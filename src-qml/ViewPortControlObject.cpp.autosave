@@ -1,0 +1,21 @@
+#include "ViewPortDisplayObject.h"
+
+//-----------------------------------------------------------------------------
+ViewPortDisplayObject::ViewPortDisplayObject()
+{
+        m_width=720;
+        m_height=540;
+}
+
+//-----------------------------------------------------------------------------
+void ViewPortDisplayObject::NewCameraFrameHandler(QImage &_img)
+{
+    m_frame = _img.scaledToWidth(m_width);
+    update();
+}
+//-----------------------------------------------------------------------------
+void ViewPortDisplayObject::paint(QPainter *painter)
+{
+    painter->drawImage(0,0,m_frame);
+}
+//-----------------------------------------------------------------------------

@@ -1,0 +1,44 @@
+//
+#ifndef LaserTrackerViewPortQMLObject_H
+#define LaserTrackerViewPortQMLObject_H
+
+#include <QQuickPaintedItem>
+#include <QImage>
+#include <QPainter>
+
+
+class LaserTrackerViewPortQMLObject : public QQuickPaintedItem
+{
+    Q_OBJECT
+
+public:
+    Q_PROPERTY(QString width READ Width WRITE setWidth NOTIFY widthChanged);
+    Q_PROPERTY(QString height READ Height WRITE setHeight NOTIFY heightChanged);
+
+
+public:
+    LaserTrackerViewPortQMLObject();
+    int Width();
+    int Height();
+    void setWidth(int _width);
+    void setHeight(int _height);
+
+signals:
+    void widthChanged();
+    void heightChanged();
+
+public slots:
+    void NewCameraFrameHandler(QImage &_img);
+
+private:
+    void paint(QPainter *painter) override;
+
+private:
+
+private:
+    QImage m_frame;
+    int m_width;
+    int m_height;
+};
+
+#endif // LaserTrackerViewPortQMLObject_H

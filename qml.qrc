@@ -1,0 +1,74 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Fonts/Blueprint BoldItalic.ttf</file>
+        <file>Fonts/EurostileBold.ttf</file>
+        <file>Fonts/EurostileExtended.ttf</file>
+        <file>Fonts/EurostileOblique.ttf</file>
+        <file>Fonts/EuroStyle Normal.ttf</file>
+        <file>Fonts/MarckScript-Regular.ttf</file>
+        <file>Fonts/Measurements.ttf</file>
+        <file>Fonts/PermanentMarker-Regular.ttf</file>
+        <file>Fonts/Typo Draft Demo.otf</file>
+        <file>Icons/alumbrush_texture.jpg</file>
+        <file>Icons/Black Button.png</file>
+        <file>Icons/BlackButton2.png</file>
+        <file>Icons/ButtonsVertical.png</file>
+        <file>Icons/camera.png</file>
+        <file>Icons/Camera2.png</file>
+        <file>Icons/camera3.png</file>
+        <file>Icons/camera4.png</file>
+        <file>Icons/dark_steel_texture.jpg</file>
+        <file>Icons/document.png</file>
+        <file>Icons/files-and-folders.png</file>
+        <file>Icons/gear.png</file>
+        <file>Icons/GreenButton.png</file>
+        <file>Icons/GreenButton2.png</file>
+        <file>Icons/image.png</file>
+        <file>Icons/interface.png</file>
+        <file>Icons/iron_texture.jpg</file>
+        <file>Icons/Joystick.png</file>
+        <file>Icons/JoystickComplete.png</file>
+        <file>Icons/laser background.jpg</file>
+        <file>Icons/laser.png</file>
+        <file>Icons/laser2.png</file>
+        <file>Icons/laser3.png</file>
+        <file>Icons/laser4.png</file>
+        <file>Icons/Lens.png</file>
+        <file>Icons/open.png</file>
+        <file>Icons/photography.png</file>
+        <file>Icons/position.png</file>
+        <file>Icons/quit.png</file>
+        <file>Icons/RedButton.png</file>
+        <file>Icons/RedButton2.png</file>
+        <file>Icons/SanwaStick.png</file>
+        <file>Icons/save.png</file>
+        <file>Icons/settings.png</file>
+        <file>Icons/settings2.png</file>
+        <file>Icons/share-post.png</file>
+        <file>Icons/slide7-l.jpg</file>
+        <file>Icons/target.png</file>
+        <file>Icons/welder.png</file>
+        <file>Icons/welding.png</file>
+        <file>Icons/Xbox-One-Controller-Buttons-PSD.png</file>
+        <file>Icons/xbox.png</file>
+        <file>Icons/xbox2.png</file>
+        <file>Icons/xbox3.png</file>
+        <file>Icons/xbox_abutton.png</file>
+        <file>Icons/xbox_bbutton.png</file>
+        <file>Icons/xbox_dpad.png</file>
+        <file>Icons/xbox_leftbumber.png</file>
+        <file>Icons/xbox_rightbumber.png</file>
+        <file>Icons/xbox_startbutton.png</file>
+        <file>qml-components/ControllerKeyObject.qml</file>
+        <file>qml-components/ControllerObject.qml</file>
+        <file>qml-components/KeypadObject.qml</file>
+        <file>qml-components/YesNoObject.qml</file>
+        <file>qml-pages/CameraSettingPage.qml</file>
+        <file>qml-pages/ControllerObject.qml</file>
+        <file>qml-pages/MainMenuPage.qml</file>
+        <file>qml-pages/MainPage.qml</file>
+        <file>qml-pages/SensorSettingsPage.qml</file>
+        <file>qml-pages/ViewSelectionPage.qml</file>
+    </qresource>
+</RCC>
