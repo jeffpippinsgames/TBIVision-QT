@@ -6,6 +6,12 @@
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 
+/**************************************************************
+//GaryHomingStatus
+/*Description:
+  A class to encapsulate the requirments for keeping track
+  of the homing status codes of the Microcontroller.
+ **************************************************************/
 class GaryHomingStatus: public QObject
 {
     Q_OBJECT
@@ -19,8 +25,13 @@ public:
     }
 };
 
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
+
+/**************************************************************
+//GaryControlErrorCode
+/*Description:
+  A class to encapsulate the requirments for keeping track
+  of the error state codes of the Microcontroller.
+ **************************************************************/
 class GaryControlErrorCode: public QObject
 {
     Q_OBJECT
@@ -38,8 +49,13 @@ public:
 
 };
 
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
+
+/**************************************************************
+//GaryOperationStatus
+/*Description:
+  A class to encapsulate the requirments for keeping track
+  of the operation status codes of the Microcontroller.
+ **************************************************************/
 class GaryOperationStatus: public QObject
 {
     Q_OBJECT
@@ -53,8 +69,13 @@ public:
     }
 };
 
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
+
+/**************************************************************
+//GaryLimitSwitch
+/*Description:
+  A class to encapsulate the requirments for keeping track
+  of the limit switch status codes of the motor axis.
+ **************************************************************/
 class GaryLimitSwitch: public QObject
 {
     Q_OBJECT
@@ -68,8 +89,13 @@ public:
     }
 };
 
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
+
+/**************************************************************
+//GaryControlMode
+/*Description:
+  A class to encapsulate the requirments for keeping track
+  of the control modes of the microcontroller
+ **************************************************************/
 class GaryControlMode: public QObject
 {
     Q_OBJECT
@@ -84,8 +110,13 @@ public:
 
 };
 
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
+
+/**************************************************************
+//GaryMotionStatus
+/*Description:
+  A class to encapsulate the requirments for keeping track
+  of the motion status codes of the Microcontroller.
+ **************************************************************/
 class GaryMotionStatus: public QObject
 {
     Q_OBJECT
@@ -104,8 +135,12 @@ public:
     }
 };
 
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
+/**************************************************************
+//GaryCommands
+/*Description:
+  A class to encapsulate the requirments for keeping track
+  of the serial command codes for the Microcontroller.
+ **************************************************************/
 class GaryCommands : public QObject
 {
 
@@ -160,31 +195,50 @@ class GaryCommands : public QObject
     }
 };
 
-//---------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------
+
+
+/**************************************************************
+//Gary
+/*Description:
+  A class to facilitate the operation and communication to the
+  microcontroller responsible for motion control of the TBI seam
+  tracker.
+ **************************************************************/
 class Gary : public QObject
 {
-    Q_OBJECT
-    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
-    Q_PROPERTY(bool jogStop READ jogStop WRITE setJogStop NOTIFY jogStopChanged)
-    Q_PROPERTY(bool jogUp READ jogUp WRITE setJogUp NOTIFY jogUpChanged)
-    //Q_PROPERTY(GaryMotionStatus motionstatus READ motionstatus WRITE setMotionStatus )
+    //QT Properties and Macros-------------------------------------
+    Q_OBJECT //QOBJECT MACRO
+    Q_PROPERTY(GaryMotionStatus motionStatus READ motionStatus WRITE setMotionStatus NOTIFY motionStatusChanged)
+    Q_PROPERTY(GaryControlMode controlMode READ controlMode WRITE setControlMode NOTIFY controlModeChanged)
+    Q_PROPERTY(GaryHomingStatus homingStatus READ homingStatus WRITE setHomingStatus NOTIFY homingStatusChanged)
+    Q_PROPERTY(GaryLimitSwitch xLimitSwitch READ xLimitSwitch WRITE setXLimitSwitch NOTIFY xLimitSwitchChanged)
+    Q_PROPERTY(GaryLimitSwitch zLimitSwitch READ zLimitSwitch WRITE setZLimitSwitch NOTIFY zLimitSwitchChanged)
+    Q_PROPERTY(GaryOperationStatus operationStatus READ operationStatus WRITE setOperationStatus NOTIFY operationStatusChanged)
 
 
 
 
 
-public:
+
+    public:
+    //Public Constructors, Destructors and Init Methods-----------
     explicit Gary(QObject *parent = nullptr);
     ~Gary();
     static void declareQML();
+    //------------------------------------------------------------
 
-    QString name() const;
-    bool jogStop() const;
-    bool jogUp() const;
 
-private:
-    QString m_name;
+    //Public Methods----------------------------------------------
+    //------------------------------------------------------------
+
+    //
+
+
+    private:
+    //Private Data Members ----------------------------------------
+    const quint16 m_teensy32_vendorID = 0x16C0;
+    const quint16 m_teensy32_productID = 0x0483;
+
     QSerialPortInfo *m_serial_info;
     QSerialPort *m_serial_port;
     GaryMotionStatus m_motion_status;
@@ -194,23 +248,17 @@ private:
     GaryLimitSwitch m_z_axis_limit;
     GaryOperationStatus m_operation_status;
 
-    bool m_jogStop;
-    bool m_jogUp;
-    const quint16 m_teensy_vendorID = 0x16C0;
-    const quint16 m_teensy_productID = 0x0483;
 
+    //-------------------------------------------------------------
+
+    //Private Methods----------------------------------------------
     bool findOpenTeensy();
-    void setName(const QString &_name);
-    void setJogStop(const bool _jogstop);
-    void setJogUp(const bool _jogup);
-
     void sendSerialCommand(QByteArray &_data);
+    //--------------------------------------------------------------
 
-
-signals:
-    void nameChanged(void);
-    void jogStopChanged(void);
-    void jogUpChanged(void);
+    //Signals-------------------------------------------------------
+    signals:
+    //--------------------------------------------------------------
 
 };
 
