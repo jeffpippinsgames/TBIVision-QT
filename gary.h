@@ -7,8 +7,8 @@
 #include <QtSerialPort/QSerialPortInfo>
 
 /**************************************************************
-//GaryHomingStatus
-/*Description:
+GaryHomingStatus
+Description:
   A class to encapsulate the requirments for keeping track
   of the homing status codes of the Microcontroller.
  **************************************************************/
@@ -23,12 +23,13 @@ public:
     {
         qmlRegisterType<GaryHomingStatus>("tbi.vision.components", 1, 0, "GaryHomingStatus");
     }
+    HomingStatus_t m_homing_status;
 };
 
 
 /**************************************************************
-//GaryControlErrorCode
-/*Description:
+GaryControlErrorCode
+Description:
   A class to encapsulate the requirments for keeping track
   of the error state codes of the Microcontroller.
  **************************************************************/
@@ -46,13 +47,12 @@ public:
     {
         qmlRegisterType<GaryControlErrorCode>("tbi.vision.components", 1, 0, "GaryControlErrorCode");
     }
-
 };
 
 
 /**************************************************************
-//GaryOperationStatus
-/*Description:
+GaryOperationStatus
+Description:
   A class to encapsulate the requirments for keeping track
   of the operation status codes of the Microcontroller.
  **************************************************************/
@@ -67,12 +67,13 @@ public:
     {
         qmlRegisterType<GaryOperationStatus>("tbi.vision.components", 1, 0, "GaryOperationStatus");
     }
+    OperationStatus_t m_operation_status;
 };
 
 
 /**************************************************************
-//GaryLimitSwitch
-/*Description:
+GaryLimitSwitch
+Description:
   A class to encapsulate the requirments for keeping track
   of the limit switch status codes of the motor axis.
  **************************************************************/
@@ -87,12 +88,13 @@ public:
     {
         qmlRegisterType<GaryLimitSwitch>("tbi.vision.components", 1, 0, "GaryLimitSwitch");
     }
+    LimitSwitchState_t m_limit_switch_state;
 };
 
 
 /**************************************************************
-//GaryControlMode
-/*Description:
+GaryControlMode
+Description:
   A class to encapsulate the requirments for keeping track
   of the control modes of the microcontroller
  **************************************************************/
@@ -107,13 +109,14 @@ public:
     {
         qmlRegisterType<GaryControlMode>("tbi.vision.components", 1, 0, "GaryControlMode");
     }
+    ControlMode_t m_control_mode;
 
 };
 
 
 /**************************************************************
-//GaryMotionStatus
-/*Description:
+GaryMotionStatus
+Description:
   A class to encapsulate the requirments for keeping track
   of the motion status codes of the Microcontroller.
  **************************************************************/
@@ -133,11 +136,12 @@ public:
     {
         qmlRegisterType<GaryMotionStatus>("tbi.vision.components", 1, 0, "GaryMotionStatus");
     }
+    MotionStatus_t m_motion_status;
 };
 
 /**************************************************************
-//GaryCommands
-/*Description:
+GaryCommands
+Description:
   A class to encapsulate the requirments for keeping track
   of the serial command codes for the Microcontroller.
  **************************************************************/
@@ -198,8 +202,8 @@ class GaryCommands : public QObject
 
 
 /**************************************************************
-//Gary
-/*Description:
+Gary
+Description:
   A class to facilitate the operation and communication to the
   microcontroller responsible for motion control of the TBI seam
   tracker.
@@ -208,47 +212,59 @@ class Gary : public QObject
 {
     //QT Properties and Macros-------------------------------------
     Q_OBJECT //QOBJECT MACRO
-    Q_PROPERTY(GaryMotionStatus motionStatus READ motionStatus WRITE setMotionStatus NOTIFY motionStatusChanged)
-    Q_PROPERTY(GaryControlMode controlMode READ controlMode WRITE setControlMode NOTIFY controlModeChanged)
-    Q_PROPERTY(GaryHomingStatus homingStatus READ homingStatus WRITE setHomingStatus NOTIFY homingStatusChanged)
-    Q_PROPERTY(GaryLimitSwitch xLimitSwitch READ xLimitSwitch WRITE setXLimitSwitch NOTIFY xLimitSwitchChanged)
-    Q_PROPERTY(GaryLimitSwitch zLimitSwitch READ zLimitSwitch WRITE setZLimitSwitch NOTIFY zLimitSwitchChanged)
-    Q_PROPERTY(GaryOperationStatus operationStatus READ operationStatus WRITE setOperationStatus NOTIFY operationStatusChanged)
-
-
-
-
-
+    Q_PROPERTY(GaryMotionStatus* motionStatus READ motionStatus WRITE setMotionStatus NOTIFY motionStatusChanged)
+    Q_PROPERTY(GaryControlMode* controlMode READ controlMode WRITE setControlMode NOTIFY controlModeChanged)
+    Q_PROPERTY(GaryHomingStatus* homingStatus READ homingStatus WRITE setHomingStatus NOTIFY homingStatusChanged)
+    Q_PROPERTY(GaryLimitSwitch* xLimitSwitch READ xLimitSwitch WRITE setXLimitSwitch NOTIFY xLimitSwitchChanged)
+    Q_PROPERTY(GaryLimitSwitch* zLimitSwitch READ zLimitSwitch WRITE setZLimitSwitch NOTIFY zLimitSwitchChanged)
+    Q_PROPERTY(GaryOperationStatus* operationStatus READ operationStatus WRITE setOperationStatus NOTIFY operationStatusChanged)
+    //------------------------------------------------------------
 
     public:
+
     //Public Constructors, Destructors and Init Methods-----------
     explicit Gary(QObject *parent = nullptr);
     ~Gary();
     static void declareQML();
     //------------------------------------------------------------
 
-
-    //Public Methods----------------------------------------------
+    //PropertySetMethods
+    void setMotionStatus(GaryMotionStatus*_ms);
+    void setControlMode(GaryControlMode* _cm);
+    void setHomingStatus(GaryHomingStatus*_hs);
+    void setXLimitSwitch(GaryLimitSwitch *_ls);
+    void setZLimitSwitch(GaryLimitSwitch *_ls);
+    void setOperationStatus(GaryOperationStatus *_os);
+    //------------------------------------------------------------
+    //Property Read Methods
+    GaryMotionStatus* motionStatus(){return m_motion_status;}
+    GaryControlMode* controlMode(){return m_control_mode;}
+    GaryHomingStatus* homingStatus(){return m_homing_status;}
+    GaryLimitSwitch* xLimitSwitch(){return m_x_axis_limit;}
+    GaryLimitSwitch* zLimitSwitch(){return m_z_axis_limit;}
+    GaryOperationStatus* operationStatus(){return m_operation_status;}
     //------------------------------------------------------------
 
-    //
-
+    //Public Send Command Methods----------------------------------------------
+    Q_INVOKABLE void sendStopMovement();
+    Q_INVOKABLE void sendJogUp();
+    Q_INVOKABLE void sendJogDown();
+    Q_INVOKABLE void sendJogLeft();
+    Q_INVOKABLE void sendJogRight();
+    //------------------------------------------------------------
 
     private:
     //Private Data Members ----------------------------------------
     const quint16 m_teensy32_vendorID = 0x16C0;
     const quint16 m_teensy32_productID = 0x0483;
-
     QSerialPortInfo *m_serial_info;
     QSerialPort *m_serial_port;
-    GaryMotionStatus m_motion_status;
-    GaryControlMode m_control_mode;
-    GaryHomingStatus m_homing_status;
-    GaryLimitSwitch m_x_axis_limit;
-    GaryLimitSwitch m_z_axis_limit;
-    GaryOperationStatus m_operation_status;
-
-
+    GaryMotionStatus *m_motion_status;
+    GaryControlMode *m_control_mode;
+    GaryHomingStatus *m_homing_status;
+    GaryLimitSwitch *m_x_axis_limit;
+    GaryLimitSwitch *m_z_axis_limit;
+    GaryOperationStatus *m_operation_status;
     //-------------------------------------------------------------
 
     //Private Methods----------------------------------------------
@@ -258,6 +274,12 @@ class Gary : public QObject
 
     //Signals-------------------------------------------------------
     signals:
+    void motionStatusChanged();
+    void controlModeChanged();
+    void homingStatusChanged();
+    void xLimitSwitchChanged();
+    void zLimitSwitchChanged();
+    void operationStatusChanged();
     //--------------------------------------------------------------
 
 };

@@ -13,10 +13,16 @@ Window {
     title: qsTr("TBI Laser Seam Tracker")
     flags: Qt.FramelessWindowHint
 
-
-
     property MyQmlPages.MainPage mainpage: MyQmlPages.MainPage{width: rootId.width; height: rootId.height;}
     property MyQmlPages.MainMenuPage mainmenupage: MyQmlPages.MainMenuPage{width: rootId.width; height: rootId.height}
+
+    readonly property int greenbutton: Qt.Key_Return
+    readonly property int redbutton: Qt.Key_Backspace
+    readonly property int blackbutton: Qt.Key_Escape
+    readonly property int upbutton: Qt.Key_Up
+    readonly property int downbutton: Qt.Key_Down
+    readonly property int leftbutton: Qt.Key_Left
+    readonly property int rightbutton: Qt.Key_Right
 
 
     Rectangle
@@ -24,7 +30,6 @@ Window {
         id: backgroundrectId
         anchors.fill: parent
         color:"black"
-
     }
 
     StackView
@@ -33,9 +38,6 @@ Window {
         id: stackview
         anchors.fill: parent
         initialItem: mainpage
-
-
-
 
         replaceEnter: Transition {
             PropertyAnimation{
@@ -56,17 +58,13 @@ Window {
 
         }
 
-        Keys.onPressed:
-        {
-            //console.log("StackView in main.qml- Keys.OnPressed Event Handler Fired.")
-
-        }
 
         Component.onCompleted:
         {
 
         }
     }
+
 
     //This is Where all signal/slot wiring is done
     Component.onCompleted:

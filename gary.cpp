@@ -1,14 +1,32 @@
 #include "gary.h"
 #include <QDebug>
 
+
+/**************************************************************
+Gary(QObject *parent) : QObject(parent)
+Public
+Description:
+  Gary Constructor
+ **************************************************************/
 Gary::Gary(QObject *parent) : QObject(parent)
 {
-    m_jogStop = true;
-    m_jogUp = false;
+    m_motion_status = new GaryMotionStatus();
+    m_control_mode = new GaryControlMode();
+    m_x_axis_limit = new GaryLimitSwitch();
+    m_z_axis_limit = new GaryLimitSwitch();
+    m_operation_status = new GaryOperationStatus();
+    m_homing_status = new GaryHomingStatus();
     qDebug() << "Gary Object Instantiated.";
     this->findOpenTeensy();
 }
+//--------------------------------------------------------------
 
+/**************************************************************
+~Gary()
+Public
+Description:
+  Gary Destructor
+ **************************************************************/
 Gary::~Gary()
 {
     qDebug() << "Gary Object Destroyed.";
@@ -22,28 +40,107 @@ Gary::~Gary()
         }
     }
 }
+//--------------------------------------------------------------
 
 
-QString Gary::name() const
-{
-    return m_name;
-}
-
-bool Gary::jogStop() const
-{
-    return m_jogStop;
-}
-
-bool Gary::jogUp() const
-{
-    return m_jogUp;
-}
-
+/**************************************************************
+declareQML()
+Public
+Description:
+  Public Method that Reqisters the Gary Type into the QML Engine.
+ **************************************************************/
 void Gary::declareQML()
 {
-        qmlRegisterType<Gary>("tbi.vision.components", 1, 0, "Gary");
+    qmlRegisterType<Gary>("tbi.vision.components", 1, 0, "Gary");
 }
+//--------------------------------------------------------------
 
+
+/**************************************************************
+setMotionStatus(GaryMotionStatus *_ms)
+Public
+Description:
+  Public set Property method.
+ **************************************************************/
+void Gary::setMotionStatus(GaryMotionStatus *_ms)
+{
+
+}
+//--------------------------------------------------------------
+
+
+/**************************************************************
+setControlMode(GaryControlMode *_cm)
+Public
+Description:
+  Public set Property method.
+ **************************************************************/
+void Gary::setControlMode(GaryControlMode *_cm)
+{
+
+}
+//--------------------------------------------------------------
+
+
+/**************************************************************
+setHomingStatus(GaryHomingStatus *_hs)
+Public
+Description:
+  Public set Property method.
+ **************************************************************/
+void Gary::setHomingStatus(GaryHomingStatus *_hs)
+{
+
+}
+//--------------------------------------------------------------
+
+
+/**************************************************************
+setXLimitSwitch(GaryLimitSwitch *_ls)
+Public
+Description:
+  Public set Property method.
+ **************************************************************/
+void Gary::setXLimitSwitch(GaryLimitSwitch *_ls)
+{
+
+}
+//--------------------------------------------------------------
+
+
+/**************************************************************
+setZLimitSwitch(GaryLimitSwitch *_ls)
+Public
+Description:
+  Public set Property method.
+ **************************************************************/
+void Gary::setZLimitSwitch(GaryLimitSwitch *_ls)
+{
+
+}
+//--------------------------------------------------------------
+
+
+/**************************************************************
+setOperationStatus(GaryOperationStatus *_os)
+Public
+Description:
+  Public set Property method.
+ **************************************************************/
+void Gary::setOperationStatus(GaryOperationStatus *_os)
+{
+
+}
+//--------------------------------------------------------------
+
+
+/**************************************************************
+findOpenTeensy()
+Public
+Description:
+  Public Method that finds the Teensy 3.2 USB device and opens
+  a serial connection to it.
+ **************************************************************/
 bool Gary::findOpenTeensy()
 {
     m_serial_info = new QSerialPortInfo();
@@ -52,9 +149,9 @@ bool Gary::findOpenTeensy()
     {
        if(_serialinfo.hasProductIdentifier() && _serialinfo.hasVendorIdentifier() )
        {
-           if(_serialinfo.vendorIdentifier() == m_teensy_vendorID)
+           if(_serialinfo.vendorIdentifier() == m_teensy32_vendorID)
            {
-               if(_serialinfo.productIdentifier() == m_teensy_productID)
+               if(_serialinfo.productIdentifier() == m_teensy32_productID)
                {
                    m_serial_port = new QSerialPort(_serialinfo, this);
                    m_serial_port->setBaudRate(QSerialPort::Baud115200);
@@ -79,46 +176,111 @@ bool Gary::findOpenTeensy()
     qDebug() << "Could Not Find Teensy 3.2 Serial Device.";
     return false;
 }
+//--------------------------------------------------------------
 
-void Gary::setName(const QString &_name)
+
+/**************************************************************
+sendJogStop()
+Public, Q_INVOKABLE
+Description:
+  Public Method that sends the Movement Stop Command to the
+  microcontroller
+ **************************************************************/
+Q_INVOKABLE void Gary::sendStopMovement()
 {
-    if(_name == m_name) return;
-    m_name = _name;
-    emit nameChanged(); //Fire Signal
+        QByteArray _cmd;
+        _cmd.append(char(GaryCommands::TBI_CMD_STOP_MOVEMENT));
+        sendSerialCommand(_cmd);
+}
+//--------------------------------------------------------------
 
+
+/**************************************************************
+sendJogUp()
+Public, Q_INVOKABLE
+Description:
+  Public Method that sends the Jog Up Command to the
+  microcontroller
+ **************************************************************/
+Q_INVOKABLE void Gary::sendJogUp()
+{
+       QByteArray _cmd;
+       _cmd.append(char(GaryCommands::TBI_CMD_JOG_UP));
+       sendSerialCommand(_cmd);
 }
 
-void Gary::setJogStop(const bool _jogstop)
+
+/**************************************************************
+sendJogDown()
+Public, Q_INVOKABLE
+Description:
+  Public Method that sends the Jog Down Command to the
+  microcontroller
+ **************************************************************/
+Q_INVOKABLE void Gary::sendJogDown()
 {
-    m_jogStop = _jogstop;
-    if(_jogstop)
-    {
-        QByteArray _jogstopcmd;
-        _jogstopcmd.append(char(GaryCommands::TBI_CMD_STOP_MOVEMENT));
-        sendSerialCommand(_jogstopcmd);
-    }
+    QByteArray _cmd;
+    _cmd.append(char(GaryCommands::TBI_CMD_JOG_DOWN));
+    sendSerialCommand(_cmd);
 }
 
-void Gary::setJogUp(const bool _jogup)
+
+/**************************************************************
+sendJogLeft()
+Public, Q_INVOKABLE
+Description:
+  Public Method that sends the Jog Left Command to the
+  microcontroller
+ **************************************************************/
+Q_INVOKABLE void Gary::sendJogLeft()
 {
-   m_jogUp = _jogup;
-   if(_jogup)
-   {
-       QByteArray _jogupcmd;
-       _jogupcmd.append(char(GaryCommands::TBI_CMD_JOG_UP));
-       sendSerialCommand(_jogupcmd);
-   }
+    QByteArray _cmd;
+    _cmd.append(char(GaryCommands::TBI_CMD_JOG_LEFT));
+    sendSerialCommand(_cmd);
 }
 
+
+/**************************************************************
+sendJogRight()
+Public, Q_INVOKABLE
+Description:
+  Public Method that sends the Jog Right Command to the
+  microcontroller
+ **************************************************************/
+Q_INVOKABLE void Gary::sendJogRight()
+{
+    QByteArray _cmd;
+    _cmd.append(char(GaryCommands::TBI_CMD_JOG_RIGHT));
+    sendSerialCommand(_cmd);
+}
+//--------------------------------------------------------------
+
+
+/**************************************************************
+sendSerialCommand(QByteArray &_data)
+Private
+Description:
+  Private Method that facilitaes all the serial send
+  functionality.
+ **************************************************************/
 void Gary::sendSerialCommand(QByteArray &_data)
 {
-    if(!m_serial_port) return;
+    if(!m_serial_port)
+    {
+        qDebug() << "Error in sendSerialCommand: m_serial_port is null";
+        return;
+    }
     if(m_serial_port->isOpen())
     {
         m_serial_port->write(_data);
         qDebug() << "Sending Command to Controller: " << _data.toHex(',');
     }
+    else
+    {
+        qDebug() << "Error in sendSerialCommand: m_serial_port is not open";
+    }
 }
+//--------------------------------------------------------------
 
 
 

@@ -65,7 +65,6 @@
         <file>qml-components/KeypadObject.qml</file>
         <file>qml-components/YesNoObject.qml</file>
         <file>qml-pages/CameraSettingPage.qml</file>
-        <file>qml-pages/ControllerObject.qml</file>
         <file>qml-pages/MainMenuPage.qml</file>
         <file>qml-pages/MainPage.qml</file>
         <file>qml-pages/SensorSettingsPage.qml</file>

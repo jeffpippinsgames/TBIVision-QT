@@ -8,25 +8,79 @@ import tbi.vision.components 1.0
 Page
 {
     id: mainpageID
-    width: 300
-    height: 300
+    width: parent.width
+    height: parent.height
     x:0
     y:0
+
 
     Gary
     {
         id: garyId
-        name: "teensy"
     }
 
-
-    //
     background: Rectangle
     {
         anchors.fill: parent
         color: "black"
     }
 
+   /* FocusScope
+    {
+
+        Keys.OnPressed:
+        {
+            /*
+            switch(event.key)
+            {
+            case greenbutton:
+                //keypadId.open();
+                break;
+            case redbutton:
+                break;
+            case blackbutton:
+                //stackview.replace(mainmenupage);
+                break;
+            case upbutton:
+                //garyId.sendJogUp();
+                break;
+            case downbutton:
+                break;
+            case leftbutton:
+                break;
+            case rightbutton:
+                break;
+            }
+
+        }
+
+        Keys.onReleased:
+        {
+            switch(event.key)
+            {
+            case greenbutton:
+                break;
+            case redbutton:
+                break;
+            case blackbutton:
+                break;
+            case upbutton:
+                garyId.sendStopMovement();
+                break;
+            case downbutton:
+                garyId.sendStopMovement();
+                break;
+            case leftbutton:
+                garyId.sendStopMovement();
+                break;
+            case rightbutton:
+                garyId.sendStopMovement();
+                break;
+            }
+        }
+
+    }
+*/
     ControllerObject
     {
         focus: true
@@ -49,43 +103,43 @@ Page
 
         onUpButtonPressed:
         {
-            garyId.jogUp = true;
+             garyId.sendJogUp();
         }
 
         onDownButtonPressed:
         {
-
+            garyId.sendJogDown();
         }
 
         onLeftButtonPressed:
         {
-
+            garyId.sendJogLeft();
         }
 
         onRightButtonPressed:
         {
-
+            garyId.sendJogRight();
         }
 
         onUpButtonReleased:
         {
-            garyId.jogStop = true;
+             garyId.sendStopMovement();
 
         }
 
         onDownButtonReleased:
         {
-
+            garyId.sendStopMovement();
         }
 
         onLeftButtonReleased:
         {
-
+            garyId.sendStopMovement();
         }
 
         onRightButtonReleased:
         {
-
+            garyId.sendStopMovement();
         }
     }
 
