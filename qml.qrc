@@ -63,13 +63,12 @@
         <file>qml-components/ControllerKeyObject.qml</file>
         <file>qml-components/ControllerObject.qml</file>
         <file>qml-components/KeypadObject.qml</file>
-        <file>qml-components/YesNoObject.qml</file>
         <file>qml-pages/CameraSettingPage.qml</file>
-        <file>qml-pages/MainMenuPageOLD.qml</file>
         <file>qml-pages/MainPage.qml</file>
         <file>qml-pages/SensorSettingsPage.qml</file>
         <file>qml-pages/ViewSelectionPage.qml</file>
         <file>qml-components/RotateMenu.qml</file>
         <file>qml-pages/MainMenuPage.qml</file>
+        <file>qml-dialogs/YesNoDialog.qml</file>
     </qresource>
 </RCC>

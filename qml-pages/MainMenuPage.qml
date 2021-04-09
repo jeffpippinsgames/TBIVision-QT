@@ -4,12 +4,15 @@ import QtGraphicalEffects 1.0
 import QtQuick.Controls 2.12
 import QtQuick.Dialogs 1.2
 import "qrc:/qml-components"
+import "qrc:/qml-dialogs"
 
 
 Item {
     //Properties-----------------------------------
     id: mainmenuId
     anchors.fill: parent
+
+    property string pagename: "MainMenu Page"
 
     //Signals--------------------------------------
     signal destroyPage()
@@ -22,21 +25,23 @@ Item {
         rotatemenuId.grabFocus();
     }
 
-    function onSelectionMade(_selection)
+    function onMainMenuSelectionMade(_selection)
     {
         switch(_selection)
         {
         case "Quit Application":
-            Qt.quit();
+            quitdialogId.visible = true;
+            quitdialogId.grabFocus();
             break;
-
+        default:
+            signalDestroyPage();
+            break;
         }
-        signalDestroyPage();
+
     }
 
     function signalDestroyPage()
     {
-
         aboutToDestroy();
         destroyPage();
     }
@@ -44,11 +49,7 @@ Item {
     //Event Handlers-------------------------------
     Component.onCompleted:
     {
-        rotatemenuId.addMenuItem("qrc:/Icons/save.png", "Save Profile");
-        rotatemenuId.addMenuItem("qrc:/Icons/gear.png", "System Settings");
-        rotatemenuId.addMenuItem("qrc:/Icons/laser3.png", "Laser");
-        rotatemenuId.addMenuItem("qrc:/Icons/quit.png", "Quit Application");
-        rotatemenuId.selectionMade.connect(onSelectionMade);
+        rotatemenuId.selectionMade.connect(onMainMenuSelectionMade);
         rotatemenuId.destroyPage.connect(signalDestroyPage);
         mainmenuId.completed();
         console.log("mainmenuId Created.");
@@ -59,9 +60,37 @@ Item {
     {
         id: rotatemenuId
         menutitle: "Main Menu"
+
+        Component.onCompleted:
+        {
+            rotatemenuId.addMenuItem("qrc:/Icons/save.png", "Save Profile");
+            rotatemenuId.addMenuItem("qrc:/Icons/gear.png", "System Settings");
+            rotatemenuId.addMenuItem("qrc:/Icons/laser3.png", "Laser");
+            rotatemenuId.addMenuItem("qrc:/Icons/quit.png", "Quit Application");
+        }
     }
 
+    YesNoDialog
+    {
+        id: quitdialogId
+        visible: false
+        messagetext: "Are You Sure You Want To Quit?"
 
+        onSelectionMade:
+        {
+            switch(selection)
+            {
+            case "Yes":
+                console.log("Exiting Program.")
+                Qt.quit();
+                break;
+            case "No":
+                quitdialogId.visible = false;
+                mainmenuId.grabFocus();
+                break
+            }
+        }
+    }
 
 
 

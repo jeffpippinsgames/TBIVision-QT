@@ -36,7 +36,6 @@ Item
     property real menuopacity: 1
 
     //Signals----------------------------------
-    signal exitMenu()
     signal selectionMade(string selection)
     signal completed()
     signal menuItemAdded()

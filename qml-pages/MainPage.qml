@@ -28,6 +28,22 @@ Item
     }
 
     //Dialog and Menu Functions------------------
+    function connectPageSignals()
+    {
+        if(page !== null)
+        {
+            switch(page.name)
+            {
+            case "MainMenu Page":
+                page.destroyPage.connect(destroyPage);
+                break;
+            case "YesNo Dialog":
+                page.destroyPage.connect(destroyPage);
+                break;
+            }
+        }
+    }
+
     function createPage(page_qml)
     {
         if(page == null)
@@ -37,7 +53,7 @@ Item
             if(page !== null)
             {
                 page.grabFocus();
-                page.destroyPage.connect(destroyPage);
+                connectPageSignals();
                 console.log(page_qml + " created.")
             }
             else
