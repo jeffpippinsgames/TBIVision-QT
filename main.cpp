@@ -1,5 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include "gary.h"
 
 int main(int argc, char *argv[])
@@ -10,7 +11,6 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
-
     //Register the Custom Gary QML Types.
     GaryHomingStatus::declareQML();
     GaryControlErrorCode::declareQML();
@@ -19,11 +19,18 @@ int main(int argc, char *argv[])
     GaryControlMode::declareQML();
     GaryCommands::declareQML();
     GaryMotionStatus::declareQML();
-    Gary::declareQML();
 
-
-
+    //The QML Application engine----------------------------------
     QQmlApplicationEngine engine;
+
+    //instantiated Objects of Application-------------------------
+    Gary _gary;
+
+    //Adding Root Properties to QML--------------------------------
+    engine.rootContext()->setContextProperty("Gary", &_gary);
+
+
+    //QML Code-----------------------------------------------------
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
@@ -31,6 +38,5 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
     engine.load(url);
-
     return app.exec();
 }

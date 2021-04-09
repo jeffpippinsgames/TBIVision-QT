@@ -3,7 +3,7 @@ import QtQuick.Window 2.12
 import QtGraphicalEffects 1.0
 import QtQuick.Controls 2.12
 
-Page
+FocusScope
 {
 
     id: sensorsettingspageId
@@ -12,7 +12,7 @@ Page
     x:0
     y:0
 
-    background: Rectangle
+    Rectangle
     {
         anchors.fill: parent
         color: "orange"

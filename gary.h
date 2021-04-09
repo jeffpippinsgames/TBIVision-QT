@@ -1,3 +1,8 @@
+/*
+QML Import Type.
+import "tbi.vision.components" 1 0
+ */
+
 #ifndef GARY_H
 #define GARY_H
 
@@ -218,6 +223,7 @@ class Gary : public QObject
     Q_PROPERTY(GaryLimitSwitch* xLimitSwitch READ xLimitSwitch WRITE setXLimitSwitch NOTIFY xLimitSwitchChanged)
     Q_PROPERTY(GaryLimitSwitch* zLimitSwitch READ zLimitSwitch WRITE setZLimitSwitch NOTIFY zLimitSwitchChanged)
     Q_PROPERTY(GaryOperationStatus* operationStatus READ operationStatus WRITE setOperationStatus NOTIFY operationStatusChanged)
+    Q_PROPERTY(float xPosition READ xPosition WRITE setXPosition NOTIFY xPositionChanged)
     //------------------------------------------------------------
 
     public:
@@ -235,6 +241,7 @@ class Gary : public QObject
     void setXLimitSwitch(GaryLimitSwitch *_ls);
     void setZLimitSwitch(GaryLimitSwitch *_ls);
     void setOperationStatus(GaryOperationStatus *_os);
+    void setXPosition(float _x_pos);
     //------------------------------------------------------------
     //Property Read Methods
     GaryMotionStatus* motionStatus(){return m_motion_status;}
@@ -243,6 +250,7 @@ class Gary : public QObject
     GaryLimitSwitch* xLimitSwitch(){return m_x_axis_limit;}
     GaryLimitSwitch* zLimitSwitch(){return m_z_axis_limit;}
     GaryOperationStatus* operationStatus(){return m_operation_status;}
+    float xPosition(){return m_x_position;}
     //------------------------------------------------------------
 
     //Public Send Command Methods----------------------------------------------
@@ -265,6 +273,7 @@ class Gary : public QObject
     GaryLimitSwitch *m_x_axis_limit;
     GaryLimitSwitch *m_z_axis_limit;
     GaryOperationStatus *m_operation_status;
+    float m_x_position;
     //-------------------------------------------------------------
 
     //Private Methods----------------------------------------------
@@ -274,12 +283,15 @@ class Gary : public QObject
 
     //Signals-------------------------------------------------------
     signals:
+    void aboutToDestroy();
+    void completed();
     void motionStatusChanged();
     void controlModeChanged();
     void homingStatusChanged();
     void xLimitSwitchChanged();
     void zLimitSwitchChanged();
     void operationStatusChanged();
+    void xPositionChanged();
     //--------------------------------------------------------------
 
 };

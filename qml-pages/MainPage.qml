@@ -3,92 +3,87 @@ import QtQuick.Window 2.12
 import QtGraphicalEffects 1.0
 import QtQuick.Controls 2.12
 import "qrc:/qml-components"
+import "qrc:/qml-pages"
 import tbi.vision.components 1.0
 
-Page
+Item
 {
+    //Object Properties-------------------------
     id: mainpageID
     width: parent.width
     height: parent.height
+    visible: true
+    focus: true
     x:0
     y:0
 
+    //Custom Properties-------------------------
+    property var page: null
 
-    Gary
+
+    //Misc Functions-------------------------
+    function grabFocus()
     {
-        id: garyId
+        controllerId.focus = true;
     }
 
-    background: Rectangle
+    //Dialog and Menu Functions------------------
+    function createPage(page_qml)
     {
-        anchors.fill: parent
-        color: "black"
-    }
-
-   /* FocusScope
-    {
-
-        Keys.OnPressed:
+        if(page == null)
         {
-            /*
-            switch(event.key)
+            var component = Qt.createComponent(page_qml);
+            page = component.createObject(mainpageID);
+            if(page !== null)
             {
-            case greenbutton:
-                //keypadId.open();
-                break;
-            case redbutton:
-                break;
-            case blackbutton:
-                //stackview.replace(mainmenupage);
-                break;
-            case upbutton:
-                //garyId.sendJogUp();
-                break;
-            case downbutton:
-                break;
-            case leftbutton:
-                break;
-            case rightbutton:
-                break;
+                page.grabFocus();
+                page.destroyPage.connect(destroyPage);
+                console.log(page_qml + " created.")
+            }
+            else
+            {
+                console.log(page_qml + " created.");
             }
 
         }
-
-        Keys.onReleased:
-        {
-            switch(event.key)
-            {
-            case greenbutton:
-                break;
-            case redbutton:
-                break;
-            case blackbutton:
-                break;
-            case upbutton:
-                garyId.sendStopMovement();
-                break;
-            case downbutton:
-                garyId.sendStopMovement();
-                break;
-            case leftbutton:
-                garyId.sendStopMovement();
-                break;
-            case rightbutton:
-                garyId.sendStopMovement();
-                break;
-            }
-        }
-
     }
-*/
+
+    function destroyPage()
+    {
+        if(page !== null)
+        {
+            page.destroy();
+            page = null;
+            controllerId.focus = true;
+            mainpageID.opacity = 1;
+        }
+    }
+
+    function garyAboutToClose()
+    {
+        //Kill All Bindings For The Destruction of Gary
+        xposId.text = "";
+    }
+
+    //Slots
+    Component.onCompleted:
+    {
+        Gary.aboutToDestroy.connect(garyAboutToClose);
+    }
+
+    //Signals-----------------------------------
+
+
+    //OML Components----------------------------
     ControllerObject
     {
-        focus: true
+
         id:controllerId
+        focus: true
 
         onBlackButtonPressed:
         {
-            stackview.replace(mainmenupage);
+            createPage("/qml-pages/MainMenuPage.qml");
         }
 
         onGreenButtonPressed:
@@ -103,44 +98,63 @@ Page
 
         onUpButtonPressed:
         {
-             garyId.sendJogUp();
+             Gary.sendJogUp();
         }
 
         onDownButtonPressed:
         {
-            garyId.sendJogDown();
+            Gary.sendJogDown();
         }
 
         onLeftButtonPressed:
         {
-            garyId.sendJogLeft();
+            Gary.sendJogLeft();
         }
 
         onRightButtonPressed:
         {
-            garyId.sendJogRight();
+            Gary.sendJogRight();
         }
 
         onUpButtonReleased:
         {
-             garyId.sendStopMovement();
-
+             Gary.sendStopMovement();
         }
 
         onDownButtonReleased:
         {
-            garyId.sendStopMovement();
+            Gary.sendStopMovement();
         }
 
         onLeftButtonReleased:
         {
-            garyId.sendStopMovement();
+            Gary.sendStopMovement();
         }
 
         onRightButtonReleased:
         {
-            garyId.sendStopMovement();
+            Gary.sendStopMovement();
         }
+    }
+
+    Rectangle
+    {
+        anchors.fill: parent
+        color: "black"
+    }
+
+    Text
+    {
+        id: xposId
+        focus: false
+        font.family: fontId.name
+        text: Gary.xPosition
+        font.pointSize: 40
+        width: titletextId.implicitWidth
+        height: titletextId.implicitHeight
+        x: 30
+        y: 10
+        color: Qt.rgba(1,1,.95,1)
     }
 
     //Font for UI
@@ -175,9 +189,11 @@ Page
         onAboutToOpen:
         {
             controllerId.focus=false;
+            keypadId.focus=true;
         }
         onAboutToClose:
         {
+            keypadId.focus=false;
             controllerId.focus=true;
         }
         onReturnedvalueChanged:

@@ -16,8 +16,10 @@ Gary::Gary(QObject *parent) : QObject(parent)
     m_z_axis_limit = new GaryLimitSwitch();
     m_operation_status = new GaryOperationStatus();
     m_homing_status = new GaryHomingStatus();
-    qDebug() << "Gary Object Instantiated.";
+    m_x_position = 10.2345;
     this->findOpenTeensy();
+    emit completed();
+    qDebug() << "Gary Object Instantiated.";
 }
 //--------------------------------------------------------------
 
@@ -29,6 +31,7 @@ Description:
  **************************************************************/
 Gary::~Gary()
 {
+    emit this->aboutToDestroy();
     qDebug() << "Gary Object Destroyed.";
     m_serial_port->close();
     if(m_serial_port)
@@ -130,6 +133,11 @@ Description:
 void Gary::setOperationStatus(GaryOperationStatus *_os)
 {
 
+}
+
+void Gary::setXPosition(float _x_pos)
+{
+    m_x_position = _x_pos;
 }
 //--------------------------------------------------------------
 

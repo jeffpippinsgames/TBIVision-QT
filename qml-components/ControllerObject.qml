@@ -23,6 +23,7 @@ FocusScope {
     property bool downpressed : false
     property bool leftpressed : false
     property bool rightpressed : false
+    property bool stickpressed: false;
 
     signal greenButtonPressed()
     signal greenButtonReleased()
@@ -45,98 +46,79 @@ FocusScope {
     signal rightButtonPressed()
     signal rightButtonReleased()
 
-    Timer
-    {
-        id: debouncetimerId
-        interval: 20
-        running: false;
-        repeat: false;
-        triggeredOnStart: false;
-
-        onTriggered:
-        {
-            if((upbuttonpressed === false) && (downbuttonpressed === false) && (leftbuttonpressed === false) && (rightbuttonpressed === false))
-            {
-                garyId.sendStopMovement();
-            }
-        }
-    }
-
     Keys.onPressed:
     {
-        if(!event.isAutoRepeat)
+        if(event.isAutoRepeat) return
+        console.log("ControllerObject Keys.OnPressed Fired");
+
+        switch(event.key)
         {
-            console.log("ControllerObject Keys.OnPressed Fired");
-            switch(event.key)
-            {
-            case greenbutton:
-                greenpressed = true;
-                greenButtonPressed();
-                break;
-            case redbutton:
-                redpressed = true;
-                redButtonPressed();
-                break;
-            case blackbutton:
-                blackpressed = true;
-                blackButtonPressed();
-                break;
-            case upbutton:
-                uppressed = true;
-                upButtonPressed();
-                break;
-            case downbutton:
-                downpressed = true;
-                downButtonPressed();
-                break;
-            case leftbutton:
-                leftpressed = true;
-                leftButtonPressed();
-                break;
-            case rightbutton:
-                rightpressed = true;
-                rightButtonPressed();
-                break;
-            }
+        case greenbutton:
+            greenpressed = true;
+            greenButtonPressed();
+            break;
+        case redbutton:
+            redpressed = true;
+            redButtonPressed();
+            break;
+        case blackbutton:
+            blackpressed = true;
+            blackButtonPressed();
+            break;
+        case upbutton:
+            uppressed = true;
+            upButtonPressed();
+            break;
+        case downbutton:
+            downpressed = true;
+            downButtonPressed();
+            break;
+        case leftbutton:
+            leftpressed = true;
+            leftButtonPressed();
+            break;
+        case rightbutton:
+            rightpressed = true;
+            rightButtonPressed();
+            break;
         }
+
     }
 
     Keys.onReleased:
     {
-        if(!event.isAutoRepeat)
+        if(event.isAutoRepeat) return
+        console.log("ControllerObject Keys.OnReleased Fired");
+        switch(event.key)
         {
-            console.log("ControllerObject Keys.OnReleased Fired");
-            switch(event.key)
-            {
-            case greenbutton:
-                greenpressed = false;
-                greenButtonReleased();
-                break;
-            case redbutton:
-                redpressed = false;
-                redButtonReleased();
-                break;
-            case blackbutton:
-                blackpressed = false;
-                blackButtonReleased();
-                break;
-            case upbutton:
-                uppressed = false;
-                upButtonReleased();
-                break;
-            case downbutton:
-                downpressed = false;
-                downButtonReleased();
-                break;
-            case leftbutton:
-                leftpressed = false;
-                leftButtonReleased();
-                break;
-            case rightbutton:
-                rightpressed = false;
-                rightButtonReleased();
-                break;
-            }
+        case greenbutton:
+            greenpressed = false;
+            greenButtonReleased();
+            break;
+        case redbutton:
+            redpressed = false;
+            redButtonReleased();
+            break;
+        case blackbutton:
+            blackpressed = false;
+            blackButtonReleased();
+            break;
+        case upbutton:
+            uppressed = false;
+            upButtonReleased();
+            break;
+        case downbutton:
+            downpressed = false;
+            downButtonReleased();
+            break;
+        case leftbutton:
+            leftpressed = false;
+            leftButtonReleased();
+            break;
+        case rightbutton:
+            rightpressed = false;
+            rightButtonReleased();
+            break;
         }
     }
 
