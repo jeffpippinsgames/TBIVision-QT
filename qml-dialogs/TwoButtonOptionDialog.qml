@@ -7,16 +7,20 @@ import "qrc:/qml-components"
 
 Item
 {
-    id: yesnodialogId
+    id: twobuttonoptiondialogId
     focus: true
     anchors.fill: parent
-    property string messagetext: "Do You Like Welding?"
+    property string messagetext: "Are You Sure?"
     property color messagecolor: Qt.rgba(1,1,.95,1)
     property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
     property string backgroundimage: "qrc:/Icons/dark_steel_texture.jpg"
-    property string pagename: "YesNo Dialog"
+    property string pagename: "TwoButtonOption Dialog"
     property int buttoniconsize: 150
     property int buttoniconspacing: 100
+    property string icon1src: value
+    property string icon2src: value
+    property string option1: "Yes"
+    property string option2: "No"
 
     signal selectionMade(string selection)
     signal completed()
@@ -44,14 +48,14 @@ Item
 
         onGreenButtonPressed:
         {
-            yesnodialogId.selectionMade("Yes");
+            yesnodialogId.selectionMade(twobuttonoptiondialogIdq.option1);
             destroyPage();
 
         }
 
         onRedButtonPressed:
         {
-            yesnodialogId.selectionMade("No");
+            yesnodialogId.selectionMade(twobuttonoptiondialogId.option2);
             destroyPage();
         }
 
@@ -84,7 +88,7 @@ Item
     FontLoader
     {
         id: fontId
-        source: yesnodialogId.fontsource
+        source: twobuttonoptiondialogId.fontsource
     }
 
     //Background Image
@@ -92,7 +96,7 @@ Item
     {
         focus: false
         id: backgroundimageId
-        source: yesnodialogId.backgroundimage
+        source: twobuttonoptiondialogId.backgroundimage
         anchors.fill: parent
         opacity: 1
     }
@@ -103,56 +107,56 @@ Item
         id: messageId
         anchors.horizontalCenter: parent.horizontalCenter
         y: posrectId.y - messageId.implicitHeight
-        text: yesnodialogId.messagetext
-        color: yesnodialogId.messagecolor
+        text: twobuttonoptiondialogId.messagetext
+        color: twobuttonoptiondialogId.messagecolor
         font.family: fontId.name
         font.pointSize: 25
     }
 
-    //Green Button Image
+    //Option1 Icon
     Image
     {
-        id: greenbuttonimageId
+        id: option1imageId
         anchors.left: posrectId.left
         anchors.verticalCenter: posrectId.verticalCenter
-        width: yesnodialogId.buttoniconsize
-        height: yesnodialogId.buttoniconsize
+        width: twobuttonoptiondialogId.buttoniconsize
+        height: twobuttonoptiondialogId.buttoniconsize
         source: "qrc:/Icons/GreenButton2.png"
         opacity: 1.0
     }
 
-    //Green Button Text
+    //Option1 Text
     Text
     {
-        id: yesId
+        id: option1textId
         anchors.horizontalCenter: greenbuttonimageId.horizontalCenter
         y: greenbuttonimageId.y + greenbuttonimageId.height + 10
-        text: "Yes"
-        color: yesnodialogId.messagecolor
+        text: twobuttonoptiondialogId.option1
+        color: twobuttonoptiondialogId.messagecolor
         font.family: fontId.name
         font.pointSize: 25
     }
 
-    //Red Button
+    //Option2 Icon
     Image
     {
-        id: redbuttonimageId
+        id: option2imageId
         anchors.right: posrectId.right
         anchors.verticalCenter: posrectId.verticalCenter
-        width: yesnodialogId.buttoniconsize
-        height: yesnodialogId.buttoniconsize
+        width: twobuttonoptiondialogId.buttoniconsize
+        height: twobuttonoptiondialogId.buttoniconsize
         source: "qrc:/Icons/RedButton2.png"
         opacity: 1.0
     }
 
-    //Red Button Text
+    //Option2 Text
     Text
     {
-        id: noId
+        id: option2textId
         anchors.horizontalCenter: redbuttonimageId.horizontalCenter
         y: redbuttonimageId.y + redbuttonimageId.height + 10
-        text: "No"
-        color: yesnodialogId.messagecolor
+        text: twobuttonoptiondialogId.option2
+        color: twobuttonoptiondialogId.messagecolor
         font.family: fontId.name
         font.pointSize: 25
     }
