@@ -151,6 +151,7 @@ Description:
  **************************************************************/
 bool Gary::findOpenTeensy()
 {
+    m_serial_port = nullptr;
     m_serial_info = new QSerialPortInfo();
     //Poll Each Serial Port Look For The Teensy 3.2
     foreach(QSerialPortInfo _serialinfo, m_serial_info->availablePorts())
@@ -181,7 +182,7 @@ bool Gary::findOpenTeensy()
            }
        }
     }
-    qDebug() << "Could Not Find Teensy 3.2 Serial Device.";
+    qDebug() << "Could Not Find Teensy 3.2 Serial Device. Microcontroller not Available.";
     return false;
 }
 //--------------------------------------------------------------
@@ -273,7 +274,8 @@ Description:
  **************************************************************/
 void Gary::sendSerialCommand(QByteArray &_data)
 {
-    if(!m_serial_port)
+
+    if(m_serial_port == nullptr)
     {
         qDebug() << "Error in sendSerialCommand: m_serial_port is null";
         return;

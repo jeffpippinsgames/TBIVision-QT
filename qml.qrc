@@ -69,7 +69,6 @@
         <file>qml-pages/ViewSelectionPage.qml</file>
         <file>qml-components/RotateMenu.qml</file>
         <file>qml-pages/MainMenuPage.qml</file>
-        <file>qml-dialogs/YesNoDialog.qml</file>
         <file>qml-dialogs/TwoButtonOptionDialog.qml</file>
     </qresource>
 </RCC>

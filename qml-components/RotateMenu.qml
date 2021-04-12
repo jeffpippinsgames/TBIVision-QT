@@ -34,6 +34,7 @@ Item
     property color menucolor: Qt.rgba(1,1,.95,1)
     property int icontextspacing: 5
     property real menuopacity: 1
+    readonly property string closemenustring: "closemenu"
 
     //Signals----------------------------------
     signal selectionMade(string selection)
@@ -77,12 +78,13 @@ Item
 
         onRedButtonPressed:
         {
-            destroyPage();
+            selectionMade(menurootId.closemenustring);
         }
 
         onBlackButtonPressed:
         {
-            destroyPage();
+
+            selectionMade(menurootId.closemenustring);
         }
 
         onUpButtonPressed:
