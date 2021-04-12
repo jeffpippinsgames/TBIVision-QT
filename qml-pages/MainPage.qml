@@ -20,7 +20,6 @@ Item
     //Custom Properties-------------------------
     property var page: null
 
-
     //Misc Functions-------------------------
     function grabFocus()
     {
@@ -32,7 +31,7 @@ Item
     {
         if(page !== null)
         {
-            switch(page.name)
+            switch(page.pagename)
             {
             case "MainMenu Page":
                 page.destroyPage.connect(destroyPage);
@@ -81,10 +80,16 @@ Item
         xposId.text = "";
     }
 
+    function processTobysNewFrame(image)
+    {
+        Toby.triggerCamera();
+    }
+
     //Slots
     Component.onCompleted:
     {
         Gary.aboutToDestroy.connect(garyAboutToClose);
+        //Toby.frameGrabbed.connect(processTobysNewFrame);
     }
 
     //Signals-----------------------------------
@@ -166,8 +171,8 @@ Item
         font.family: fontId.name
         text: Gary.xPosition
         font.pointSize: 40
-        width: titletextId.implicitWidth
-        height: titletextId.implicitHeight
+        width: xposId.implicitWidth
+        height: xposId.implicitHeight
         x: 30
         y: 10
         color: Qt.rgba(1,1,.95,1)
@@ -195,6 +200,15 @@ Item
         greenbuttonmessage: "Auto"
         redbuttonmessage: "Stop"
         blackbuttonmessage: "Main Menu"
+    }
+
+    //Camera Image
+    Image {
+        id: cameraimageId
+        width: 720
+        height: 540
+        x: 50
+        y: 50
     }
 
     KeypadObject

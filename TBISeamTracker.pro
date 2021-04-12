@@ -10,7 +10,9 @@ CONFIG += c++11
 
 SOURCES += \
         gary.cpp \
-        main.cpp
+        main.cpp \
+        toby.cpp \
+        tobyqmlviewer.cpp
 
 RESOURCES += qml.qrc
 
@@ -26,7 +28,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    gary.h
+    gary.h \
+    toby.h \
+    tobyqmlviewer.h
 
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonbase-6.2.0
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonutility-6.2.0

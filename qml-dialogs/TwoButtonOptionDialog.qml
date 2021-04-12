@@ -10,15 +10,15 @@ Item
     id: twobuttonoptiondialogId
     focus: true
     anchors.fill: parent
+
+    property string pagename: "TwoButtonOption Dialog"
+
     property string messagetext: "Are You Sure?"
     property color messagecolor: Qt.rgba(1,1,.95,1)
     property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
     property string backgroundimage: "qrc:/Icons/dark_steel_texture.jpg"
-    property string pagename: "TwoButtonOption Dialog"
     property int buttoniconsize: 150
     property int buttoniconspacing: 100
-    property string icon1src: value
-    property string icon2src: value
     property string option1: "Yes"
     property string option2: "No"
 
@@ -48,14 +48,14 @@ Item
 
         onGreenButtonPressed:
         {
-            yesnodialogId.selectionMade(twobuttonoptiondialogIdq.option1);
+            twobuttonoptiondialogId.selectionMade(twobuttonoptiondialogId.option1);
             destroyPage();
 
         }
 
         onRedButtonPressed:
         {
-            yesnodialogId.selectionMade(twobuttonoptiondialogId.option2);
+            twobuttonoptiondialogId.selectionMade(twobuttonoptiondialogId.option2);
             destroyPage();
         }
 
@@ -129,8 +129,8 @@ Item
     Text
     {
         id: option1textId
-        anchors.horizontalCenter: greenbuttonimageId.horizontalCenter
-        y: greenbuttonimageId.y + greenbuttonimageId.height + 10
+        anchors.horizontalCenter: option1imageId.horizontalCenter
+        y: option1imageId.y + option1imageId.height + 10
         text: twobuttonoptiondialogId.option1
         color: twobuttonoptiondialogId.messagecolor
         font.family: fontId.name
@@ -153,8 +153,8 @@ Item
     Text
     {
         id: option2textId
-        anchors.horizontalCenter: redbuttonimageId.horizontalCenter
-        y: redbuttonimageId.y + redbuttonimageId.height + 10
+        anchors.horizontalCenter: option2imageId.horizontalCenter
+        y: option2imageId.y + option2imageId.height + 10
         text: twobuttonoptiondialogId.option2
         color: twobuttonoptiondialogId.messagecolor
         font.family: fontId.name

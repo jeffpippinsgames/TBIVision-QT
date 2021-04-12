@@ -49,8 +49,6 @@ FocusScope {
     Keys.onPressed:
     {
         if(event.isAutoRepeat) return
-        console.log("ControllerObject Keys.OnPressed Fired");
-
         switch(event.key)
         {
         case greenbutton:
@@ -88,7 +86,6 @@ FocusScope {
     Keys.onReleased:
     {
         if(event.isAutoRepeat) return
-        console.log("ControllerObject Keys.OnReleased Fired");
         switch(event.key)
         {
         case greenbutton:
