@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <pylon/PylonIncludes.h>
+#include <QImage>
 
 
 using namespace Pylon;
@@ -18,26 +19,27 @@ Description:
 class Toby : public QObject, public Pylon::CImageEventHandler, public Pylon::CConfigurationEventHandler
 {
     Q_OBJECT
-    //Q_PROPERTY(QImage* cameraframe READ getCameraFrame)
+
 
 public:
     explicit Toby(QObject *parent = nullptr);
     ~Toby();
     Q_INVOKABLE void triggerCamera();
-    QImage* getCameraFrame(){return m_camera_frame;}
+    Q_INVOKABLE void startCamera();
+    Q_INVOKABLE Toby* getThisToby(){return this;}
 
 private:
 
     //Pylon Members
     CInstantCamera* m_camera1;
-    QImage* m_camera_frame;
 
-    // from Pylon::CImageEventHandler
+    //Methods
     virtual void OnImageGrabbed(Pylon::CInstantCamera& camera, const Pylon::CGrabResultPtr& ptrGrab);
-     QImage toQImage(Pylon::CPylonImage* pylonImage);
+   // QImage toQImage(Pylon::CPylonImage* pylonImage);
 
 signals:
-    void frameGrabbed(QImage frame);
+    void newFrameGrabbed(const QImage &frame);
+    void cameraOpenedChanged(bool _isopen);
 
 };
 

@@ -11,6 +11,7 @@ Item {
     //Properties-----------------------------------
     id: mainmenuId
     anchors.fill: parent
+    opacity: 1
 
     readonly property string pagename: "MainMenu Page"
 
@@ -80,7 +81,6 @@ Item {
         messagetext: "Are You Sure You Want To Quit?"
         onSelectionMade:
         {
-            console.log("Ding");
             switch(selection)
             {
             case "Yes":

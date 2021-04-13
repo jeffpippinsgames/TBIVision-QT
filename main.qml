@@ -42,6 +42,8 @@ Window {
         color: "black"
     }
 
+
+
     //This is where main operating page is created
     //and where any signal/slot wiring is done.
     Component.onCompleted:

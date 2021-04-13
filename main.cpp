@@ -4,6 +4,7 @@
 #include <QQmlContext>
 #include "gary.h"
 #include "toby.h"
+#include "QImageQMLViewer.h"
 
 using namespace Pylon;
 
@@ -12,7 +13,7 @@ int main(int argc, char *argv[])
 
     //Init the Pylon Run Time.
     //Required For Use of the Pylon Function Calls
-    Pylon::PylonInitialize();
+    Pylon::PylonAutoInitTerm pylonAutoInitTerm;
 
 
     #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -21,6 +22,7 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
+    //------QML Component Registration ---------------------------
     //Register the Custom Gary QML Types.
     GaryHomingStatus::declareQML();
     GaryControlErrorCode::declareQML();
@@ -29,6 +31,8 @@ int main(int argc, char *argv[])
     GaryControlMode::declareQML();
     GaryCommands::declareQML();
     GaryMotionStatus::declareQML();
+    //Register The QImageQMLViewer QML Type
+    QImageQMLViewer::declareQML();
 
     //The QML Application engine----------------------------------
     QQmlApplicationEngine engine;
@@ -49,5 +53,11 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
     engine.load(url);
+    //QML Is Running Now--------------------------------------------
+
+    //Do Signal/Slot Connections Between QML Components and Qt Singletons.
+    //QObject::connect(&_toby, SIGNAL(newFrameGrabbed(QImage &)), &tobyviewerId, SLOT(newCameraFrameHandler(QImage &)));
+
+    //Exit App.
     return app.exec();
 }

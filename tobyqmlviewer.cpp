@@ -1,2 +1,0 @@
-#include "tobyqmlviewer.h"
-

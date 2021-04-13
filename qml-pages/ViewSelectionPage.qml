@@ -12,7 +12,7 @@ FocusScope
     x:0
     y:0
 
-    background: Rectangle
+    Rectangle
     {
         anchors.fill: parent
         color: "orange"

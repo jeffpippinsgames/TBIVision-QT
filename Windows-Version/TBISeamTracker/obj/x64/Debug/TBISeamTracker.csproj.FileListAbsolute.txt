@@ -1,0 +1,128 @@
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\TBISeamTracker.exe.config
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\TBISeamTracker.exe
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\TBISeamTracker.pdb
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Basler.Pylon.dll
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.DebuggerVisualizers.VS2017.dll
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.UI.dll
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.World.dll
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Microsoft.VisualStudio.DebuggerVisualizers.dll
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\ZedGraph.dll
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Basler.Pylon.xml
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.UI.xml
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.World.xml
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csprojAssemblyReference.cache
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.MainForm.resources
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.Properties.Resources.resources
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csproj.GenerateResource.cache
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csproj.CoreCompileInputs.cache
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csproj.CopyComplete
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.exe
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.pdb
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.Form_AboutBox.resources
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.Form_CameraSettings.resources
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.dll
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.XInput.dll
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.pdb
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.XInput.pdb
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.XInput.xml
+D:\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.dll.config
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.dll.config
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\TBISeamTracker.exe.config
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\TBISeamTracker.exe
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\TBISeamTracker.pdb
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.dll
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.Math.Core.dll
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.Math.dll
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.Statistics.dll
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Basler.Pylon.dll
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.DebuggerVisualizers.VS2017.dll
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.UI.dll
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.World.dll
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Extreme.Numerics.dll
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.dll
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.XInput.dll
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Microsoft.VisualStudio.DebuggerVisualizers.dll
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\ZedGraph.dll
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.xml
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.Math.xml
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.Math.Core.xml
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.Statistics.xml
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Basler.Pylon.xml
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.UI.xml
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.World.xml
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Extreme.Numerics.xml
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.pdb
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.XInput.pdb
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.XInput.xml
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csprojAssemblyReference.cache
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.Form_AboutBox.resources
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.Form_CameraSettings.resources
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.MainForm.resources
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.Properties.Resources.resources
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csproj.GenerateResource.cache
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csproj.CoreCompileInputs.cache
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csproj.CopyComplete
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.exe
+C:\Users\Tbailey\Documents\Visual Studio 2017\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.pdb
+E:\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csprojAssemblyReference.cache
+E:\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.Form_AboutBox.resources
+E:\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.Form_CameraSettings.resources
+E:\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.MainForm.resources
+E:\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.Properties.Resources.resources
+E:\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csproj.GenerateResource.cache
+E:\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csproj.CoreCompileInputs.cache
+E:\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.exe
+E:\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.pdb
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.dll.config
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\TBISeamTracker.exe.config
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\TBISeamTracker.exe
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\TBISeamTracker.pdb
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.dll
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.Math.Core.dll
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.Math.dll
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.Statistics.dll
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Basler.Pylon.dll
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.DebuggerVisualizers.VS2017.dll
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.UI.dll
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.World.dll
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Extreme.Numerics.dll
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.dll
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.XInput.dll
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Microsoft.VisualStudio.DebuggerVisualizers.dll
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\ZedGraph.dll
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.xml
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.Math.xml
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.Math.Core.xml
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.Statistics.xml
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Basler.Pylon.xml
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.UI.xml
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.World.xml
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Extreme.Numerics.xml
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.pdb
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.XInput.pdb
+E:\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.XInput.xml
+E:\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csproj.CopyComplete
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csprojAssemblyReference.cache
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.Form_AboutBox.resources
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.Form_CameraSettings.resources
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.MainForm.resources
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.Properties.Resources.resources
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csproj.GenerateResource.cache
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csproj.CoreCompileInputs.cache
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.exe
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.pdb
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Accord.dll.config
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\TBISeamTracker.exe.config
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\TBISeamTracker.exe
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\TBISeamTracker.pdb
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.dll
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.XInput.dll
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Microsoft.VisualStudio.DebuggerVisualizers.dll
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\ZedGraph.dll
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Basler.Pylon.xml
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.UI.xml
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\Emgu.CV.World.xml
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.pdb
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.XInput.pdb
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\bin\x64\Debug\SharpDX.XInput.xml
+D:\Dropbox\Dropbox\Visual Studio Projects\TBISeamTracker\TBISeamTracker\obj\x64\Debug\TBISeamTracker.csproj.CopyComplete

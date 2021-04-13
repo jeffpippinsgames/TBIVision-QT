@@ -89,6 +89,10 @@ Item
     Component.onCompleted:
     {
         Gary.aboutToDestroy.connect(garyAboutToClose);
+        Toby.newFrameGrabbed.connect(qimageviewerId.newCameraFrameHandler);
+        //qimageviewerId.setToby(Toby.getThisToby());
+        Toby.startCamera();
+
         //Toby.frameGrabbed.connect(processTobysNewFrame);
     }
 
@@ -164,6 +168,7 @@ Item
         color: "black"
     }
 
+
     Text
     {
         id: xposId
@@ -194,6 +199,8 @@ Item
         opacity: .7
     }
 
+
+
     //Bottom Button Operation Key
     ControllerKeyObject
     {
@@ -202,13 +209,20 @@ Item
         blackbuttonmessage: "Main Menu"
     }
 
-    //Camera Image
-    Image {
-        id: cameraimageId
-        width: 720
-        height: 540
-        x: 50
-        y: 50
+    //QImage Viewer Component
+    QImageQMLViewer
+    {
+        id: qimageviewerId
+        visible: true
+        x:0
+        y:0
+        anchors.fill: parent
+        opacity: .5
+
+        onNewFrameGrabbed:
+        {
+            Toby.triggerCamera();
+        }
     }
 
     KeypadObject

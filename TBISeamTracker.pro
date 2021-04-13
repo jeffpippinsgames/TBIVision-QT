@@ -9,10 +9,11 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        QImageQMLViewer.cpp \
         gary.cpp \
         main.cpp \
-        toby.cpp \
-        tobyqmlviewer.cpp
+        max.cpp \
+        toby.cpp
 
 RESOURCES += qml.qrc
 
@@ -28,9 +29,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    QImageQMLViewer.h \
     gary.h \
-    toby.h \
-    tobyqmlviewer.h
+    max.h \
+    toby.h
 
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonbase-6.2.0
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonutility-6.2.0
@@ -39,3 +41,11 @@ unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lGenApi_gcc_v3_1_Basl
 
 INCLUDEPATH += $$PWD/../../../../../opt/pylon/include
 DEPENDPATH += $$PWD/../../../../../opt/pylon/include
+
+unix:!macx: LIBS += -L$$PWD/../../../../../usr/local/lib/ -lopencv_core
+unix:!macx: LIBS += -L$$PWD/../../../../../usr/local/lib/ -lopencv_imgproc
+
+INCLUDEPATH += $$PWD/../../../../../usr/local/include
+DEPENDPATH += $$PWD/../../../../../usr/local/include
+INCLUDEPATH += $$PWD/../../../../../usr/local/include/opencv4
+DEPENDPATH += $$PWD/../../../../../usr/local/include/opencv4

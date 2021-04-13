@@ -98,7 +98,7 @@ Item
         id: backgroundimageId
         source: twobuttonoptiondialogId.backgroundimage
         anchors.fill: parent
-        opacity: 1
+        opacity: .6
     }
 
     //Message

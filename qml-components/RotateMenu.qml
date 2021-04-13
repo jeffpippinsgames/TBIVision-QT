@@ -122,7 +122,7 @@ Item
         id: backgroundimageId
         source: menurootId.backgroundimage
         anchors.fill: parent
-        opacity: 1
+        opacity: .6
     }
 
     //Main Menu Text
