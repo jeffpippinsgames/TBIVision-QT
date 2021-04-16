@@ -14,6 +14,9 @@ import "tbi.vision.components" 1 0
 /**************************************************************
 GaryHomingStatus
 Description:
+  Gary is the Photographer.
+  Gary Directly Interacts With Mary.
+
   A class to encapsulate the requirments for keeping track
   of the homing status codes of the Microcontroller.
  **************************************************************/
@@ -144,6 +147,7 @@ public:
     MotionStatus_t m_motion_status;
 };
 
+
 /**************************************************************
 GaryCommands
 Description:
@@ -205,9 +209,12 @@ class GaryCommands : public QObject
 };
 
 
-
 /**************************************************************
 Gary
+
+Gary is the Guy Who Moves The Slides.
+He's the interface to the motion system.
+
 Description:
   A class to facilitate the operation and communication to the
   microcontroller responsible for motion control of the TBI seam
@@ -222,7 +229,7 @@ class Gary : public QObject
     Q_PROPERTY(GaryHomingStatus* homingStatus READ homingStatus WRITE setHomingStatus NOTIFY homingStatusChanged)
     Q_PROPERTY(GaryLimitSwitch* xLimitSwitch READ xLimitSwitch WRITE setXLimitSwitch NOTIFY xLimitSwitchChanged)
     Q_PROPERTY(GaryLimitSwitch* zLimitSwitch READ zLimitSwitch WRITE setZLimitSwitch NOTIFY zLimitSwitchChanged)
-    Q_PROPERTY(GaryOperationStatus* operationStatus READ operationStatus WRITE setOperationStatus NOTIFY operationStatusChanged)
+    Q_PROPERTY(int operationStatus READ getOperationStatus WRITE setOperationStatus NOTIFY operationStatusChanged)
     Q_PROPERTY(float xPosition READ xPosition WRITE setXPosition NOTIFY xPositionChanged)
     //------------------------------------------------------------
 
@@ -240,7 +247,7 @@ class Gary : public QObject
     void setHomingStatus(GaryHomingStatus*_hs);
     void setXLimitSwitch(GaryLimitSwitch *_ls);
     void setZLimitSwitch(GaryLimitSwitch *_ls);
-    void setOperationStatus(GaryOperationStatus *_os);
+    void setOperationStatus(int _os);
     void setXPosition(float _x_pos);
     //------------------------------------------------------------
     //Property Read Methods
@@ -249,7 +256,7 @@ class Gary : public QObject
     GaryHomingStatus* homingStatus(){return m_homing_status;}
     GaryLimitSwitch* xLimitSwitch(){return m_x_axis_limit;}
     GaryLimitSwitch* zLimitSwitch(){return m_z_axis_limit;}
-    GaryOperationStatus* operationStatus(){return m_operation_status;}
+    int getOperationStatus(){return m_operation_status;}
     float xPosition(){return m_x_position;}
     //------------------------------------------------------------
 
@@ -272,7 +279,7 @@ class Gary : public QObject
     GaryHomingStatus *m_homing_status;
     GaryLimitSwitch *m_x_axis_limit;
     GaryLimitSwitch *m_z_axis_limit;
-    GaryOperationStatus *m_operation_status;
+    int m_operation_status;
     float m_x_position;
     //-------------------------------------------------------------
 
@@ -294,6 +301,8 @@ class Gary : public QObject
     void xPositionChanged();
     //--------------------------------------------------------------
 
+public slots:
+    void serialError(QSerialPort::SerialPortError _error);
 };
 
 #endif // GARY_H

@@ -6,11 +6,11 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.12
 
 
-FocusScope
+Item
 {
-    id: keypadfocusId
+    id: rootcomponentId
     visible: false
-    focus:keypadfocusId.visible
+    focus:rootcomponentId.visible
     anchors.fill: parent
 
     //Properties
@@ -19,25 +19,31 @@ FocusScope
     property bool integervalue: false
     property bool negativeallowed: true
     property string returnedvalue: ""
+    property real backgroundopacity: 1
 
     //Signals
     signal valueEntered()
     signal aboutToOpen()
     signal aboutToClose()
 
-    //Functions
+    //Misc Functions-------------------------------------------------
+    function grabFocus()
+    {
+        controllerId.focus = true;
+    }
+
     function open()
     {
         displayedvalue = "";
-        keypadfocusId.aboutToOpen();
-        keypadfocusId.visible = true;
+        rootcomponentId.aboutToOpen();
+        rootcomponentId.visible = true;
     }
 
     function close()
     {
         displayedvalue = "";
-        keypadfocusId.aboutToClose();
-        keypadfocusId.visible = false;
+        rootcomponentId.aboutToClose();
+        rootcomponentId.visible = false;
     }
 
     //Font for UI
@@ -51,7 +57,7 @@ FocusScope
     ControllerObject
     {
         id:controllerId
-        focus:keypadfocusId.focus
+        focus:rootcomponentId.focus
 
         onGreenButtonPressed:
         {
@@ -86,7 +92,7 @@ FocusScope
         onBlackButtonPressed:
         {
             returnedvalue = displayedvalue;
-            keypadfocusId.close();
+            rootcomponentId.close();
         }
 
         onUpButtonPressed:
@@ -110,22 +116,13 @@ FocusScope
         }
     }
 
-    //Black Background
-    Rectangle
-    {
-
-        anchors.fill: parent
-        color:"black"
-        visible: keypadfocusId.visible
-    }
-
     //Background Image
     Image
     {
         id: backgroundimageId
         source: "qrc:/Icons/dark_steel_texture.jpg"
         anchors.fill: parent
-        opacity: .7
+        opacity: rootcomponentId.backgroundopacity
     }
 
     ControllerKeyObject
@@ -162,7 +159,7 @@ FocusScope
         width:470
         height:700
         focus:false
-        visible: keypadfocusId.visible
+        visible: rootcomponentId.visible
         color: "transparent"
 
         FontLoader
@@ -186,7 +183,7 @@ FocusScope
 
             Connections
             {
-                target: keypadfocusId
+                target: rootcomponentId
                 function onintegervalueChanged()
                 {
                     if(integervalue)

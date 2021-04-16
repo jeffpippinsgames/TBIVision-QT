@@ -4,9 +4,13 @@
 #include <QQmlContext>
 #include "gary.h"
 #include "toby.h"
-#include "QImageQMLViewer.h"
+#include "max.h"
+#include "QmlTBIDisplay.h"
+#include "opencv4/opencv2/core.hpp"
 
 using namespace Pylon;
+
+Q_DECLARE_METATYPE(cv::Mat)
 
 int main(int argc, char *argv[])
 {
@@ -31,8 +35,10 @@ int main(int argc, char *argv[])
     GaryControlMode::declareQML();
     GaryCommands::declareQML();
     GaryMotionStatus::declareQML();
-    //Register The QImageQMLViewer QML Type
-    QImageQMLViewer::declareQML();
+    //Register The QmlTBIDisplay QML Type
+    QmlTBIDisplay::declareQML();
+    //Register Max QML Types
+
 
     //The QML Application engine----------------------------------
     QQmlApplicationEngine engine;
@@ -40,10 +46,16 @@ int main(int argc, char *argv[])
     //instantiated Objects of Application-------------------------
     Gary _gary; //MicroController Singleton
     Toby _toby; //Basler Camera Singleton
+    Max _max; //Seam Tracking Singleton
 
-    //Adding Root Properties to QML--------------------------------
+    //Connect The Singletons Signals and Slots
+    qRegisterMetaType< Mat >("Mat");
+    QObject::connect(&_toby, SIGNAL(newCVMatFrameGrabbed(const cv::Mat&)), &_max, SLOT(recieveNewCVMat(const cv::Mat&)));
+
+    //Adding Singletons as Root Properties to QML--------------------------------
     engine.rootContext()->setContextProperty("Gary", &_gary);
     engine.rootContext()->setContextProperty("Toby", &_toby);
+    engine.rootContext()->setContextProperty("Max", &_max);
 
     //QML Code-----------------------------------------------------
     const QUrl url(QStringLiteral("qrc:/main.qml"));
@@ -54,9 +66,6 @@ int main(int argc, char *argv[])
     }, Qt::QueuedConnection);
     engine.load(url);
     //QML Is Running Now--------------------------------------------
-
-    //Do Signal/Slot Connections Between QML Components and Qt Singletons.
-    //QObject::connect(&_toby, SIGNAL(newFrameGrabbed(QImage &)), &tobyviewerId, SLOT(newCameraFrameHandler(QImage &)));
 
     //Exit App.
     return app.exec();

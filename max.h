@@ -5,36 +5,51 @@
 #include <QImage>
 #include "opencv4/opencv2/core.hpp"
 #include "opencv4/opencv2/imgproc/imgproc.hpp"
+#include <QImage>
+#include <QQuickItem>
+
 
 using namespace cv;
 
-class MaxColumnite
+class MaxPixelColumnContainer
 {
-
+public:
+    MaxPixelColumnContainer();
+    ~MaxPixelColumnContainer();
 };
+
+
 
 /**************************************************************
 Max
+
+Max Is the Welder.
+He Decides Where to Place the Weld.
+
 Description:
-  max is the welder. The seam tracking functionality is
+   The seam tracking functionality is
   encapsulated inside Max.
  **************************************************************/
 class Max : public QObject
 {
-
-
     Q_OBJECT
+
 public:
     explicit Max(QObject *parent = nullptr);
+    ~Max();
 
 private:
-    cv::Mat m_raw_mat;
-    cv::Mat m_blurred_mat;
-    cv::Mat m_threshold_mat
 
-
-
+public slots:
+    void recieveNewCVMat(const cv::Mat& _mat_frame);
 signals:
+    void newFrameProcessed(const QImage& _qimage);
+    void newRawMatProcessed(const cv::Mat& _raw_frame);
+    void newBlurMatProcessed(const cv::Mat& _blur_frame);
+    void newThresholdMatProcessed(const cv::Mat& _threshold_frame);
+    void processingComplete();
+    void viewportChanged();
+    void aboutToDestroy();
 
 };
 

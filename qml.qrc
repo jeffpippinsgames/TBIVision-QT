@@ -63,12 +63,13 @@
         <file>qml-components/ControllerKeyObject.qml</file>
         <file>qml-components/ControllerObject.qml</file>
         <file>qml-components/KeypadObject.qml</file>
-        <file>qml-pages/CameraSettingPage.qml</file>
         <file>qml-pages/MainPage.qml</file>
-        <file>qml-pages/SensorSettingsPage.qml</file>
-        <file>qml-pages/ViewSelectionPage.qml</file>
         <file>qml-components/RotateMenu.qml</file>
         <file>qml-pages/MainMenuPage.qml</file>
         <file>qml-dialogs/TwoButtonOptionDialog.qml</file>
+        <file>qml-pages/PageTemplate.qml</file>
+        <file>qml-components/IconInfoStatusObject.qml</file>
+        <file>Icons/microcontroller(white).png</file>
+        <file>qml-pages/ImageProcessingSettingsPage.qml</file>
     </qresource>
 </RCC>

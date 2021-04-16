@@ -14,14 +14,15 @@ Gary::Gary(QObject *parent) : QObject(parent)
     m_control_mode = new GaryControlMode();
     m_x_axis_limit = new GaryLimitSwitch();
     m_z_axis_limit = new GaryLimitSwitch();
-    m_operation_status = new GaryOperationStatus();
+    setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
     m_homing_status = new GaryHomingStatus();
     m_x_position = 10.2345;
     this->findOpenTeensy();
     emit completed();
-    qDebug() << "Gary Object Instantiated.";
+    qDebug() << "Gary: Gary Object Created.";
 }
 //--------------------------------------------------------------
+
 
 /**************************************************************
 ~Gary()
@@ -31,15 +32,15 @@ Description:
  **************************************************************/
 Gary::~Gary()
 {
-    emit this->aboutToDestroy();
-    qDebug() << "Gary Object Destroyed.";
+    emit aboutToDestroy();
+    qDebug() << "Gary: Gary Object Destroyed.";
     m_serial_port->close();
     if(m_serial_port)
     {
         if(m_serial_port->isOpen())
         {
             m_serial_port->close();
-            qDebug() << "Serial Port Closed.";
+            qDebug() << "Gary: Serial Port Closed.";
         }
     }
 }
@@ -130,10 +131,13 @@ Public
 Description:
   Public set Property method.
  **************************************************************/
-void Gary::setOperationStatus(GaryOperationStatus *_os)
+void Gary::setOperationStatus(int _os)
 {
-
+    m_operation_status = _os;
+    emit operationStatusChanged();
 }
+//--------------------------------------------------------------
+
 
 void Gary::setXPosition(float _x_pos)
 {
@@ -170,19 +174,22 @@ bool Gary::findOpenTeensy()
                    m_serial_port->setFlowControl(QSerialPort::NoFlowControl);
                    if(m_serial_port->open(QIODevice::ReadWrite))
                    {
-                       qDebug() << "Serial Port Opened.";
+                       qDebug() << "Gary: Serial Port Opened.";
+                       QObject::connect(m_serial_port, SIGNAL(errorOccured(QSerialPort::SerialPortError)), this, SLOT(serialError(QSerialPort::SerialPortError)));
+                       setOperationStatus(GaryOperationStatus::TBI_OPERATION_OK);
                        return true;
                    }
                    else
                    {
-                       qDebug() << "Error Opening Serial Port";
+                       qDebug() << "Gary: Error Opening Serial Port";
+                       setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
                        return false;
                    }
                }
            }
        }
     }
-    qDebug() << "Could Not Find Teensy 3.2 Serial Device. Microcontroller not Available.";
+    qDebug() << "Gary: Could Not Find Teensy 3.2 Serial Device. Microcontroller not Available.";
     return false;
 }
 //--------------------------------------------------------------
@@ -217,6 +224,7 @@ Q_INVOKABLE void Gary::sendJogUp()
        _cmd.append(char(GaryCommands::TBI_CMD_JOG_UP));
        sendSerialCommand(_cmd);
 }
+//--------------------------------------------------------------
 
 
 /**************************************************************
@@ -232,6 +240,7 @@ Q_INVOKABLE void Gary::sendJogDown()
     _cmd.append(char(GaryCommands::TBI_CMD_JOG_DOWN));
     sendSerialCommand(_cmd);
 }
+//--------------------------------------------------------------
 
 
 /**************************************************************
@@ -247,6 +256,7 @@ Q_INVOKABLE void Gary::sendJogLeft()
     _cmd.append(char(GaryCommands::TBI_CMD_JOG_LEFT));
     sendSerialCommand(_cmd);
 }
+//--------------------------------------------------------------
 
 
 /**************************************************************
@@ -277,18 +287,31 @@ void Gary::sendSerialCommand(QByteArray &_data)
 
     if(m_serial_port == nullptr)
     {
-        qDebug() << "Error in sendSerialCommand: m_serial_port is null";
+        qDebug() << "Gary: Error in sendSerialCommand: m_serial_port is null";
         return;
     }
     if(m_serial_port->isOpen())
     {
         m_serial_port->write(_data);
-        qDebug() << "Sending Command to Controller: " << _data.toHex(',');
+        qDebug() << "Gary: Sending Command to Controller: " << _data.toHex(',');
     }
     else
     {
-        qDebug() << "Error in sendSerialCommand: m_serial_port is not open";
+        qDebug() << "Gary: Error in sendSerialCommand: m_serial_port is not open";
     }
+}
+//--------------------------------------------------------------
+
+
+/**************************************************************
+serialError(QSerialPort::SerialPortError _error)
+Slot
+Description:
+  Handler for the QSerialPort::errorOccured Signal
+ **************************************************************/
+void Gary::serialError(QSerialPort::SerialPortError _error)
+{
+    setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
 }
 //--------------------------------------------------------------
 

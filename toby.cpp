@@ -1,21 +1,23 @@
 #include "toby.h"
 #include <QDebug>
 
+
 Toby::Toby(QObject *parent) : QObject(parent)
 {
     //Grab The First Camera
     m_camera1 = nullptr;
-    qDebug() << "Toby Object Created." << Qt::endl;
+    qDebug() << "Toby: Toby Object Created.";
 }
 
 Toby::~Toby()
 {
+    emit this->aboutToDestroy();
     if(m_camera1 != nullptr)
-    {
+    {     
         if(m_camera1->IsOpen()) m_camera1->Close();
         m_camera1->DestroyDevice();
     }
-    qDebug() << "Toby Onject Destroyed." << Qt::endl;
+    qDebug() << "Toby: Toby Object Destroyed.";
 }
 
 void Toby::triggerCamera()
@@ -44,49 +46,21 @@ void Toby::startCamera()
     }
     catch(const Pylon::GenericException e)
     {
-        qDebug() << "Pylon Camera Error:" << e.GetDescription() << Qt::endl;
+        qDebug() << "Toby: Pylon Error - " << e.GetDescription();
         m_camera1 = nullptr;
         return;
     }
-    qDebug() << "Toby Initialized Pylon Successfully. Pylon Camera Device Created and Opened." << Qt::endl;
+    qDebug() << "Toby: Pylon Camera Device Created and Opened.";
 }
 
 void Toby::OnImageGrabbed(CInstantCamera &camera, const CGrabResultPtr &ptrGrab)
 {
 
-
     if(ptrGrab->GrabSucceeded())
     {
-        /*
-        CImageFormatConverter fc;
-        fc.OutputPixelFormat = PixelType_Mono8;
-        CPylonImage pylonImage;
-        fc.Convert(pylonImage, ptrGrab);
-        if (!pylonImage.IsValid()) {
-           qDebug()<<"Error in Toby::OnImageGrabbed(). pylonImage Could Not Be Converted.";
-            return;
-        }
-        QImage img = this->toQImage(&pylonImage);
-        emit frameGrabbed(img);
-        */
-
-        QImage _img = QImage(static_cast<uchar*>(ptrGrab->GetBuffer()), ptrGrab->GetWidth(), ptrGrab->GetHeight(), QImage::Format_Grayscale8);
-        emit newFrameGrabbed(_img);
+        cv::Mat _mat = cv::Mat(ptrGrab->GetHeight(), ptrGrab->GetWidth(), CV_8UC1, (uint8_t *) ptrGrab->GetBuffer());
+        emit newCVMatFrameGrabbed(_mat);
     }
-
 }
 
-/*
-QImage Toby::toQImage(CPylonImage *pylonImage)
-{
-    int width = pylonImage->GetWidth();
-    int height = pylonImage->GetHeight();
-    void* buffer = (uchar*)pylonImage->GetBuffer();
-    //int step = pylonImage->GetAllocatedBufferSize() / height;
-    QImage img(static_cast<uchar*>(buffer), width, height, QImage::Format_Grayscale8);
-    return img;
-
-
-}
-*/
 

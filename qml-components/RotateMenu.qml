@@ -15,15 +15,15 @@ import "qrc:/qml-components"
 Item
 {
     //Object Properties-------------------------
-    id: menurootId
+    id: rootcomponentId
     anchors.fill:parent
     focus: true
 
     //Custom Properties-------------------------
     property int xpathradius: 650
     property int ypathradius: 150
-    property int menucenterx: menurootId.width/2 - titletextId.width/2
-    property int menucentery: menurootId.height/2 - titletextId.height/2
+    property int menucenterx: rootcomponentId.width/2 - titletextId.width/2
+    property int menucentery: rootcomponentId.height/2 - titletextId.height/2
     property string menutitle: "Menu"
     property string backgroundimage: "qrc:/Icons/dark_steel_texture.jpg"
     property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
@@ -34,6 +34,7 @@ Item
     property color menucolor: Qt.rgba(1,1,.95,1)
     property int icontextspacing: 5
     property real menuopacity: 1
+    property real backgroundopacity: .8
     readonly property string closemenustring: "closemenu"
 
     //Signals----------------------------------
@@ -78,13 +79,13 @@ Item
 
         onRedButtonPressed:
         {
-            selectionMade(menurootId.closemenustring);
+            selectionMade(rootcomponentId.closemenustring);
         }
 
         onBlackButtonPressed:
         {
 
-            selectionMade(menurootId.closemenustring);
+            selectionMade(rootcomponentId.closemenustring);
         }
 
         onUpButtonPressed:
@@ -112,7 +113,7 @@ Item
     FontLoader
     {
         id: fontId
-        source: menurootId.fontsource
+        source: rootcomponentId.fontsource
     }
 
     //Background Image
@@ -120,9 +121,9 @@ Item
     {
         focus: false
         id: backgroundimageId
-        source: menurootId.backgroundimage
+        source: rootcomponentId.backgroundimage
         anchors.fill: parent
-        opacity: .6
+        opacity: rootcomponentId.backgroundopacity
     }
 
     //Main Menu Text
@@ -132,12 +133,12 @@ Item
         focus: false
         font.family: fontId.name
         text: menutitle
-        font.pointSize: menurootId.menutitletextsize
+        font.pointSize: rootcomponentId.menutitletextsize
         width: titletextId.implicitWidth
         height: titletextId.implicitHeight
-        x: menurootId.menucenterx
-        y: menurootId.menucentery
-        color: menurootId.menucolor
+        x: rootcomponentId.menucenterx
+        y: rootcomponentId.menucentery
+        color: rootcomponentId.menucolor
     }
 
     //Menu ListModel
@@ -155,20 +156,20 @@ Item
             opacity: PathView.opacity
             z: PathView.z
             scale: PathView.scale
-            spacing: menurootId.icontextspacing
+            spacing: rootcomponentId.icontextspacing
             Image
             {
                 id: delegateimageId
                 anchors.horizontalCenter: delegatetextId.horizontalCenter
-                source: iconfile; width: menurootId.menuiconsizex; height: menurootId.menuiconsizey; smooth: true
+                source: iconfile; width: rootcomponentId.menuiconsizex; height: rootcomponentId.menuiconsizey; smooth: true
                 fillMode: Image.PreserveAspectFit
             }
             Text
             {
                 id: delegatetextId
                 font.family: fontId.name
-                text: name; font.pixelSize: menurootId.menuicontextsize
-                color: menurootId.menucolor
+                text: name; font.pixelSize: rootcomponentId.menuicontextsize
+                color: rootcomponentId.menucolor
             }
         }
 
@@ -179,31 +180,31 @@ Item
     {
         id: pathId
         startX: (titletextId.x + (titletextId.implicitWidth/2))
-        startY: (titletextId.y + (titletextId.implicitHeight/2)) + menurootId.ypathradius + 50
+        startY: (titletextId.y + (titletextId.implicitHeight/2)) + rootcomponentId.ypathradius + 50
         PathAttribute { name: "opacity"; value: 1.0 }
         PathAttribute { name: "scale"; value: 1.0 }
         PathAttribute { name: "z"; value: 0 }
 
         //Left
-        PathArc{x: (titletextId.x + (titletextId.implicitWidth/2)) - menurootId.xpathradius; y: (titletextId.y + (titletextId.implicitHeight/2)); radiusX: menurootId.xpathradius; radiusY: menurootId.ypathradius}
+        PathArc{x: (titletextId.x + (titletextId.implicitWidth/2)) - rootcomponentId.xpathradius; y: (titletextId.y + (titletextId.implicitHeight/2)); radiusX: rootcomponentId.xpathradius; radiusY: rootcomponentId.ypathradius}
         PathAttribute { name: "opacity"; value: .3 }
         PathAttribute { name: "scale"; value: .8}
         PathAttribute { name: "z"; value: -1 }
 
         //Top
-        PathArc{x: (titletextId.x + (titletextId.implicitWidth/2)); y: (titletextId.y + (titletextId.implicitHeight/2)) - menurootId.ypathradius; radiusX: menurootId.xpathradius; radiusY: menurootId.ypathradius}
+        PathArc{x: (titletextId.x + (titletextId.implicitWidth/2)); y: (titletextId.y + (titletextId.implicitHeight/2)) - rootcomponentId.ypathradius; radiusX: rootcomponentId.xpathradius; radiusY: rootcomponentId.ypathradius}
         PathAttribute { name: "opacity"; value: .2 }
         PathAttribute { name: "scale"; value: .4 }
         PathAttribute { name: "z"; value: -2 }
 
         //Right
-        PathArc{x: (titletextId.x + (titletextId.implicitWidth/2)) + menurootId.xpathradius; y: (titletextId.y + (titletextId.implicitHeight/2)); radiusX: menurootId.xpathradius; radiusY: menurootId.ypathradius}
+        PathArc{x: (titletextId.x + (titletextId.implicitWidth/2)) + rootcomponentId.xpathradius; y: (titletextId.y + (titletextId.implicitHeight/2)); radiusX: rootcomponentId.xpathradius; radiusY: rootcomponentId.ypathradius}
         PathAttribute { name: "opacity"; value: .3}
         PathAttribute { name: "scale"; value: .8 }
         PathAttribute { name: "z"; value: -1 }
 
         //Bottom
-        PathArc{x: pathId.startX; y: pathId.startY; radiusX: menurootId.xpathradius; radiusY: menurootId.ypathradius}
+        PathArc{x: pathId.startX; y: pathId.startY; radiusX: rootcomponentId.xpathradius; radiusY: rootcomponentId.ypathradius}
         PathAttribute { name: "opacity"; value: 1.0 }
         PathAttribute { name: "scale"; value: 1.0 }
         PathAttribute { name: "z"; value: 0 }
@@ -218,7 +219,7 @@ Item
         model: modelId
         delegate: delegateId
         path: pathId
-        opacity: menurootId.menuopacity
+        opacity: rootcomponentId.menuopacity
 
     }
 
@@ -230,4 +231,5 @@ Item
         redbuttonmessage: "Back"
         enableblackbutton: false
     }
+
 }

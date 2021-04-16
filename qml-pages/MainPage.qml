@@ -53,11 +53,10 @@ Item
             {
                 page.grabFocus();
                 connectPageSignals();
-                console.log(page_qml + " created.")
             }
             else
             {
-                console.log(page_qml + " created.");
+                console.log("QML: " + page_qml + " Could Not Be Created.");
             }
 
         }
@@ -74,13 +73,19 @@ Item
         }
     }
 
-    function garyAboutToClose()
+    function garyAboutToDestory()
     {
         //Kill All Bindings For The Destruction of Gary
         xposId.text = "";
     }
 
-    function processTobysNewFrame(image)
+
+    function viewportChange(view)
+    {
+        mainscreenId.connectToMax(view);
+    }
+
+    function triggerTobyNextFrame()
     {
         Toby.triggerCamera();
     }
@@ -88,12 +93,13 @@ Item
     //Slots
     Component.onCompleted:
     {
-        Gary.aboutToDestroy.connect(garyAboutToClose);
-        Toby.newFrameGrabbed.connect(qimageviewerId.newCameraFrameHandler);
-        //qimageviewerId.setToby(Toby.getThisToby());
+        //Connect the Application Singletons to the QML Objects.
+        Max.processingComplete.connect(mainpageID.triggerTobyNextFrame);
+        Gary.aboutToDestroy.connect(mainpageID.garyAboutToDestory);
+        mainscreenId.connectToMax("RawFrame");
+        //Max.newBlurMatProcessed.connect(blurrviewId.recieveCVMat);
+        //Max.newThresholdMatProcessed.connect(thresholdviewId.recieveCVMat);
         Toby.startCamera();
-
-        //Toby.frameGrabbed.connect(processTobysNewFrame);
     }
 
     //Signals-----------------------------------
@@ -123,7 +129,7 @@ Item
 
         onUpButtonPressed:
         {
-             Gary.sendJogUp();
+            Gary.sendJogUp();
         }
 
         onDownButtonPressed:
@@ -143,7 +149,7 @@ Item
 
         onUpButtonReleased:
         {
-             Gary.sendStopMovement();
+            Gary.sendStopMovement();
         }
 
         onDownButtonReleased:
@@ -167,7 +173,6 @@ Item
         anchors.fill: parent
         color: "black"
     }
-
 
     Text
     {
@@ -199,8 +204,6 @@ Item
         opacity: .7
     }
 
-
-
     //Bottom Button Operation Key
     ControllerKeyObject
     {
@@ -209,20 +212,89 @@ Item
         blackbuttonmessage: "Main Menu"
     }
 
-    //QImage Viewer Component
-    QImageQMLViewer
+    //QImage Viewer Component - Main Display Screen
+    QmlTBIDisplay
     {
-        id: qimageviewerId
+        id: mainscreenId
         visible: true
         x:0
         y:0
+        scaleToWidth: 1440
         anchors.fill: parent
-        opacity: .5
+        opacity: 1
 
-        onNewFrameGrabbed:
+        property string current_frame: "NoFrame"
+
+        function connectToMax(view)
         {
-            Toby.triggerCamera();
+            switch(mainscreenId.current_frame)
+            {
+            case "RawFrame":
+                Max.newRawMatProcessed.disconnect(mainscreenId.recieveCVMat);
+                break;
+            case "BlurFrame":
+                Max.newBlurMatProcessed.disconnect(mainscreenId.recieveCVMat);
+                break;
+            case "ThresFrame":
+                Max.newThresholdMatProcessed.disconnect(mainscreenId.recieveCVMat);
+                break;
+            }
+
+            switch(view)
+            {
+            case "RawFrame":
+                Max.newRawMatProcessed.connect(mainscreenId.recieveCVMat);
+                mainscreenId.current_frame = "RawFrame";
+                break;
+            case "BlurFrame":
+                Max.newBlurMatProcessed.connect(mainscreenId.recieveCVMat);
+                mainscreenId.current_frame = "BlurFrame";
+                break;
+            case "ThresFrame":
+                Max.newThresholdMatProcessed.connect(mainscreenId.recieveCVMat);
+                mainscreenId.current_frame = "ThresFrame";
+                break;
+            }
         }
+    }
+
+    //Gary Notification Icon
+    IconInfoStatusObject
+    {
+        id:garystatusId
+        imagesource: "qrc:/Icons/microcontroller(white).png"
+        width:150
+        height:150
+        x:mainpageID.width-garystatusId.width-50
+        y:50
+
+        function garyChangedOperationStatus(status)
+        {
+            switch(status)
+            {
+            case GaryOperationStatus.TBI_OPERATION_OK:
+                garystatusId.glowcolor = Qt.rgba(0,1,0,1);
+                garystatusId.messagetext = "Motion Controller O.K.";
+                break;
+             case GaryOperationStatus.TBI_OPERATION_ERROR:
+                 garystatusId.glowcolor = Qt.rgba(1,0,0,1);
+                 garystatusId.messagetext = "Error in Motion Controller";
+            }
+        }
+
+        Component.onCompleted:
+        {
+            Gary.operationStatusChanged.connect(garystatusId.garyChangedOperationStatus);
+        }
+    }
+
+    //Control Key Display
+    ControllerKeyObject
+    {
+        id: controlkeyId
+        greenbuttonmessage: "Selection"
+        redbuttonmessage: "Leave Selection"
+        blackbuttonmessage: "Main Menu"
     }
 
     KeypadObject

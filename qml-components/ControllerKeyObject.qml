@@ -3,7 +3,7 @@ import QtQuick 2.12
 
 //Bottom Button Key
 Item {
-    id: buttonkeyimagesId
+    id: rootcomponentId
     anchors.fill: parent
     focus:false
 
@@ -13,11 +13,12 @@ Item {
     property bool enableredbutton: true
     property string blackbuttonmessage: "Black Button"
     property bool enableblackbutton: true
+    property color textcolor: Qt.rgba(.5, .5, .5, 1)
 
-    readonly property int buttonsize: 100
-    readonly property int xmargin: 20
-    readonly property int ymargin: 20
-    readonly property int buttonspacing: 50
+    property int buttonsize: 100
+    property int xmargin: 20
+    property int ymargin: 20
+    property int buttonspacing: 50
 
     //Font for UI
     FontLoader
@@ -43,7 +44,7 @@ Item {
             height: buttonsize
             visible: enablegreenbutton
             source: "qrc:/Icons/GreenButton2.png"
-            opacity: .60
+            opacity: rootcomponentId.opacity
         }
 
         Text
@@ -57,7 +58,8 @@ Item {
             font.pointSize: 15
             width: greenbuttontextId.implicitWidth
             height: greenbuttontextId.implicitHeight
-            color: Qt.rgba(.5, .5, .5, 1)
+            color: rootcomponentId.textcolor
+            opacity: rootcomponentId.opacity
         }
     }
 
@@ -80,7 +82,7 @@ Item {
             height:buttonsize
             visible: enableredbutton
             source: "qrc:/Icons/RedButton2.png"
-            opacity: .60
+            opacity: rootcomponentId.opacity
         }
 
         Text
@@ -94,7 +96,8 @@ Item {
             font.pointSize: 15
             width: redbuttontextId.implicitWidth
             height: redbuttontextId.implicitHeight
-            color: Qt.rgba(.5, .5, .5, 1)
+            color: rootcomponentId.textcolor
+            opacity: rootcomponentId.opacity
         }
     }
 
@@ -117,7 +120,7 @@ Item {
             height:buttonsize
             visible: enableblackbutton
             source: "qrc:/Icons/BlackButton2.png"
-            opacity: .90
+            opacity: 1
         }
 
         Text
@@ -131,7 +134,7 @@ Item {
             font.pointSize: 15
             width: blackbuttontextId.implicitWidth
             height: blackbuttontextId.implicitHeight
-            color: Qt.rgba(.5, .5, .5, 1)
+            color: rootcomponentId.textcolor
         }
     }
 

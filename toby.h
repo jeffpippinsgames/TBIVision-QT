@@ -2,14 +2,20 @@
 #define TOBY_H
 
 #include <QObject>
+#include <QQuickItem>
 #include <pylon/PylonIncludes.h>
 #include <QImage>
+#include "opencv4/opencv2/core.hpp"
 
 
 using namespace Pylon;
 
 /**************************************************************
-toby
+Toby
+
+Toby is the Photographer.
+Toby is in charge of handling the Camera.
+
 Description:
   toby is a class that facilitates all of the machine vision
   camera functionality. It encapulates from Basler's Pylon SDK
@@ -34,12 +40,15 @@ private:
     CInstantCamera* m_camera1;
 
     //Methods
-    virtual void OnImageGrabbed(Pylon::CInstantCamera& camera, const Pylon::CGrabResultPtr& ptrGrab);
-   // QImage toQImage(Pylon::CPylonImage* pylonImage);
+    virtual void OnImageGrabbed(Pylon::CInstantCamera& camera, const Pylon::CGrabResultPtr& ptrGrab); //Pylon Event Handler
+
+public slots:
 
 signals:
-    void newFrameGrabbed(const QImage &frame);
+    void newQImageFrameGrabbed(const QImage &qimageframe);
+    void newCVMatFrameGrabbed(const cv::Mat &matframe);
     void cameraOpenedChanged(bool _isopen);
+    void aboutToDestroy();
 
 };
 

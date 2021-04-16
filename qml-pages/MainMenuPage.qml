@@ -9,11 +9,13 @@ import "qrc:/qml-dialogs"
 
 Item {
     //Properties-----------------------------------
-    id: mainmenuId
+    id: rootpageId
     anchors.fill: parent
     opacity: 1
 
     readonly property string pagename: "MainMenu Page"
+
+    property var dynamicpage: null
 
     //Signals--------------------------------------
     signal destroyPage()
@@ -28,17 +30,44 @@ Item {
 
     function signalDestroyPage()
     {
-        console.log("MainMenuPage.qml Firing aboutToDestroy() Signal");
         aboutToDestroy();
-        console.log("MainMenuPage.qml Firing aboutToDestroy() Signal");
         destroyPage();
+    }
+
+    function createImageProcessingPage()
+    {
+        if(dynamicpage == null)
+        {
+            var component = Qt.createComponent("/qml-pages/ImageProcessingSettingsPage.qml");
+            dynamicpage = component.createObject(rootpageId);
+            if(page !== null)
+            {
+                dynamicpage.grabFocus();
+                dynamicpage.destroyPage.connect(destroyDynamicPage);
+            }
+            else
+            {
+                console.log("QML: Could Not Create ImageProcessingSettingsPage");
+            }
+
+        }
+    }
+
+    function destroyDynamicPage()
+    {
+        if(dynamicpage !== null)
+        {
+            dynamicpage.destroy();
+            dynamicpage = null;
+            grabFocus();
+        }
     }
 
     //Event Handlers-------------------------------
     Component.onCompleted:
     {
-        mainmenuId.completed();
-        console.log("mainmenuId Created.");
+        rootpageId.completed();
+        console.log("QML: MainMenuPage Created.");
     }
 
     //QML Components-------------------------------
@@ -52,6 +81,7 @@ Item {
             rotatemenuId.addMenuItem("qrc:/Icons/save.png", "Save Profile");
             rotatemenuId.addMenuItem("qrc:/Icons/gear.png", "System Settings");
             rotatemenuId.addMenuItem("qrc:/Icons/laser3.png", "Toggle Laser Power");
+            rotatemenuId.addMenuItem("qrc:/Icons/image.png", "Image Processsor Settings");
             rotatemenuId.addMenuItem("qrc:/Icons/quit.png", "Quit Application");
         }
 
@@ -61,6 +91,9 @@ Item {
             {
             case rotatemenuId.closemenustring:
                 signalDestroyPage();
+                break;
+            case "Image Processsor Settings":
+                rootpageId.createImageProcessingPage();
                 break;
             case "Quit Application":
                 quitdialogId.visible = true;
@@ -89,9 +122,10 @@ Item {
                 break;
             case "No":
                 quitdialogId.visible = false;
-                mainmenuId.grabFocus();
+                rootpageId.grabFocus();
                 break;
             }
         }
     }
+
 }
