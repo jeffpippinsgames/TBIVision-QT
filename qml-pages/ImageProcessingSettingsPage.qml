@@ -21,43 +21,6 @@ Item {
     property real controlsopacity: 1
     property color textcolor: Qt.rgba(1,1,.95,1)
 
-    QtObject //For Private Properties
-    {
-        id:rootpage_privateId
-
-        property string active_frame: rootpageId.rawframe
-
-        function setState(_state)
-        {
-            switch(_state)
-            {
-            case rootpageId.camerastateframeactive:
-                rootpageId.state = rootpageId.camerastateframeactive;
-                rootpage_privateId.active_frame = rootpageId.camerastateframeactive;
-                break;
-            case rootpageId.camerastateframenotactive:
-                rootpageId.state = rootpageId.camerastateframenotactive;
-                rootpage_privateId.active_frame = rootpageId.camerastateframenotactive;
-                break;
-            case rootpageId.blurstateframeactive:
-                rootpageId.state = rootpageId.blurstateframeactive;
-                rootpage_privateId.active_frame = rootpageId.blurstateframeactive;
-                break;
-            case rootpageId.blurstateframenotactive:
-                rootpageId.state = rootpageId.blurstateframenotactive;
-                rootpage_privateId.active_frame = rootpageId.blurstateframenotactive;
-                break;
-            case rootpageId.thresholdstateframeactive:
-                rootpageId.state = rootpageId.thresholdstateframeactive;
-                rootpage_privateId.active_frame = rootpageId.thresholdstateframeactive;
-                break;
-            case rootpageId.thresholdstateframenotactive:
-                rootpageId.state = rootpageId.thresholdstateframenotactive;
-                rootpage_privateId.active_frame = rootpageId.thresholdstateframenotactive;
-                break;
-            }
-        }
-    }
 
     //State Constants
     readonly property string camerastateframeactive: "CameraStateFrameActive"
@@ -111,10 +74,10 @@ Item {
     Component.onCompleted:
     {
         //Connect the Application Singletons to the QML Objects.
+        rootpageId.state = rootpageId.camerastateframeactive;
         rootpageId.completed();
         console.log("QML: ImageProcessingSettingPage Created.");
     }
-
 
     //Page States---------------------------------------------------
     states:
@@ -130,6 +93,9 @@ Item {
            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
            PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.nonfocuscolor}
            //SetController focus To FrameSele
+           PropertyChanges{target: blursettingscontrollerId; focus: false}
+           PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+           PropertyChanges{target: camerasettingscontrollerId; focus: false}
            PropertyChanges{target: frameselectcontrollerId; focus: true}
            //SetMainViewRect Display
            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.rawframe}
@@ -145,7 +111,10 @@ Item {
            //Set The Highlighted Rect
            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
            PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.focuscolor}
-           //SetController focus To FrameSele
+           //SetController focus To FrameSelect
+           PropertyChanges{target: blursettingscontrollerId; focus: false}
+           PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+           PropertyChanges{target: frameselectcontrollerId; focus: false}
            PropertyChanges{target: camerasettingscontrollerId; focus: true}
            //SetMainViewRect Display
            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.rawframe}
@@ -161,6 +130,9 @@ Item {
            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
            PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.nonfocuscolor}
            //SetController focus To FrameSele
+           PropertyChanges{target: blursettingscontrollerId; focus: false}
+           PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+           PropertyChanges{target: camerasettingscontrollerId; focus: false}
            PropertyChanges{target: frameselectcontrollerId; focus: true}
            //SetMainViewRect Display
            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
@@ -176,7 +148,10 @@ Item {
            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
            PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.focuscolor}
            //SetController focus To FrameSele
-           PropertyChanges{target: blurselectcontrollerId; focus: true}
+           PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+           PropertyChanges{target: camerasettingscontrollerId; focus: false}
+           PropertyChanges{target: frameselectcontrollerId; focus: false}
+           PropertyChanges{target: blursettingscontrollerId; focus: true}
            //SetMainViewRect Display
            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
        },
@@ -191,6 +166,9 @@ Item {
            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
            PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.nonfocuscolor}
            //SetController focus To FrameSele
+           PropertyChanges{target: blursettingscontrollerId; focus: false}
+           PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+           PropertyChanges{target: camerasettingscontrollerId; focus: false}
            PropertyChanges{target: frameselectcontrollerId; focus: true}
            //SetMainViewRect Display
            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
@@ -206,13 +184,14 @@ Item {
            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
            PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.focuscolor}
            //SetController focus To FrameSele
+           PropertyChanges{target: camerasettingscontrollerId; focus: false}
+           PropertyChanges{target: blursettingscontrollerId; focus: false}
+           PropertyChanges{target: frameselectcontrollerId; focus: false}
            PropertyChanges{target: thresholdsettingscontrollerId; focus: true}
            //SetMainViewRect Display
            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
        }
     ]
-
-
 
     //OML Components------------------------------------------------
     //Font for UI
@@ -222,14 +201,14 @@ Item {
         source: rootpageId.fontsource
     }
 
-    //Background Solid
+    //Background Solid----------------------------------------------
     Rectangle
     {
         anchors.fill: rootpageId
         color: "black"
     }
 
-    //Background Image
+    //Background Image----------------------------------------------
     Image
     {
         focus: false
@@ -239,7 +218,7 @@ Item {
         opacity: rootpageId.backgroundopacity
     }
 
-    //Top Text
+    //Top Text------------------------------------------------------
     Text
     {
         id: toptextId
@@ -251,7 +230,7 @@ Item {
         color: rootpageId.textcolor
     }
 
-    //Right Text
+    //Right Text----------------------------------------------------
     Text
     {
         id: righttextId
@@ -263,7 +242,7 @@ Item {
         color: rootpageId.textcolor
     }
 
-    //Frame Selection Rectangle
+    //Frame Selection Rectangle-------------------------------------
     Rectangle
     {
         id: frameselectionrectId
@@ -273,50 +252,12 @@ Item {
         width: rootpageId.frameselectrectwidth
         color: "transparent"
 
-        Rectangle
-        {
-            anchors.fill: frameselectionrectId
-            color: "black"
-            opacity: .8
-            radius: 10
-        }
-
-        Rectangle
-        {
-            anchors.fill: frameselectionrectId
-            color: "darkred"
-            opacity: .05
-            radius: 10
-        }
-
-        Rectangle
-        {
-            id: frameselectborderrectId
-            anchors.fill: frameselectionrectId
-            color: "transparent"
-            border.width: rootpageId.rectborderwidths
-            border.color: rootpageId.nonfocuscolor
-            radius: 10
-        }
 
         ControllerObject
         {
 
             id:frameselectcontrollerId
             focus: false
-
-            onFocusChanged:
-            {
-                switch(frameselectcontrollerId.focus)
-                {
-                case true:
-                    frameselectborderrectId.border.color = rootpageId.focuscolor;
-                    break;
-                case false:
-                    frameselectborderrectId.border.color = rootpageId.nonfocuscolor;
-                    break;
-                }
-            }
 
             onBlackButtonPressed:
             {
@@ -340,16 +281,16 @@ Item {
 
             onDownButtonPressed:
             {
-                switch(rootpageId.state)
+                switch(mainviewrectId.displayed_frame)
                 {
-                    case rootpageId.camerastateframeactive:
-                        rootpage_privateId.setState(rootpageId.camerastateframenotactive);
+                    case rootpageId.rawframe:
+                        rootpageId.state = rootpageId.camerastateframenotactive;
                         break;
-                    case rootpageId.blurstateframeactive:
-                        rootpage_privateId.setState(rootpageId.blurstateframenotactive);
+                    case rootpageId.blurframe:
+                        rootpageId.state = rootpageId.blurstateframenotactive;
                         break;
-                    case rootpageId.thresholdstateframeactive:
-                        rootpage_privateId.setState(rootpageId.thresholdstateframenotactive);
+                    case rootpageId.thresholdframe:
+                        rootpageId.state = rootpageId.thresholdstateframenotactive;
                         break;
                 }
             }
@@ -383,6 +324,32 @@ Item {
             {
 
             }
+        }
+
+        Rectangle
+        {
+            anchors.fill: frameselectionrectId
+            color: "black"
+            opacity: .8
+            radius: 10
+        }
+
+        Rectangle
+        {
+            anchors.fill: frameselectionrectId
+            color: "darkred"
+            opacity: .05
+            radius: 10
+        }
+
+        Rectangle
+        {
+            id: frameselectborderrectId
+            anchors.fill: frameselectionrectId
+            color: "transparent"
+            border.width: rootpageId.rectborderwidths
+            border.color: rootpageId.nonfocuscolor
+            radius: 10
         }
 
         //ListModel
@@ -482,13 +449,13 @@ Item {
                 switch(modelId.get(framelistviewId.currentIndex).frame)
                 {
                 case rootpageId.rawframe:
-                    rootpage_privateId.setState(rootpageId.camerastateframeactive);
+                    rootpageId.state = rootpageId.camerastateframeactive;
                     break;
                 case rootpageId.blurframe:
-                    rootpage_privateId.setState(rootpageId.blurstateframeactive);
+                    rootpageId.state = rootpageId.blurstateframeactive;
                     break;
                 case rootpageId.thresholdframe:
-                    rootpage_privateId.setState(rootpageId.thresholdstateframeactive);
+                    rootpageId.state = rootpageId.thresholdstateframeactive;
                     break;
                 }
             }
@@ -496,41 +463,23 @@ Item {
         }
     }
 
-    //Camera Settings Rectangle
+    //Camera Settings Rectangle-------------------------------------
     Rectangle
     {
         id: camerasettingsrectId
-        visible: true
+        visible: false
         width: rootpageId.settingsrectwidth
         height: rootpageId.settingsrectheight
         x: rootpageId.settingsrectx
         y: rootpageId.settingsrecty
         color: "transparent"
 
-        Rectangle
+        onVisibleChanged:
         {
-            anchors.fill: camerasettingsrectId
-            color: "black"
-            opacity: .8
-            radius: 10
-        }
-
-        Rectangle
-        {
-            anchors.fill: camerasettingsrectId
-            color: "darkred"
-            opacity: .05
-            radius: 10
-        }
-
-        Rectangle
-        {
-            id: camerasettingsborderrectId
-            anchors.fill: camerasettingsrectId
-            color: "transparent"
-            border.color: rootpageId.nonfocuscolor
-            border.width: rootpageId.rectborderwidths
-            radius: 10
+            if(camerasettingsrectId.visible)
+            {
+                cameradeviceinfotextId.text = Toby.getCameraInfo();
+            }
         }
 
         ControllerObject
@@ -555,7 +504,7 @@ Item {
 
             onUpButtonPressed:
             {
-                rootpage_privateId.setState(rootpageId.camerastateframeactive);
+                rootpageId.state = rootpageId.camerastateframeactive;
             }
 
             onDownButtonPressed:
@@ -594,6 +543,32 @@ Item {
             }
         }
 
+        Rectangle
+        {
+            anchors.fill: camerasettingsrectId
+            color: "black"
+            opacity: .8
+            radius: 10
+        }
+
+        Rectangle
+        {
+            anchors.fill: camerasettingsrectId
+            color: "darkred"
+            opacity: .05
+            radius: 10
+        }
+
+        Rectangle
+        {
+            id: camerasettingsborderrectId
+            anchors.fill: camerasettingsrectId
+            color: "transparent"
+            border.color: rootpageId.nonfocuscolor
+            border.width: rootpageId.rectborderwidths
+            radius: 10
+        }
+
         //Settings Text
         Text
         {
@@ -606,9 +581,19 @@ Item {
             color: rootpageId.textcolor
         }
 
+        //Camera Info
+        Text
+        {
+            id: cameradeviceinfotextId
+            font.family: fontId.name
+            y: 60
+            x:10
+            font.pixelSize: 20
+            color: rootpageId.textcolor
+        }
     }
 
-    //Blur Settings Rectangle
+    //Blur Settings Rectangle---------------------------------------
     Rectangle
     {
         id: blursettingsrectId
@@ -640,7 +625,7 @@ Item {
 
             onUpButtonPressed:
             {
-                rootpage_privateId.setState(rootpageId.blurstateframeactive);
+                rootpageId.state = rootpageId.blurstateframeactive;
             }
 
             onDownButtonPressed:
@@ -719,7 +704,7 @@ Item {
 
     }
 
-    //Threshold Settings Rectangle
+    //Threshold Settings Rectangle----------------------------------
     Rectangle
     {
         id: thresholdsettingsrectId
@@ -751,7 +736,7 @@ Item {
 
             onUpButtonPressed:
             {
-
+                rootpageId.state = rootpageId.state = rootpageId.thresholdstateframeactive;
             }
 
             onDownButtonPressed:
@@ -830,7 +815,7 @@ Item {
 
     }
 
-    //Main View Rectangle
+    //Main View Rectangle-------------------------------------------
     Rectangle
     {
         id: mainviewrectId
@@ -846,49 +831,50 @@ Item {
         {
             id: mainviewrect_privateId
 
-            property string current_frame: rootpageId.rawframe
+            property string attached_frame: rootpageId.rawframe
 
             function detachMaxSignal()
             {
-                switch(mainviewrectId.current_frame)
+                switch(mainviewrect_privateId.attached_frame)
                 {
                 case rootpageId.rawframe:
                     Max.newRawMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
+                    //console.log("Detaching Max.newRawMatProcessed");
                     break;
                 case rootpageId.blurframe:
                     Max.newBlurMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
+                    //console.log("Detaching Max.newBlurMatProcessed");
                     break;
                 case rootpageId.thresholdframe:
                     Max.newThresholdMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
+                    //console.log("Detaching Max.newThresholdMatProcessed");
                     break;
                 }
-                mainviewrectId.displayed_frame = rootpageId.emptyframe;
-                mainviewrect_privateId.current_frame = rootpageId.emptyframe;
+                mainviewrect_privateId.attached_frame = rootpageId.emptyframe;
             }
 
-            function attachMaxSignal (frame)
+            function attachMaxSignal (_frame)
             {
                 //Now Reconnect To New Frame Signal From Max
-                switch(frame)
+                switch(_frame)
                 {
                 case rootpageId.rawframe:
                     Max.newRawMatProcessed.connect(mainviewdisplayId.recieveCVMat);
-                    mainviewrect_privateId.current_frame = frame;
-                    mainviewrectId.displayed_frame = frame;
+                     mainviewrect_privateId.attached_frame = rootpageId.rawframe;
+                    //console.log("Connecting Max.newRawMatProcessed");
                     break;
                 case rootpageId.blurframe:
                     Max.newBlurMatProcessed.connect(mainviewdisplayId.recieveCVMat);
-                    mainviewrect_privateId.current_frame = frame;
-                    mainviewrectId.displayed_frame = frame;
+                     mainviewrect_privateId.attached_frame = rootpageId.blurframe;
+                    //console.log("Connecting Max.newBlurMatProcessed");
                     break;
                 case rootpageId.thresholdframe:
                     Max.newThresholdMatProcessed.connect(mainviewdisplayId.recieveCVMat);
-                    mainviewrect_privateId.current_frame = frame;
-                    mainviewrectId.displayed_frame = frame;
+                     mainviewrect_privateId.attached_frame = rootpageId.thresholdframe;
+                    //console.log("Connecting Max.newThresholdMatProcessed");
                     break;
                  default:
                      mainviewrectId.displayed_frame = rootpageId.emptyframe;
-                     mainviewrect_privateId.current_frame = rootpageId.emptyframe;
                      break;
                 }
             }
@@ -898,8 +884,12 @@ Item {
 
         onDisplayed_frameChanged:
         {
+            //console.log("");
+            //console.log("onDisplayed_frameChanged Starting. displayed_frame = " + displayed_frame + " - attached_frame = " + mainviewrect_privateId.attached_frame);
             mainviewrect_privateId.detachMaxSignal();
             mainviewrect_privateId.attachMaxSignal(mainviewrectId.displayed_frame);
+            //console.log("onDisplayed_frameChanged Finished. displayed_frame = " + displayed_frame + " - attached_frame = " + mainviewrect_privateId.attached_frame);
+            //console.log("");
         }
 
         Component.onCompleted:
@@ -950,13 +940,13 @@ Item {
         }
     }
 
-    //Graphical Key
+    //Graphical Key-------------------------------------------------
     ControllerKeyObject
     {
         id: controlkeyId
         greenbuttonmessage: "Select"
         redbuttonmessage: "Back"
-        enableblackbutton: false
+        blackbuttonmessage: "Save"
+        enableblackbutton: true
     }
-
 }

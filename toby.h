@@ -6,6 +6,7 @@
 #include <pylon/PylonIncludes.h>
 #include <QImage>
 #include "opencv4/opencv2/core.hpp"
+#include <QString>
 
 
 using namespace Pylon;
@@ -24,6 +25,7 @@ Description:
  **************************************************************/
 class Toby : public QObject, public Pylon::CImageEventHandler, public Pylon::CConfigurationEventHandler
 {
+
     Q_OBJECT
 
 
@@ -32,7 +34,10 @@ public:
     ~Toby();
     Q_INVOKABLE void triggerCamera();
     Q_INVOKABLE void startCamera();
-    Q_INVOKABLE Toby* getThisToby(){return this;}
+
+
+    //Property Get Methods
+    Q_INVOKABLE QString getCameraInfo();
 
 private:
 

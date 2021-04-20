@@ -5,6 +5,7 @@
 #include "gary.h"
 #include "toby.h"
 #include "max.h"
+#include "mary.h"
 #include "QmlTBIDisplay.h"
 #include "opencv4/opencv2/core.hpp"
 
@@ -47,6 +48,8 @@ int main(int argc, char *argv[])
     Gary _gary; //MicroController Singleton
     Toby _toby; //Basler Camera Singleton
     Max _max; //Seam Tracking Singleton
+    Mary _mary; //Settings Singleton
+
 
     //Connect The Singletons Signals and Slots
     qRegisterMetaType< Mat >("Mat");
@@ -56,6 +59,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("Gary", &_gary);
     engine.rootContext()->setContextProperty("Toby", &_toby);
     engine.rootContext()->setContextProperty("Max", &_max);
+    engine.rootContext()->setContextProperty("Mary", &_mary);
 
     //QML Code-----------------------------------------------------
     const QUrl url(QStringLiteral("qrc:/main.qml"));
