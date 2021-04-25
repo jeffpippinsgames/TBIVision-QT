@@ -58,6 +58,7 @@ public:
 
 
 signals:
+    void pylonCameraNameChanged();
     void cvBlurValueChanged();
     void cvThresholdMinValueChanged();
     void cvThresholdMaxValueChanged();

@@ -65,6 +65,9 @@ void Toby::startCamera()
         m_camera1 = new Pylon::CInstantCamera(Pylon::CTlFactory::GetInstance().CreateFirstDevice());
         m_camera1->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_None);
         m_camera1->Open();
+
+        //Set Camera Settings
+        //m_camera1->GetNodeMap().GetNode()
         m_camera1->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
         m_camera1->StartGrabbing(Pylon::GrabStrategy_LatestImages, Pylon::GrabLoop_ProvidedByInstantCamera);
         this->triggerCamera();

@@ -591,6 +591,12 @@ Item {
             font.pixelSize: 20
             color: rootpageId.textcolor
         }
+
+        Slider
+        {
+            id: cameraexposureId
+
+        }
     }
 
     //Blur Settings Rectangle---------------------------------------
