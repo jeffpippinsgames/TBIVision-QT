@@ -198,7 +198,8 @@ class GaryCommands : public QObject
                           TBI_CMD_SET_KI_ZCONTROL = 0x22,
                           TBI_CMD_SEND_KP_ZCONTROL = 0x23,
                           TBI_CMD_SEND_KD_ZCONTROL = 0x24,
-                          TBI_CMD_SEND_KI_ZCONTROL = 0x25};
+                          TBI_CMD_SEND_KI_ZCONTROL = 0x25,
+                          TBI_CMD_TOGGLE_LASER_POWER = 0x26};
 
     Q_ENUMS(SerialCommand_t)
 
@@ -266,6 +267,7 @@ class Gary : public QObject
     Q_INVOKABLE void sendJogDown();
     Q_INVOKABLE void sendJogLeft();
     Q_INVOKABLE void sendJogRight();
+    Q_INVOKABLE void sendToggleLaserPower();
     //------------------------------------------------------------
 
     private:

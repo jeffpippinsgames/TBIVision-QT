@@ -79,6 +79,11 @@ Item
         xposId.text = "";
     }
 
+    function maryAboutToDestroy()
+    {
+        timeinlooptextId.visible = false;
+        timeinlooptextId.text = "";
+    }
 
     function viewportChange(view)
     {
@@ -96,6 +101,7 @@ Item
         //Connect the Application Singletons to the QML Objects.
         Max.processingComplete.connect(mainpageID.triggerTobyNextFrame);
         Gary.aboutToDestroy.connect(mainpageID.garyAboutToDestory);
+        Mary.aboutToDestroy.connect(mainpageID.maryAboutToDestroy);
         mainscreenId.connectToMax("RawFrame");
         //Max.newBlurMatProcessed.connect(blurrviewId.recieveCVMat);
         //Max.newThresholdMatProcessed.connect(thresholdviewId.recieveCVMat);
@@ -174,20 +180,6 @@ Item
         color: "black"
     }
 
-    Text
-    {
-        id: xposId
-        focus: false
-        font.family: fontId.name
-        text: Gary.xPosition
-        font.pointSize: 40
-        width: xposId.implicitWidth
-        height: xposId.implicitHeight
-        x: 30
-        y: 10
-        color: Qt.rgba(1,1,.95,1)
-    }
-
     //Font for UI
     FontLoader
     {
@@ -202,14 +194,6 @@ Item
         source: "qrc:/Icons/dark_steel_texture.jpg"
         anchors.fill: parent
         opacity: .7
-    }
-
-    //Bottom Button Operation Key
-    ControllerKeyObject
-    {
-        greenbuttonmessage: "Auto"
-        redbuttonmessage: "Stop"
-        blackbuttonmessage: "Main Menu"
     }
 
     //QImage Viewer Component - Main Display Screen
@@ -258,6 +242,22 @@ Item
         }
     }
 
+    //Time in Loop Text
+    Text
+    {
+        id: timeinlooptextId
+        visible: Mary.showdebuginfo
+        focus: false
+        font.family: fontId.name
+        text: Max.timeinloop
+        font.pointSize: 15
+        width: timeinlooptextId.implicitWidth
+        height: timeinlooptextId.implicitHeight
+        x: 30
+        y: 10
+        color: Qt.rgba(1,1,.95,1)
+    }
+
     //Gary Notification Icon
     IconInfoStatusObject
     {
@@ -297,6 +297,7 @@ Item
         blackbuttonmessage: "Main Menu"
     }
 
+    //Testing Keypad Object
     KeypadObject
     {
         id: keypadId

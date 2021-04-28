@@ -10,8 +10,9 @@
 #include "opencv4/opencv2/core.hpp"
 
 using namespace Pylon;
+using namespace cv;
 
-Q_DECLARE_METATYPE(cv::Mat)
+Q_DECLARE_METATYPE(cv::Mat) //So Mat Can Be Passed Thru Signals
 
 int main(int argc, char *argv[])
 {
@@ -27,8 +28,12 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
+    //Register the QML Meta Types So That QML Can Use Them
+    qRegisterMetaType< Mat >("Mat"); //OpenCV Mat Type. So Mats can be passed thru Signals.
+
+
     //------QML Component Registration ---------------------------
-    //Register the Custom Gary QML Types.
+    //Register the Custom Gary QML Data Types.
     GaryHomingStatus::declareQML();
     GaryControlErrorCode::declareQML();
     GaryOperationStatus::declareQML();
@@ -38,8 +43,6 @@ int main(int argc, char *argv[])
     GaryMotionStatus::declareQML();
     //Register The QmlTBIDisplay QML Type
     QmlTBIDisplay::declareQML();
-    //Register Max QML Types
-
 
     //The QML Application engine----------------------------------
     QQmlApplicationEngine engine;
@@ -50,10 +53,13 @@ int main(int argc, char *argv[])
     Max _max; //Seam Tracking Singleton
     Mary _mary; //Settings Singleton
 
-
-    //Connect The Singletons Signals and Slots
-    qRegisterMetaType< Mat >("Mat");
+    //Connect The Singletons Signals and Slots---------------------
     QObject::connect(&_toby, SIGNAL(newCVMatFrameGrabbed(const cv::Mat&)), &_max, SLOT(recieveNewCVMat(const cv::Mat&)));
+    QObject::connect(&_mary, SIGNAL(signalChangeCameraAOI(int,int)), &_toby, SLOT(onChangeCameraAOI(int,int)));
+
+    //Set Mary's Default Values... This must Be Done After the Signals and Slot of the Singletons are connected.
+    _mary.SetMaryDefaultValues();
+    _mary.loadMaryFromFile();
 
     //Adding Singletons as Root Properties to QML--------------------------------
     engine.rootContext()->setContextProperty("Gary", &_gary);
@@ -69,8 +75,7 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
     engine.load(url);
-    //QML Is Running Now--------------------------------------------
-
+    //QML App Is Running Now--------------------------------------------
     //Exit App.
     return app.exec();
 }

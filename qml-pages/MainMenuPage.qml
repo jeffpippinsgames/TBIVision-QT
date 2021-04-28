@@ -99,6 +99,10 @@ Item {
                 quitdialogId.visible = true;
                 quitdialogId.grabFocus();
                 break;
+            case "Toggle Laser Power":
+                Gary.sendToggleLaserPower();
+                signalDestroyPage();
+                break;
             }
         }
     }

@@ -272,6 +272,20 @@ Q_INVOKABLE void Gary::sendJogRight()
     _cmd.append(char(GaryCommands::TBI_CMD_JOG_RIGHT));
     sendSerialCommand(_cmd);
 }
+
+/**************************************************************
+sendToggleLaserPower()
+Public, Q_INVOKABLE
+Description:
+  Public Method that sends the Toggle Laser Power Signal to the
+  Microcontroller
+ **************************************************************/
+void Gary::sendToggleLaserPower()
+{
+    QByteArray _cmd;
+    _cmd.append(char(GaryCommands::TBI_CMD_TOGGLE_LASER_POWER));
+    sendSerialCommand(_cmd);
+}
 //--------------------------------------------------------------
 
 

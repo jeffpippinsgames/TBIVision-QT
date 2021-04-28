@@ -21,7 +21,6 @@ Item {
     property real controlsopacity: 1
     property color textcolor: Qt.rgba(1,1,.95,1)
 
-
     //State Constants
     readonly property string camerastateframeactive: "CameraStateFrameActive"
     readonly property string camerastateframenotactive: "CameraStateFrameNotActive"
@@ -66,6 +65,9 @@ Item {
 
     function signalDestroyPage()
     {
+
+        Mary.updateCameraAOIToMarysSettings();
+        Mary.saveMaryToFile();
         aboutToDestroy();
         destroyPage();
     }
@@ -73,6 +75,8 @@ Item {
     //Slots
     Component.onCompleted:
     {
+        //Adjust Camera AOI to Max
+        Toby.setCameraAOIToMax();
         //Connect the Application Singletons to the QML Objects.
         rootpageId.state = rootpageId.camerastateframeactive;
         rootpageId.completed();
@@ -81,116 +85,120 @@ Item {
 
     //Page States---------------------------------------------------
     states:
-    [
-       State //Camera Selected Frame Focused
-       {
-           name: rootpageId.camerastateframeactive
-           //Set Displayed Setting Rect
-           PropertyChanges{ target: camerasettingsrectId; visible: true;}
-           PropertyChanges{ target: blursettingsrectId; visible: false;}
-           PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
-           //Set The Highlighted Rect
-           PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
-           PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.nonfocuscolor}
-           //SetController focus To FrameSele
-           PropertyChanges{target: blursettingscontrollerId; focus: false}
-           PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
-           PropertyChanges{target: camerasettingscontrollerId; focus: false}
-           PropertyChanges{target: frameselectcontrollerId; focus: true}
-           //SetMainViewRect Display
-           PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.rawframe}
+        [
+        State //Camera Selected Frame Focused
+        {
+            name: rootpageId.camerastateframeactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: true;}
+            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
+            PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.nonfocuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.rawframe}
+            //Set The Interior Control State
+            PropertyChanges {target: camerasettingsrectId; state: "NonFocused";}
 
-       },
-       State //Camera Selected and Focused
-       {
-           name: rootpageId.camerastateframenotactive
-           //Set Displayed Setting Rect
-           PropertyChanges{ target: camerasettingsrectId; visible: true;}
-           PropertyChanges{ target: blursettingsrectId; visible: false;}
-           PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
-           //Set The Highlighted Rect
-           PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
-           PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.focuscolor}
-           //SetController focus To FrameSelect
-           PropertyChanges{target: blursettingscontrollerId; focus: false}
-           PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
-           PropertyChanges{target: frameselectcontrollerId; focus: false}
-           PropertyChanges{target: camerasettingscontrollerId; focus: true}
-           //SetMainViewRect Display
-           PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.rawframe}
-       },
-       State //Blur Selected Frame Focused
-       {
-           name: rootpageId.blurstateframeactive
-           //Set Displayed Setting Rect
-           PropertyChanges{ target: camerasettingsrectId; visible: false;}
-           PropertyChanges{ target: blursettingsrectId; visible: true;}
-           PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
-           //Set The Highlighted Rect
-           PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
-           PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.nonfocuscolor}
-           //SetController focus To FrameSele
-           PropertyChanges{target: blursettingscontrollerId; focus: false}
-           PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
-           PropertyChanges{target: camerasettingscontrollerId; focus: false}
-           PropertyChanges{target: frameselectcontrollerId; focus: true}
-           //SetMainViewRect Display
-           PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
-       },
-       State //Blur Selected and Focused
-       {
-           name: rootpageId.blurstateframenotactive
-           //Set Displayed Setting Rect
-           PropertyChanges{ target: camerasettingsrectId; visible: false;}
-           PropertyChanges{ target: blursettingsrectId; visible: true;}
-           PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
-           //Set The Highlighted Rect
-           PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
-           PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.focuscolor}
-           //SetController focus To FrameSele
-           PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
-           PropertyChanges{target: camerasettingscontrollerId; focus: false}
-           PropertyChanges{target: frameselectcontrollerId; focus: false}
-           PropertyChanges{target: blursettingscontrollerId; focus: true}
-           //SetMainViewRect Display
-           PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
-       },
-       State //Threshold Selected Frame Focused
-       {
-           name: rootpageId.thresholdstateframeactive
-           //Set Displayed Setting Rect
-           PropertyChanges{ target: camerasettingsrectId; visible: false;}
-           PropertyChanges{ target: blursettingsrectId; visible: false;}
-           PropertyChanges{ target: thresholdsettingsrectId; visible: true;}
-           //Set The Highlighted Rect
-           PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
-           PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.nonfocuscolor}
-           //SetController focus To FrameSele
-           PropertyChanges{target: blursettingscontrollerId; focus: false}
-           PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
-           PropertyChanges{target: camerasettingscontrollerId; focus: false}
-           PropertyChanges{target: frameselectcontrollerId; focus: true}
-           //SetMainViewRect Display
-           PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
-       },
-       State //Threshold Selected and Focused
-       {
-           name: rootpageId.thresholdstateframenotactive
-           //Set Displayed Setting Rect
-           PropertyChanges{ target: camerasettingsrectId; visible: false;}
-           PropertyChanges{ target: blursettingsrectId; visible: false;}
-           PropertyChanges{ target: thresholdsettingsrectId; visible: true;}
-           //Set The Highlighted Rect
-           PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
-           PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.focuscolor}
-           //SetController focus To FrameSele
-           PropertyChanges{target: camerasettingscontrollerId; focus: false}
-           PropertyChanges{target: blursettingscontrollerId; focus: false}
-           PropertyChanges{target: frameselectcontrollerId; focus: false}
-           PropertyChanges{target: thresholdsettingscontrollerId; focus: true}
-           //SetMainViewRect Display
-           PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
-       }
+        },
+        State //Camera Selected and Focused
+        {
+            name: rootpageId.camerastateframenotactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: true;}
+            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
+            PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.focuscolor}
+            //SetController focus To FrameSelect
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: false}
+            PropertyChanges{target: camerasettingscontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.rawframe}
+            //Set The Interior Control State
+            PropertyChanges {target: camerasettingsrectId; state: "CameraAOIWidthHeightState";}
+        },
+        State //Blur Selected Frame Focused
+        {
+            name: rootpageId.blurstateframeactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: false;}
+            PropertyChanges{ target: blursettingsrectId; visible: true;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
+            PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.nonfocuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
+        },
+        State //Blur Selected and Focused
+        {
+            name: rootpageId.blurstateframenotactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: false;}
+            PropertyChanges{ target: blursettingsrectId; visible: true;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
+            PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.focuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: false}
+            PropertyChanges{target: blursettingscontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
+        },
+        State //Threshold Selected Frame Focused
+        {
+            name: rootpageId.thresholdstateframeactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: false;}
+            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: true;}
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
+            PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.nonfocuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
+        },
+        State //Threshold Selected and Focused
+        {
+            name: rootpageId.thresholdstateframenotactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: false;}
+            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: true;}
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
+            PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.focuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
+        }
     ]
 
     //OML Components------------------------------------------------
@@ -283,15 +291,15 @@ Item {
             {
                 switch(mainviewrectId.displayed_frame)
                 {
-                    case rootpageId.rawframe:
-                        rootpageId.state = rootpageId.camerastateframenotactive;
-                        break;
-                    case rootpageId.blurframe:
-                        rootpageId.state = rootpageId.blurstateframenotactive;
-                        break;
-                    case rootpageId.thresholdframe:
-                        rootpageId.state = rootpageId.thresholdstateframenotactive;
-                        break;
+                case rootpageId.rawframe:
+                    rootpageId.state = rootpageId.camerastateframenotactive;
+                    break;
+                case rootpageId.blurframe:
+                    rootpageId.state = rootpageId.blurstateframenotactive;
+                    break;
+                case rootpageId.thresholdframe:
+                    rootpageId.state = rootpageId.thresholdstateframenotactive;
+                    break;
                 }
             }
 
@@ -474,19 +482,48 @@ Item {
         y: rootpageId.settingsrecty
         color: "transparent"
 
+        function grabFocus()
+        {
+            camerasettingscontrollerId.focus = true;
+        }
+
         onVisibleChanged:
         {
             if(camerasettingsrectId.visible)
             {
                 cameradeviceinfotextId.text = Toby.getCameraInfo();
             }
+            else
+            {
+                camerasettingsrectId.state = "NonFocused";
+            }
         }
+
+        states:
+            [
+            State
+            {
+                name: "NonFocused"
+                PropertyChanges{target: cameraAOIadjustemtId; border.color:rootpageId.nonfocuscolor;}
+            },
+            State
+            {
+                name: "CameraAOIWidthHeightState"
+                PropertyChanges{target: cameraAOIadjustemtId; border.color:rootpageId.focuscolor;}
+            }
+
+        ]
 
         ControllerObject
         {
 
             id:camerasettingscontrollerId
             focus: false
+
+            onFocusChanged:
+            {
+
+            }
 
             onBlackButtonPressed:
             {
@@ -495,6 +532,13 @@ Item {
 
             onGreenButtonPressed:
             {
+                switch(camerasettingsrectId.state)
+                {
+                case "CameraAOIWidthHeightState":
+                    cameraAOIadjustemtId.grabFocus();
+                    break;
+
+                }
             }
 
             onRedButtonPressed:
@@ -504,12 +548,26 @@ Item {
 
             onUpButtonPressed:
             {
-                rootpageId.state = rootpageId.camerastateframeactive;
+                switch(camerasettingsrectId.state)
+                {
+                case "CameraAOIWidthHeightState":
+                    camerasettingsrectId.state = "NonFocused";
+                    rootpageId.state = rootpageId.camerastateframeactive;
+                    break;
+                }
+
+
             }
 
             onDownButtonPressed:
             {
+                switch(camerasettingsrectId.state)
+                {
+                case "CameraAOIWidthHeightState":
 
+                    break;
+
+                }
             }
 
             onLeftButtonPressed:
@@ -592,12 +650,115 @@ Item {
             color: rootpageId.textcolor
         }
 
-        Slider
+        //Camera AOI Adjustment Button
+        Rectangle
         {
-            id: cameraexposureId
+            id: cameraAOIadjustemtId
+            x:20
+            y:100
+            width: 600
+            height: 75
+            color: "transparent"
+            border.width: rootpageId.rectborderwidths
+            border.color: rootpageId.nonfocuscolor
+
+
+            function grabFocus()
+            {
+                cameraAOIadjustmentcontrollerId.focus = true;
+            }
+
+            Text
+            {
+                id: cameraAOIadjustmenttextId
+                anchors.centerIn: parent
+                font.family: fontId.name
+                font.pointSize: 15
+                height: cameraAOIadjustmenttextId.implicitHeight
+                width: cameraAOIadjustmenttextId.implicitWidth
+                text: "Change Camera AOI Height/Width"
+                color: rootpageId.textcolor
+            }
+
+            ControllerObject
+            {
+
+                id: cameraAOIadjustmentcontrollerId
+                focus: false
+
+                onFocusChanged:
+                {
+                    if(cameraAOIadjustmentcontrollerId.focus)
+                    {
+                        cameraaoirectId.border.color = Qt.rgba(0,.5,0,1);
+                    }
+                    else
+                    {
+                        cameraaoirectId.border.color = Qt.rgba(.5,0,0,1);
+                    }
+
+                }
+
+                onBlackButtonPressed:
+                {
+                    camerasettingsrectId.grabFocus();
+                }
+
+                onGreenButtonPressed:
+                {
+                    camerasettingsrectId.grabFocus();
+                }
+
+                onRedButtonPressed:
+                {
+                    camerasettingsrectId.grabFocus();
+                }
+
+                onUpButtonPressed:
+                {
+                    Mary.pylon_aoiheight = Mary.pylon_aoiheight + 20
+                }
+
+                onDownButtonPressed:
+                {
+                    Mary.pylon_aoiheight = Mary.pylon_aoiheight - 20
+                }
+
+                onLeftButtonPressed:
+                {
+                    Mary.pylon_aoiwidth = Mary.pylon_aoiwidth + 20
+                }
+
+                onRightButtonPressed:
+                {
+                    Mary.pylon_aoiwidth = Mary.pylon_aoiwidth - 20
+                }
+
+                onUpButtonReleased:
+                {
+
+                }
+
+                onDownButtonReleased:
+                {
+
+                }
+
+                onLeftButtonReleased:
+                {
+
+                }
+
+                onRightButtonReleased:
+                {
+
+                }
+            }
+
 
         }
-    }
+
+ }
 
     //Blur Settings Rectangle---------------------------------------
     Rectangle
@@ -866,22 +1027,22 @@ Item {
                 {
                 case rootpageId.rawframe:
                     Max.newRawMatProcessed.connect(mainviewdisplayId.recieveCVMat);
-                     mainviewrect_privateId.attached_frame = rootpageId.rawframe;
+                    mainviewrect_privateId.attached_frame = rootpageId.rawframe;
                     //console.log("Connecting Max.newRawMatProcessed");
                     break;
                 case rootpageId.blurframe:
                     Max.newBlurMatProcessed.connect(mainviewdisplayId.recieveCVMat);
-                     mainviewrect_privateId.attached_frame = rootpageId.blurframe;
+                    mainviewrect_privateId.attached_frame = rootpageId.blurframe;
                     //console.log("Connecting Max.newBlurMatProcessed");
                     break;
                 case rootpageId.thresholdframe:
                     Max.newThresholdMatProcessed.connect(mainviewdisplayId.recieveCVMat);
-                     mainviewrect_privateId.attached_frame = rootpageId.thresholdframe;
+                    mainviewrect_privateId.attached_frame = rootpageId.thresholdframe;
                     //console.log("Connecting Max.newThresholdMatProcessed");
                     break;
-                 default:
-                     mainviewrectId.displayed_frame = rootpageId.emptyframe;
-                     break;
+                default:
+                    mainviewrectId.displayed_frame = rootpageId.emptyframe;
+                    break;
                 }
             }
         }
@@ -942,6 +1103,20 @@ Item {
             {
                 mainviewdisplayId.scaleToWidth = mainviewdisplayId.width
                 Max.newRawMatProcessed.connect(mainviewdisplayId.recieveCVMat);
+            }
+
+            //AOI Rectangle
+            Rectangle
+            {
+                id: cameraaoirectId
+                color: "transparent"
+                anchors.centerIn: parent
+                width: Mary.pylon_aoiwidth * scalex
+                height: Mary.pylon_aoiheight * scaley
+                border.color: "yellow"
+                border.width: 2
+                readonly property real scalex: mainviewdisplayId.width/Mary.pylon_maxwidth
+                readonly property real  scaley: mainviewdisplayId.height/Mary.pylon_maxheight
             }
         }
     }

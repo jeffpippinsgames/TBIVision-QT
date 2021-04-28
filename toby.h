@@ -4,9 +4,11 @@
 #include <QObject>
 #include <QQuickItem>
 #include <pylon/PylonIncludes.h>
+#include <pylon/BaslerUniversalInstantCamera.h>
 #include <QImage>
 #include "opencv4/opencv2/core.hpp"
 #include <QString>
+#include <QElapsedTimer>
 
 
 using namespace Pylon;
@@ -35,21 +37,23 @@ public:
     Q_INVOKABLE void triggerCamera();
     Q_INVOKABLE void startCamera();
 
-
     //Property Get Methods
     Q_INVOKABLE QString getCameraInfo();
+    Q_INVOKABLE void setCameraAOIToMax();
 
 private:
-
     //Pylon Members
-    CInstantCamera* m_camera1;
+    CBaslerUniversalInstantCamera *m_camera;
 
     //Methods
     virtual void OnImageGrabbed(Pylon::CInstantCamera& camera, const Pylon::CGrabResultPtr& ptrGrab); //Pylon Event Handler
+    void CameraSettings();
 
 public slots:
+    void onChangeCameraAOI(int _width, int _height);
 
 signals:
+
     void newQImageFrameGrabbed(const QImage &qimageframe);
     void newCVMatFrameGrabbed(const cv::Mat &matframe);
     void cameraOpenedChanged(bool _isopen);

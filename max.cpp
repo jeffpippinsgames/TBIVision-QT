@@ -3,6 +3,8 @@
 
 Max::Max(QObject *parent) : QObject(parent)
 {
+    m_timeinloop = "Error:";
+    emit timeInLoopChanged(m_timeinloop);
     qDebug()<<"Max: Max Object Created.";
 }
 
@@ -14,6 +16,9 @@ Max::~Max()
 
 void Max::recieveNewCVMat(const Mat &_mat)
 {
+    //Start The Time in Loop Timer
+    m_timer.start();
+
     cv::Mat _raw_mat = _mat.clone();
     cv::Mat _blurr_mat;
     cv::Mat _threshold_mat;
@@ -27,7 +32,12 @@ void Max::recieveNewCVMat(const Mat &_mat)
     cv::threshold(_blurr_mat, _threshold_mat, 100, 255, THRESH_TOZERO);
     emit newThresholdMatProcessed(_threshold_mat);
 
-    emit processingComplete(); //Must Be Last Signal Sent
 
+
+    //Time The Loop.
+    m_timeinloop = QString("Time in Loop: " + QString::number(m_timer.elapsed()) + " ms.-Camera FPS = " + QString::number(1000/m_timer.elapsed()));
+    emit timeInLoopChanged(m_timeinloop);
+
+    emit processingComplete(); //Must Be Last Signal Sent
 }
 
