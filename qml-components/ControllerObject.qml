@@ -4,7 +4,6 @@ import QtQuick 2.12
 //Container Object to Help Keep Controller Data in One Place
 FocusScope {
 
-    //id: controllerrootId
     focus: false
 
     //Joystick Properties
@@ -24,6 +23,9 @@ FocusScope {
     property bool leftpressed : false
     property bool rightpressed : false
     property bool stickpressed: false;
+
+    property bool useAutoRepeatonSticks: false
+    property bool useAutoRepeatonButtons: false
 
     signal greenButtonPressed()
     signal greenButtonReleased()
@@ -48,34 +50,62 @@ FocusScope {
 
     Keys.onPressed:
     {
-        if(event.isAutoRepeat) return
+
         switch(event.key)
         {
         case greenbutton:
+            if(!useAutoRepeatonButtons)
+            {
+                if(event.isAutoRepeat) return
+            }
             greenpressed = true;
             greenButtonPressed();
             break;
         case redbutton:
+            if(!useAutoRepeatonButtons)
+            {
+                if(event.isAutoRepeat) return
+            }
             redpressed = true;
             redButtonPressed();
             break;
         case blackbutton:
+            if(!useAutoRepeatonButtons)
+            {
+                if(event.isAutoRepeat) return
+            }
             blackpressed = true;
             blackButtonPressed();
             break;
         case upbutton:
+            if(!useAutoRepeatonSticks)
+            {
+                if(event.isAutoRepeat) return
+            }
             uppressed = true;
             upButtonPressed();
             break;
         case downbutton:
+            if(!useAutoRepeatonSticks)
+            {
+                if(event.isAutoRepeat) return
+            }
             downpressed = true;
             downButtonPressed();
             break;
         case leftbutton:
+            if(!useAutoRepeatonSticks)
+            {
+                if(event.isAutoRepeat) return
+            }
             leftpressed = true;
             leftButtonPressed();
             break;
         case rightbutton:
+            if(!useAutoRepeatonSticks)
+            {
+                if(event.isAutoRepeat) return
+            }
             rightpressed = true;
             rightButtonPressed();
             break;
@@ -85,34 +115,61 @@ FocusScope {
 
     Keys.onReleased:
     {
-        if(event.isAutoRepeat) return
         switch(event.key)
         {
         case greenbutton:
+            if(!useAutoRepeatonButtons)
+            {
+                if(event.isAutoRepeat) return
+            }
             greenpressed = false;
             greenButtonReleased();
             break;
         case redbutton:
+            if(!useAutoRepeatonButtons)
+            {
+                if(event.isAutoRepeat) return
+            }
             redpressed = false;
             redButtonReleased();
             break;
         case blackbutton:
+            if(!useAutoRepeatonButtons)
+            {
+                if(event.isAutoRepeat) return
+            }
             blackpressed = false;
             blackButtonReleased();
             break;
         case upbutton:
+            if(!useAutoRepeatonSticks)
+            {
+                if(event.isAutoRepeat) return
+            }
             uppressed = false;
             upButtonReleased();
             break;
         case downbutton:
+            if(!useAutoRepeatonSticks)
+            {
+                if(event.isAutoRepeat) return
+            }
             downpressed = false;
             downButtonReleased();
             break;
         case leftbutton:
+            if(!useAutoRepeatonSticks)
+            {
+                if(event.isAutoRepeat) return
+            }
             leftpressed = false;
             leftButtonReleased();
             break;
         case rightbutton:
+            if(!useAutoRepeatonSticks)
+            {
+                if(event.isAutoRepeat) return
+            }
             rightpressed = false;
             rightButtonReleased();
             break;

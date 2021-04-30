@@ -45,7 +45,7 @@ Item {
     {
 
         id:controllerId
-        focus: true
+        focus: false
 
         onBlackButtonPressed:
         {
@@ -117,5 +117,40 @@ Item {
         anchors.fill: parent
         opacity: rootpageId.backgroundopacity
     }
+
+    //Slider Template
+    SliderSettingsObject
+    {
+        id: templatesliderId
+        controlname: "MinThresholdSlider"
+        x:20
+        y:60
+        messagetext: "Text Message";
+        valuefrom: 0
+        valueto: 100
+        stepsize: 1
+        majorstepsize: 5
+
+
+        Component.onCompleted:
+        {
+            // templatesliderId.value = Some Init Function
+
+        onEndFocus:
+        {
+            // grabFocus of Root Rectangle
+            templatesliderId.state = templatesliderId.highlightedstate;
+        }
+
+        onValueChanged:
+        {
+            //Update Mary With Value
+        }
+    }
+
+
+
+}
+
 
 }

@@ -67,11 +67,10 @@ void Toby::startCamera()
         m_camera->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_None);
         m_camera->Open();
         m_camera->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
-        CameraSettings();
+        SetDefaultCameraSettings();
         m_camera->StartGrabbing(Pylon::GrabStrategy_LatestImages, Pylon::GrabLoop_ProvidedByInstantCamera);
         this->triggerCamera();
         emit cameraOpenedChanged(m_camera->IsOpen());
-
         qDebug() << "Toby: Pylon Camera Device Created and Opened.";
         qDebug() << "Toby: Max Camera Height = " << m_camera->Height.GetMax();
         qDebug() << "Toby: Min Camera Height = " << m_camera->Height.GetMin();
@@ -150,7 +149,7 @@ Description:
  This Function Puts them all in one spot for ease of reading
  and Changing. It mirrors the Pylon Viewer App.
  **************************************************************/
-void Toby::CameraSettings()
+void Toby::SetDefaultCameraSettings()
 {
     //Analog Controls
     m_camera->GainAuto.SetValue("Off");
@@ -228,6 +227,33 @@ void Toby::onChangeCameraAOI(int _width, int _height)
     }
 
     triggerCamera();
+}
+
+/**************************************************************
+onChangeCameraExposure(double _exposure)
+Slot
+Description:
+  Signal Handler For Changing the Camera Exposure
+ **************************************************************/
+void Toby::onChangeCameraExposure(double _exposure)
+{
+    if(m_camera == nullptr) return;
+    if(!m_camera->IsOpen()) return;
+    m_camera->ExposureTimeAbs.SetValue(_exposure);
+}
+
+
+/**************************************************************
+onChangeCameraGain(int _gain)
+Slot
+Description:
+  Signal Handler For Changing the Camera Gain
+ **************************************************************/
+void Toby::onChangeCameraGain(int _gain)
+{
+    if(m_camera == nullptr) return;
+    if(!m_camera->IsOpen()) return;
+    m_camera->GainRaw.SetValue(_gain);
 }
 
 

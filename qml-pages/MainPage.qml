@@ -103,9 +103,8 @@ Item
         Gary.aboutToDestroy.connect(mainpageID.garyAboutToDestory);
         Mary.aboutToDestroy.connect(mainpageID.maryAboutToDestroy);
         mainscreenId.connectToMax("RawFrame");
-        //Max.newBlurMatProcessed.connect(blurrviewId.recieveCVMat);
-        //Max.newThresholdMatProcessed.connect(thresholdviewId.recieveCVMat);
         Toby.startCamera();
+        Mary.broadcastUpdateSignals();
     }
 
     //Signals-----------------------------------

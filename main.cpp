@@ -54,9 +54,16 @@ int main(int argc, char *argv[])
     Mary _mary; //Settings Singleton
 
     //Connect The Singletons Signals and Slots---------------------
+    //Toby To Max Signals
     QObject::connect(&_toby, SIGNAL(newCVMatFrameGrabbed(const cv::Mat&)), &_max, SLOT(recieveNewCVMat(const cv::Mat&)));
+    //Mary To Toby Signals
     QObject::connect(&_mary, SIGNAL(signalChangeCameraAOI(int,int)), &_toby, SLOT(onChangeCameraAOI(int,int)));
-
+    QObject::connect(&_mary, SIGNAL(signalChangeCameraExposure(double)), &_toby, SLOT(onChangeCameraExposure(double)));
+    QObject::connect(&_mary, SIGNAL(signalChangeCameraGain(int)), &_toby, SLOT(onChangeCameraGain(int)));
+    //Mary To Max Signals
+    QObject::connect(&_mary, SIGNAL(signalChangeBlur(int)), &_max, SLOT(onBlurChange(int)));
+    QObject::connect(&_mary, SIGNAL(signalChangeThresholdMin(int)), &_max, SLOT(onThresholdMinChange(int)));
+    QObject::connect(&_mary, SIGNAL(signalChangeThresholdMax(int)), &_max, SLOT(onThresholdMaxChange(int)));
     //Set Mary's Default Values... This must Be Done After the Signals and Slot of the Singletons are connected.
     _mary.SetMaryDefaultValues();
     _mary.loadMaryFromFile();

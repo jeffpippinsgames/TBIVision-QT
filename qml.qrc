@@ -71,5 +71,6 @@
         <file>qml-components/IconInfoStatusObject.qml</file>
         <file>Icons/microcontroller(white).png</file>
         <file>qml-pages/ImageProcessingSettingsPage.qml</file>
+        <file>qml-components/SliderSettingsObject.qml</file>
     </qresource>
 </RCC>

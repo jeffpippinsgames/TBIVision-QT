@@ -36,6 +36,10 @@ class Max : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString timeinloop READ getTimeinLoop NOTIFY timeInLoopChanged)
+
+private:
+    bool FlattenMat(cv::Mat& _src, cv::Mat &_dst);
+
 public:
     explicit Max(QObject *parent = nullptr);
     ~Max();
@@ -44,9 +48,28 @@ public:
 private:
     QString m_timeinloop;
     QElapsedTimer m_timer;
+    int m_blur;
+    int m_thresholdmin;
+    int m_thresholdmax;
+    unsigned long m_max_image_intensity;
+    unsigned long m_min_image_intensity;
+    unsigned long m_current_image_intensity;
+
+    uint8_t *m_flattened_pixels;
+    int m_rows;
+    int m_cols;
+    int m_stride;
+    unsigned long m_total_image_intensity;
+
+
+
 
 public slots:
     void recieveNewCVMat(const cv::Mat& _mat_frame);
+    void onBlurChange(int _blur);
+    void onThresholdMinChange(int _min);
+    void onThresholdMaxChange(int _max);
+
 signals:
 
     void timeInLoopChanged(QString _timinloop);

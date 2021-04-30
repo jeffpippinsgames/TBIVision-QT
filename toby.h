@@ -47,13 +47,16 @@ private:
 
     //Methods
     virtual void OnImageGrabbed(Pylon::CInstantCamera& camera, const Pylon::CGrabResultPtr& ptrGrab); //Pylon Event Handler
-    void CameraSettings();
+    void SetDefaultCameraSettings();
 
 public slots:
     void onChangeCameraAOI(int _width, int _height);
+    void onChangeCameraExposure(double _exposure);
+    void onChangeCameraGain(int _gain);
 
 signals:
 
+    void signalMaryForCameraSettings();
     void newQImageFrameGrabbed(const QImage &qimageframe);
     void newCVMatFrameGrabbed(const cv::Mat &matframe);
     void cameraOpenedChanged(bool _isopen);

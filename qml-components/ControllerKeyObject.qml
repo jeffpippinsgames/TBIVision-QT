@@ -20,6 +20,8 @@ Item {
     property int ymargin: 20
     property int buttonspacing: 50
 
+
+
     //Font for UI
     FontLoader
     {

@@ -13,6 +13,9 @@ Mary::Mary(QObject *parent) : QObject(parent)
 {
 
     qDebug() << "Mary: Mary Object Created.";
+    m_cv_blur = 3;
+    m_cv_thresholdmax = 255;
+    m_cv_thresholdmin = 0;
 }
 
 
@@ -86,6 +89,9 @@ void Mary::saveMaryToFile()
     _ds.setVersion(QDataStream::Qt_5_12);
     _savefile.close();
     qDebug() << "Mary: Mary Saved To " << _filepath;
+
+
+
 }
 
 
@@ -126,7 +132,7 @@ Description:
   Sets The Width of the Camera AOI
 **************************************************************/
 void Mary::setCameraAOIWidth(int _width)
-{
+{       if(m_pylon_aoiwidth == _width) return;
         if(_width < 5) return;
         if(_width > m_pylon_maxcamerawidth) return;
         m_pylon_aoiwidth = _width;
@@ -142,6 +148,7 @@ Description:
 **************************************************************/
 void Mary::setCameraAOIHeight(int _height)
 {
+    if(_height == m_pylon_aoiheight) return;
     if(_height < 5) return;
     if(_height > m_pylon_maxcameraheight) return;
     m_pylon_aoiheight = _height;
@@ -157,10 +164,12 @@ Description:
 **************************************************************/
 void Mary::setCameraExposure(double _exposure)
 {
-    if((_exposure <= 22.0 && _exposure <= 100000000))
+    if(_exposure == m_pylon_exposuretime) return;
+    if((_exposure >= 22.0 && _exposure < 20000))
     {
         m_pylon_exposuretime = _exposure;
         emit pylonCameraExposureChanged();
+        emit signalChangeCameraExposure(m_pylon_exposuretime);
     }
 }
 
@@ -173,10 +182,13 @@ Description:
 **************************************************************/
 void Mary::setCameraGain(int _gain)
 {
-    if((_gain >= 0) && (_gain <= 360))
+    if(_gain == m_pylon_gain) return;
+    if((_gain >= 0) && (_gain < 360))
     {
+
         m_pylon_gain = _gain;
         emit pylonCameraGainChanged();
+        emit signalChangeCameraGain(_gain);
     }
 }
 
@@ -189,7 +201,16 @@ Description:
 **************************************************************/
 void Mary::setCVBlurValue(int _value)
 {
-    emit cvBlurValueChanged();
+    if(_value == m_cv_blur) return;
+    if((_value >= 1) && (_value <= 50))
+    {
+        if((_value%2) != 1) ++_value;
+        m_cv_blur = _value;
+        emit cvBlurValueChanged();
+        emit signalChangeBlur(m_cv_blur);
+    }
+
+
 }
 
 
@@ -201,7 +222,14 @@ Description:
 **************************************************************/
 void Mary::setCVThresholdMinValue(int _value)
 {
-    emit cvThresholdMinValueChanged();
+    if(_value == m_cv_thresholdmin) return;
+    if((_value >= 0) && (_value < m_cv_thresholdmax))
+    {
+        m_cv_thresholdmin = _value;
+        emit cvThresholdMinValueChanged();
+        emit signalChangeThresholdMin(m_cv_thresholdmin);
+    }
+
 }
 
 
@@ -213,7 +241,13 @@ Description:
 **************************************************************/
 void Mary::setCVThresholdMaxValue(int _value)
 {
-    emit cvThresholdMaxValueChanged();
+    if(_value == m_cv_thresholdmax) return;
+    if((_value > m_cv_thresholdmin) && (_value <= 255))
+    {
+        m_cv_thresholdmax = _value;
+        emit cvThresholdMaxValueChanged();
+        emit signalChangeThresholdMax(m_cv_thresholdmax);
+    }
 }
 
 
@@ -230,4 +264,21 @@ void Mary::setShowDebugInfo(bool _value)
         m_gui_showdebuginfo = _value;
         emit showDebugInfoChanged();
     }
+}
+
+
+/**************************************************************
+sendCameraSettings()
+Slot
+Description:
+  Slot That Resends all the Setting Emits
+**************************************************************/
+void Mary::broadcastUpdateSignals()
+{
+    emit signalChangeCameraAOI(m_pylon_aoiwidth, m_pylon_aoiheight);
+    emit signalChangeCameraExposure(m_pylon_exposuretime);
+    emit signalChangeCameraGain(m_pylon_gain);
+    emit signalChangeBlur(m_cv_blur);
+    emit signalChangeThresholdMin(m_cv_thresholdmin);
+    emit signalChangeThresholdMax(m_cv_thresholdmax);
 }

@@ -10,7 +10,6 @@
 #include "opencv4/opencv2/imgproc/imgproc.hpp"
 #include <QFile>
 
-
 /*
  A Note About Settings File Layout:
 
@@ -66,22 +65,20 @@ public:
     Q_INVOKABLE void saveMaryToFile();
     Q_INVOKABLE void loadMaryFromFile();
 
-
-
     //Pylon Property Get Functions-------------------------------------------------------------
-    int getCameraMaxHeight(){return m_pylon_maxcameraheight;}
-    int getCameraMaxWidth(){return m_pylon_maxcamerawidth;}
-    QString getCameraDeviceName(){return m_pylon_cameraname;}
-    int getCameraAOIWidth(){return m_pylon_aoiwidth;}
-    int getCameraAOIHeight(){return m_pylon_aoiheight;}
-    double getCameraExposure(){return m_pylon_exposuretime;}
-    int getCameraGain(){return m_pylon_gain;}
+    Q_INVOKABLE int getCameraMaxHeight(){return m_pylon_maxcameraheight;}
+    Q_INVOKABLE int getCameraMaxWidth(){return m_pylon_maxcamerawidth;}
+    Q_INVOKABLE QString getCameraDeviceName(){return m_pylon_cameraname;}
+    Q_INVOKABLE int getCameraAOIWidth(){return m_pylon_aoiwidth;}
+    Q_INVOKABLE int getCameraAOIHeight(){return m_pylon_aoiheight;}
+    Q_INVOKABLE double getCameraExposure(){return m_pylon_exposuretime;}
+    Q_INVOKABLE int getCameraGain(){return m_pylon_gain;}
     //Open CV Property Get Functions-----------------------------------------------------------
-    int getCVBlurValue(){return m_cv_blur;}
-    int getCVThresholdMinValue(){return m_cv_thresholdmin;}
-    int getCVThresholdMaxValue(){return m_cv_thresholdmax;}
+    Q_INVOKABLE int getCVBlurValue(){return m_cv_blur;}
+    Q_INVOKABLE int getCVThresholdMinValue(){return m_cv_thresholdmin;}
+    Q_INVOKABLE int getCVThresholdMaxValue(){return m_cv_thresholdmax;}
     //GUI Property Get Functions--------------------------------------------------------------
-    bool getShowDebugInfo(){return m_gui_showdebuginfo;}
+    Q_INVOKABLE bool getShowDebugInfo(){return m_gui_showdebuginfo;}
 
     //Pylon Property Set Functions------------------------------------------------------------
     void setCameraAOIWidth(int _width);
@@ -103,6 +100,10 @@ signals:
     void signalChangeCameraAOI(int _width, int _height);
     void signalChangeCameraExposure(double _exposure);
     void signalChangeCameraGain(int _gain);
+    //Max Related Signals---------------------------------------------------------------------
+    void signalChangeBlur(int _blur);
+    void signalChangeThresholdMin(int _min);
+    void signalChangeThresholdMax(int _max);
     //Pylon Related Signals-------------------------------------------------------------------
     void pylonCameraMaxHeightChanged();
     void pylonCameraMaxWidthChanged();
@@ -119,7 +120,7 @@ signals:
     void showDebugInfoChanged();
 
 public slots:
-
+    Q_INVOKABLE void broadcastUpdateSignals();
 private:
     //Pylon Settings and Stuff
     const int m_pylon_maxcamerawidth = 724;
@@ -138,7 +139,6 @@ private:
     int m_cv_blur;
     int m_cv_thresholdmin;
     int m_cv_thresholdmax;
-
 
     //GUI UI Settings and Stuff
     bool m_gui_showdebuginfo;

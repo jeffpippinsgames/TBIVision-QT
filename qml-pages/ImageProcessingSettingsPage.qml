@@ -72,7 +72,7 @@ Item {
         destroyPage();
     }
 
-    //Slots
+    //Slots---------------------------------------------------------
     Component.onCompleted:
     {
         //Adjust Camera AOI to Max
@@ -162,6 +162,8 @@ Item {
             PropertyChanges{target: blursettingscontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
+            //Set The Interior Control State
+            PropertyChanges {target: blursettingsrectId; state: "BlurState";}
         },
         State //Threshold Selected Frame Focused
         {
@@ -198,6 +200,9 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
+            //Set The Interior Control State
+            PropertyChanges {target: thresholdsettingsrectId; state: "MinState";}
+
         }
     ]
 
@@ -505,11 +510,33 @@ Item {
             {
                 name: "NonFocused"
                 PropertyChanges{target: cameraAOIadjustemtId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: exposuresliderId; state: exposuresliderId.nothighlightedstate;}
+                PropertyChanges{target: gainsliderId; state: gainsliderId.nothighlightedstate;}
+
             },
             State
             {
                 name: "CameraAOIWidthHeightState"
                 PropertyChanges{target: cameraAOIadjustemtId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: exposuresliderId; state: exposuresliderId.nothighlightedstate;}
+                PropertyChanges{target: gainsliderId; state: gainsliderId.nothighlightedstate;}
+
+            },
+            State
+            {
+                name: "CameraExposureState"
+                PropertyChanges{target: cameraAOIadjustemtId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: exposuresliderId; state: exposuresliderId.highlightedstate;}
+                PropertyChanges{target: gainsliderId; state: gainsliderId.nothighlightedstate;}
+
+            },
+            State
+            {
+                name: "CameraGainState"
+                PropertyChanges{target: cameraAOIadjustemtId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: exposuresliderId; state: exposuresliderId.nothighlightedstate;}
+                PropertyChanges{target: gainsliderId; state: gainsliderId.highlightedstate;}
+
             }
 
         ]
@@ -527,6 +554,7 @@ Item {
 
             onBlackButtonPressed:
             {
+
                 rootpageId.signalDestroyPage();
             }
 
@@ -536,6 +564,12 @@ Item {
                 {
                 case "CameraAOIWidthHeightState":
                     cameraAOIadjustemtId.grabFocus();
+                    break;
+                case "CameraExposureState":
+                    exposuresliderId.grabFocus();
+                    break;
+                case "CameraGainState":
+                    gainsliderId.grabFocus();
                     break;
 
                 }
@@ -554,6 +588,12 @@ Item {
                     camerasettingsrectId.state = "NonFocused";
                     rootpageId.state = rootpageId.camerastateframeactive;
                     break;
+                case "CameraExposureState":
+                    camerasettingsrectId.state = "CameraAOIWidthHeightState";
+                    break;
+                case "CameraGainState":
+                    camerasettingsrectId.state = "CameraExposureState";
+                    break;
                 }
 
 
@@ -564,8 +604,12 @@ Item {
                 switch(camerasettingsrectId.state)
                 {
                 case "CameraAOIWidthHeightState":
-
+                    camerasettingsrectId.state = "CameraExposureState";
                     break;
+                case "CameraExposureState":
+                    camerasettingsrectId.state = "CameraGainState";
+                    break;
+
 
                 }
             }
@@ -685,16 +729,19 @@ Item {
 
                 id: cameraAOIadjustmentcontrollerId
                 focus: false
+                useAutoRepeatonSticks: true
 
                 onFocusChanged:
                 {
                     if(cameraAOIadjustmentcontrollerId.focus)
                     {
                         cameraaoirectId.border.color = Qt.rgba(0,.5,0,1);
+                        cameraAOIadjustemtId.color = Qt.rgba(0,1,0,.2);
                     }
                     else
                     {
                         cameraaoirectId.border.color = Qt.rgba(.5,0,0,1);
+                        cameraAOIadjustemtId.color = "transparent";
                     }
 
                 }
@@ -758,7 +805,73 @@ Item {
 
         }
 
- }
+        //Exposure Slider
+        SliderSettingsObject
+        {
+            id: exposuresliderId
+            controlname: "CameraExposureSlider"
+            x:20
+            y:195
+            messagetext: "Exposure: " + Mary.pylon_exposure + " micro sec.";
+            valuefrom: 30
+            valueto: 10000
+            stepsize: 10
+            majorstepsize: 500
+            controlstickautorepeat: true
+            fontsize: 15
+
+
+            Component.onCompleted:
+            {
+                exposuresliderId.value = Mary.getCameraExposure();
+            }
+
+            onEndFocus:
+            {
+                camerasettingsrectId.grabFocus();
+                exposuresliderId.state = exposuresliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                Mary.pylon_exposure = exposuresliderId.value;
+            }
+        }
+
+        //Gain Slider
+        SliderSettingsObject
+        {
+            id: gainsliderId
+            controlname: "CameraGainSlider"
+            x:20
+            y:exposuresliderId.y+exposuresliderId.height+20
+            messagetext: "Gain: " + Mary.pylon_gain;
+            valuefrom: 0
+            valueto: 360
+            stepsize: 1
+            majorstepsize: 5
+            controlstickautorepeat: true
+            fontsize: 15
+
+
+            Component.onCompleted:
+            {
+                 gainsliderId.value = Mary.getCameraGain();
+            }
+
+            onEndFocus:
+            {
+                camerasettingsrectId.grabFocus();
+                gainsliderId.state = exposuresliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                Mary.pylon_gain =  gainsliderId.value;
+            }
+        }
+
+    }
 
     //Blur Settings Rectangle---------------------------------------
     Rectangle
@@ -771,27 +884,59 @@ Item {
         y: rootpageId.settingsrecty
         color: "transparent"
 
+        function grabFocus()
+        {
+            blursettingscontrollerId.focus = true;
+
+        }
+
+        states:
+            [
+            State
+            {
+                name: "NonFocused"
+                PropertyChanges{target: blursettingsrectId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: blursliderId; state: blursliderId.nothighlightedstate;}
+
+            },
+            State
+            {
+                name: "BlurState"
+                PropertyChanges{target: blursettingsrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: blursliderId; state: blursliderId.highlightedstate;}
+            }
+        ]
+
         ControllerObject
         {
 
             id:blursettingscontrollerId
             focus: false
 
+
             onBlackButtonPressed:
             {
+                rootpageId.signalDestroyPage();
             }
 
             onGreenButtonPressed:
             {
+                switch(blursettingsrectId.state)
+                {
+                case "BlurState":
+                    blursliderId.grabFocus();
+                    break;
+                }
             }
 
             onRedButtonPressed:
             {
-
+                rootpageId.signalDestroyPage();
             }
 
             onUpButtonPressed:
             {
+                blursettingscontrollerId.state = "NonFocused"
                 rootpageId.state = rootpageId.blurstateframeactive;
             }
 
@@ -869,6 +1014,38 @@ Item {
             color: rootpageId.textcolor
         }
 
+        SliderSettingsObject
+        {
+            id: blursliderId
+            controlname: "BlurSliderControl"
+            x:20
+            y:60
+            messagetext: "Blur: " + Mary.cv_blur;
+            valuefrom: 1
+            valueto: 49
+            stepsize: 2
+            majorstepsize: 4
+            controlstickautorepeat: true
+
+            Component.onCompleted:
+            {
+                blursliderId.value = Mary.getCVBlurValue();
+            }
+
+            onEndFocus:
+            {
+                blursettingsrectId.grabFocus();
+                blursliderId.state = blursliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                Mary.cv_blur = blursliderId.value;
+            }
+
+
+        }
+
     }
 
     //Threshold Settings Rectangle----------------------------------
@@ -882,6 +1059,37 @@ Item {
         y: rootpageId.settingsrecty
         color: "transparent"
 
+        function grabFocus()
+        {
+            thresholdsettingscontrollerId.focus = true;
+        }
+
+        states:
+        [
+            State
+            {
+                name: "NonFocused"
+                PropertyChanges{target: thresholdsettingsrectId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: thresholdminsliderId; state: thresholdminsliderId.nothighlightedstate;}
+                PropertyChanges{target: thresholdmaxsliderId; state: thresholdmaxsliderId.nothighlightedstate;}
+            },
+            State
+            {
+                name: "MinState"
+                PropertyChanges{target: thresholdsettingsrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: thresholdminsliderId; state: thresholdminsliderId.highlightedstate;}
+                PropertyChanges{target: thresholdmaxsliderId; state: thresholdmaxsliderId.nothighlightedstate;}
+
+            },
+            State
+            {
+                name: "MaxState"
+                PropertyChanges{target: thresholdsettingsrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: thresholdminsliderId; state: thresholdminsliderId.nothighlightedstate;}
+                PropertyChanges{target: thresholdmaxsliderId; state: thresholdmaxsliderId.highlightedstate;}
+            }
+        ]
+
         ControllerObject
         {
 
@@ -890,25 +1098,52 @@ Item {
 
             onBlackButtonPressed:
             {
+                rootpageId.signalDestroyPage();
             }
 
             onGreenButtonPressed:
             {
+                switch(thresholdsettingsrectId.state)
+                {
+                case "MinState":
+                    thresholdminsliderId.grabFocus();
+                    break;
+                case "MaxState":
+                    thresholdmaxsliderId.grabFocus();
+                    break;
+                }
             }
 
             onRedButtonPressed:
             {
-                rootpage_privateId.setState(rootpageId.thresholdstateframeactive);
+                rootpageId.signalDestroyPage();
             }
 
             onUpButtonPressed:
             {
-                rootpageId.state = rootpageId.state = rootpageId.thresholdstateframeactive;
+                switch(thresholdsettingsrectId.state)
+                {
+                case "MinState":
+                    rootpageId.state = rootpageId.thresholdstateframeactive;
+                    thresholdsettingsrectId.state = "NonFocused";
+                    break;
+                case "MaxState":
+                    thresholdsettingsrectId.state = "MinState";
+                    break;
+
+                }
+
+
             }
 
             onDownButtonPressed:
             {
-
+                switch(thresholdsettingsrectId.state)
+                {
+                case "MinState":
+                    thresholdsettingsrectId.state = "MaxState";
+                    break;
+                }
             }
 
             onLeftButtonPressed:
@@ -978,6 +1213,71 @@ Item {
             text: "Threshold Frame Settings"
             font.pixelSize: 25
             color: rootpageId.textcolor
+        }
+
+        //Min Threshold Slider
+        SliderSettingsObject
+        {
+            id: thresholdminsliderId
+            controlname: "MinThresholdSlider"
+            x:20
+            y:60
+            messagetext: "Threshold Min: " + Mary.cv_thresholdmin;
+            valuefrom: 0
+            valueto: Mary.cv_thresholdmax-1
+            stepsize: 1
+            majorstepsize: 5
+            controlstickautorepeat: true
+
+
+            Component.onCompleted:
+            {
+                thresholdminsliderId.value = Mary.getCVThresholdMinValue();
+            }
+
+            onEndFocus:
+            {
+                thresholdsettingsrectId.grabFocus();
+                thresholdminsliderId.state = thresholdminsliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                Mary.cv_thresholdmin = thresholdminsliderId.value;
+            }
+        }
+
+
+        //Max Threshold Slider
+        SliderSettingsObject
+        {
+            id: thresholdmaxsliderId
+            x:20
+            y:thresholdminsliderId.y+thresholdminsliderId.height+20
+            messagetext: "Threshold Max: " + Mary.cv_thresholdmax
+            valuefrom: Mary.cv_thresholdmin + 1
+            valueto: 255
+            stepsize: 1
+            majorstepsize: 5
+            controlstickautorepeat: true
+
+
+           Component.onCompleted:
+           {
+               thresholdmaxsliderId.value = Mary.getCVThresholdMaxValue();
+           }
+
+           onEndFocus:
+           {
+               thresholdsettingsrectId.grabFocus();
+               thresholdmaxsliderId.state = thresholdmaxsliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.cv_thresholdmax = thresholdmaxsliderId.value;
+           }
+
         }
 
     }
@@ -1113,7 +1413,7 @@ Item {
                 anchors.centerIn: parent
                 width: Mary.pylon_aoiwidth * scalex
                 height: Mary.pylon_aoiheight * scaley
-                border.color: "yellow"
+                border.color: Qt.rgba(.5,0,0,1);
                 border.width: 2
                 readonly property real scalex: mainviewdisplayId.width/Mary.pylon_maxwidth
                 readonly property real  scaley: mainviewdisplayId.height/Mary.pylon_maxheight
