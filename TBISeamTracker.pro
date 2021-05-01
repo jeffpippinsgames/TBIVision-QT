@@ -14,10 +14,9 @@ SOURCES += \
         main.cpp \
         mary.cpp \
         max.cpp \
-        pcluster.cpp \
-        pcolumn.cpp \
-        pfundamental.cpp \
-        pixelanalyzer.cpp \
+        pixelcluster.cpp \
+        pixelcolumn.cpp \
+        pixelfundamental.cpp \
         toby.cpp
 
 RESOURCES += qml.qrc
@@ -38,10 +37,9 @@ HEADERS += \
     gary.h \
     mary.h \
     max.h \
-    pcluster.h \
-    pcolumn.h \
-    pfundamental.h \
-    pixelanalyzer.h \
+    pixelcluster.h \
+    pixelcolumn.h \
+    pixelfundamental.h \
     toby.h
 
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonbase-6.2.0

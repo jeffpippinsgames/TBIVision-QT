@@ -43,7 +43,6 @@ class Mary : public QObject
     Q_PROPERTY(QString pylon_cameraname READ getCameraDeviceName NOTIFY pylonCameraNameChanged)
     Q_PROPERTY(int pylon_aoiwidth READ getCameraAOIWidth WRITE setCameraAOIWidth NOTIFY pylonCameraAOIWidthChanged)
     Q_PROPERTY(int pylon_aoiheight READ getCameraAOIHeight WRITE setCameraAOIHeight NOTIFY pylonCameraAOIHeightChanged)
-    Q_PROPERTY(int pylon_aoiwidth READ getCameraAOIWidth WRITE setCameraAOIWidth NOTIFY pylonCameraAOIWidthChanged)
     Q_PROPERTY(double pylon_exposure READ getCameraExposure WRITE setCameraExposure NOTIFY pylonCameraExposureChanged)
     Q_PROPERTY(int pylon_gain READ getCameraGain WRITE setCameraGain NOTIFY pylonCameraGainChanged)
     //Open CV Properties------------------------------------------------------------------------

@@ -9,24 +9,16 @@
 #include <QQuickItem>
 #include <QString>
 #include <QElapsedTimer>
-
+#include <QList>
+#include "pixelcolumn.h"
 
 using namespace cv;
 
-class MaxPixelColumnContainer
-{
-public:
-    MaxPixelColumnContainer();
-    ~MaxPixelColumnContainer();
-};
-
-
-
 /**************************************************************
 Max
-
 Max Is the Welder.
 He Decides Where to Place the Weld.
+He Deciphers The Images and Performs the Seam Tracking
 
 Description:
    The seam tracking functionality is
@@ -38,7 +30,9 @@ class Max : public QObject
     Q_PROPERTY(QString timeinloop READ getTimeinLoop NOTIFY timeInLoopChanged)
 
 private:
-    bool FlattenMat(cv::Mat& _src, cv::Mat &_dst);
+    void blankProcessingArrays();
+    bool fillFlattenedArray(cv::Mat &_src);
+    void fillColumnClusterList();
 
 public:
     explicit Max(QObject *parent = nullptr);
@@ -46,32 +40,45 @@ public:
     QString getTimeinLoop(){return m_timeinloop;}
 
 private:
+    //The Maximum Frame Size For The Camera
+    static const int Mat_Max_Width = 720;
+    static const int Mat_Max_Height = 540;
+
+    //Elements For GUI Display----------------------------------------
     QString m_timeinloop;
     QElapsedTimer m_timer;
+
+    //CV Processing Variables-----------------------------------------
     int m_blur;
     int m_thresholdmin;
     int m_thresholdmax;
+    //Flattening Phase Processing Variables----------------------------
     unsigned long m_max_image_intensity;
     unsigned long m_min_image_intensity;
-    unsigned long m_current_image_intensity;
+    int m_min_cluster_size;
+    int m_max_cluster_size;
 
-    uint8_t *m_flattened_pixels;
-    int m_rows;
-    int m_cols;
-    int m_stride;
+    //Geometric Construction Processing Variables----------------------
+
+    //Flattening Phase Data Variables-----------------------------------
+    int m_flattened_pixel_array[Mat_Max_Width][Mat_Max_Height];
+    int m_flattened_rows;
+    int m_flattened_cols;
     unsigned long m_total_image_intensity;
+    QList<PixelColumn> m_columnclusterlist;
+    float m_skeletal_line_array[Mat_Max_Width];
+    //Geometric Construction Phase Data Variables-----------------------
 
 
-
-
+//Public Slots----------------------------------------------------------
 public slots:
     void recieveNewCVMat(const cv::Mat& _mat_frame);
     void onBlurChange(int _blur);
     void onThresholdMinChange(int _min);
     void onThresholdMaxChange(int _max);
 
+//Signals----------------------------------------------------------------
 signals:
-
     void timeInLoopChanged(QString _timinloop);
     void newFrameProcessed(const QImage& _qimage);
     void newRawMatProcessed(const cv::Mat& _raw_frame);
@@ -80,6 +87,7 @@ signals:
     void processingComplete();
     void viewportChanged();
     void aboutToDestroy();
+    void totalImageIntensityExceeded();
 
 };
 
