@@ -15,7 +15,7 @@ Mary::Mary(QObject *parent) : QObject(parent)
     qDebug() << "Mary: Mary Object Created.";
     m_cv_blur = 3;
     m_cv_thresholdmax = 255;
-    m_cv_thresholdmin = 0;
+    m_cv_thresholdmin = 0; 
 }
 
 
@@ -40,17 +40,19 @@ Description:
 **************************************************************/
 void Mary::SetMaryDefaultValues()
 {
+    m_cv_blur = 3;
+    m_cv_thresholdmax = 255;
+    m_cv_thresholdmin = 0;
     m_gui_showdebuginfo = true;
-    emit showDebugInfoChanged();
     m_pylon_aoiheight = m_pylon_maxcameraheight;
-    m_pylon_aoiwidth = m_pylon_maxcamerawidth;
-    emit pylonCameraAOIHeightChanged();
-    emit pylonCameraAOIWidthChanged();
-    updateCameraAOIToMarysSettings();
+    m_pylon_aoiwidth = m_pylon_maxcamerawidth; 
     m_pylon_exposuretime = 3000.0;
-    emit pylonCameraExposureChanged();
     m_pylon_gain = 0;
-    emit pylonCameraGainChanged();
+    m_pc_max_tii = 720*540*255*.3;
+    m_pc_min_tii = m_pc_max_tii * .01;
+    m_pc_max_clustersize = 100;
+    m_pc_min_clustersize = 20;
+    m_pc_max_clustersincolumn = 1;
 }
 
 
@@ -86,6 +88,11 @@ void Mary::saveMaryToFile()
     _ds << m_cv_thresholdmin;
     _ds << m_cv_thresholdmax;
     _ds << m_gui_showdebuginfo;
+    _ds << m_pc_max_tii;
+    _ds << m_pc_min_tii;
+    _ds << m_pc_max_clustersize;
+    _ds << m_pc_min_clustersize;
+    _ds << m_pc_max_clustersincolumn;
     _ds.setVersion(QDataStream::Qt_5_12);
     _savefile.close();
     qDebug() << "Mary: Mary Saved To " << _filepath;
@@ -120,6 +127,11 @@ void Mary::loadMaryFromFile()
     _ds >> m_cv_thresholdmin;
     _ds >> m_cv_thresholdmax;
     _ds >> m_gui_showdebuginfo;
+    _ds >> m_pc_max_tii;
+    _ds >> m_pc_min_tii;
+    _ds >> m_pc_max_clustersize;
+    _ds >> m_pc_min_clustersize;
+    _ds >> m_pc_max_clustersincolumn;
     _savefile.close();
     qDebug("Mary: marydefualt.tbi Loaded.");
 }
@@ -250,6 +262,62 @@ void Mary::setCVThresholdMaxValue(int _value)
     }
 }
 
+void Mary::setMaxTII(quint64 _maxtii)
+{
+    if(_maxtii > m_pc_min_tii)
+    {
+      m_pc_max_tii = _maxtii;
+      emit pcMaxTIIChanged();
+      emit signalChangeMaxTII(m_pc_max_tii);
+    }
+}
+
+void Mary::setMinTII(quint64 _mintii)
+{
+    if(_mintii > 0)
+    {
+        if(_mintii < m_pc_max_tii)
+        {
+            m_pc_min_tii = _mintii;
+            emit pcMinTIIChanged();
+            emit signalChangeMinTII(m_pc_min_tii);
+        }
+    }
+}
+
+void Mary::setMinClusterSize(int _cs)
+{
+    if(_cs > 2)
+    {
+        if(_cs < m_pc_max_clustersize)
+        {
+            m_pc_min_clustersize = _cs;
+            emit pcMinClusterSizeChanged();
+            emit signalChangeMinClusterSize(m_pc_min_clustersize);
+        }
+    }
+}
+
+void Mary::setMaxClusterSize(int _cs)
+{
+    if(_cs > m_pc_min_clustersize)
+    {
+        m_pc_max_clustersize = _cs;
+        emit pcMaxClusterSizeChanged();
+        emit signalChangeMaxClusterSize(m_pc_max_clustersize);
+    }
+}
+
+void Mary::setMaxClusterInCol(int _csincol)
+{
+    if(_csincol >= 1)
+    {
+        m_pc_max_clustersincolumn = _csincol;
+        emit pcMaxClusterInColChanged();
+        emit signalChangeMaxClustersInColumn(m_pc_max_clustersincolumn);
+    }
+}
+
 
 /**************************************************************
 setShowDebugInfo(bool _value)
@@ -266,6 +334,22 @@ void Mary::setShowDebugInfo(bool _value)
     }
 }
 
+void Mary::broadcastQMLSignals()
+{
+    emit cvBlurValueChanged();
+    emit cvThresholdMaxValueChanged();
+    emit cvThresholdMinValueChanged();
+    emit showDebugInfoChanged();
+    emit pylonCameraAOIHeightChanged();
+    emit pylonCameraAOIWidthChanged();
+    emit pylonCameraExposureChanged();
+    emit pylonCameraGainChanged();
+    emit pcMaxTIIChanged();
+    emit pcMinTIIChanged();
+    emit pcMaxClusterSizeChanged();
+    emit pcMinClusterSizeChanged();
+    emit pcMaxClusterInColChanged();
+}
 
 /**************************************************************
 sendCameraSettings()
@@ -273,7 +357,7 @@ Slot
 Description:
   Slot That Resends all the Setting Emits
 **************************************************************/
-void Mary::broadcastUpdateSignals()
+void Mary::broadcastSingletonSignals()
 {
     emit signalChangeCameraAOI(m_pylon_aoiwidth, m_pylon_aoiheight);
     emit signalChangeCameraExposure(m_pylon_exposuretime);
@@ -281,4 +365,11 @@ void Mary::broadcastUpdateSignals()
     emit signalChangeBlur(m_cv_blur);
     emit signalChangeThresholdMin(m_cv_thresholdmin);
     emit signalChangeThresholdMax(m_cv_thresholdmax);
+    emit signalChangeMaxTII(m_pc_max_tii);
+    emit signalChangeMinTII(m_pc_min_tii);
+    emit signalChangeMaxClusterSize(m_pc_max_clustersize);
+    emit signalChangeMinClusterSize(m_pc_min_clustersize);
+    emit signalChangeMaxClustersInColumn(m_pc_max_clustersincolumn);
 }
+
+

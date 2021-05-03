@@ -1,14 +1,11 @@
 #ifndef PIXELFUNDAMENTAL_H
 #define PIXELFUNDAMENTAL_H
 
-
-class PixelFundamental
+struct PixelFundamental_t
 {
-public:
-    PixelFundamental();
-    int m_row;
-    int m_col;
-    int m_value;
+    int row;
+    int col;
+    int intensity;
 };
 
 #endif // PIXELFUNDAMENTAL_H

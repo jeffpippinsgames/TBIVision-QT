@@ -14,9 +14,8 @@ SOURCES += \
         main.cpp \
         mary.cpp \
         max.cpp \
-        pixelcluster.cpp \
-        pixelcolumn.cpp \
-        pixelfundamental.cpp \
+        pixelclusterclass.cpp \
+        pixelcolumnclass.cpp \
         toby.cpp
 
 RESOURCES += qml.qrc
@@ -37,8 +36,8 @@ HEADERS += \
     gary.h \
     mary.h \
     max.h \
-    pixelcluster.h \
-    pixelcolumn.h \
+    pixelclusterclass.h \
+    pixelcolumnclass.h \
     pixelfundamental.h \
     toby.h
 

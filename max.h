@@ -10,7 +10,8 @@
 #include <QString>
 #include <QElapsedTimer>
 #include <QList>
-#include "pixelcolumn.h"
+#include <vector>
+#include "pixelcolumnclass.h"
 
 using namespace cv;
 
@@ -28,11 +29,14 @@ class Max : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString timeinloop READ getTimeinLoop NOTIFY timeInLoopChanged)
+    Q_PROPERTY(quint64 total_image_intensity READ getTotalImageIntensity NOTIFY totalImageIntensityChanged)
 
 private:
     void blankProcessingArrays();
     bool fillFlattenedArray(cv::Mat &_src);
+    bool buildPixelClusterList(cv::Mat &_src, cv::Mat &_dst);
     void fillColumnClusterList();
+    quint64 getTotalImageIntensity(){return m_total_image_intensity;}
 
 public:
     explicit Max(QObject *parent = nullptr);
@@ -53,8 +57,8 @@ private:
     int m_thresholdmin;
     int m_thresholdmax;
     //Flattening Phase Processing Variables----------------------------
-    unsigned long m_max_image_intensity;
-    unsigned long m_min_image_intensity;
+    quint64 m_max_image_intensity;
+    quint64 m_min_image_intensity;
     int m_min_cluster_size;
     int m_max_cluster_size;
 
@@ -64,10 +68,11 @@ private:
     int m_flattened_pixel_array[Mat_Max_Width][Mat_Max_Height];
     int m_flattened_rows;
     int m_flattened_cols;
-    unsigned long m_total_image_intensity;
-    QList<PixelColumn> m_columnclusterlist;
+    quint64 m_total_image_intensity;
+    std::vector<PixelColumnClass> m_column_cluster_list;
     float m_skeletal_line_array[Mat_Max_Width];
     //Geometric Construction Phase Data Variables-----------------------
+
 
 
 //Public Slots----------------------------------------------------------
@@ -77,6 +82,7 @@ public slots:
     void onThresholdMinChange(int _min);
     void onThresholdMaxChange(int _max);
 
+
 //Signals----------------------------------------------------------------
 signals:
     void timeInLoopChanged(QString _timinloop);
@@ -84,10 +90,12 @@ signals:
     void newRawMatProcessed(const cv::Mat& _raw_frame);
     void newBlurMatProcessed(const cv::Mat& _blur_frame);
     void newThresholdMatProcessed(const cv::Mat& _threshold_frame);
+    void newPixelColumnMatProcessed(const cv::Mat& _pixel_column_frame);
     void processingComplete();
     void viewportChanged();
     void aboutToDestroy();
     void totalImageIntensityExceeded();
+    void totalImageIntensityChanged(quint64 _tii);
 
 };
 

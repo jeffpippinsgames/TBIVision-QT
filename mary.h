@@ -49,6 +49,15 @@ class Mary : public QObject
     Q_PROPERTY(int cv_blur READ getCVBlurValue WRITE setCVBlurValue NOTIFY cvBlurValueChanged)
     Q_PROPERTY(int cv_thresholdmin READ getCVThresholdMinValue WRITE setCVThresholdMinValue NOTIFY cvThresholdMinValueChanged)
     Q_PROPERTY(int cv_thresholdmax READ getCVThresholdMaxValue WRITE setCVThresholdMaxValue NOTIFY cvThresholdMaxValueChanged)
+    //Pixel Column Processing Properties---------------------------------------------------------
+    Q_PROPERTY(quint64 pc_max_tii READ getMaxTII WRITE setMaxTII NOTIFY pcMaxTIIChanged)
+    Q_PROPERTY(quint64 pc_min_tii READ getMinTII WRITE setMinTII NOTIFY pcMinTIIChanged)
+    Q_PROPERTY(int pc_min_cluster_size READ getMinClusterSize WRITE setMinClusterSize NOTIFY pcMinClusterSizeChanged)
+    Q_PROPERTY(int pc_max_cluster_size READ getMaxClusterSize WRITE setMaxClusterSize NOTIFY pcMaxClusterSizeChanged)
+    Q_PROPERTY(int pc_max_clusters_in_column READ getMaxClusterInCol WRITE setMaxClusterInCol NOTIFY pcMaxClusterInColChanged)
+    //Skeletal Processing Properties-------------------------------------------------------------
+
+
     //GUI Properties Changed--------------------------------------------------------------------
     Q_PROPERTY(bool showdebuginfo READ getShowDebugInfo WRITE setShowDebugInfo NOTIFY showDebugInfoChanged)
 
@@ -76,6 +85,12 @@ public:
     Q_INVOKABLE int getCVBlurValue(){return m_cv_blur;}
     Q_INVOKABLE int getCVThresholdMinValue(){return m_cv_thresholdmin;}
     Q_INVOKABLE int getCVThresholdMaxValue(){return m_cv_thresholdmax;}
+    //Pixel Column Processing Get Functions
+    Q_INVOKABLE quint64 getMaxTII(){return m_pc_max_tii;}
+    Q_INVOKABLE quint64 getMinTII(){return m_pc_min_tii;}
+    Q_INVOKABLE int getMinClusterSize(){return m_pc_min_clustersize;}
+    Q_INVOKABLE int getMaxClusterSize(){return m_pc_max_clustersize;}
+    Q_INVOKABLE int getMaxClusterInCol(){return m_pc_max_clustersincolumn;}
     //GUI Property Get Functions--------------------------------------------------------------
     Q_INVOKABLE bool getShowDebugInfo(){return m_gui_showdebuginfo;}
 
@@ -88,6 +103,12 @@ public:
     void setCVBlurValue(int _value);
     void setCVThresholdMinValue(int _value);
     void setCVThresholdMaxValue(int _value);
+    //Pixel Column Set Functions-------------------------------------------------------------
+    void setMaxTII(quint64 _maxtii);
+    void setMinTII(quint64 _mintii);
+    void setMinClusterSize(int _cs);
+    void setMaxClusterSize(int _cs);
+    void setMaxClusterInCol(int _csincol);
     //GUI Property Set Functions--------------------------------------------------------------
     void setShowDebugInfo(bool _value);
 
@@ -103,6 +124,11 @@ signals:
     void signalChangeBlur(int _blur);
     void signalChangeThresholdMin(int _min);
     void signalChangeThresholdMax(int _max);
+    void signalChangeMaxTII(quint64 _maxtii);
+    void signalChangeMinTII(quint64 _mintii);
+    void signalChangeMaxClusterSize(int _size);
+    void signalChangeMinClusterSize(int _size);
+    void signalChangeMaxClustersInColumn(int _numofclusters);
     //Pylon Related Signals-------------------------------------------------------------------
     void pylonCameraMaxHeightChanged();
     void pylonCameraMaxWidthChanged();
@@ -115,11 +141,18 @@ signals:
     void cvBlurValueChanged();
     void cvThresholdMinValueChanged();
     void cvThresholdMaxValueChanged();
+    //Pixel Column Related Signals------------------------------------------------------------
+    void pcMaxTIIChanged();
+    void pcMinTIIChanged();
+    void pcMinClusterSizeChanged();
+    void pcMaxClusterSizeChanged();
+    void pcMaxClusterInColChanged();
     //GUI Related Signals---------------------------------------------------------------------
     void showDebugInfoChanged();
 
 public slots:
-    Q_INVOKABLE void broadcastUpdateSignals();
+    Q_INVOKABLE void broadcastQMLSignals();
+    Q_INVOKABLE void broadcastSingletonSignals();
 private:
     //Pylon Settings and Stuff
     const int m_pylon_maxcamerawidth = 724;
@@ -139,8 +172,18 @@ private:
     int m_cv_thresholdmin;
     int m_cv_thresholdmax;
 
+    //Pixel Column Processing Settings and Stuff
+    quint64 m_pc_max_tii;
+    quint64 m_pc_min_tii;
+    int m_pc_max_clustersize;
+    int m_pc_min_clustersize;
+    int m_pc_max_clustersincolumn;
+
     //GUI UI Settings and Stuff
     bool m_gui_showdebuginfo;
+
+
+
 };
 
 #endif // MARY_H

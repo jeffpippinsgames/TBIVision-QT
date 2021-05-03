@@ -28,12 +28,15 @@ Item {
     readonly property string blurstateframenotactive: "BlurStateFrameNotActive"
     readonly property string thresholdstateframeactive: "ThresholdStateFrameActive"
     readonly property string thresholdstateframenotactive: "ThresholdStateFrameNotActive"
+    readonly property string pixelcolumnstateframenotactive: "PixelColumnStateFrameNotActive"
+    readonly property string pixelcolumnstateframeactive: "PixelColumnStateFrameActive"
 
     //Frame Constants. For Display Switching and Signal Connections to Max
     readonly property string emptyframe: "NoFrame"
     readonly property string rawframe: "Camera"
     readonly property string blurframe: "Blur"
     readonly property string thresholdframe: "Threshold"
+    readonly property string pixelcolumnframe: "PixelColumn"
 
     //For Rectangle Placements
     //The MainView Rect Derives From FrameSelect and Settings
@@ -72,11 +75,17 @@ Item {
         destroyPage();
     }
 
+    function triggerTobyNextFrame()
+    {
+        Toby.triggerCamera();
+    }
+
     //Slots---------------------------------------------------------
     Component.onCompleted:
     {
         //Adjust Camera AOI to Max
         Toby.setCameraAOIToMax();
+        Max.processingComplete.connect(rootpageId.triggerTobyNextFrame);
         //Connect the Application Singletons to the QML Objects.
         rootpageId.state = rootpageId.camerastateframeactive;
         rootpageId.completed();
@@ -93,6 +102,7 @@ Item {
             PropertyChanges{ target: camerasettingsrectId; visible: true;}
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -100,6 +110,7 @@ Item {
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.rawframe}
@@ -114,6 +125,7 @@ Item {
             PropertyChanges{ target: camerasettingsrectId; visible: true;}
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.focuscolor}
@@ -121,6 +133,7 @@ Item {
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.rawframe}
@@ -134,6 +147,7 @@ Item {
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
             PropertyChanges{ target: blursettingsrectId; visible: true;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -141,6 +155,7 @@ Item {
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
@@ -152,6 +167,7 @@ Item {
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
             PropertyChanges{ target: blursettingsrectId; visible: true;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.focuscolor}
@@ -159,6 +175,7 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: blursettingscontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
@@ -172,6 +189,7 @@ Item {
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: true;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -179,6 +197,7 @@ Item {
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
@@ -190,6 +209,7 @@ Item {
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: true;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.focuscolor}
@@ -197,13 +217,56 @@ Item {
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
             //Set The Interior Control State
             PropertyChanges {target: thresholdsettingsrectId; state: "MinState";}
-
+        },
+        State //Pixel Column Selected Frame Focused
+        {
+            name: rootpageId.pixelcolumnstateframeactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: false;}
+            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: true;}
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
+            PropertyChanges{ target: pixelcolumnborderrectId; border.color: rootpageId.nonfocuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.pixelcolumnframe}
+        },
+        State //Pixel Column Selected and Focused
+        {
+            name: rootpageId.pixelcolumnstateframenotactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: false;}
+            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: true;}
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
+            PropertyChanges{ target: pixelcolumnborderrectId; border.color: rootpageId.focuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.pixelcolumnframe}
+            //Set The Interior Control State
+            PropertyChanges {target: thresholdsettingsrectId; state: "MinState";}
         }
+
     ]
 
     //OML Components------------------------------------------------
@@ -304,6 +367,9 @@ Item {
                     break;
                 case rootpageId.thresholdframe:
                     rootpageId.state = rootpageId.thresholdstateframenotactive;
+                    break;
+                case rootpageId.pixelcolumnframe:
+                    rootpageId.state = rootpageId.pixelcolumnstateframenotactive;
                     break;
                 }
             }
@@ -417,6 +483,9 @@ Item {
                         case rootpageId.thresholdframe:
                             Max.newThresholdMatProcessed.connect(delegateframeId.recieveCVMat);
                             break;
+                        case rootpageId.pixelcolumnframe:
+                            Max.newPixelColumnMatProcessed.connect(delegateframeId.recieveCVMat);
+                            break;
                         }
                     }
                 }
@@ -453,6 +522,7 @@ Item {
                 modelId.append({"frame": rootpageId.rawframe});
                 modelId.append({"frame": rootpageId.blurframe});
                 modelId.append({"frame": rootpageId.thresholdframe});
+                modelId.append({"frame": rootpageId.pixelcolumnframe});
 
             }
 
@@ -469,6 +539,9 @@ Item {
                     break;
                 case rootpageId.thresholdframe:
                     rootpageId.state = rootpageId.thresholdstateframeactive;
+                    break;
+                case rootpageId.pixelcolumnframe:
+                    rootpageId.state = rootpageId.pixelcolumnstateframeactive;
                     break;
                 }
             }
@@ -1282,6 +1355,123 @@ Item {
 
     }
 
+    //Pixel Column Settings Rectangle
+    Rectangle
+    {
+        id: pixelcolumnsettingsrectId
+        visible: false
+        width: rootpageId.settingsrectwidth
+        height: rootpageId.settingsrectheight
+        x: rootpageId.settingsrectx
+        y: rootpageId.settingsrecty
+        color: "transparent"
+
+        Rectangle
+        {
+            anchors.fill: pixelcolumnsettingsrectId
+            color: "black"
+            opacity: .8
+            radius: 10
+        }
+
+        Rectangle
+        {
+            anchors.fill: pixelcolumnsettingsrectId
+            color: "darkred"
+            opacity: .05
+            radius: 10
+        }
+
+        Rectangle
+        {
+            id: pixelcolumnborderrectId
+            anchors.fill: pixelcolumnsettingsrectId
+            color: "transparent"
+            border.color: rootpageId.nonfocuscolor
+            border.width: rootpageId.rectborderwidths
+            radius: 10
+        }
+
+        ControllerObject
+        {
+
+            id:pixelcolumncontrollerId
+            focus: false
+
+            onBlackButtonPressed:
+            {
+            }
+
+            onGreenButtonPressed:
+            {
+            }
+
+            onRedButtonPressed:
+            {
+
+            }
+
+            onUpButtonPressed:
+            {
+                rootpageId.state = rootpageId.pixelcolumnstateframeactive;
+            }
+
+            onDownButtonPressed:
+            {
+
+            }
+
+            onLeftButtonPressed:
+            {
+
+            }
+
+            onRightButtonPressed:
+            {
+
+            }
+
+            onUpButtonReleased:
+            {
+
+            }
+
+            onDownButtonReleased:
+            {
+
+            }
+
+            onLeftButtonReleased:
+            {
+
+            }
+
+            onRightButtonReleased:
+            {
+
+            }
+        }
+
+        //Settings Text
+        Text
+        {
+            id: pixelcolumntextId
+            font.family: fontId.name
+            y: 10
+            x:10
+            text: "Pixel Column Settings"
+            font.pixelSize: 25
+            color: rootpageId.textcolor
+        }
+
+        //Total Image Intensity
+        Text
+        {
+        id: pixelcolumn_ttitextId
+        text: "Total Image Intensity: " + Mary.pc_max_tii
+        }
+    }
+
     //Main View Rectangle-------------------------------------------
     Rectangle
     {
@@ -1316,6 +1506,9 @@ Item {
                     Max.newThresholdMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
                     //console.log("Detaching Max.newThresholdMatProcessed");
                     break;
+                case rootpageId.pixelcolumnframe:
+                    Max.newPixelColumnMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
+                    break;
                 }
                 mainviewrect_privateId.attached_frame = rootpageId.emptyframe;
             }
@@ -1339,6 +1532,10 @@ Item {
                     Max.newThresholdMatProcessed.connect(mainviewdisplayId.recieveCVMat);
                     mainviewrect_privateId.attached_frame = rootpageId.thresholdframe;
                     //console.log("Connecting Max.newThresholdMatProcessed");
+                    break;
+                case rootpageId.pixelcolumnframe:
+                    Max.newPixelColumnMatProcessed.connect(mainviewdisplayId.recieveCVMat);
+                    mainviewrect_privateId.attached_frame = rootpageId.pixelcolumnframe;
                     break;
                 default:
                     mainviewrectId.displayed_frame = rootpageId.emptyframe;

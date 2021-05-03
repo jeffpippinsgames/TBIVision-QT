@@ -34,7 +34,7 @@ Item
     property color menucolor: Qt.rgba(1,1,.95,1)
     property int icontextspacing: 5
     property real menuopacity: 1
-    property real backgroundopacity: .8
+    property real backgroundopacity: 1
     readonly property string closemenustring: "closemenu"
 
     //Signals----------------------------------
