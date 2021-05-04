@@ -33,15 +33,17 @@ class Max : public QObject
 
 private:
     void blankProcessingArrays();
-    bool fillFlattenedArray(cv::Mat &_src);
-    bool buildPixelClusterList(cv::Mat &_src, cv::Mat &_dst);
-    void fillColumnClusterList();
-    quint64 getTotalImageIntensity(){return m_total_image_intensity;}
+    bool fillColumnClusterArray(cv::Mat &_src, cv::Mat &_dst);
+    bool fillSkeleton(cv::Mat _dst);
+    bool updateFlattenedMembers(cv::Mat _src);
+
+
 
 public:
     explicit Max(QObject *parent = nullptr);
     ~Max();
     QString getTimeinLoop(){return m_timeinloop;}
+    quint64 getTotalImageIntensity(){return m_total_image_intensity;}
 
 private:
     //The Maximum Frame Size For The Camera
@@ -56,22 +58,28 @@ private:
     int m_blur;
     int m_thresholdmin;
     int m_thresholdmax;
-    //Flattening Phase Processing Variables----------------------------
+    //Pixel Column Phase Processing Variables----------------------------
     quint64 m_max_image_intensity;
     quint64 m_min_image_intensity;
     int m_min_cluster_size;
     int m_max_cluster_size;
-
+    int m_max_clusterincol;
     //Geometric Construction Processing Variables----------------------
 
     //Flattening Phase Data Variables-----------------------------------
-    int m_flattened_pixel_array[Mat_Max_Width][Mat_Max_Height];
     int m_flattened_rows;
     int m_flattened_cols;
+
+    //Pixel Column Phase Processing Variables--------------------------
     quint64 m_total_image_intensity;
+    PixelColumnClass m_cluster_columns[Mat_Max_Width];
     std::vector<PixelColumnClass> m_column_cluster_list;
+
+    //Skeletal Phase Data Variables-------------------------------------
     float m_skeletal_line_array[Mat_Max_Width];
+    int m_allowable_discontinuities;
     //Geometric Construction Phase Data Variables-----------------------
+
 
 
 
@@ -81,6 +89,11 @@ public slots:
     void onBlurChange(int _blur);
     void onThresholdMinChange(int _min);
     void onThresholdMaxChange(int _max);
+    void onMaxTIIChange(quint64 _tii);
+    void onMinTIIChange(quint64 _tii);
+    void onMaxClusterSizeChange(int _size);
+    void onMinClusterSizeChange(int _size);
+    void onMaxClustersInColChange(int _size);
 
 
 //Signals----------------------------------------------------------------
@@ -91,10 +104,12 @@ signals:
     void newBlurMatProcessed(const cv::Mat& _blur_frame);
     void newThresholdMatProcessed(const cv::Mat& _threshold_frame);
     void newPixelColumnMatProcessed(const cv::Mat& _pixel_column_frame);
+    void newSkeletalMatProcessed(const cv::Mat& _skel_frame);
     void processingComplete();
     void viewportChanged();
     void aboutToDestroy();
-    void totalImageIntensityExceeded();
+    void failedTIICheck();
+    void failedDiscontinuityCheck();
     void totalImageIntensityChanged(quint64 _tii);
 
 };

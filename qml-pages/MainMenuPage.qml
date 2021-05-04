@@ -81,7 +81,7 @@ Item {
             rotatemenuId.addMenuItem("qrc:/Icons/save.png", "Save Profile");
             rotatemenuId.addMenuItem("qrc:/Icons/gear.png", "System Settings");
             rotatemenuId.addMenuItem("qrc:/Icons/laser3.png", "Toggle Laser Power");
-            rotatemenuId.addMenuItem("qrc:/Icons/image.png", "Image Processsor Settings");
+            rotatemenuId.addMenuItem("qrc:/Icons/image.png", "Processing Pipeline Settings");
             rotatemenuId.addMenuItem("qrc:/Icons/quit.png", "Quit Application");
         }
 
@@ -92,7 +92,7 @@ Item {
             case rotatemenuId.closemenustring:
                 signalDestroyPage();
                 break;
-            case "Image Processsor Settings":
+            case "Processing Pipeline Settings":
                 rootpageId.createImageProcessingPage();
                 break;
             case "Quit Application":
@@ -101,7 +101,6 @@ Item {
                 break;
             case "Toggle Laser Power":
                 Gary.sendToggleLaserPower();
-                signalDestroyPage();
                 break;
             }
         }

@@ -30,6 +30,8 @@ Item {
     readonly property string thresholdstateframenotactive: "ThresholdStateFrameNotActive"
     readonly property string pixelcolumnstateframenotactive: "PixelColumnStateFrameNotActive"
     readonly property string pixelcolumnstateframeactive: "PixelColumnStateFrameActive"
+    readonly property string skeletalstateframenotactive: "SkeletalStateFrameNotActive"
+    readonly property string skeletalstateframeactive: "SkeletalStateFrameActive"
 
     //Frame Constants. For Display Switching and Signal Connections to Max
     readonly property string emptyframe: "NoFrame"
@@ -37,6 +39,7 @@ Item {
     readonly property string blurframe: "Blur"
     readonly property string thresholdframe: "Threshold"
     readonly property string pixelcolumnframe: "PixelColumn"
+    readonly property string skeletalframe: "Skeletal"
 
     //For Rectangle Placements
     //The MainView Rect Derives From FrameSelect and Settings
@@ -68,7 +71,7 @@ Item {
 
     function signalDestroyPage()
     {
-
+        Max.processingComplete.disconnect(rootpageId.triggerTobyNextFrame);
         Mary.updateCameraAOIToMarysSettings();
         Mary.saveMaryToFile();
         aboutToDestroy();
@@ -264,8 +267,51 @@ Item {
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.pixelcolumnframe}
             //Set The Interior Control State
-            PropertyChanges {target: thresholdsettingsrectId; state: "MinState";}
+            PropertyChanges {target: pixelcolumnsettingsrectId; state: "MaxTII";}
+        },
+        State //Skeletal Selected Frame Focused
+        {
+            name: rootpageId.skeletalstateframeactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: false;}
+            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: true;}
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
+            PropertyChanges{ target: pixelcolumnborderrectId; border.color: rootpageId.nonfocuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.skeletalframe}
+        },
+        State //Skeletal Selected and Focused
+        {
+            name: rootpageId.skeletalstateframenotactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: false;}
+            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: true;}
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
+            PropertyChanges{ target: pixelcolumnborderrectId; border.color: rootpageId.focuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.skeletalframe}
+            //Set The Interior Control State
+            PropertyChanges {target: pixelcolumnsettingsrectId; state: "MaxTII";}
         }
+
 
     ]
 
@@ -301,7 +347,7 @@ Item {
         font.family: fontId.name
         y: 20
         x:25
-        text: "Pipeline Selection"
+        text: "Processing Pipeline"
         font.pixelSize: 30
         color: rootpageId.textcolor
     }
@@ -313,7 +359,7 @@ Item {
         font.family: fontId.name
         y: 20
         x:frameselectionrectId.x+frameselectionrectId.width-righttextId.implicitWidth
-        text: "Image Processing Settings"
+        text: "Settings"
         font.pixelSize: 30
         color: rootpageId.textcolor
     }
@@ -335,6 +381,13 @@ Item {
             id:frameselectcontrollerId
             focus: false
 
+            onFocusChanged:
+            {
+                if(focus)
+                {
+                    controlkeyId.enableblackbutton = true;
+                }
+            }
             onBlackButtonPressed:
             {
                 rootpageId.signalDestroyPage();
@@ -370,6 +423,9 @@ Item {
                     break;
                 case rootpageId.pixelcolumnframe:
                     rootpageId.state = rootpageId.pixelcolumnstateframenotactive;
+                    break;
+                case rootpageId.skeletalframe:
+                    rootpageId.state = rootpageId.skeletalstateframenotactive;
                     break;
                 }
             }
@@ -486,6 +542,9 @@ Item {
                         case rootpageId.pixelcolumnframe:
                             Max.newPixelColumnMatProcessed.connect(delegateframeId.recieveCVMat);
                             break;
+                        case rootpageId.skeletalframe:
+                            Max.newSkeletalMatProcessed.connect(delegateframeId.recieveCVMat);
+                            break;
                         }
                     }
                 }
@@ -523,6 +582,7 @@ Item {
                 modelId.append({"frame": rootpageId.blurframe});
                 modelId.append({"frame": rootpageId.thresholdframe});
                 modelId.append({"frame": rootpageId.pixelcolumnframe});
+                modelId.append({"frame": rootpageId.skeletalframe});
 
             }
 
@@ -542,6 +602,9 @@ Item {
                     break;
                 case rootpageId.pixelcolumnframe:
                     rootpageId.state = rootpageId.pixelcolumnstateframeactive;
+                    break;
+                case rootpageId.skeletalframe:
+                    rootpageId.state = rootpageId.skeletalstateframeactive;
                     break;
                 }
             }
@@ -622,13 +685,16 @@ Item {
 
             onFocusChanged:
             {
-
+                if(focus)
+                {
+                    controlkeyId.enableblackbutton = false;
+                }
             }
 
             onBlackButtonPressed:
             {
 
-                rootpageId.signalDestroyPage();
+                //rootpageId.signalDestroyPage();
             }
 
             onGreenButtonPressed:
@@ -650,7 +716,7 @@ Item {
 
             onRedButtonPressed:
             {
-                rootpageId.signalDestroyPage();
+               // rootpageId.signalDestroyPage();
             }
 
             onUpButtonPressed:
@@ -918,7 +984,7 @@ Item {
             controlname: "CameraGainSlider"
             x:20
             y:exposuresliderId.y+exposuresliderId.height+20
-            messagetext: "Gain: " + Mary.pylon_gain;
+            messagetext: "Gain: " + Mary.pylon_gain
             valuefrom: 0
             valueto: 360
             stepsize: 1
@@ -986,10 +1052,17 @@ Item {
             id:blursettingscontrollerId
             focus: false
 
+            onFocusChanged:
+            {
+                if(focus)
+                {
+                    controlkeyId.enableblackbutton = false;
+                }
+            }
 
             onBlackButtonPressed:
             {
-                rootpageId.signalDestroyPage();
+                //rootpageId.signalDestroyPage();
             }
 
             onGreenButtonPressed:
@@ -1004,7 +1077,7 @@ Item {
 
             onRedButtonPressed:
             {
-                rootpageId.signalDestroyPage();
+                //rootpageId.signalDestroyPage();
             }
 
             onUpButtonPressed:
@@ -1169,9 +1242,17 @@ Item {
             id:thresholdsettingscontrollerId
             focus: false
 
+            onFocusChanged:
+            {
+                if(focus)
+                {
+                    controlkeyId.enableblackbutton = false;
+                }
+            }
+
             onBlackButtonPressed:
             {
-                rootpageId.signalDestroyPage();
+                //rootpageId.signalDestroyPage();
             }
 
             onGreenButtonPressed:
@@ -1189,7 +1270,7 @@ Item {
 
             onRedButtonPressed:
             {
-                rootpageId.signalDestroyPage();
+                //rootpageId.signalDestroyPage();
             }
 
             onUpButtonPressed:
@@ -1366,6 +1447,78 @@ Item {
         y: rootpageId.settingsrecty
         color: "transparent"
 
+        function grabFocus()
+        {
+            pixelcolumncontrollerId.focus = true;
+        }
+
+        states:
+        [
+            State
+            {
+                name: "NonFocused"
+                PropertyChanges{target: pixelcolumnborderrectId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: maxtiisliderId; state: maxtiisliderId.nothighlightedstate;}
+                PropertyChanges{target: mintiisliderId; state: mintiisliderId.nothighlightedstate;}
+                PropertyChanges{target: maxclustersizesliderId; state: maxclustersizesliderId.nothighlightedstate;}
+                PropertyChanges{target: minclustersizesliderId; state: minclustersizesliderId.nothighlightedstate;}
+                PropertyChanges{target: maxclustersincolsliderId; state: maxclustersincolsliderId.nothighlightedstate;}
+
+            },
+            State
+            {
+                name: "MaxTII"
+                PropertyChanges{target: pixelcolumnborderrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: maxtiisliderId; state: maxtiisliderId.highlightedstate;}
+                PropertyChanges{target: mintiisliderId; state: mintiisliderId.nothighlightedstate;}
+                PropertyChanges{target: maxclustersizesliderId; state: maxclustersizesliderId.nothighlightedstate;}
+                PropertyChanges{target: minclustersizesliderId; state: minclustersizesliderId.nothighlightedstate;}
+                PropertyChanges{target: maxclustersincolsliderId; state: maxclustersincolsliderId.nothighlightedstate;}
+
+            },
+            State
+            {
+                name: "MinTII"
+                PropertyChanges{target: pixelcolumnborderrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: maxtiisliderId; state: maxtiisliderId.nothighlightedstate;}
+                PropertyChanges{target: mintiisliderId; state: mintiisliderId.highlightedstate;}
+                PropertyChanges{target: maxclustersizesliderId; state: maxclustersizesliderId.nothighlightedstate;}
+                PropertyChanges{target: minclustersizesliderId; state: minclustersizesliderId.nothighlightedstate;}
+                PropertyChanges{target: maxclustersincolsliderId; state: maxclustersincolsliderId.nothighlightedstate;}
+            },
+            State
+            {
+                name: "MaxCS"
+                PropertyChanges{target: pixelcolumnborderrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: maxtiisliderId; state: maxtiisliderId.nothighlightedstate;}
+                PropertyChanges{target: mintiisliderId; state: mintiisliderId.nothighlightedstate;}
+                PropertyChanges{target: maxclustersizesliderId; state: maxclustersizesliderId.highlightedstate;}
+                PropertyChanges{target: minclustersizesliderId; state: minclustersizesliderId.nothighlightedstate;}
+                PropertyChanges{target: maxclustersincolsliderId; state: maxclustersincolsliderId.nothighlightedstate;}
+            },
+            State
+            {
+                name: "MinCS"
+                PropertyChanges{target: pixelcolumnborderrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: maxtiisliderId; state: maxtiisliderId.nothighlightedstate;}
+                PropertyChanges{target: mintiisliderId; state: mintiisliderId.nothighlightedstate;}
+                PropertyChanges{target: maxclustersizesliderId; state: maxclustersizesliderId.nothighlightedstate;}
+                PropertyChanges{target: minclustersizesliderId; state: minclustersizesliderId.highlightedstate;}
+                PropertyChanges{target: maxclustersincolsliderId; state: maxclustersincolsliderId.nothighlightedstate;}
+            },
+            State
+            {
+                name: "MaxCIC"
+                PropertyChanges{target: pixelcolumnborderrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: maxtiisliderId; state: maxtiisliderId.nothighlightedstate;}
+                PropertyChanges{target: mintiisliderId; state: mintiisliderId.nothighlightedstate;}
+                PropertyChanges{target: maxclustersizesliderId; state: maxclustersizesliderId.nothighlightedstate;}
+                PropertyChanges{target: minclustersizesliderId; state: minclustersizesliderId.nothighlightedstate;}
+                PropertyChanges{target: maxclustersincolsliderId; state: maxclustersincolsliderId.highlightedstate;}
+            }
+
+        ]
+
         Rectangle
         {
             anchors.fill: pixelcolumnsettingsrectId
@@ -1398,27 +1551,90 @@ Item {
             id:pixelcolumncontrollerId
             focus: false
 
+            onFocusChanged:
+            {
+                if(focus)
+                {
+                    controlkeyId.enableblackbutton = false;
+                }
+            }
+
             onBlackButtonPressed:
             {
+                //rootpageId.signalDestroyPage();
             }
 
             onGreenButtonPressed:
             {
+                switch(pixelcolumnsettingsrectId.state)
+                {
+                case "MaxTII":
+                    maxtiisliderId.grabFocus();
+                    break;
+                case "MinTII":
+                    mintiisliderId.grabFocus();
+                    break;
+                case "MaxCS":
+                    maxclustersizesliderId.grabFocus();
+                    break;
+                case "MinCS":
+                    minclustersizesliderId.grabFocus();
+                    break;
+                case "MaxCIC":
+                    maxclustersincolsliderId.grabFocus();
+                    break;
+
+                }
             }
 
             onRedButtonPressed:
             {
-
+               // rootpageId.signalDestroyPage();
             }
 
             onUpButtonPressed:
             {
-                rootpageId.state = rootpageId.pixelcolumnstateframeactive;
+
+                switch(pixelcolumnsettingsrectId.state)
+                {
+                case "MaxTII":
+                    rootpageId.state = rootpageId.pixelcolumnstateframeactive;
+                    pixelcolumnsettingsrectId.state = "NonFocused";
+                    break;
+                case "MinTII":
+                    pixelcolumnsettingsrectId.state = "MaxTII";
+                    break;
+                case "MaxCS":
+                    pixelcolumnsettingsrectId.state = "MinTII";
+                    break;
+                case "MinCS":
+                    pixelcolumnsettingsrectId.state = "MaxCS";
+                    break;
+                case "MaxCIC":
+                    pixelcolumnsettingsrectId.state = "MinCS";
+                    break;
+                }
             }
 
             onDownButtonPressed:
             {
-
+                switch(pixelcolumnsettingsrectId.state)
+                {
+                case "MaxTII":
+                    pixelcolumnsettingsrectId.state = "MinTII";
+                    break;
+                case "MinTII":
+                    pixelcolumnsettingsrectId.state = "MaxCS";
+                    break;
+                case "MaxCS":
+                    pixelcolumnsettingsrectId.state = "MinCS";
+                    break;
+                case "MinCS":
+                    pixelcolumnsettingsrectId.state = "MaxCIC";
+                    break;
+                case "MaxCIC":
+                    break;
+                }
             }
 
             onLeftButtonPressed:
@@ -1468,8 +1684,181 @@ Item {
         Text
         {
         id: pixelcolumn_ttitextId
-        text: "Total Image Intensity: " + Mary.pc_max_tii
+        font.family: fontId.name
+        height: pixelcolumn_ttitextId.implicitHeight
+        width: pixelcolumn_ttitextId.implicitWidth
+        y: 60
+        x: 10
+        font.pixelSize: 20
+        color: rootpageId.textcolor
+        text: "Total Image Intensity: " + Max.total_image_intensity
         }
+
+        //Max TTI Slider
+        SliderSettingsObject
+        {
+            id: maxtiisliderId
+            x: 20
+            y: pixelcolumn_ttitextId.y + pixelcolumn_ttitextId.height + 20
+            messagetext: "Max Image Intensity: " + Mary.pc_max_tii
+            valuefrom: Mary.pc_min_tii + 1
+            valueto: 3000000
+            stepsize: 1
+            majorstepsize: 50000
+            controlstickautorepeat: true
+            fontsize: 15
+
+            Component.onCompleted:
+            {
+                maxtiisliderId.value = Mary.pc_max_tii;
+            }
+
+            onEndFocus:
+            {
+                // grabFocus of Root Rectangle
+                pixelcolumnsettingsrectId.grabFocus();
+                maxtiisliderId.state = maxtiisliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                Mary.pc_max_tii = maxtiisliderId.value;
+            }
+
+        }
+
+        //Min TTI Slider
+        SliderSettingsObject
+        {
+            id: mintiisliderId
+            x: 20
+            y: maxtiisliderId.y + maxtiisliderId.height + 20
+            messagetext: "Min Image Intensity: " + Mary.pc_min_tii
+            valuefrom: 0
+            valueto: Mary.pc_max_tii - 1
+            stepsize: 1
+            majorstepsize: 50000
+            controlstickautorepeat: true
+            fontsize: 15
+
+            Component.onCompleted:
+            {
+                mintiisliderId.value = Mary.pc_min_tii;
+            }
+
+            onEndFocus:
+            {
+                // grabFocus of Root Rectangle
+                pixelcolumnsettingsrectId.grabFocus();
+                mintiisliderId.state = mintiisliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                Mary.pc_min_tii = mintiisliderId.value;
+            }
+
+        }
+
+        //Max Cluster Size Slider
+        SliderSettingsObject
+        {
+            id: maxclustersizesliderId
+            x: 20
+            y: mintiisliderId.y + mintiisliderId.height + 20
+            messagetext: "Max Pixel Cluster Size: " + Mary.pc_max_cluster_size
+            valuefrom: Mary.pc_min_cluster_size + 1
+            valueto: 200
+            stepsize: 1
+            majorstepsize: 10
+            controlstickautorepeat: true
+            fontsize: 15
+
+            Component.onCompleted:
+            {
+                maxclustersizesliderId.value = Mary.pc_max_cluster_size;
+            }
+
+            onEndFocus:
+            {
+                // grabFocus of Root Rectangle
+                pixelcolumnsettingsrectId.grabFocus();
+                maxclustersizesliderId.state = maxclustersizesliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                Mary.pc_max_cluster_size = maxclustersizesliderId.value;
+            }
+
+        }
+
+        //Min Cluster Size Slider
+        SliderSettingsObject
+        {
+            id: minclustersizesliderId
+            x: 20
+            y: maxclustersizesliderId.y + maxclustersizesliderId.height + 20
+            messagetext: "Min Pixel Cluster Size: " + Mary.pc_min_cluster_size
+            valuefrom: 3
+            valueto: Mary.pc_max_cluster_size - 1
+            stepsize: 1
+            majorstepsize: 10
+            controlstickautorepeat: true
+            fontsize: 15
+
+            Component.onCompleted:
+            {
+                minclustersizesliderId.value = Mary.pc_min_cluster_size;
+            }
+
+            onEndFocus:
+            {
+                // grabFocus of Root Rectangle
+                pixelcolumnsettingsrectId.grabFocus();
+                minclustersizesliderId.state = minclustersizesliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                Mary.pc_min_cluster_size = minclustersizesliderId.value;
+            }
+
+        }
+
+        //Max Clusters in Column Slider
+        SliderSettingsObject
+        {
+            id: maxclustersincolsliderId
+            x: 20
+            y: minclustersizesliderId.y + minclustersizesliderId.height + 20
+            messagetext: "Max Clusters in Column: " + Mary.pc_max_clusters_in_column
+            valuefrom: 1
+            valueto: 10
+            stepsize: 1
+            majorstepsize: 1
+            controlstickautorepeat: true
+            fontsize: 15
+
+            Component.onCompleted:
+            {
+                maxclustersincolsliderId.value = Mary.pc_max_clusters_in_column;
+            }
+
+            onEndFocus:
+            {
+                // grabFocus of Root Rectangle
+                pixelcolumnsettingsrectId.grabFocus();
+                maxclustersincolsliderId.state = maxclustersincolsliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                Mary.pc_max_clusters_in_column = maxclustersincolsliderId.value;
+            }
+
+        }
+
     }
 
     //Main View Rectangle-------------------------------------------
@@ -1509,6 +1898,9 @@ Item {
                 case rootpageId.pixelcolumnframe:
                     Max.newPixelColumnMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
                     break;
+                case rootpageId.skeletalframe:
+                    Max.newSkeletalMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
+                    break;
                 }
                 mainviewrect_privateId.attached_frame = rootpageId.emptyframe;
             }
@@ -1536,6 +1928,10 @@ Item {
                 case rootpageId.pixelcolumnframe:
                     Max.newPixelColumnMatProcessed.connect(mainviewdisplayId.recieveCVMat);
                     mainviewrect_privateId.attached_frame = rootpageId.pixelcolumnframe;
+                    break;
+                case rootpageId.skeletalframe:
+                    Max.newSkeletalMatProcessed.connect(mainviewdisplayId.recieveCVMat);
+                    mainviewrect_privateId.attached_frame = rootpageId.skeletalframe;
                     break;
                 default:
                     mainviewrectId.displayed_frame = rootpageId.emptyframe;
@@ -1623,8 +2019,9 @@ Item {
     {
         id: controlkeyId
         greenbuttonmessage: "Select"
-        redbuttonmessage: "Back"
-        blackbuttonmessage: "Save"
+        blackbuttonmessage: "Exit & Save"
+        enableredbutton: false
         enableblackbutton: true
+        buttonspacing: 120
     }
 }

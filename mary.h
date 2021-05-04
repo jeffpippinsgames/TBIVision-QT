@@ -127,8 +127,8 @@ signals:
     void signalChangeMaxTII(quint64 _maxtii);
     void signalChangeMinTII(quint64 _mintii);
     void signalChangeMaxClusterSize(int _size);
-    void signalChangeMinClusterSize(int _size);
     void signalChangeMaxClustersInColumn(int _numofclusters);
+    void signalChangeMinClusterSize(int _size);
     //Pylon Related Signals-------------------------------------------------------------------
     void pylonCameraMaxHeightChanged();
     void pylonCameraMaxWidthChanged();

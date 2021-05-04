@@ -15,7 +15,9 @@ public:
     bool isGausian();
     void clear();
     int size();
-    void ClusterToMat(cv::Mat &_mat);
+    void DrawToMat(cv::Mat &_mat);
+    void EraseFromMat(cv::Mat &_mat);
+    int getColumn();
 
 
 private:

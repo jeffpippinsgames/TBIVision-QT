@@ -6,185 +6,141 @@
 
 void Max::blankProcessingArrays()
 {
-    int _row=0;
+
     int _col=0;
     do
     {
-        m_flattened_pixel_array[_col][_row] = 0;
-        ++_row;
-        if(_row == Mat_Max_Height)
-        {
-            m_skeletal_line_array[_col] = 0;
-            _row = 0;
-            ++_col;
-        }
+        m_cluster_columns[_col].clear();
+        m_skeletal_line_array[_col] = 0;
+        ++_col;
     }while(_col < Mat_Max_Width);
 }
 
-bool Max::fillFlattenedArray(Mat &_src)
+bool Max::fillColumnClusterArray(Mat &_src, Mat &_dst)
 {
-    if(_src.channels() != 1)
-    {
-        qDebug()<<"Max: Error: fillFlattenedArray() Requires a Single Channel cv::Mat.";
-        return false;
-    }
-    if(!_src.isContinuous())
-    {
-        qDebug()<<"Max: Error: fillFlattenedArray() Requires a Continuous cv::Mat.";
-        return false;
-    }
-
-    m_flattened_rows = _src.rows;
-    m_flattened_cols = _src.cols;
     m_total_image_intensity = 0;
 
-    int _row=0;
-    int _col=0;
-    uint8_t* _data = (uint8_t*) _src.data;
-    int _dataindex = 0;
+    uint8_t * _srcdata = (uint8_t*)_src.data;
+    int _srcindex = 0;
+    int _row = 0;
+    int _col = 0;
+    PixelFundamental_t _pixel;
+    PixelClusterClass _cluster;
 
-    uint8_t _value;
-
+    //Fill the PixelColumn Array
     do
     {
-        _value = _data[_dataindex];
-        m_flattened_pixel_array[_col][_row] = _value;
-        m_total_image_intensity = m_total_image_intensity + _value;
+        if(m_total_image_intensity > m_max_image_intensity)
+        {
+            emit totalImageIntensityChanged(m_total_image_intensity);
+            emit failedTIICheck();
+            return false;
+        }
+        _srcindex = (_row * m_flattened_cols)+_col;
+        if(_srcdata[_srcindex] > 0) //Start The Cluster Count.
+        {
+            _pixel.col = _col;
+            _pixel.row = _row;
+            _pixel.intensity = _srcdata[_srcindex];
+            _cluster.pushPixelToBack(_pixel);
+            m_total_image_intensity += _srcdata[_srcindex];
+        }
+        if(_srcdata[_srcindex] == 0) //Check to see if We need to Build a Cluster List
+        {
+            if((_cluster.size() >= m_min_cluster_size) && (_cluster.size() <= m_max_cluster_size))
+            {
+                if(_cluster.isGausian()) m_cluster_columns[_col].pushClusterToBack(_cluster);
+            }
+            _cluster.clear();
+        }
 
         ++_row;
         if(_row == m_flattened_rows)
         {
+            //Check to see if this leftover cluster needs to be added.
+            if((_cluster.size() >= m_min_cluster_size) && (_cluster.size() <= m_max_cluster_size))
+            {
+                if(_cluster.isGausian()) m_cluster_columns[_col].pushClusterToBack(_cluster);
+            }
+            _cluster.clear();
             _row = 0;
             ++_col;
         }
-        _dataindex = (_row * m_flattened_cols) + _col;
     }while(_col < m_flattened_cols);
 
-    //Now Build Cluster List From Marked Clusters
-    //The pixel array has been built We might want to remove it later.
+    //Check TII For Min Requirement
+    if(m_total_image_intensity < m_min_image_intensity)
+    {
+        emit totalImageIntensityChanged(m_total_image_intensity);
+        emit failedTIICheck();
+        return false;
+    }
 
-    _col = 0 ;
-    _row = 0 ;
+    //Remove Any Clusters That Do Not Meet The Max Cluster in Col Check
+    _col = 0;
+    do
+    {
+        if(m_cluster_columns[_col].size() > m_max_clusterincol)
+        {
+            m_cluster_columns[_col].clear();
+        }
+        ++_col;
+    }while(_col < m_flattened_cols);
+
+    //Draw The Clusters in a New Mat
+    _col = 0;
+    do
+    {
+        m_cluster_columns[_col].drawToMat(_dst);
+        ++_col;
+    }while(_col < m_flattened_cols);
+
+    emit totalImageIntensityChanged(m_total_image_intensity);
+    return true;
+}
+
+bool Max::fillSkeleton(Mat _dst)
+{
+    uint8_t* _data = (uint8_t*)_dst.data;
+    int _dataindex;
+    int _index = 0;
+    float _rowcentroid;
+    int _empty_cols = 0;
+
+    do
+    {
+        if(m_cluster_columns[_index].size() == 1) //One Cluster Pop it
+        {
+            _rowcentroid = m_cluster_columns[_index].getCentroidofCluster(0);
+            m_skeletal_line_array[_index] = _rowcentroid;
+            _dataindex = ((int)_rowcentroid * m_flattened_cols) + _index;
+            _data[_dataindex] = 255;
+        }
+        else
+        {
+            ++_empty_cols;
+        }
+        ++_index;
+    }while(_index < m_flattened_cols);
+
+    if(_empty_cols > m_allowable_discontinuities)
+    {
+        emit failedDiscontinuityCheck();
+        return false;
+    }
 
     return true;
 }
 
-bool Max::buildPixelClusterList(Mat &_src, Mat &_dst)
+bool Max::updateFlattenedMembers(Mat _src)
 {
-
-     m_total_image_intensity = 0;
-
     if(_src.channels() != 1)
     {
-        qDebug()<<"Max: Error: buildPixelClusterList() Requires a Single Channel cv::Mat.";
-        emit totalImageIntensityChanged(m_total_image_intensity);
+        qDebug() << "Max: updateFlattenedMembers requires a Single Channel Mat.";
         return false;
     }
-    if(!_src.isContinuous())
-    {
-        qDebug()<<"Max: Error: buildPixelClusterList() Requires a Continuous cv::Mat.";
-        emit totalImageIntensityChanged(m_total_image_intensity);
-        return false;
-    }
-
-    m_column_cluster_list.clear();
-    m_flattened_rows = _src.rows;
     m_flattened_cols = _src.cols;
-
-
-    _dst.release();
-    _dst = cv::Mat(_src.rows, _src.cols, CV_8UC1);
-    uint8_t * _dstdata = (uint8_t*)_dst.data;
-
-    int _row=0;
-    int _col=0;
-    uint8_t* _data = (uint8_t*) _src.data;
-    int _dataindex = 0;
-    uint8_t _value;
-    int _numofclusterpixels=0;
-    PixelFundamental_t _pixel;
-    PixelClusterClass _cluster;
-    PixelColumnClass _column;
-
-    //start building the list.
-    do
-    {
-        _dstdata[_dataindex] = 0;
-        _value = _data[_dataindex];
-
-        m_total_image_intensity = m_total_image_intensity + _value;
-        //-------------------------------------------------------------------------------
-        if(_value > 0) //Start Determining If This is a Valid Cluster
-        {
-            ++_numofclusterpixels;
-        }
-        else if(_value == 0) //This Row Has No Pixel Intensity. Build The Cluster if Needed
-        {
-            if((_numofclusterpixels >= m_min_cluster_size) && (_numofclusterpixels <= m_max_cluster_size))
-            {
-                _cluster.clear();
-                int __row = _row - _numofclusterpixels;
-                int __dataindex = (__row * m_flattened_cols) + _col;
-                do //start building cluster with pixels
-                {
-                    _pixel.col = _col;
-                    _pixel.row = __row;
-                    _pixel.intensity = _data[__dataindex];
-                    _cluster.pushPixelToBack(_pixel);
-                    ++__row;
-                    __dataindex = (__row * m_flattened_cols) + _col;
-                }while(__row < _row);
-                if(_cluster.isGausian())
-                {
-                    _column.pushClusterToBack(_cluster);
-                    _cluster.ClusterToMat(_dst);
-                }
-            }
-            _numofclusterpixels = 0;
-        }
-        //-------------------------------------------------------------------------------
-        ++_row; //incriment _row
-        //-------------------------------------------------------------------------------
-        if(_row == m_flattened_rows) //The Column is Over. Increment Stuff and Deal with addint the _column
-        {
-            if((_numofclusterpixels >= m_min_cluster_size) && (_numofclusterpixels <= m_max_cluster_size))
-            {
-                _cluster.clear();
-                int __row = _row - _numofclusterpixels;
-                int __dataindex = (__row * m_flattened_cols) + _col;
-                do //start building cluster with pixels
-                {
-                    _pixel.col = _col;
-                    _pixel.row = __row;
-                    _pixel.intensity = _data[__dataindex];
-                    _cluster.pushPixelToBack(_pixel);
-                    ++__row;
-                    __dataindex = (__row * m_flattened_cols) + _col;
-                }while(__row < _row);
-                if(_cluster.isGausian())
-                {
-                    _column.pushClusterToBack(_cluster);
-                    _cluster.ClusterToMat(_dst);
-                }
-            }
-
-            if(_column.size() > 0)
-            {
-                m_column_cluster_list.push_back(_column);
-            }
-
-            _column.clear();
-            _cluster.clear();
-            _row = 0; //Reset The Row
-            ++_col; //Increment _col
-            _numofclusterpixels = 0; //Reset _numofclusterpixels
-        }
-        //-------------------------------------------------------------------------------
-        _dataindex = (_row * m_flattened_cols) + _col; //Get the New Data Index
-        //-------------------------------------------------------------------------------
-    }while(_col < m_flattened_cols);
-    //End of Building The Cluster Column List.
-    emit totalImageIntensityChanged(m_total_image_intensity);
+    m_flattened_rows = _src.rows;
     return true;
 }
 
@@ -198,6 +154,7 @@ Max::Max(QObject *parent) : QObject(parent)
     m_min_image_intensity = 720*255;
     m_min_cluster_size = 6;
     m_max_cluster_size = 75;
+    m_allowable_discontinuities = 20;
     emit timeInLoopChanged(m_timeinloop);
     qDebug()<<"Max: Max Object Created.";
 }
@@ -236,10 +193,10 @@ void Max::recieveNewCVMat(const Mat &_mat)
 
     //Declare Mats
     cv::Mat _raw_mat = _mat.clone();
-    cv::Mat _blurr_mat;
-    cv::Mat _threshold_mat;
-    cv::Mat _columite_mat;
-    cv::Mat _skel_mat;
+    cv::Mat _blurr_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC1);
+    cv::Mat _threshold_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC1);
+    cv::Mat _pixelcolumn_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC1);
+    cv::Mat _skel_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC1);
     cv::Mat _operation_mat;
 
     //Do OpenCV Proccesses
@@ -249,20 +206,35 @@ void Max::recieveNewCVMat(const Mat &_mat)
     cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
     emit newThresholdMatProcessed(_threshold_mat);
 
-    //Start Building Internals and Doing Checks
-    buildPixelClusterList(_threshold_mat, _columite_mat);
-    emit newPixelColumnMatProcessed(_columite_mat);
-
-    if(m_total_image_intensity > m_max_image_intensity)
+    //Pixel Column Processing and TII Trap.
+    blankProcessingArrays();
+    if(updateFlattenedMembers(_threshold_mat))
     {
-        emit totalImageIntensityExceeded();
-        m_timeinloop = QString("Time in Loop: " + QString::number(m_timer.elapsed()) + " ms.-Camera FPS = " + QString::number(1000/m_timer.elapsed()));
-        emit timeInLoopChanged(m_timeinloop);
-        emit processingComplete(); //Must Be Last Signal Sent
-        return;
+        if(fillColumnClusterArray(_threshold_mat, _pixelcolumn_mat)) //The TII Check is Done Here
+        {
+            emit newPixelColumnMatProcessed(_pixelcolumn_mat);
+            if(fillSkeleton(_skel_mat)) //Fill Skeleton and Discontinuity Trap
+            {
+                emit newSkeletalMatProcessed(_skel_mat);
+            }
+            else
+            {
+                _skel_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8SC1);
+                emit newSkeletalMatProcessed(_skel_mat);
+            }
+        }
+        else
+        {
+            _pixelcolumn_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8SC1);
+            emit newPixelColumnMatProcessed(_pixelcolumn_mat);
+            emit newSkeletalMatProcessed(_skel_mat);
+        }
     }
-
-
+    else
+    {
+        emit newPixelColumnMatProcessed(_pixelcolumn_mat);
+        emit newSkeletalMatProcessed(_skel_mat);
+    }
 
     //Time The Loop.
     m_timeinloop = QString("Time in Loop: " + QString::number(m_timer.elapsed()) + " ms.-Camera FPS = " + QString::number(1000/m_timer.elapsed()));
@@ -284,6 +256,37 @@ void Max::onThresholdMaxChange(int _max)
 {
     m_thresholdmax = _max;
 }
+
+void Max::onMaxTIIChange(quint64 _tii)
+{
+    m_max_image_intensity = _tii;
+}
+
+void Max::onMinTIIChange(quint64 _tii)
+{
+    m_min_image_intensity = _tii;
+}
+
+void Max::onMaxClusterSizeChange(int _size)
+{
+    m_max_cluster_size = _size;
+}
+
+void Max::onMinClusterSizeChange(int _size)
+{
+    m_min_cluster_size = _size;
+}
+
+void Max::onMaxClustersInColChange(int _size)
+{
+    m_max_clusterincol = _size;
+}
+
+
+
+
+
+
 
 
 

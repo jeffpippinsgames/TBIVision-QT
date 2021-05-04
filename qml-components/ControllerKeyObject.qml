@@ -22,6 +22,15 @@ Item {
 
 
 
+
+    onEnableredbuttonChanged:
+    {
+        if(!enableredbutton)
+        {
+            blackbuttonitemId.x = greenbuttonitemId.x + greenbuttonitemId.width + buttonspacing;
+        }
+    }
+
     //Font for UI
     FontLoader
     {

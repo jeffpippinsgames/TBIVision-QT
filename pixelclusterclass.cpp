@@ -63,7 +63,7 @@ int PixelClusterClass::size()
     return m_pixels.size();
 }
 
-void PixelClusterClass::ClusterToMat(cv::Mat &_mat)
+void PixelClusterClass::DrawToMat(cv::Mat &_mat)
 {
     if(_mat.channels() != 1) return;
     if(m_pixels.size() == 0) return;
@@ -82,6 +82,33 @@ void PixelClusterClass::ClusterToMat(cv::Mat &_mat)
         }
         ++_element;
     }while(_element < (int)m_pixels.size());
+}
+
+void PixelClusterClass::EraseFromMat(cv::Mat &_mat)
+{
+    if(_mat.channels() != 1) return;
+    if(m_pixels.size() == 0) return;
+
+    int _max_elements = _mat.rows * _mat.cols;
+    int _dataindex;
+    int _element = 0;
+    uint8_t * _data = (uint8_t*)_mat.data;
+
+    do
+    {
+        _dataindex = (m_pixels[_element].row * _mat.cols) + m_pixels[_element].col;
+        if(_dataindex < _max_elements)
+        {
+            _data[_dataindex] = 0;
+        }
+        ++_element;
+    }while(_element < (int)m_pixels.size());
+}
+
+int PixelClusterClass::getColumn()
+{
+    if(m_pixels.size() == 0) return -1;
+    return m_pixels[0].col;
 }
 
 

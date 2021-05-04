@@ -2,7 +2,6 @@
 #include <QDebug>
 #include <QDataStream>
 
-
 /**************************************************************
 Mary(QObject *parent) : QObject(parent)
 Public
@@ -18,7 +17,6 @@ Mary::Mary(QObject *parent) : QObject(parent)
     m_cv_thresholdmin = 0; 
 }
 
-
 /**************************************************************
 ~Mary(QObject *parent) : QObject(parent)
 Public
@@ -30,7 +28,6 @@ Mary::~Mary()
     emit aboutToDestroy();
     qDebug() << "Mary: Mary Object Destroyed.";
 }
-
 
 /**************************************************************
 SetMaryDefaultValues()
@@ -48,13 +45,12 @@ void Mary::SetMaryDefaultValues()
     m_pylon_aoiwidth = m_pylon_maxcamerawidth; 
     m_pylon_exposuretime = 3000.0;
     m_pylon_gain = 0;
-    m_pc_max_tii = 720*540*255*.3;
-    m_pc_min_tii = m_pc_max_tii * .01;
-    m_pc_max_clustersize = 100;
-    m_pc_min_clustersize = 20;
+    m_pc_max_tii = 2500000;
+    m_pc_min_tii = 250000;
+    m_pc_max_clustersize = 75;
+    m_pc_min_clustersize = 10;
     m_pc_max_clustersincolumn = 1;
 }
-
 
 /**************************************************************
 UpdateCameraAOIToMarysSettings()
@@ -66,7 +62,6 @@ void Mary::updateCameraAOIToMarysSettings()
 {
     emit signalChangeCameraAOI(m_pylon_aoiwidth, m_pylon_aoiheight);
 }
-
 
 /**************************************************************
 saveMaryToFile()
@@ -100,7 +95,6 @@ void Mary::saveMaryToFile()
 
 
 }
-
 
 /**************************************************************
 loadMaryFromFile()
@@ -136,7 +130,6 @@ void Mary::loadMaryFromFile()
     qDebug("Mary: marydefualt.tbi Loaded.");
 }
 
-
 /**************************************************************
 setCameraAOIWidth(int _width)
 Public
@@ -150,7 +143,6 @@ void Mary::setCameraAOIWidth(int _width)
         m_pylon_aoiwidth = _width;
         emit pylonCameraAOIWidthChanged();
 }
-
 
 /**************************************************************
 setCameraAOIHeight(int _height)
@@ -166,7 +158,6 @@ void Mary::setCameraAOIHeight(int _height)
     m_pylon_aoiheight = _height;
     emit pylonCameraAOIHeightChanged();
 }
-
 
 /**************************************************************
 setCameraExposure(double _exposure)
@@ -185,7 +176,6 @@ void Mary::setCameraExposure(double _exposure)
     }
 }
 
-
 /**************************************************************
 setCameraGain(int _gain)
 Public
@@ -203,7 +193,6 @@ void Mary::setCameraGain(int _gain)
         emit signalChangeCameraGain(_gain);
     }
 }
-
 
 /**************************************************************
 setCVBlurValue(int _value)
@@ -225,7 +214,6 @@ void Mary::setCVBlurValue(int _value)
 
 }
 
-
 /**************************************************************
 setCVThresholdMinValue(int _value)
 Public
@@ -244,7 +232,6 @@ void Mary::setCVThresholdMinValue(int _value)
 
 }
 
-
 /**************************************************************
 setCVThresholdMaxValue(int _value)
 Public
@@ -262,6 +249,12 @@ void Mary::setCVThresholdMaxValue(int _value)
     }
 }
 
+/**************************************************************
+setMaxTII
+Set Function
+Description:
+  Sets the Min TII
+**************************************************************/
 void Mary::setMaxTII(quint64 _maxtii)
 {
     if(_maxtii > m_pc_min_tii)
@@ -272,6 +265,12 @@ void Mary::setMaxTII(quint64 _maxtii)
     }
 }
 
+/**************************************************************
+setMinTII
+Set Function
+Description:
+  Sets the Min TII
+**************************************************************/
 void Mary::setMinTII(quint64 _mintii)
 {
     if(_mintii > 0)
@@ -285,6 +284,12 @@ void Mary::setMinTII(quint64 _mintii)
     }
 }
 
+/**************************************************************
+setMinClusterSize
+Set Function
+Description:
+  Sets the Min Cluster Size
+**************************************************************/
 void Mary::setMinClusterSize(int _cs)
 {
     if(_cs > 2)
@@ -298,6 +303,12 @@ void Mary::setMinClusterSize(int _cs)
     }
 }
 
+/**************************************************************
+setMaxClusterSize
+Set Function
+Description:
+  Sets the Max Cluster Size Setting
+**************************************************************/
 void Mary::setMaxClusterSize(int _cs)
 {
     if(_cs > m_pc_min_clustersize)
@@ -308,6 +319,12 @@ void Mary::setMaxClusterSize(int _cs)
     }
 }
 
+/**************************************************************
+setMaxClusterInCol
+Set Function
+Description:
+  Sets the Max Clusters Per Column Setting
+**************************************************************/
 void Mary::setMaxClusterInCol(int _csincol)
 {
     if(_csincol >= 1)
@@ -317,7 +334,6 @@ void Mary::setMaxClusterInCol(int _csincol)
         emit signalChangeMaxClustersInColumn(m_pc_max_clustersincolumn);
     }
 }
-
 
 /**************************************************************
 setShowDebugInfo(bool _value)
@@ -334,6 +350,12 @@ void Mary::setShowDebugInfo(bool _value)
     }
 }
 
+/**************************************************************
+broadcastQMLSignals()
+Slot
+Description:
+  Slot That Resends all the Setting Emits To The QML
+**************************************************************/
 void Mary::broadcastQMLSignals()
 {
     emit cvBlurValueChanged();
@@ -352,10 +374,10 @@ void Mary::broadcastQMLSignals()
 }
 
 /**************************************************************
-sendCameraSettings()
+broadcastSingletonSignals()
 Slot
 Description:
-  Slot That Resends all the Setting Emits
+  Slot That Resends all the Setting Emits To The Singletons
 **************************************************************/
 void Mary::broadcastSingletonSignals()
 {
@@ -368,8 +390,8 @@ void Mary::broadcastSingletonSignals()
     emit signalChangeMaxTII(m_pc_max_tii);
     emit signalChangeMinTII(m_pc_min_tii);
     emit signalChangeMaxClusterSize(m_pc_max_clustersize);
-    emit signalChangeMinClusterSize(m_pc_min_clustersize);
     emit signalChangeMaxClustersInColumn(m_pc_max_clustersincolumn);
+    emit signalChangeMinClusterSize(m_pc_min_clustersize);
 }
 
 
