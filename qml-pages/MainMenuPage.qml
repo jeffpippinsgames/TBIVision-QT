@@ -13,6 +13,8 @@ Item {
     anchors.fill: parent
     opacity: 1
 
+
+
     readonly property string pagename: "MainMenu Page"
 
     property var dynamicpage: null

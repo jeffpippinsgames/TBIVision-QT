@@ -29,7 +29,11 @@ Rectangle
     readonly property int highlightbordersize: 5
 
     property string messagetext: "Message Text"
-    property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
+    //property string fontsource: "qrc:/Fonts/EurostileBold.ttf"
+    //property string fontsource: "qrc:/Fonts/Measurements.ttf"
+    //property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    property string fontsource: "qrc:/Fonts/PermanentMarker-Regular.ttf"
     property color textcolor: Qt.rgba(1,1,.95,1)
     property int fontsize: 20
     property real valueto: 100
@@ -151,10 +155,7 @@ Rectangle
 
         onUpButtonReleased:
         {
-            if((rootobjectId.value-rootobjectId.stepsize) >= rootobjectId.valuefrom)
-            {
-                rootobjectId.value = rootobjectId.value - rootobjectId.stepsize;
-            }
+
         }
 
         onDownButtonReleased:

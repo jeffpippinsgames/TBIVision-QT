@@ -17,6 +17,12 @@ Item
     x:0
     y:0
 
+    //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
+    //property string fontsource: "qrc:/Fonts/EurostileBold.ttf"
+    //property string fontsource: "qrc:/Fonts/Measurements.ttf"
+    //property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    property string fontsource: "qrc:/Fonts/PermanentMarker-Regular.ttf"
+
     //Custom Properties-------------------------
     property var page: null
 
@@ -186,7 +192,7 @@ Item
     FontLoader
     {
         id: fontId
-        source: "qrc:/Fonts/Typo Draft Demo.otf"
+        source: fontsource
     }
 
     //Background Image

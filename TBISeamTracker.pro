@@ -16,6 +16,8 @@ SOURCES += \
         max.cpp \
         pixelclusterclass.cpp \
         pixelcolumnclass.cpp \
+        tbiline.cpp \
+        tbipoint.cpp \
         toby.cpp
 
 RESOURCES += qml.qrc
@@ -39,6 +41,8 @@ HEADERS += \
     pixelclusterclass.h \
     pixelcolumnclass.h \
     pixelfundamental.h \
+    tbiline.h \
+    tbipoint.h \
     toby.h
 
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonbase-6.2.0

@@ -20,7 +20,11 @@ Item {
     property int ymargin: 20
     property int buttonspacing: 50
 
-
+    //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
+    //property string fontsource: "qrc:/Fonts/EurostileBold.ttf"
+    //property string fontsource: "qrc:/Fonts/Measurements.ttf"
+    //property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    property string fontsource: "qrc:/Fonts/PermanentMarker-Regular.ttf"
 
 
     onEnableredbuttonChanged:
@@ -35,7 +39,7 @@ Item {
     FontLoader
     {
         id: fontId
-        source: "qrc:/Fonts/Typo Draft Demo.otf"
+        source: fontsource
     }
 
     //Green Button Hugs the Left Side of the Screen

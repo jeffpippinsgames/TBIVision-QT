@@ -26,7 +26,11 @@ Item
     property int menucentery: rootcomponentId.height/2 - titletextId.height/2
     property string menutitle: "Menu"
     property string backgroundimage: "qrc:/Icons/dark_steel_texture.jpg"
-    property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
+    //property string fontsource: "qrc:/Fonts/EurostileBold.ttf"
+    //property string fontsource: "qrc:/Fonts/Measurements.ttf"
+    //property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    property string fontsource: "qrc:/Fonts/PermanentMarker-Regular.ttf"
     property int menuiconsizex: 64
     property int menuiconsizey: 64
     property int menuicontextsize: 35

@@ -113,11 +113,13 @@ bool Max::fillSkeleton(Mat _dst)
         {
             _rowcentroid = m_cluster_columns[_index].getCentroidofCluster(0);
             m_skeletal_line_array[_index] = _rowcentroid;
+            emit skeletalArrayChanged(_rowcentroid, _index);
             _dataindex = ((int)_rowcentroid * m_flattened_cols) + _index;
             _data[_dataindex] = 255;
         }
         else
         {
+            emit skeletalArrayChanged(0.0, _index);
             ++_empty_cols;
         }
         ++_index;
@@ -128,6 +130,7 @@ bool Max::fillSkeleton(Mat _dst)
         emit failedDiscontinuityCheck();
         return false;
     }
+
 
     return true;
 }

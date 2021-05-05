@@ -111,6 +111,7 @@ signals:
     void failedTIICheck();
     void failedDiscontinuityCheck();
     void totalImageIntensityChanged(quint64 _tii);
+    void skeletalArrayChanged(float _value, int _index);
 
 };
 

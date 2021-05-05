@@ -15,7 +15,11 @@ Item {
     //Custom Properties----------------------------------------------
     readonly property string pagename: "ImageProcessingSettings Page"
 
-    property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
+    //property string fontsource: "qrc:/Fonts/EurostileBold.ttf"
+    //property string fontsource: "qrc:/Fonts/Measurements.ttf"
+    //property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    property string fontsource: "qrc:/Fonts/PermanentMarker-Regular.ttf"
     property string backgroundimage: "qrc:/Icons/dark_steel_texture.jpg"
     property real backgroundopacity: .6
     property real controlsopacity: 1
@@ -72,6 +76,8 @@ Item {
     function signalDestroyPage()
     {
         Max.processingComplete.disconnect(rootpageId.triggerTobyNextFrame);
+        Max.skeletalArrayChanged.disconnect(skeletalarrayId.updateArray);
+        mainviewrectId.disconnectSignal();
         Mary.updateCameraAOIToMarysSettings();
         Mary.saveMaryToFile();
         aboutToDestroy();
@@ -106,6 +112,7 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -114,6 +121,7 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.rawframe}
@@ -129,6 +137,7 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.focuscolor}
@@ -137,6 +146,7 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.rawframe}
@@ -151,6 +161,7 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: true;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -159,6 +170,7 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
@@ -171,6 +183,7 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: true;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.focuscolor}
@@ -179,6 +192,7 @@ Item {
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: blursettingscontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
@@ -193,6 +207,7 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: true;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -201,6 +216,7 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
@@ -213,6 +229,7 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: true;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.focuscolor}
@@ -221,6 +238,7 @@ Item {
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
@@ -235,6 +253,7 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: true;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: pixelcolumnborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -243,6 +262,7 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.pixelcolumnframe}
@@ -255,6 +275,7 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: true;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: pixelcolumnborderrectId; border.color: rootpageId.focuscolor}
@@ -263,6 +284,7 @@ Item {
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.pixelcolumnframe}
@@ -276,15 +298,18 @@ Item {
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
-            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: true;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: true;}
+
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
-            PropertyChanges{ target: pixelcolumnborderrectId; border.color: rootpageId.nonfocuscolor}
+            PropertyChanges{ target: skeletalborderrectId; border.color: rootpageId.nonfocuscolor}
             //SetController focus To FrameSele
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.skeletalframe}
@@ -296,20 +321,24 @@ Item {
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
-            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: true;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: true;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
-            PropertyChanges{ target: pixelcolumnborderrectId; border.color: rootpageId.focuscolor}
+            PropertyChanges{ target: skeletalborderrectId; border.color: rootpageId.focuscolor}
             //SetController focus To FrameSele
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
-            PropertyChanges{target: pixelcolumncontrollerId; focus: true}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.skeletalframe}
             //Set The Interior Control State
             PropertyChanges {target: pixelcolumnsettingsrectId; state: "MaxTII";}
+            //Set The Interior Control State
+            PropertyChanges {target: skeletalsettingsrectId; state: "ArrayState";}
         }
 
 
@@ -716,7 +745,7 @@ Item {
 
             onRedButtonPressed:
             {
-               // rootpageId.signalDestroyPage();
+                // rootpageId.signalDestroyPage();
             }
 
             onUpButtonPressed:
@@ -995,7 +1024,7 @@ Item {
 
             Component.onCompleted:
             {
-                 gainsliderId.value = Mary.getCameraGain();
+                gainsliderId.value = Mary.getCameraGain();
             }
 
             onEndFocus:
@@ -1211,7 +1240,7 @@ Item {
         }
 
         states:
-        [
+            [
             State
             {
                 name: "NonFocused"
@@ -1416,21 +1445,21 @@ Item {
             controlstickautorepeat: true
 
 
-           Component.onCompleted:
-           {
-               thresholdmaxsliderId.value = Mary.getCVThresholdMaxValue();
-           }
+            Component.onCompleted:
+            {
+                thresholdmaxsliderId.value = Mary.getCVThresholdMaxValue();
+            }
 
-           onEndFocus:
-           {
-               thresholdsettingsrectId.grabFocus();
-               thresholdmaxsliderId.state = thresholdmaxsliderId.highlightedstate;
-           }
+            onEndFocus:
+            {
+                thresholdsettingsrectId.grabFocus();
+                thresholdmaxsliderId.state = thresholdmaxsliderId.highlightedstate;
+            }
 
-           onValueChanged:
-           {
-               Mary.cv_thresholdmax = thresholdmaxsliderId.value;
-           }
+            onValueChanged:
+            {
+                Mary.cv_thresholdmax = thresholdmaxsliderId.value;
+            }
 
         }
 
@@ -1453,7 +1482,7 @@ Item {
         }
 
         states:
-        [
+            [
             State
             {
                 name: "NonFocused"
@@ -1589,7 +1618,7 @@ Item {
 
             onRedButtonPressed:
             {
-               // rootpageId.signalDestroyPage();
+                // rootpageId.signalDestroyPage();
             }
 
             onUpButtonPressed:
@@ -1683,15 +1712,15 @@ Item {
         //Total Image Intensity
         Text
         {
-        id: pixelcolumn_ttitextId
-        font.family: fontId.name
-        height: pixelcolumn_ttitextId.implicitHeight
-        width: pixelcolumn_ttitextId.implicitWidth
-        y: 60
-        x: 10
-        font.pixelSize: 20
-        color: rootpageId.textcolor
-        text: "Total Image Intensity: " + Max.total_image_intensity
+            id: pixelcolumn_ttitextId
+            font.family: fontId.name
+            height: pixelcolumn_ttitextId.implicitHeight
+            width: pixelcolumn_ttitextId.implicitWidth
+            y: 60
+            x: 10
+            font.pixelSize: 20
+            color: rootpageId.textcolor
+            text: "Total Image Intensity: " + Max.total_image_intensity
         }
 
         //Max TTI Slider
@@ -1861,6 +1890,192 @@ Item {
 
     }
 
+    //Skeletal Settings Rectangle
+    Rectangle
+    {
+        id: skeletalsettingsrectId
+        visible: false
+        width: rootpageId.settingsrectwidth
+        height: rootpageId.settingsrectheight
+        x: rootpageId.settingsrectx
+        y: rootpageId.settingsrecty
+        color: "transparent"
+
+        function grabFocus()
+        {
+            skeletalcontrollerId.focus = true;
+        }
+
+        states:
+            [
+            State
+            {
+                name: "NonFocused"
+                PropertyChanges{target: skeletalborderrectId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: skeletalarrayId; state: skeletalarrayId.nothighlightedstate;}
+            },
+            State
+            {
+                name: "ArrayState"
+                PropertyChanges{target: skeletalborderrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: skeletalarrayId; state: skeletalarrayId.highlightedstate;}
+            }
+        ]
+
+        Rectangle
+        {
+            anchors.fill: skeletalsettingsrectId
+            color: "black"
+            opacity: .8
+            radius: 10
+        }
+
+        Rectangle
+        {
+            anchors.fill: skeletalsettingsrectId
+            color: "darkred"
+            opacity: .05
+            radius: 10
+        }
+
+        Rectangle
+        {
+            id: skeletalborderrectId
+            anchors.fill: skeletalsettingsrectId
+            color: "transparent"
+            border.color: rootpageId.nonfocuscolor
+            border.width: rootpageId.rectborderwidths
+            radius: 10
+        }
+
+        ControllerObject
+        {
+
+            id:skeletalcontrollerId
+            focus: false
+
+            onFocusChanged:
+            {
+                if(focus)
+                {
+                    controlkeyId.enableblackbutton = false;
+                }
+            }
+
+            onBlackButtonPressed:
+            {
+                //rootpageId.signalDestroyPage();
+            }
+
+            onGreenButtonPressed:
+            {
+                switch(skeletalsettingsrectId.state)
+                {
+                case "ArrayState":
+                    skeletalarrayId.grabFocus();
+                    break;
+                }
+            }
+
+            onRedButtonPressed:
+            {
+                // rootpageId.signalDestroyPage();
+            }
+
+            onUpButtonPressed:
+            {
+
+                switch(skeletalsettingsrectId.state)
+                {
+                case "ArrayState":
+                    rootpageId.state = skeletalstateframeactive;
+                    skeletalsettingsrectId.state = "NonFocused";
+                    break;
+                }
+            }
+
+            onDownButtonPressed:
+            {
+
+            }
+
+            onLeftButtonPressed:
+            {
+
+            }
+
+            onRightButtonPressed:
+            {
+
+            }
+
+            onUpButtonReleased:
+            {
+
+            }
+
+            onDownButtonReleased:
+            {
+
+            }
+
+            onLeftButtonReleased:
+            {
+
+            }
+
+            onRightButtonReleased:
+            {
+
+            }
+        }
+
+        //Settings Text
+        Text
+        {
+            id: skeletaltextId
+            font.family: fontId.name
+            y: 10
+            x:10
+            text: "Skeletal Settings"
+            font.pixelSize: 25
+            color: rootpageId.textcolor
+        }
+
+        ArrayViewerObject
+        {
+            id: skeletalarrayId
+            x:20
+            y:100
+            width:760
+            title_text: "Skeletal Array"
+            controlstickautorepeat: true
+
+            function updateArray(_value, _index)
+            {
+                if(_index < skeletalarrayId.listModelSize())
+                {
+                    skeletalarrayId.updateElementValue(_value, _index);
+                }
+                else
+                {
+                    skeletalarrayId.addListElement(_value, _index);
+                }
+            }
+
+            Component.onCompleted:
+            {
+                Max.skeletalArrayChanged.connect(skeletalarrayId.updateArray);
+            }
+
+            onEndFocus:
+            {
+                skeletalsettingsrectId.grabFocus();
+                skeletalsettingsrectId.state = "ArrayState";
+            }
+        }
+    }
+
     //Main View Rectangle-------------------------------------------
     Rectangle
     {
@@ -1871,6 +2086,11 @@ Item {
         x: rootpageId.frameselectrectx
         y: rootpageId.settingsrecty
         color: "transparent"
+
+        function disconnectSignal()
+        {
+            mainviewrect_privateId.detachMaxSignal();
+        }
 
         //Encapsulated To Make Private
         QtObject

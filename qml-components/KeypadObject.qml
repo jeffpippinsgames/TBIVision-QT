@@ -26,6 +26,12 @@ Item
     signal aboutToOpen()
     signal aboutToClose()
 
+    //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
+    //property string fontsource: "qrc:/Fonts/EurostileBold.ttf"
+    //property string fontsource: "qrc:/Fonts/Measurements.ttf"
+    //property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    property string fontsource: "qrc:/Fonts/PermanentMarker-Regular.ttf"
+
     //Misc Functions-------------------------------------------------
     function grabFocus()
     {
@@ -50,7 +56,7 @@ Item
     FontLoader
     {
         id: font2Id
-        source: "qrc:/Fonts/Typo Draft Demo.otf"
+        source: fontsource
     }
 
     //Controller Object

@@ -15,7 +15,11 @@ Item
 
     property string messagetext: "Are You Sure?"
     property color messagecolor: Qt.rgba(1,1,.95,1)
-    property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
+    //property string fontsource: "qrc:/Fonts/EurostileBold.ttf"
+    //property string fontsource: "qrc:/Fonts/Measurements.ttf"
+    //property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    property string fontsource: "qrc:/Fonts/PermanentMarker-Regular.ttf"
     property string backgroundimage: "qrc:/Icons/dark_steel_texture.jpg"
     property int buttoniconsize: 150
     property int buttoniconspacing: 100

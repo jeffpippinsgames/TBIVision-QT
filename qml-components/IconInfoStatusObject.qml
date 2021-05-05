@@ -20,7 +20,11 @@ Rectangle
     property color textcolor: Qt.rgba(1,1,.95,1)
     property int glowradius: 10
     property int glowsamples: 10
-    property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
+    //property string fontsource: "qrc:/Fonts/EurostileBold.ttf"
+    //property string fontsource: "qrc:/Fonts/Measurements.ttf"
+    //property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    property string fontsource: "qrc:/Fonts/PermanentMarker-Regular.ttf"
     property int textsize: 30
 
 

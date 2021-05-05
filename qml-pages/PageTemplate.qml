@@ -15,7 +15,11 @@ Item {
     //Custom Properties----------------------------------------------
     readonly property string pagename: ""
 
-    property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
+    //property string fontsource: "qrc:/Fonts/EurostileBold.ttf"
+    //property string fontsource: "qrc:/Fonts/Measurements.ttf"
+    //property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    property string fontsource: "qrc:/Fonts/PermanentMarker-Regular.ttf"
     property string backgroundimage: "qrc:/Icons/dark_steel_texture.jpg"
     property real backgroundopacity: 1
     property real controlsopacity: 1
