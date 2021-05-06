@@ -35,6 +35,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     QmlTBIDisplay.h \
+    TBITopSurfaceLineVotingStructure.h \
     gary.h \
     mary.h \
     max.h \

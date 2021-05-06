@@ -36,6 +36,8 @@ Item {
     readonly property string pixelcolumnstateframeactive: "PixelColumnStateFrameActive"
     readonly property string skeletalstateframenotactive: "SkeletalStateFrameNotActive"
     readonly property string skeletalstateframeactive: "SkeletalStateFrameActive"
+    readonly property string tslstateframenotactive: "TSLStateFrameNotActive" //Top Surface Lines
+    readonly property string tslstateframeactive: "TSLStateFrameActive" //Top Surface Lines
 
     //Frame Constants. For Display Switching and Signal Connections to Max
     readonly property string emptyframe: "NoFrame"
@@ -44,6 +46,7 @@ Item {
     readonly property string thresholdframe: "Threshold"
     readonly property string pixelcolumnframe: "PixelColumn"
     readonly property string skeletalframe: "Skeletal"
+    readonly property string tslframe: "TSL" //Top Surface Lines
 
     //For Rectangle Placements
     //The MainView Rect Derives From FrameSelect and Settings
@@ -336,10 +339,56 @@ Item {
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.skeletalframe}
             //Set The Interior Control State
-            PropertyChanges {target: pixelcolumnsettingsrectId; state: "MaxTII";}
+            PropertyChanges {target: skeletalsettingsrectId; state: "ArrayState";}
+        },
+        State //TSL Selected Frame Focused
+        {
+            name: rootpageId.tslstateframeactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: false;}
+            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
+            PropertyChanges{ target: skeletalborderrectId; border.color: rootpageId.nonfocuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.tslframe}
+        },
+        State //TSL Selected and Focused
+        {
+            name: rootpageId.tslstateframenotactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: false;}
+            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
+            PropertyChanges{ target: skeletalborderrectId; border.color: rootpageId.focuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.tslframe}
             //Set The Interior Control State
             PropertyChanges {target: skeletalsettingsrectId; state: "ArrayState";}
         }
+
 
 
     ]
@@ -574,6 +623,9 @@ Item {
                         case rootpageId.skeletalframe:
                             Max.newSkeletalMatProcessed.connect(delegateframeId.recieveCVMat);
                             break;
+                        case rootpageId.tslframe:
+                            Max.newTSLMatProcessed.connect(delegateframeId.recieveCVMat);
+                            break;
                         }
                     }
                 }
@@ -612,6 +664,7 @@ Item {
                 modelId.append({"frame": rootpageId.thresholdframe});
                 modelId.append({"frame": rootpageId.pixelcolumnframe});
                 modelId.append({"frame": rootpageId.skeletalframe});
+                modelId.append({"frame": rootpageId.tslframe});
 
             }
 
@@ -1037,6 +1090,18 @@ Item {
             {
                 Mary.pylon_gain =  gainsliderId.value;
             }
+        }
+
+        //Toby Debugging
+        Text
+        {
+            id: exposuredebugtextId
+            font.family: fontId.name
+            y: gainsliderId.y + gainsliderId.height + 20
+            x:20
+            text: "Toby: Camera Exposure: " + Toby.pylon_exposure
+            font.pixelSize: 25
+            color: rootpageId.textcolor
         }
 
     }
@@ -1913,12 +1978,21 @@ Item {
                 name: "NonFocused"
                 PropertyChanges{target: skeletalborderrectId; border.color:rootpageId.nonfocuscolor;}
                 PropertyChanges{target: skeletalarrayId; state: skeletalarrayId.nothighlightedstate;}
+                PropertyChanges{target: discontinuitysliderId; state: discontinuitysliderId.nothighlightedstate;}
             },
             State
             {
                 name: "ArrayState"
                 PropertyChanges{target: skeletalborderrectId; border.color:rootpageId.focuscolor;}
                 PropertyChanges{target: skeletalarrayId; state: skeletalarrayId.highlightedstate;}
+                PropertyChanges{target: discontinuitysliderId; state: discontinuitysliderId.nothighlightedstate;}
+            },
+            State
+            {
+                name: "DiscState"
+                PropertyChanges{target: skeletalborderrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: skeletalarrayId; state: skeletalarrayId.nothighlightedstate;}
+                PropertyChanges{target: discontinuitysliderId; state: discontinuitysliderId.highlightedstate;}
             }
         ]
 
@@ -1974,6 +2048,10 @@ Item {
                 case "ArrayState":
                     skeletalarrayId.grabFocus();
                     break;
+                case "DiscState":
+                    discontinuitysliderId.grabFocus();
+                    break;
+
                 }
             }
 
@@ -1991,12 +2069,20 @@ Item {
                     rootpageId.state = skeletalstateframeactive;
                     skeletalsettingsrectId.state = "NonFocused";
                     break;
+                case "DiscState":
+                    skeletalsettingsrectId.state = "ArrayState";
+                    break;
                 }
             }
 
             onDownButtonPressed:
             {
-
+                switch(skeletalsettingsrectId.state)
+                {
+                case "ArrayState":
+                    skeletalsettingsrectId.state = "DiscState";
+                    break;
+                }
             }
 
             onLeftButtonPressed:
@@ -2042,6 +2128,7 @@ Item {
             color: rootpageId.textcolor
         }
 
+        //Skeletal Array
         ArrayViewerObject
         {
             id: skeletalarrayId
@@ -2074,7 +2161,44 @@ Item {
                 skeletalsettingsrectId.state = "ArrayState";
             }
         }
+
+        //Discontinuity Slider
+        SliderSettingsObject
+        {
+            id: discontinuitysliderId
+            controlname: "MaxDiscontinuities"
+            x:20
+            y: skeletalarrayId.y + skeletalarrayId.height + 20
+            messagetext: "Maximum Discontinuities: " + Mary.sk_max_discontinuity;
+            valuefrom: 0
+            valueto: 50
+            stepsize: 1
+            majorstepsize: 5
+            controlstickautorepeat: true;
+
+
+
+            Component.onCompleted:
+            {
+                discontinuitysliderId.value = Mary.sk_max_discontinuity;
+            }
+
+            onEndFocus:
+            {
+                skeletalsettingsrectId.grabFocus();
+                discontinuitysliderId.state = discontinuitysliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                Mary.sk_max_discontinuity = discontinuitysliderId.value;
+            }
+        }
+
+
+
     }
+
 
     //Main View Rectangle-------------------------------------------
     Rectangle
@@ -2121,6 +2245,9 @@ Item {
                 case rootpageId.skeletalframe:
                     Max.newSkeletalMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
                     break;
+                case rootpageId.tslframe:
+                    Max.newTSLMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
+                    break;
                 }
                 mainviewrect_privateId.attached_frame = rootpageId.emptyframe;
             }
@@ -2152,6 +2279,10 @@ Item {
                 case rootpageId.skeletalframe:
                     Max.newSkeletalMatProcessed.connect(mainviewdisplayId.recieveCVMat);
                     mainviewrect_privateId.attached_frame = rootpageId.skeletalframe;
+                    break;
+                case rootpageId.tslframe:
+                    Max.newTSLMatProcessed.connect(mainviewdisplayId.recieveCVMat);
+                    mainviewrect_privateId.attached_frame = rootpageId.tslframe;
                     break;
                 default:
                     mainviewrectId.displayed_frame = rootpageId.emptyframe;

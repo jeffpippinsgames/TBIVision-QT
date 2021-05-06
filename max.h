@@ -12,6 +12,7 @@
 #include <QList>
 #include <vector>
 #include "pixelcolumnclass.h"
+#include "tbiline.h"
 
 using namespace cv;
 
@@ -34,8 +35,9 @@ class Max : public QObject
 private:
     void blankProcessingArrays();
     bool fillColumnClusterArray(cv::Mat &_src, cv::Mat &_dst);
-    bool fillSkeleton(cv::Mat _dst);
-    bool updateFlattenedMembers(cv::Mat _src);
+    bool fillSkeleton(cv::Mat &_dst);
+    bool fillTopSurfaceLines(cv::Mat &_dst);
+    bool updateFlattenedMembers(cv::Mat &_src);
 
 
 
@@ -69,6 +71,7 @@ private:
     //Flattening Phase Data Variables-----------------------------------
     int m_flattened_rows;
     int m_flattened_cols;
+    int m_flattened_iohrv; //IndexOfHighestRowValue i.e index of the skeletal array with bottom pixel value
 
     //Pixel Column Phase Processing Variables--------------------------
     quint64 m_total_image_intensity;
@@ -78,7 +81,23 @@ private:
     //Skeletal Phase Data Variables-------------------------------------
     float m_skeletal_line_array[Mat_Max_Width];
     int m_allowable_discontinuities;
+
+    //RANSAC. Left and Right Top Surface Lines(Voting Algorythms)-------
+    TBILine m_left_tsl;
+    TBILine m_right_tsl;
+    float m_max_tsl_angle;
+    float m_min_tsl_angle;
+    int m_min_tsl_votes;
+    int m_tsl_iterations;
+    float m_tsl_distance_threshold;
+
+    //Linear Topography. (Split and Merge Algorythms)-------------------
+    std::vector<TBILine> m_topography_lines;
+    float m_sm_distance_threshold;
+    float m_sm_length_requirement;
+
     //Geometric Construction Phase Data Variables-----------------------
+
 
 
 
@@ -94,24 +113,32 @@ public slots:
     void onMaxClusterSizeChange(int _size);
     void onMinClusterSizeChange(int _size);
     void onMaxClustersInColChange(int _size);
+    void onMaxDiscontinuityChange(int _value);
 
 
 //Signals----------------------------------------------------------------
 signals:
+    //QML Signals--------------------------------------------------------
     void timeInLoopChanged(QString _timinloop);
+    void viewportChanged();
+    void aboutToDestroy();
+    void totalImageIntensityChanged(quint64 _tii);
+    void skeletalArrayChanged(float _value, int _index);
+    //Mat Delivery Signals-----------------------------------------------
     void newFrameProcessed(const QImage& _qimage);
     void newRawMatProcessed(const cv::Mat& _raw_frame);
     void newBlurMatProcessed(const cv::Mat& _blur_frame);
     void newThresholdMatProcessed(const cv::Mat& _threshold_frame);
     void newPixelColumnMatProcessed(const cv::Mat& _pixel_column_frame);
     void newSkeletalMatProcessed(const cv::Mat& _skel_frame);
+    void newTSLMatProcessed(const cv::Mat& _tsl_frame);
+    //ProccessingComplete Signal-----------------------------------------
     void processingComplete();
-    void viewportChanged();
-    void aboutToDestroy();
-    void failedTIICheck();
+    //Processing Failure Signals-----------------------------------------
+    void failedTIICheck(); //Total Image Intensity
     void failedDiscontinuityCheck();
-    void totalImageIntensityChanged(quint64 _tii);
-    void skeletalArrayChanged(float _value, int _index);
+    void failedTSLCheck(); //Top Surface Lines
+
 
 };
 

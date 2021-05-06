@@ -138,12 +138,13 @@ Item {
 
         Component.onCompleted:
         {
-            // templatesliderId.value = Some Init Function
+            // Initialize the Slider Value
+        }
 
         onEndFocus:
         {
             // grabFocus of Root Rectangle
-            templatesliderId.state = templatesliderId.highlightedstate;
+            //Set The slider state to highlightedstate
         }
 
         onValueChanged:
@@ -157,4 +158,4 @@ Item {
 }
 
 
-}
+

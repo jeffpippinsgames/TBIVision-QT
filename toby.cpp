@@ -46,7 +46,7 @@ void Toby::triggerCamera()
     if(!m_camera->IsGrabbing()) return;
     if(m_camera->CanWaitForFrameTriggerReady())
     {
-        //m_camera->WaitForFrameTriggerReady(200);
+        m_camera->WaitForFrameTriggerReady(2000);
         m_camera->ExecuteSoftwareTrigger();
     }
 }

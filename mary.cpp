@@ -12,9 +12,7 @@ Mary::Mary(QObject *parent) : QObject(parent)
 {
 
     qDebug() << "Mary: Mary Object Created.";
-    m_cv_blur = 3;
-    m_cv_thresholdmax = 255;
-    m_cv_thresholdmin = 0; 
+
 }
 
 /**************************************************************
@@ -43,13 +41,14 @@ void Mary::SetMaryDefaultValues()
     m_gui_showdebuginfo = true;
     m_pylon_aoiheight = m_pylon_maxcameraheight;
     m_pylon_aoiwidth = m_pylon_maxcamerawidth; 
-    m_pylon_exposuretime = 3000.0;
+    m_pylon_exposuretime = 2500.0;
     m_pylon_gain = 0;
     m_pc_max_tii = 2500000;
     m_pc_min_tii = 250000;
     m_pc_max_clustersize = 75;
     m_pc_min_clustersize = 10;
     m_pc_max_clustersincolumn = 1;
+    m_sk_max_discontinuity = 20;
 }
 
 /**************************************************************
@@ -88,6 +87,7 @@ void Mary::saveMaryToFile()
     _ds << m_pc_max_clustersize;
     _ds << m_pc_min_clustersize;
     _ds << m_pc_max_clustersincolumn;
+    _ds << m_sk_max_discontinuity;
     _ds.setVersion(QDataStream::Qt_5_12);
     _savefile.close();
     qDebug() << "Mary: Mary Saved To " << _filepath;
@@ -108,6 +108,9 @@ void Mary::loadMaryFromFile()
     QFile _savefile(_filepath);
     if(!_savefile.exists())
     {
+        SetMaryDefaultValues();
+        broadcastQMLSignals();
+        broadcastSingletonSignals();
         qDebug("Mary: marydefualt.tbi does not exsist.");
         return;
     }
@@ -126,8 +129,11 @@ void Mary::loadMaryFromFile()
     _ds >> m_pc_max_clustersize;
     _ds >> m_pc_min_clustersize;
     _ds >> m_pc_max_clustersincolumn;
+    _ds >> m_sk_max_discontinuity;
     _savefile.close();
     qDebug("Mary: marydefualt.tbi Loaded.");
+    broadcastQMLSignals();
+    broadcastSingletonSignals();
 }
 
 /**************************************************************
@@ -336,6 +342,21 @@ void Mary::setMaxClusterInCol(int _csincol)
 }
 
 /**************************************************************
+setMaxDiscontinuity
+Set Function
+Description:
+  Sets the Max Allowable Discontinuity For The Skeletal
+  Processing.
+**************************************************************/
+void Mary::setMaxDiscontinuity(int _disc)
+{
+    if((_disc < 0) || (_disc > 50)) return;
+    m_sk_max_discontinuity = _disc;
+    emit skMaxDiscontuityChanged();
+    emit signalChangeMaxDiscontinuity(m_sk_max_discontinuity);
+}
+
+/**************************************************************
 setShowDebugInfo(bool _value)
 Public
 Description:
@@ -371,6 +392,7 @@ void Mary::broadcastQMLSignals()
     emit pcMaxClusterSizeChanged();
     emit pcMinClusterSizeChanged();
     emit pcMaxClusterInColChanged();
+    emit skMaxDiscontuityChanged();
 }
 
 /**************************************************************
@@ -392,6 +414,7 @@ void Mary::broadcastSingletonSignals()
     emit signalChangeMaxClusterSize(m_pc_max_clustersize);
     emit signalChangeMaxClustersInColumn(m_pc_max_clustersincolumn);
     emit signalChangeMinClusterSize(m_pc_min_clustersize);
+    emit signalChangeMaxDiscontinuity(m_sk_max_discontinuity);
 }
 
 

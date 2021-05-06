@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     Mary _mary; //Settings Singleton
 
     //Connect The Singletons Signals and Slots---------------------
-    //REMEMBER TO RESET THE SAVE FILE!!!
+    //REMEMBER TO RESET THE SAVE FILE WHEN YOU ADD A MARY SIGNAL!!!
     //Toby To Max Signals
     QObject::connect(&_toby, SIGNAL(newCVMatFrameGrabbed(const cv::Mat&)), &_max, SLOT(recieveNewCVMat(const cv::Mat&)));
     //Mary To Toby Signals
@@ -70,9 +70,10 @@ int main(int argc, char *argv[])
     QObject::connect(&_mary, SIGNAL(signalChangeMaxClusterSize(int)), &_max, SLOT(onMaxClusterSizeChange(int)));
     QObject::connect(&_mary, SIGNAL(signalChangeMaxClustersInColumn(int)), &_max, SLOT(onMaxClustersInColChange(int)));
     QObject::connect(&_mary, SIGNAL(signalChangeMinClusterSize(int)), &_max, SLOT(onMinClusterSizeChange(int)));
+    QObject::connect(&_mary, SIGNAL(signalChangeMaxDiscontinuity(int)), &_max, SLOT(onMaxDiscontinuityChange(int)));
     //Set Mary's Default Values... This must Be Done After the Signals and Slot of the Singletons are connected.
-    _mary.SetMaryDefaultValues();
-    _mary.loadMaryFromFile();
+
+
 
     //Adding Singletons as Root Properties to QML--------------------------------
     engine.rootContext()->setContextProperty("Gary", &_gary);

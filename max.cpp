@@ -3,6 +3,8 @@
 #include "pixelcolumnclass.h"
 #include "pixelclusterclass.h"
 #include "pixelfundamental.h"
+#include "TBITopSurfaceLineVotingStructure.h"
+#include <QRandomGenerator>
 
 void Max::blankProcessingArrays()
 {
@@ -14,6 +16,11 @@ void Max::blankProcessingArrays()
         m_skeletal_line_array[_col] = 0;
         ++_col;
     }while(_col < Mat_Max_Width);
+
+    m_left_tsl.clear();
+    m_right_tsl.clear();
+    m_topography_lines.clear();
+    m_flattened_iohrv = 0;
 }
 
 bool Max::fillColumnClusterArray(Mat &_src, Mat &_dst)
@@ -99,13 +106,14 @@ bool Max::fillColumnClusterArray(Mat &_src, Mat &_dst)
     return true;
 }
 
-bool Max::fillSkeleton(Mat _dst)
+bool Max::fillSkeleton(Mat &_dst)
 {
     uint8_t* _data = (uint8_t*)_dst.data;
     int _dataindex;
     int _index = 0;
     float _rowcentroid;
     int _empty_cols = 0;
+    float _highestrowvalue = 0.0;
 
     do
     {
@@ -113,6 +121,11 @@ bool Max::fillSkeleton(Mat _dst)
         {
             _rowcentroid = m_cluster_columns[_index].getCentroidofCluster(0);
             m_skeletal_line_array[_index] = _rowcentroid;
+            if(_rowcentroid > _highestrowvalue)
+            {
+                _highestrowvalue = _rowcentroid;
+                m_flattened_iohrv = _index;
+            }
             emit skeletalArrayChanged(_rowcentroid, _index);
             _dataindex = ((int)_rowcentroid * m_flattened_cols) + _index;
             _data[_dataindex] = 255;
@@ -135,7 +148,182 @@ bool Max::fillSkeleton(Mat _dst)
     return true;
 }
 
-bool Max::updateFlattenedMembers(Mat _src)
+bool Max::fillTopSurfaceLines(Mat &_dst)
+{
+    if(_dst.channels() != 3)
+    {
+        qDebug() << "Max: fillTopSurfaceLines() requires a 3 channel Mat.";
+        emit failedTSLCheck();
+        return false;
+    }
+    if(m_flattened_iohrv  <= 1)
+    {
+        emit failedTSLCheck();
+        return false;
+    }
+    std::vector<TBILineVotingStructure> _linecandidates;
+    int _iteration = 0;
+    int _index1;
+    int _index2;
+    float _distance;
+    int _highestvote_index = 0;
+    int _highest_vote_count = 0;
+
+    //Fill The Candidate List
+    //1. Get Two Random Points
+    //2. Calc The Line Values
+    //3 Determine The Votes.
+
+    //Get Left Side TSL----------------------------------------------------------------
+    do
+    {
+        //Left Side
+        _index1 =  QRandomGenerator::global()->bounded(m_flattened_iohrv);
+        do
+        {
+            _index2 = QRandomGenerator::global()->bounded(m_flattened_iohrv);
+        }while(_index2 == _index1);
+        TBILineVotingStructure _leftlinecandidate;
+        _leftlinecandidate.m_line.setLine((float)_index1, m_skeletal_line_array[_index1], (float)_index2, m_skeletal_line_array[_index2]);
+        if(_leftlinecandidate.m_line.isValid())
+        {
+            _leftlinecandidate.m_angletohorizontal = _leftlinecandidate.m_line.angleFromHorizontal();
+            if(_leftlinecandidate.m_angletohorizontal >= m_min_tsl_angle)
+            {
+                if(_leftlinecandidate.m_angletohorizontal <= m_max_tsl_angle)
+                {
+                    _linecandidates.push_back(_leftlinecandidate);
+                    //_linecandidates[_iteration].m_line.setLine((float)_index1, m_skeletal_line_array[_index1], (float)_index2, m_skeletal_line_array[_index2]);
+                    //_linecandidates[_iteration].m_angletohorizontal = _leftlinecandidate.m_angletohorizontal;
+
+                }
+            }
+        }
+        ++_iteration;
+    }while(_iteration <= m_tsl_iterations);
+    //Fail if There are No Candidates in TSL List
+    if(_linecandidates.size() == 0)
+    {
+        emit failedTSLCheck();
+        return false;
+    }
+    //Count Left Side Votes
+    _index1 = 0;
+    _index2 = 0;
+    do
+    {
+        TBIPoint _pnt((float)_index2, m_skeletal_line_array[_index2]);
+        _distance = _linecandidates[_index1].m_line.getOrthogonalDistance(_pnt);
+        if(_distance <= m_tsl_distance_threshold)
+        {
+            ++_linecandidates[_index1].m_numvotes;
+            if(_linecandidates[_index1].m_numvotes > _highest_vote_count)
+            {
+                _highest_vote_count = _linecandidates[_index1].m_numvotes;
+                _highestvote_index = _index1;
+            }
+        }
+        ++_index2;
+        if(_index2 == m_flattened_iohrv)
+        {
+            _index2 = 0;
+            ++_index1;
+        }
+    }while(_index1 < (int)_linecandidates.size());
+    //Fail if Vote Count Fails
+    if(_highest_vote_count < m_min_tsl_votes)
+    {
+        emit failedTSLCheck();
+        return false;
+    }
+    //Set Left TSL
+    m_left_tsl.setLine(_linecandidates[_highestvote_index].m_line.getPoint1().getX(),
+                       _linecandidates[_highestvote_index].m_line.getPoint1().getY(),
+                       _linecandidates[_highestvote_index].m_line.getPoint2().getX(),
+                       _linecandidates[_highestvote_index].m_line.getPoint2().getY());
+    m_left_tsl.makeLeftTSLLine(m_flattened_iohrv);
+    //Start Right TSL---------------------------------------------------------------------
+    _linecandidates.clear();
+    _index1 = 0;
+    _index2 = 0;
+    _iteration = 0;
+    _highest_vote_count = 0;
+    _highestvote_index = 0;
+    _distance = 0.0;
+    //Get Right Side TSL
+    do
+    {
+        //Left Side
+        _index1 =  QRandomGenerator::global()->bounded(m_flattened_iohrv, m_flattened_cols-1);
+        do
+        {
+            _index2 = QRandomGenerator::global()->bounded(m_flattened_iohrv, m_flattened_cols-1);
+        }while(_index2 == _index1);
+        TBILineVotingStructure _rightlinecandidate;
+        _rightlinecandidate.m_line.setLine((float)_index1, m_skeletal_line_array[_index1], (float)_index2, m_skeletal_line_array[_index2]);
+        if(_rightlinecandidate.m_line.isValid())
+        {
+            _rightlinecandidate.m_angletohorizontal = _rightlinecandidate.m_line.angleFromHorizontal();
+            if(_rightlinecandidate.m_angletohorizontal >= m_min_tsl_angle)
+            {
+                if(_rightlinecandidate.m_angletohorizontal <= m_max_tsl_angle)
+                {
+                    _linecandidates.push_back(_rightlinecandidate);
+                }
+            }
+        }
+        ++_iteration;
+    }while(_iteration <= m_tsl_iterations);
+    //Fail if There are No Candidates in TSL List
+    if(_linecandidates.size() == 0)
+    {
+        emit failedTSLCheck();
+        return false;
+    }
+    //Count Right Side Votes
+    _index1 = 0;
+    _index2 = m_flattened_iohrv;
+    do
+    {
+        TBIPoint _pnt((float)_index2, m_skeletal_line_array[_index2]);
+        _distance = _linecandidates[_index1].m_line.getOrthogonalDistance(_pnt);
+        if(_distance <= m_tsl_distance_threshold)
+        {
+            ++_linecandidates[_index1].m_numvotes;
+            if(_linecandidates[_index1].m_numvotes > _highest_vote_count)
+            {
+                _highest_vote_count = _linecandidates[_index1].m_numvotes;
+                _highestvote_index = _index1;
+            }
+        }
+        ++_index2;
+        if(_index2 == m_flattened_cols)
+        {
+            _index2 = 0;
+            ++_index1;
+        }
+    }while(_index1 < (int)_linecandidates.size());
+    //Fail if Vote Count Fails
+    if(_highest_vote_count < m_min_tsl_votes)
+    {
+        emit failedTSLCheck();
+        return false;
+    }
+    //Set Right TSL
+    m_right_tsl.setLine(_linecandidates[_highestvote_index].m_line.getPoint1().getX(),
+                        _linecandidates[_highestvote_index].m_line.getPoint1().getY(),
+                        _linecandidates[_highestvote_index].m_line.getPoint2().getX(),
+                        _linecandidates[_highestvote_index].m_line.getPoint2().getY());
+    m_right_tsl.makeRightTSLLine(m_flattened_iohrv, m_flattened_cols-1);
+
+    //Draw on Mat
+    m_left_tsl.drawOnMat(_dst, cv::Scalar(0,.8,0), 1);
+    m_right_tsl.drawOnMat(_dst, cv::Scalar(0,.8,0), 1);
+    return true;
+
+}
+
+bool Max::updateFlattenedMembers(Mat &_src)
 {
     if(_src.channels() != 1)
     {
@@ -158,6 +346,12 @@ Max::Max(QObject *parent) : QObject(parent)
     m_min_cluster_size = 6;
     m_max_cluster_size = 75;
     m_allowable_discontinuities = 20;
+    m_max_tsl_angle = 10;
+    m_min_tsl_angle = -10;
+    m_min_tsl_votes = 20;
+    m_tsl_iterations = 75;
+    m_tsl_distance_threshold = 1;
+
     emit timeInLoopChanged(m_timeinloop);
     qDebug()<<"Max: Max Object Created.";
 }
@@ -200,7 +394,9 @@ void Max::recieveNewCVMat(const Mat &_mat)
     cv::Mat _threshold_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC1);
     cv::Mat _pixelcolumn_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC1);
     cv::Mat _skel_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC1);
-    cv::Mat _operation_mat;
+    cv::Mat _tsl_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3); //Mats From Here Out are Color.
+    cv::Mat _topography_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3);
+    cv::Mat _operation_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3);
 
     //Do OpenCV Proccesses
     emit newRawMatProcessed(_raw_mat);
@@ -210,6 +406,8 @@ void Max::recieveNewCVMat(const Mat &_mat)
     emit newThresholdMatProcessed(_threshold_mat);
 
     //Pixel Column Processing and TII Trap.
+    //This is a Nested Nightmare.
+    //It Has to Be this way
     blankProcessingArrays();
     if(updateFlattenedMembers(_threshold_mat))
     {
@@ -219,6 +417,16 @@ void Max::recieveNewCVMat(const Mat &_mat)
             if(fillSkeleton(_skel_mat)) //Fill Skeleton and Discontinuity Trap
             {
                 emit newSkeletalMatProcessed(_skel_mat);
+                if(fillTopSurfaceLines(_tsl_mat))
+                {
+                    emit newTSLMatProcessed(_tsl_mat);
+                }
+                else
+                {
+                    _tsl_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3);
+                    emit newTSLMatProcessed(_tsl_mat);
+                }
+
             }
             else
             {
@@ -283,6 +491,11 @@ void Max::onMinClusterSizeChange(int _size)
 void Max::onMaxClustersInColChange(int _size)
 {
     m_max_clusterincol = _size;
+}
+
+void Max::onMaxDiscontinuityChange(int _value)
+{
+    m_allowable_discontinuities = _value;
 }
 
 

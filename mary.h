@@ -56,7 +56,7 @@ class Mary : public QObject
     Q_PROPERTY(int pc_max_cluster_size READ getMaxClusterSize WRITE setMaxClusterSize NOTIFY pcMaxClusterSizeChanged)
     Q_PROPERTY(int pc_max_clusters_in_column READ getMaxClusterInCol WRITE setMaxClusterInCol NOTIFY pcMaxClusterInColChanged)
     //Skeletal Processing Properties-------------------------------------------------------------
-
+    Q_PROPERTY(int sk_max_discontinuity READ getMaxDiscontinuity WRITE setMaxDiscontinuity NOTIFY skMaxDiscontuityChanged)
 
     //GUI Properties Changed--------------------------------------------------------------------
     Q_PROPERTY(bool showdebuginfo READ getShowDebugInfo WRITE setShowDebugInfo NOTIFY showDebugInfoChanged)
@@ -91,6 +91,8 @@ public:
     Q_INVOKABLE int getMinClusterSize(){return m_pc_min_clustersize;}
     Q_INVOKABLE int getMaxClusterSize(){return m_pc_max_clustersize;}
     Q_INVOKABLE int getMaxClusterInCol(){return m_pc_max_clustersincolumn;}
+    //Skeletal Processing Get Functions
+    Q_INVOKABLE int getMaxDiscontinuity(){return m_sk_max_discontinuity;}
     //GUI Property Get Functions--------------------------------------------------------------
     Q_INVOKABLE bool getShowDebugInfo(){return m_gui_showdebuginfo;}
 
@@ -109,6 +111,8 @@ public:
     void setMinClusterSize(int _cs);
     void setMaxClusterSize(int _cs);
     void setMaxClusterInCol(int _csincol);
+    //Skeletal Set Functions-------------------------------------------------------------
+    void setMaxDiscontinuity(int _disc);
     //GUI Property Set Functions--------------------------------------------------------------
     void setShowDebugInfo(bool _value);
 
@@ -129,6 +133,7 @@ signals:
     void signalChangeMaxClusterSize(int _size);
     void signalChangeMaxClustersInColumn(int _numofclusters);
     void signalChangeMinClusterSize(int _size);
+    void signalChangeMaxDiscontinuity(int _value);
     //Pylon Related Signals-------------------------------------------------------------------
     void pylonCameraMaxHeightChanged();
     void pylonCameraMaxWidthChanged();
@@ -147,6 +152,8 @@ signals:
     void pcMinClusterSizeChanged();
     void pcMaxClusterSizeChanged();
     void pcMaxClusterInColChanged();
+    //Skeletal Related Signals----------------------------------------------------------------
+    void skMaxDiscontuityChanged();
     //GUI Related Signals---------------------------------------------------------------------
     void showDebugInfoChanged();
 
@@ -178,6 +185,9 @@ private:
     int m_pc_max_clustersize;
     int m_pc_min_clustersize;
     int m_pc_max_clustersincolumn;
+
+    //Skeletal Processing Settings and Stuff
+    int m_sk_max_discontinuity;
 
     //GUI UI Settings and Stuff
     bool m_gui_showdebuginfo;

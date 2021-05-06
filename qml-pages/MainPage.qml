@@ -106,13 +106,12 @@ Item
     Component.onCompleted:
     {
         //Connect the Application Singletons to the QML Objects.
-        Mary.broadcastQMLSignals();
-        Mary.broadcastSingletonSignals();
         Max.processingComplete.connect(mainpageID.triggerTobyNextFrame);
         Gary.aboutToDestroy.connect(mainpageID.garyAboutToDestory);
         Mary.aboutToDestroy.connect(mainpageID.maryAboutToDestroy);
         mainscreenId.connectToMax("RawFrame");
         Toby.startCamera();
+        Mary.loadMaryFromFile();
 
     }
 

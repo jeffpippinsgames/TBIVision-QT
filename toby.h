@@ -30,6 +30,8 @@ class Toby : public QObject, public Pylon::CImageEventHandler, public Pylon::CCo
 
     Q_OBJECT
 
+    Q_PROPERTY(double pylon_exposure READ getCameraExposure NOTIFY pylonCameraExposureChanged)
+
 
 public:
     explicit Toby(QObject *parent = nullptr);
@@ -40,6 +42,7 @@ public:
     //Property Get Methods
     Q_INVOKABLE QString getCameraInfo();
     Q_INVOKABLE void setCameraAOIToMax();
+    Q_INVOKABLE double getCameraExposure(){return m_camera->ExposureTimeAbs.GetValue();}
 
 private:
     //Pylon Members
@@ -61,6 +64,7 @@ signals:
     void newCVMatFrameGrabbed(const cv::Mat &matframe);
     void cameraOpenedChanged(bool _isopen);
     void aboutToDestroy();
+    void pylonCameraExposureChanged();
 
 };
 
