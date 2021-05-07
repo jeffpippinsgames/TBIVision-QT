@@ -26,6 +26,34 @@ Description:
    The seam tracking functionality is
   encapsulated inside Max.
  **************************************************************/
+
+
+/***************************************************************
+ A Note on the Processing Sequence
+
+ The Processing Sequence is initiated inside the slot recieveNewCVMat().
+
+ When This Mat is Recieved into Max A Sequence of Events Happens.
+
+ 1. The OpenCV Blur is Applied.
+ 2. The OpenCV Threshold is Applied.
+    This ends the Use of the OpenCV Library.
+ 3. The Pixel Column Processing Routines are Applied.
+    Total Image Intensity is Calculated Here.
+ 4. The Skeletal Processing Routines are Applied.
+    The Flattened Members are Updated Here.
+    It is important that the flattened members be updated
+    here as the future functions will use them to complete properly.
+ 5. The Top Surface Lines and Bevel Wall Lines are Generated.
+ 6. The Topography Sequential Line List is Generated.
+ 7. Tracking Points are Generated
+
+ The QML GUI.
+ The Mary Class For the most part interacts thru signal slots
+ with the QML GUI.
+ Max is wired into Mary, Toby and Gary.
+ **************************************************************/
+
 class Max : public QObject
 {
     Q_OBJECT
@@ -34,10 +62,14 @@ class Max : public QObject
 
 private:
     void blankProcessingArrays();
-    bool fillColumnClusterArray(cv::Mat &_src, cv::Mat &_dst);
-    bool fillSkeleton(cv::Mat &_dst);
-    bool fillTopSurfaceLines(cv::Mat &_dst);
-    bool updateFlattenedMembers(cv::Mat &_src);
+    bool doPixelColumnProcessing(cv::Mat &_src, cv::Mat &_dst);
+    bool doSkeletonProcessing(cv::Mat &_dst);
+    bool doTSLProcessing(cv::Mat &_dst);
+    bool doBWLProcessing(cv::Mat &_dst);
+    bool fillBevelWallLines(cv::Mat &_dst);
+
+    bool updateFlattenedMembers(cv::Mat &_src); //Almost All Other Functions Require this to be run first.
+
 
 
 
@@ -51,6 +83,7 @@ private:
     //The Maximum Frame Size For The Camera
     static const int Mat_Max_Width = 720;
     static const int Mat_Max_Height = 540;
+    bool m_in_proccesing_loop;
 
     //Elements For GUI Display----------------------------------------
     QString m_timeinloop;
@@ -69,6 +102,8 @@ private:
     //Geometric Construction Processing Variables----------------------
 
     //Flattening Phase Data Variables-----------------------------------
+    //These are Used Throught The Class.
+    //You Must Call
     int m_flattened_rows;
     int m_flattened_cols;
     int m_flattened_iohrv; //IndexOfHighestRowValue i.e index of the skeletal array with bottom pixel value
@@ -82,14 +117,26 @@ private:
     float m_skeletal_line_array[Mat_Max_Width];
     int m_allowable_discontinuities;
 
-    //RANSAC. Left and Right Top Surface Lines(Voting Algorythms)-------
+    //RANSAC. Left and Right Top Surface Lines and Bevel Wall Lines(Voting Algorythms)-------
     TBILine m_left_tsl;
     TBILine m_right_tsl;
-    float m_max_tsl_angle;
-    float m_min_tsl_angle;
+    float m_max_tslleft_angle;
+    float m_min_tslleft_angle;
+    float m_max_tslright_angle;
+    float m_min_tslright_angle;
     int m_min_tsl_votes;
     int m_tsl_iterations;
     float m_tsl_distance_threshold;
+
+    TBILine m_left_bwl;
+    TBILine m_right_bwl;
+    float m_max_bwlleft_angle;
+    float m_min_bwlleft_angle;
+    float m_max_bwlright_angle;
+    float m_min_bwlright_angle;
+    int m_min_bwl_votes;
+    int m_bwl_iterations;
+    float m_bwl_distance_threshold;
 
     //Linear Topography. (Split and Merge Algorythms)-------------------
     std::vector<TBILine> m_topography_lines;
@@ -132,6 +179,7 @@ signals:
     void newPixelColumnMatProcessed(const cv::Mat& _pixel_column_frame);
     void newSkeletalMatProcessed(const cv::Mat& _skel_frame);
     void newTSLMatProcessed(const cv::Mat& _tsl_frame);
+    void newOperationMatProcessed(const cv::Mat &_operation_frame);
     //ProccessingComplete Signal-----------------------------------------
     void processingComplete();
     //Processing Failure Signals-----------------------------------------

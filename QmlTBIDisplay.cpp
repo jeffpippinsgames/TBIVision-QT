@@ -33,6 +33,7 @@ void QmlTBIDisplay::recieveQImage(const QImage &frame)
 void QmlTBIDisplay::recieveCVMat(const cv::Mat& _mat)
 {
     //cv::Mat _mat = __mat.clone();
+
     if(_mat.channels() == 1)
     {
         m_frame = QImage((uchar*)_mat.data, _mat.cols, _mat.rows, _mat.step, QImage::Format_Grayscale8).scaledToWidth(m_scale_to_width);
@@ -41,9 +42,9 @@ void QmlTBIDisplay::recieveCVMat(const cv::Mat& _mat)
     }
     else if(_mat.channels() == 3)
     {
-        m_frame = QImage((uchar*)_mat.data, _mat.cols, _mat.rows, _mat.step, QImage::Format_BGR888).scaledToWidth(m_scale_to_width);
-        update(); //redraw
-        emit newFrameRecieved();
+            m_frame = QImage((uchar*)_mat.data, _mat.cols, _mat.rows, _mat.step, QImage::Format_RGB888).scaledToWidth(m_scale_to_width);
+            update(); //redraw
+            emit newFrameRecieved();
     }
 
 }

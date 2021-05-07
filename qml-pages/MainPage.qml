@@ -17,6 +17,9 @@ Item
     x:0
     y:0
 
+
+
+
     //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
     //property string fontsource: "qrc:/Fonts/EurostileBold.ttf"
     //property string fontsource: "qrc:/Fonts/Measurements.ttf"
@@ -33,21 +36,6 @@ Item
     }
 
     //Dialog and Menu Functions------------------
-    function connectPageSignals()
-    {
-        if(page !== null)
-        {
-            switch(page.pagename)
-            {
-            case "MainMenu Page":
-                page.destroyPage.connect(destroyPage);
-                break;
-            case "YesNo Dialog":
-                page.destroyPage.connect(destroyPage);
-                break;
-            }
-        }
-    }
 
     function createPage(page_qml)
     {
@@ -57,8 +45,8 @@ Item
             page = component.createObject(mainpageID);
             if(page !== null)
             {
+                page.destroyPage.connect(destroyPage);
                 page.grabFocus();
-                connectPageSignals();
             }
             else
             {
@@ -92,10 +80,6 @@ Item
         timeinlooptextId.text = "";
     }
 
-    function viewportChange(view)
-    {
-        mainscreenId.connectToMax(view);
-    }
 
     function triggerTobyNextFrame()
     {
@@ -109,10 +93,8 @@ Item
         Max.processingComplete.connect(mainpageID.triggerTobyNextFrame);
         Gary.aboutToDestroy.connect(mainpageID.garyAboutToDestory);
         Mary.aboutToDestroy.connect(mainpageID.maryAboutToDestroy);
-        mainscreenId.connectToMax("RawFrame");
         Toby.startCamera();
         Mary.loadMaryFromFile();
-
     }
 
     //Signals-----------------------------------
@@ -210,42 +192,13 @@ Item
         visible: true
         x:0
         y:0
-        scaleToWidth: 1440
+        scaleToWidth: 720
         anchors.fill: parent
         opacity: 1
 
-        property string current_frame: "NoFrame"
-
-        function connectToMax(view)
+        Component.onCompleted:
         {
-            switch(mainscreenId.current_frame)
-            {
-            case "RawFrame":
-                Max.newRawMatProcessed.disconnect(mainscreenId.recieveCVMat);
-                break;
-            case "BlurFrame":
-                Max.newBlurMatProcessed.disconnect(mainscreenId.recieveCVMat);
-                break;
-            case "ThresFrame":
-                Max.newThresholdMatProcessed.disconnect(mainscreenId.recieveCVMat);
-                break;
-            }
-
-            switch(view)
-            {
-            case "RawFrame":
-                Max.newRawMatProcessed.connect(mainscreenId.recieveCVMat);
-                mainscreenId.current_frame = "RawFrame";
-                break;
-            case "BlurFrame":
-                Max.newBlurMatProcessed.connect(mainscreenId.recieveCVMat);
-                mainscreenId.current_frame = "BlurFrame";
-                break;
-            case "ThresFrame":
-                Max.newThresholdMatProcessed.connect(mainscreenId.recieveCVMat);
-                mainscreenId.current_frame = "ThresFrame";
-                break;
-            }
+            //Max.newOperationMatProcessed.connect(mainscreenId.recieveCVMat);
         }
     }
 

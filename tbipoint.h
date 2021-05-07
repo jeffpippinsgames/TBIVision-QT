@@ -8,7 +8,7 @@ class TBIPoint
 public:
     TBIPoint();
     TBIPoint(float _x, float _y);
-    TBIPoint(const TBIPoint&_pnt);
+    TBIPoint(const TBIPoint&_pnt); //Copy Constructor
     void drawtoCVMat(cv::Mat &_dst, uint8_t _value);
     float distance(const TBIPoint &_pnt) const;
     float getX() const {return m_x;}
@@ -17,10 +17,10 @@ public:
     void setY(float _y){m_y=_y;}
     void zero();
 
-    TBIPoint operator=(const TBIPoint&_pnt)
+    void operator=(const TBIPoint&_pnt)
     {
-        TBIPoint __pnt(_pnt.m_x, _pnt.m_y);
-        return __pnt;
+        this->m_x = _pnt.m_x;
+        this->m_y = _pnt.m_y;
     }
 
     bool operator==(const TBIPoint&_pnt)

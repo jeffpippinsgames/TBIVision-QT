@@ -14,41 +14,21 @@ TBILine::TBILine()
 
 TBILine::TBILine(const TBILine &_line)
 {
-    m_point1 = _line.getPoint1();
-    m_point2 = _line.getPoint2();
+    this->m_point1 = _line.m_point1;
+    this->m_point2 = _line.m_point2;
     updateInternals();
-
 }
 
 void TBILine::setPoint1(TBIPoint _pnt)
 {
-    m_point1.setX(_pnt.getX());
-    m_point1.setY(_pnt.getY());
+    m_point1 = _pnt;
     updateInternals();
 }
 
 void TBILine::setPoint2(TBIPoint _pnt)
 {
-    m_point2.setX(_pnt.getX());
-    m_point2.setY(_pnt.getY());
+    m_point2 = _pnt;
     updateInternals();
-}
-
-void TBILine::setLine(float _x1, float _y1, float _x2, float _y2)
-{
-    m_point1.setX(_x1);
-    m_point1.setY(_y1);
-    m_point2.setX(_x2);
-    m_point2.setY(_y2);
-    updateInternals();
-}
-
-void TBILine::copyLine(const TBILine &_line)
-{
-    m_point1 = _line.getPoint1();
-    m_point2 = _line.getPoint2();
-    updateInternals();
-
 }
 
 bool TBILine::canLineBeSplitForSplitMerge(const TBIPoint &_pnt, float _distance) const
@@ -112,6 +92,19 @@ TBIPoint TBILine::getVector() const
     return(TBIPoint((m_point2.getX() - m_point1.getX()),(m_point2.getY() - m_point2.getY())));
 }
 
+bool TBILine::findPointofIntersection(const TBILine &_line, TBIPoint &_intersectionpnt)
+{
+    if(!m_validline) return false;
+    if(!_line.isValid()) return false;
+    if(m_slope == _line.getSlope()) return false;
+
+    float _x = (m_intercept-_line.getIntercept())/(_line.getSlope() - m_slope);
+    float _y = m_slope*_x+m_intercept;
+    _intersectionpnt.setX(_x);
+    _intersectionpnt.setY(_y);
+    return true;
+}
+
 void TBILine::clear()
 {
     m_point1.zero();
@@ -119,23 +112,11 @@ void TBILine::clear()
     updateInternals();
 }
 
-void TBILine::makeLeftTSLLine(int _flattened_iohr)
+void TBILine::remakeLine(int _startcol, int _endcol)
 {
     if(m_validline)
     {
-        TBIPoint _pnt1(0, this->getYatX(0));
-        TBIPoint _pnt2((float)_flattened_iohr, this->getYatX((float)_flattened_iohr));
-        this->setLine(_pnt1.getX(), _pnt1.getY(), _pnt2.getX(), _pnt2.getY());
-    }
-}
-
-void TBILine::makeRightTSLLine(int _flattened_iohr, int _columnedge)
-{
-    if(m_validline)
-    {
-        TBIPoint _pnt1(_flattened_iohr, this->getYatX(_flattened_iohr));
-        TBIPoint _pnt2((float)_columnedge, this->getYatX((float)_columnedge));
-        this->setLine(_pnt1.getX(), _pnt1.getY(), _pnt2.getX(), _pnt2.getY());
+        *this = TBILine((float)_startcol, this->getYatX((float)_startcol), (float)_endcol, this->getYatX((float)_endcol));
     }
 }
 
@@ -145,6 +126,7 @@ void TBILine::drawOnMat(cv::Mat &_dst, cv::Scalar _color, int _thickness)
     cv::Point _p1((int)this->m_point1.getX(), (int)this->m_point1.getY());
     cv::Point _p2((int)this->m_point2.getX(), (int)this->m_point2.getY());
     cv::line(_dst, _p1, _p2, _color, _thickness);
+
 }
 
 void TBILine::updateInternals()

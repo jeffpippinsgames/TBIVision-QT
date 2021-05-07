@@ -452,7 +452,6 @@ Item {
         width: rootpageId.frameselectrectwidth
         color: "transparent"
 
-
         ControllerObject
         {
 
@@ -641,6 +640,7 @@ Item {
             }
         }
 
+        //Frame Selection ListView
         ListView
         {
             id: framelistviewId
@@ -687,6 +687,9 @@ Item {
                     break;
                 case rootpageId.skeletalframe:
                     rootpageId.state = rootpageId.skeletalstateframeactive;
+                    break;
+                case rootpageId.tslframe:
+                    rootpageId.state = rootpageId.tslstateframeactive;
                     break;
                 }
             }
@@ -2198,7 +2201,6 @@ Item {
 
 
     }
-
 
     //Main View Rectangle-------------------------------------------
     Rectangle

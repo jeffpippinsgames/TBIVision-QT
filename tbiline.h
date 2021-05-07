@@ -12,11 +12,9 @@ public:
     TBILine();
     TBILine(const TBIPoint &_p1, const TBIPoint &_p2);
     TBILine(const float _x1, const float _y1, const float _x2, const float _y2);
-    TBILine(const TBILine &_line);
+    TBILine(const TBILine &_line); //Copy Constructor
     void setPoint1(TBIPoint _pnt);
     void setPoint2(TBIPoint _pnt);
-    void setLine(float _x1, float _y1, float _x2, float _y2);
-    void copyLine(const TBILine &_line);
     bool canLineBeSplitForSplitMerge(const TBIPoint &_pnt, float _distance) const;
     float getOrthogonalDistance(const TBIPoint &_pnt) const;
     float interiorAngleToLine(const TBILine &_line) const;
@@ -30,15 +28,21 @@ public:
     TBIPoint getPoint1() const;
     TBIPoint getPoint2() const;
     TBIPoint getVector() const;
+    bool findPointofIntersection(const TBILine &_line, TBIPoint &_intersectionpnt);
     void clear();
-    void makeLeftTSLLine(int _flattened_iohr);
-    void makeRightTSLLine(int _flattened_iohr, int _maxcols);
+    void remakeLine(int _startcol, int _endcol);
     void drawOnMat(cv::Mat &_dst, cv::Scalar _color, int _thickness = 1);
+    float getPoint1X() const{return m_point1.getX();}
+    float getPoint1Y() const{return m_point1.getY();}
+    float getPoint2X() const{return m_point2.getX();}
+    float getPoint2Y() const{return m_point2.getY();}
 
-    TBILine operator = (const TBILine &_line)
+
+    void operator = (const TBILine &_line)
     {
-        TBILine __line(_line);
-        return __line;
+        this->m_point1 = _line.m_point1;
+        this->m_point2 = _line.m_point2;
+        this->updateInternals();
     }
 
     bool operator == (const TBILine &_line)
@@ -67,3 +71,4 @@ private:
 };
 
 #endif // TBILINE_H
+

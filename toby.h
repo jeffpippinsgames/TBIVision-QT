@@ -31,8 +31,6 @@ class Toby : public QObject, public Pylon::CImageEventHandler, public Pylon::CCo
     Q_OBJECT
 
     Q_PROPERTY(double pylon_exposure READ getCameraExposure NOTIFY pylonCameraExposureChanged)
-
-
 public:
     explicit Toby(QObject *parent = nullptr);
     ~Toby();
