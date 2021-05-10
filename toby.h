@@ -41,6 +41,8 @@ public:
     Q_INVOKABLE QString getCameraInfo();
     Q_INVOKABLE void setCameraAOIToMax();
     Q_INVOKABLE double getCameraExposure(){return m_camera->ExposureTimeAbs.GetValue();}
+    Q_INVOKABLE void turnOffCamera();
+
 
 private:
     //Pylon Members

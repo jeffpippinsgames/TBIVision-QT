@@ -123,6 +123,24 @@ void Toby::setCameraAOIToMax()
     onChangeCameraAOI(720, 540);
 }
 
+void Toby::turnOffCamera()
+{
+    while(m_camera->IsGrabbing())
+    {
+        m_camera->StopGrabbing();
+    }
+    while(m_camera->IsOpen())
+    {
+        m_camera->Close();
+    }
+    while(m_camera->IsPylonDeviceAttached())
+    {
+        m_camera->DetachDevice();
+    }
+    m_camera->DestroyDevice();
+    qDebug() << "Toby: Pylon Device Closed and Destroyed.";
+}
+
 /**************************************************************
 OnImageGrabbed(CInstantCamera &camera, const CGrabResultPtr &ptrGrab)
 Private

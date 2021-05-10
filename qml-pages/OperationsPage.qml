@@ -17,8 +17,7 @@ Item
     x:0
     y:0
 
-
-
+    readonly property string pagename: "Operations Page"
 
     //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
     //property string fontsource: "qrc:/Fonts/EurostileBold.ttf"
@@ -37,49 +36,14 @@ Item
 
     //Dialog and Menu Functions------------------
 
-    function createPage(page_qml)
+    function cleanupForDestruction()
     {
-        if(page == null)
-        {
-            var component = Qt.createComponent(page_qml);
-            page = component.createObject(mainpageID);
-            if(page !== null)
-            {
-                page.destroyPage.connect(destroyPage);
-                page.grabFocus();
-            }
-            else
-            {
-                console.log("QML: " + page_qml + " Could Not Be Created.");
-            }
-
-        }
-    }
-
-    function destroyPage()
-    {
-        if(page !== null)
-        {
-            page.destroy();
-            page = null;
-            controllerId.focus = true;
-            mainpageID.opacity = 1;
-            triggerTobyNextFrame();
-        }
-    }
-
-    function garyAboutToDestory()
-    {
-        //Kill All Bindings For The Destruction of Gary
-        xposId.text = "";
-    }
-
-    function maryAboutToDestroy()
-    {
-        timeinlooptextId.visible = false;
+        //Kill All Bindings For The Destruction
         timeinlooptextId.text = "";
+        //Disconnect All Signals
+        Max.processingComplete.disconnect(mainpageID.triggerTobyNextFrame);
+        Toby.turnOffCamera();
     }
-
 
     function triggerTobyNextFrame()
     {
@@ -89,16 +53,19 @@ Item
     //Slots
     Component.onCompleted:
     {
-        //Connect the Application Singletons to the QML Objects.
         Max.processingComplete.connect(mainpageID.triggerTobyNextFrame);
-        Gary.aboutToDestroy.connect(mainpageID.garyAboutToDestory);
-        Mary.aboutToDestroy.connect(mainpageID.maryAboutToDestroy);
         Toby.startCamera();
         Mary.loadMaryFromFile();
     }
 
     //Signals-----------------------------------
+    signal destroyPage(string _transition_page)
 
+    //Required For Every Page
+    PagesDescriptionObject
+    {
+        id:pagesId
+    }
 
     //OML Components----------------------------
     ControllerObject
@@ -109,7 +76,8 @@ Item
 
         onBlackButtonPressed:
         {
-            createPage("/qml-pages/MainMenuPage.qml");
+            cleanupForDestruction();
+            destroyPage(pagesId.mainmenupage);
         }
 
         onGreenButtonPressed:
@@ -163,6 +131,7 @@ Item
         }
     }
 
+    //Background Color
     Rectangle
     {
         anchors.fill: parent
@@ -183,23 +152,6 @@ Item
         source: "qrc:/Icons/dark_steel_texture.jpg"
         anchors.fill: parent
         opacity: .7
-    }
-
-    //QImage Viewer Component - Main Display Screen
-    QmlTBIDisplay
-    {
-        id: mainscreenId
-        visible: true
-        x:0
-        y:0
-        scaleToWidth: 720
-        anchors.fill: parent
-        opacity: 1
-
-        Component.onCompleted:
-        {
-            //Max.newOperationMatProcessed.connect(mainscreenId.recieveCVMat);
-        }
     }
 
     //Time in Loop Text

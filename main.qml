@@ -1,10 +1,14 @@
 import QtQuick 2.15
 import QtQuick.Window 2.15
 import QtQuick.Controls 2.15
-import "qrc:/qml-pages" as MyQmlPages
-import "qrc:/qml-components" as MyQmlComponents
+import "qrc:/qml-pages"
+import "qrc:/qml-components"
 
-
+/*
+  main.qml is a page management component.
+  only 1 page is ever in memory at a time.
+  pages must be built accordingly.
+  */
 Window {
     id: rootId
     visible: true
@@ -13,26 +17,55 @@ Window {
     title: qsTr("TBI Laser Seam Tracker")
     flags: Qt.FramelessWindowHint
 
+    property var page: null
 
-    property var mainoperationpage: null
-
-    function openMainOperationPage()
+    function openPage(_page)
     {
-        if(mainoperationpage == null)
+        var component = null;
+        switch(_page)
         {
-            var component = Qt.createComponent("/qml-pages/MainPage.qml");
-            mainoperationpage = component.createObject(rootId);
-            if(mainoperationpage !== null)
+        case pagesId.operationspage:
+            component = Qt.createComponent("/qml-pages/OperationsPage.qml");
+            break;
+        case pagesId.mainmenupage:
+            component = Qt.createComponent("/qml-pages/MainMenuPage.qml");
+            break;
+        case pagesId.pipelinesettingspage:
+            component = Qt.createComponent("/qml-pages/ImageProcessingSettingsPage.qml");
+            break;
+        }
+
+        if(component == null) return;
+
+        if(page == null)
+        {
+            page = component.createObject(rootId);
+            if(page !== null)
             {
-                mainoperationpage.grabFocus();
-                console.log("mainoperationpage created.")
+                page.grabFocus(); //Send Focus
+                page.destroyPage.connect(destroyPage); //Connect The Destruction
+                console.log(page.pagename + " is Being Created.");
             }
             else
             {
-                console.log("mainoperationpage failed to Create.");
+                console.log("main.qml: failed to create page.");
             }
 
         }
+    }
+
+    function destroyPage(_transition_page)
+    {
+        console.log(page.pagename + " is Being Destroyed.")
+        //page.destroyPage.disconnect(destroyPage);
+        page.destroy();
+        page = null;
+        openPage(_transition_page);
+    }
+
+    PagesDescriptionObject
+    {
+        id:pagesId
     }
 
     Rectangle
@@ -48,7 +81,7 @@ Window {
     //and where any signal/slot wiring is done.
     Component.onCompleted:
     {
-        openMainOperationPage();
+        openPage(pagesId.operationspage);
     }
 
 

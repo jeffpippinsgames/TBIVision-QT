@@ -111,7 +111,7 @@ void Mary::loadMaryFromFile()
         SetMaryDefaultValues();
         broadcastQMLSignals();
         broadcastSingletonSignals();
-        qDebug("Mary: marydefualt.tbi does not exsist.");
+        qDebug("Mary: marydefualt.tbi Does Not Exsist. Loading Default Values.");
         return;
     }
     _savefile.open(QIODevice::ReadOnly);

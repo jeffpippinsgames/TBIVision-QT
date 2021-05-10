@@ -13,16 +13,10 @@ Item {
     anchors.fill: parent
     opacity: 1
 
-
-
     readonly property string pagename: "MainMenu Page"
 
-    property var dynamicpage: null
-
     //Signals--------------------------------------
-    signal destroyPage()
-    signal aboutToDestroy()
-    signal completed()
+    signal destroyPage(string _transition_page)
 
     //Functions------------------------------------
     function grabFocus()
@@ -30,49 +24,29 @@ Item {
         rotatemenuId.grabFocus();
     }
 
-    function signalDestroyPage()
+    function cleanupForDestruction()
     {
-        aboutToDestroy();
-        destroyPage();
-    }
+        //Kill All Bindings For The Destruction
 
-    function createImageProcessingPage()
-    {
-        if(dynamicpage == null)
-        {
-            var component = Qt.createComponent("/qml-pages/ImageProcessingSettingsPage.qml");
-            dynamicpage = component.createObject(rootpageId);
-            if(page !== null)
-            {
-                dynamicpage.grabFocus();
-                dynamicpage.destroyPage.connect(destroyDynamicPage);
-            }
-            else
-            {
-                console.log("QML: Could Not Create ImageProcessingSettingsPage");
-            }
+        //Disconnect All Signals
 
-        }
-    }
 
-    function destroyDynamicPage()
-    {
-        if(dynamicpage !== null)
-        {
-            dynamicpage.destroy();
-            dynamicpage = null;
-            grabFocus();
-        }
     }
 
     //Event Handlers-------------------------------
     Component.onCompleted:
     {
-        rootpageId.completed();
-        console.log("QML: MainMenuPage Created.");
+
     }
 
     //QML Components-------------------------------
+
+    //Required For Every Page
+    PagesDescriptionObject
+    {
+        id:pagesId
+    }
+
     RotateMenu
     {
         id: rotatemenuId
@@ -92,10 +66,12 @@ Item {
             switch(selection)
             {
             case rotatemenuId.closemenustring:
-                signalDestroyPage();
+                rootpageId.cleanupForDestruction();
+                rootpageId.destroyPage(pagesId.operationspage);
                 break;
             case "Processing Pipeline Settings":
-                rootpageId.createImageProcessingPage();
+                rootpageId.cleanupForDestruction();
+                rootpageId.destroyPage(pagesId.pipelinesettingspage)
                 break;
             case "Quit Application":
                 quitdialogId.visible = true;
@@ -103,6 +79,8 @@ Item {
                 break;
             case "Toggle Laser Power":
                 Gary.sendToggleLaserPower();
+                rootpageId.cleanupForDestruction();
+                rootpageId.destroyPage(pagesId.operationspage);
                 break;
             }
         }

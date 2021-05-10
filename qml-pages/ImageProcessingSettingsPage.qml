@@ -13,7 +13,7 @@ Item {
     visible: true
 
     //Custom Properties----------------------------------------------
-    readonly property string pagename: "ImageProcessingSettings Page"
+    readonly property string pagename: "Pipeline Settings Page"
 
     //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
     //property string fontsource: "qrc:/Fonts/EurostileBold.ttf"
@@ -66,9 +66,7 @@ Item {
     readonly property int settingsrecty: rootpageId.frameselectrecty+rootpageId.frameselectrectheight+rootpageId.rectpadding
 
     //Signals--------------------------------------------------------
-    signal destroyPage()
-    signal aboutToDestroy()
-    signal completed()
+    signal destroyPage(string _transition_page)
 
     //Misc Functions-------------------------------------------------
     function grabFocus()
@@ -76,15 +74,20 @@ Item {
         frameselectcontrollerId.focus = true;
     }
 
-    function signalDestroyPage()
+    function cleanupForDestruction()
     {
+        //detach any bindings
+
+        //Save Mary
+        Mary.saveMaryToFile();
+
+        //disconnect all connected signals
         Max.processingComplete.disconnect(rootpageId.triggerTobyNextFrame);
         Max.skeletalArrayChanged.disconnect(skeletalarrayId.updateArray);
         mainviewrectId.disconnectSignal();
-        Mary.updateCameraAOIToMarysSettings();
-        Mary.saveMaryToFile();
-        aboutToDestroy();
-        destroyPage();
+
+        //Handle Camera
+        Toby.turnOffCamera();
     }
 
     function triggerTobyNextFrame()
@@ -95,12 +98,20 @@ Item {
     //Slots---------------------------------------------------------
     Component.onCompleted:
     {
-        //Adjust Camera AOI to Max
-        Toby.setCameraAOIToMax();
+        //Connect Signals
         Max.processingComplete.connect(rootpageId.triggerTobyNextFrame);
-        //Connect the Application Singletons to the QML Objects.
+
+        //Set The State of the Root Component
         rootpageId.state = rootpageId.camerastateframeactive;
-        rootpageId.completed();
+
+        //Handle Camera
+        Toby.startCamera();
+        Mary.loadMaryFromFile();
+        Toby.setCameraAOIToMax();
+
+        //Update Control Bindings
+        cameradeviceinfotextId.text = Toby.getCameraInfo();
+
         console.log("QML: ImageProcessingSettingPage Created.");
     }
 
@@ -394,11 +405,23 @@ Item {
     ]
 
     //OML Components------------------------------------------------
+
+    //Required For Every Page
+    PagesDescriptionObject
+    {
+        id:pagesId
+    }
+
     //Font for UI
     FontLoader
     {
         id: fontId
         source: rootpageId.fontsource
+
+        Component.onCompleted:
+        {
+
+        }
     }
 
     //Background Solid----------------------------------------------
@@ -440,6 +463,20 @@ Item {
         text: "Settings"
         font.pixelSize: 30
         color: rootpageId.textcolor
+
+    }
+
+    //Right Text----------------------------------------------------
+    Text
+    {
+        id: timeinlooptextId
+        font.family: fontId.name
+        y: 20
+        x:toptextId.x+toptextId.implicitWidth+100
+        text:  Max.timeinloop
+        font.pixelSize: 25
+        color: rootpageId.textcolor
+
     }
 
     //Frame Selection Rectangle-------------------------------------
@@ -451,6 +488,7 @@ Item {
         height:rootpageId.frameselectrectheight
         width: rootpageId.frameselectrectwidth
         color: "transparent"
+
 
         ControllerObject
         {
@@ -465,19 +503,23 @@ Item {
                     controlkeyId.enableblackbutton = true;
                 }
             }
+
             onBlackButtonPressed:
             {
-                rootpageId.signalDestroyPage();
+                cleanupForDestruction();
+                destroyPage(pagesId.mainmenupage);
             }
 
             onGreenButtonPressed:
             {
-                rootpageId.signalDestroyPage();
+                cleanupForDestruction();
+                destroyPage(pagesId.mainmenupage);
             }
 
             onRedButtonPressed:
             {
-                rootpageId.signalDestroyPage();
+                cleanupForDestruction();
+                destroyPage(pagesId.mainmenupage);
             }
 
             onUpButtonPressed:
@@ -568,25 +610,6 @@ Item {
         ListModel
         {
             id: modelId
-
-            /*
-            //ListElemet Settings Cannot Use Properties to
-            //Set the frame elements.
-            ListElement
-            {
-                frame: "Camera"
-            }
-
-            ListElement
-            {
-                frame: "Blur"
-            }
-
-            ListElement
-            {
-                frame: "Threshold"
-            }
-            */
         }
 
         //Menu Delegate
@@ -779,7 +802,7 @@ Item {
             onBlackButtonPressed:
             {
 
-                //rootpageId.signalDestroyPage();
+
             }
 
             onGreenButtonPressed:
@@ -801,7 +824,7 @@ Item {
 
             onRedButtonPressed:
             {
-                // rootpageId.signalDestroyPage();
+
             }
 
             onUpButtonPressed:
@@ -1094,19 +1117,6 @@ Item {
                 Mary.pylon_gain =  gainsliderId.value;
             }
         }
-
-        //Toby Debugging
-        Text
-        {
-            id: exposuredebugtextId
-            font.family: fontId.name
-            y: gainsliderId.y + gainsliderId.height + 20
-            x:20
-            text: "Toby: Camera Exposure: " + Toby.pylon_exposure
-            font.pixelSize: 25
-            color: rootpageId.textcolor
-        }
-
     }
 
     //Blur Settings Rectangle---------------------------------------
@@ -1159,7 +1169,7 @@ Item {
 
             onBlackButtonPressed:
             {
-                //rootpageId.signalDestroyPage();
+
             }
 
             onGreenButtonPressed:
@@ -1174,7 +1184,7 @@ Item {
 
             onRedButtonPressed:
             {
-                //rootpageId.signalDestroyPage();
+
             }
 
             onUpButtonPressed:
@@ -1349,7 +1359,7 @@ Item {
 
             onBlackButtonPressed:
             {
-                //rootpageId.signalDestroyPage();
+
             }
 
             onGreenButtonPressed:
@@ -1367,7 +1377,7 @@ Item {
 
             onRedButtonPressed:
             {
-                //rootpageId.signalDestroyPage();
+
             }
 
             onUpButtonPressed:
@@ -1658,7 +1668,7 @@ Item {
 
             onBlackButtonPressed:
             {
-                //rootpageId.signalDestroyPage();
+
             }
 
             onGreenButtonPressed:
@@ -1686,7 +1696,7 @@ Item {
 
             onRedButtonPressed:
             {
-                // rootpageId.signalDestroyPage();
+
             }
 
             onUpButtonPressed:
@@ -2041,7 +2051,7 @@ Item {
 
             onBlackButtonPressed:
             {
-                //rootpageId.signalDestroyPage();
+
             }
 
             onGreenButtonPressed:
@@ -2060,7 +2070,7 @@ Item {
 
             onRedButtonPressed:
             {
-                // rootpageId.signalDestroyPage();
+
             }
 
             onUpButtonPressed:
@@ -2305,11 +2315,6 @@ Item {
             //console.log("");
         }
 
-        Component.onCompleted:
-        {
-
-        }
-
         Rectangle
         {
             anchors.fill: mainviewrectId
@@ -2376,5 +2381,6 @@ Item {
         enableredbutton: false
         enableblackbutton: true
         buttonspacing: 120
+
     }
 }
