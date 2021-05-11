@@ -13,6 +13,7 @@
 #include <vector>
 #include "pixelcolumnclass.h"
 #include "tbiline.h"
+#include <QRandomGenerator>
 
 using namespace cv;
 
@@ -64,9 +65,9 @@ private:
     void blankProcessingArrays();
     bool doPixelColumnProcessing(cv::Mat &_src, cv::Mat &_dst);
     bool doSkeletonProcessing(cv::Mat &_dst);
-    bool doTSLProcessing(cv::Mat &_dst);
-    bool doBWLProcessing(cv::Mat &_dst);
-    bool fillBevelWallLines(cv::Mat &_dst);
+    bool doVotingLineProcessing(cv::Mat &_dst, TBILine &_line, int _total_iterations, int _vote_threshold,
+                                float _distance_threshold, float _min_angle_to_horizon, float _max_angle_to_horizon,
+                                float* _skeletalarray, int _start_index, int _end_index, cv::Scalar _line_color);
 
     bool updateFlattenedMembers(cv::Mat &_src); //Almost All Other Functions Require this to be run first.
 
@@ -84,6 +85,7 @@ private:
     static const int Mat_Max_Width = 720;
     static const int Mat_Max_Height = 540;
     bool m_in_proccesing_loop;
+
 
     //Elements For GUI Display----------------------------------------
     QString m_timeinloop;
@@ -111,7 +113,8 @@ private:
     //Pixel Column Phase Processing Variables--------------------------
     quint64 m_total_image_intensity;
     PixelColumnClass m_cluster_columns[Mat_Max_Width];
-    std::vector<PixelColumnClass> m_column_cluster_list;
+    //std::vector<PixelColumnClass> m_column_cluster_list;
+    //QList<PixelColumnClass> m_column_cluster_list;
 
     //Skeletal Phase Data Variables-------------------------------------
     float m_skeletal_line_array[Mat_Max_Width];
@@ -186,6 +189,7 @@ signals:
     void failedTIICheck(); //Total Image Intensity
     void failedDiscontinuityCheck();
     void failedTSLCheck(); //Top Surface Lines
+    void failedVLCheck(); //Voting Lines
 
 
 };

@@ -41,6 +41,7 @@ Item
         //Kill All Bindings For The Destruction
         timeinlooptextId.text = "";
         //Disconnect All Signals
+        Max.newOperationMatProcessed.disconnect(operationviewId.recieveCVMat);
         Max.processingComplete.disconnect(mainpageID.triggerTobyNextFrame);
         Toby.turnOffCamera();
     }
@@ -170,6 +171,23 @@ Item
         color: Qt.rgba(1,1,.95,1)
     }
 
+    //Camera FPS Text
+    Text
+    {
+        id: camerafpstextId
+        visible: Mary.showdebuginfo
+        focus: false
+        font.family: fontId.name
+        text: Toby.camera_fps
+        font.pointSize: 15
+        width: camerafpstextId.implicitWidth
+        height: camerafpstextId.implicitHeight
+        x: 200
+        y: 10
+        color: Qt.rgba(1,1,.95,1)
+    }
+
+    /*
     //Gary Notification Icon
     IconInfoStatusObject
     {
@@ -188,9 +206,9 @@ Item
                 garystatusId.glowcolor = Qt.rgba(0,1,0,1);
                 garystatusId.messagetext = "Motion Controller O.K.";
                 break;
-             case GaryOperationStatus.TBI_OPERATION_ERROR:
-                 garystatusId.glowcolor = Qt.rgba(1,0,0,1);
-                 garystatusId.messagetext = "Error in Motion Controller";
+            case GaryOperationStatus.TBI_OPERATION_ERROR:
+                garystatusId.glowcolor = Qt.rgba(1,0,0,1);
+                garystatusId.messagetext = "Error in Motion Controller";
             }
         }
 
@@ -199,7 +217,7 @@ Item
             Gary.operationStatusChanged.connect(garystatusId.garyChangedOperationStatus);
         }
     }
-
+*/
     //Control Key Display
     ControllerKeyObject
     {
@@ -208,7 +226,7 @@ Item
         redbuttonmessage: "Leave Selection"
         blackbuttonmessage: "Main Menu"
     }
-
+/*
     //Testing Keypad Object
     KeypadObject
     {
@@ -228,6 +246,33 @@ Item
         onReturnedvalueChanged:
         {
             console.log("Keypad Returned: " + returnedvalue);
+        }
+    }
+*/
+    Rectangle
+    {
+        id: viewbackgroundrectId
+        width:800
+        height:600
+        x:50
+        y: 200
+        color: "black"
+        border.color: Qt.rgba(1,1,1,.1)
+        border.width: 5
+    }
+
+    QmlTBIDisplay
+    {
+        id: operationviewId
+        width: 720
+        height: 540
+
+        anchors.centerIn: viewbackgroundrectId
+
+        Component.onCompleted:
+        {
+            operationviewId.scaleToWidth = operationviewId.width;
+            Max.newOperationMatProcessed.connect(operationviewId.recieveCVMat);
         }
     }
 

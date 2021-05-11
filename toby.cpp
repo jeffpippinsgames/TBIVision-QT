@@ -13,6 +13,9 @@ Toby::Toby(QObject *parent) : QObject(parent)
 {
     //Grab The First Camera
     m_camera = nullptr;
+    m_timer.start();
+    m_camera_fps = "Error";
+    emit cameraFPSChanged();
     qDebug() << "Toby: Toby Object Created.";
 }
 
@@ -62,21 +65,21 @@ void Toby::startCamera()
 {
     try
     {
-        m_camera = new Pylon::CBaslerUniversalInstantCamera(Pylon::CTlFactory::GetInstance().CreateFirstDevice());
+        m_camera = new Pylon::CInstantCamera(Pylon::CTlFactory::GetInstance().CreateFirstDevice());
         //m_camera = new Pylon::CInstantCamera(Pylon::CTlFactory::GetInstance().CreateFirstDevice());
-        m_camera->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_None);
+        m_camera->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
         m_camera->Open();
         m_camera->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
-        SetDefaultCameraSettings();
+
+        if(!SetDefaultCameraSettings())
+        {
+            turnOffCamera();
+            return;
+        }
+
         m_camera->StartGrabbing(Pylon::GrabStrategy_LatestImages, Pylon::GrabLoop_ProvidedByInstantCamera);
         this->triggerCamera();
         emit cameraOpenedChanged(m_camera->IsOpen());
-        qDebug() << "Toby: Pylon Camera Device Created and Opened.";
-        qDebug() << "Toby: Max Camera Height = " << m_camera->Height.GetMax();
-        qDebug() << "Toby: Min Camera Height = " << m_camera->Height.GetMin();
-        qDebug() << "Toby: Max Camera Width = " << m_camera->Width.GetMax();
-        qDebug() << "Toby: Min Camera Width = " << m_camera->Width.GetMin();
-        qDebug() << "Toby: Camera CenterX/Y = " << m_camera->CenterX.GetValue();
     }
     catch(const Pylon::GenericException e)
     {
@@ -149,13 +152,16 @@ Description:
  **************************************************************/
 void Toby::OnImageGrabbed(CInstantCamera &camera, const CGrabResultPtr &ptrGrab)
 {
-
+    m_camera_fps = QString("Camera FPS = " + QString::number(1000/m_timer.elapsed()));
     if(ptrGrab->GrabSucceeded())
     {
-
+        m_timer.start();
         cv::Mat _mat = cv::Mat(ptrGrab->GetHeight(), ptrGrab->GetWidth(), CV_8UC1, (uint8_t *) ptrGrab->GetBuffer());
+        emit cameraFPSChanged();
         emit newCVMatFrameGrabbed(_mat);
+        return;
     }
+    emit cameraFPSChanged();
 
 }
 
@@ -167,55 +173,67 @@ Description:
  This Function Puts them all in one spot for ease of reading
  and Changing. It mirrors the Pylon Viewer App.
  **************************************************************/
-void Toby::SetDefaultCameraSettings()
+bool Toby::SetDefaultCameraSettings()
 {
-    //Analog Controls
-    m_camera->GainAuto.SetValue("Off");
-    m_camera->GainSelector.SetValue("All");
-    m_camera->GainRaw.SetValue(0); //Range 0 to 360
-    m_camera->BlackLevelSelector.SetValue("All");
-    m_camera->BlackLevelRaw.SetValue(0); //Range 0 to 511
-    m_camera->GammaEnable.SetValue(false);
-    m_camera->GammaSelector.SetValue("User");
-    m_camera->Gamma.SetValue(0.0); //Range 0.0 to 4.0
-    m_camera->DigitalShift.SetValue(0); //Range 0 to 4
+    try
+    {
+        //Get Camera NodeMap
+        GenApi::INodeMap& _nodemap = m_camera->GetNodeMap();
+        //Analog Controls
+        CEnumParameter(_nodemap, "GainAuto").SetValue("Off");
+        CEnumParameter(_nodemap, "GainSelector").SetValue("All");
+        CIntegerParameter(_nodemap, "GainRaw").SetValue(0); //Range 0 to 360
+        CEnumParameter(_nodemap, "BlackLevelSelector").SetValue("All");
+        CIntegerParameter(_nodemap, "BlackLevelRaw").SetValue(0); //Range 0 to 511
+        CBooleanParameter(_nodemap, "GammaEnable").SetValue(false);
+        CEnumParameter(_nodemap, "GammaSelector").SetValue("User");
+        CFloatParameter(_nodemap, "Gamma").SetValue(0.0);
+        CIntegerParameter(_nodemap, "DigitalShift").SetValue(0); //Range 0 to 4
 
-    //Image Format Controls
-    m_camera->PixelFormat.SetValue("Mono8");
-    m_camera->ReverseX.SetValue(false);
-    m_camera->ReverseY.SetValue(false);
+        //Image Format Controls
+        CEnumParameter(_nodemap, "PixelFormat").SetValue("Mono8");
+        CBooleanParameter(_nodemap, "ReverseX").SetValue(false);
+        CBooleanParameter(_nodemap, "ReverseY").SetValue(false);
 
-    //AOI Controls
-    m_camera->Width.SetValue(720);
-    m_camera->Height.SetValue(540);
-    m_camera->CenterX.SetValue(true);
-    m_camera->CenterY.SetValue(true);
-    m_camera->BinningHorizontal.SetValue(1);
-    m_camera->BinningVertical.SetValue(1);
-    m_camera->BinningHorizontalMode.SetValue("Average");
-    m_camera->BinningVerticalMode.SetValue("Average");
+        //AOI Controls
+        CIntegerParameter(_nodemap, "Width").SetValue(720); //Range 0 to 728
+        CIntegerParameter(_nodemap, "Height").SetValue(540); //Range 0 to 544
+        CBooleanParameter(_nodemap, "CenterX").SetValue(true);
+        CBooleanParameter(_nodemap, "CenterY").SetValue(true);
+        CIntegerParameter(_nodemap, "BinningHorizontal").SetValue(1); //Set To 1
+        CIntegerParameter(_nodemap, "BinningVertical").SetValue(1); //Set to 1
+        CEnumParameter(_nodemap, "BinningHorizontalMode").SetValue("Average");
+        CEnumParameter(_nodemap, "BinningVerticalMode").SetValue("Average");
 
-    //Image Quality Control
-    m_camera->PgiMode.SetValue("Off");
+        //Image Quality Control
+        CEnumParameter(_nodemap, "PgiMode").SetValue("Off");
 
-    //Acquisition Controls
-    m_camera->AcquisitionFrameCount.SetValue(1);
-    m_camera->TriggerMode.SetValue("On");
-    m_camera->TriggerSource.SetValue("Software");
-    m_camera->TriggerActivation.SetValue("RisingEdge");
-    m_camera->TriggerDelayAbs.SetValue(0.0);
-    m_camera->ExposureMode.SetValue("Timed");
-    m_camera->ExposureAuto.SetValue("Off");
-    m_camera->ExposureTimeMode.SetValue("Standard");
-    m_camera->ExposureTimeAbs.SetValue(3000.0); //Range From 22 to 100,000,000 in micro seconds.
-    m_camera->ShutterMode.SetValue("Global");
-    m_camera->AcquisitionFrameRateEnable.SetValue(false);
-    m_camera->AcquisitionFrameRateAbs.SetValue(100.0);
-    m_camera->AcquisitionStatusSelector.SetValue("FrameTriggerWait");
-    m_camera->SyncFreeRunTimerEnable.SetValue(false);
-    m_camera->SyncFreeRunTimerStartTimeLow.SetValue(0);
-    m_camera->SyncFreeRunTimerStartTimeHigh.SetValue(0);
-    m_camera->SyncFreeRunTimerTriggerRateAbs.SetValue(0.03);
+        //Acquisition Controls
+        CIntegerParameter(_nodemap, "AcquisitionFrameCount").SetValue(1); //Set to 1
+        CEnumParameter(_nodemap, "TriggerMode").SetValue("On");
+        CEnumParameter(_nodemap, "TriggerSource").SetValue("Software");
+        CEnumParameter(_nodemap, "TriggerActivation").SetValue("RisingEdge");
+        //CFloatParameter(_nodemap, "TriggerDelay").SetValue(0.0); //Our Camera Does Not Have This Node.
+        CEnumParameter(_nodemap, "ExposureMode").SetValue("Timed");
+        CEnumParameter(_nodemap, "ExposureAuto").SetValue("Off");
+        CEnumParameter(_nodemap, "ExposureTimeMode").SetValue("Standard");
+        CFloatParameter(_nodemap, "ExposureTimeAbs").SetValue(3000.0);
+        //CEnumParameter(_nodemap, "SensorShutterMode").SetValue("Global"); //Our Camera Does Not Have This Node.
+        CBooleanParameter(_nodemap, "AcquisitionFrameRateEnable").SetValue(false);
+        CFloatParameter(_nodemap, "AcquisitionFrameRateAbs").SetValue(100.0);
+        CEnumParameter(_nodemap, "AcquisitionStatusSelector").SetValue("FrameTriggerWait");
+        CBooleanParameter(_nodemap, "SyncFreeRunTimerEnable").SetValue(false);
+        CIntegerParameter(_nodemap, "SyncFreeRunTimerStartTimeLow").SetValue(0); //Set to 0
+        CIntegerParameter(_nodemap, "SyncFreeRunTimerStartTimeHigh").SetValue(0); //Set to 0
+        CFloatParameter(_nodemap, "SyncFreeRunTimerTriggerRateAbs").SetValue(0.03);
+    }
+    catch(const GenericException &e)
+    {
+        QString _error = e.GetDescription();
+        qDebug() << "Toby:: Error in SetDefaultCameraSettings: " + _error;
+        return false;
+    }
+    return true;
 }
 
 /**************************************************************
@@ -229,21 +247,38 @@ void Toby::onChangeCameraAOI(int _width, int _height)
     bool _oneshot = true;
     if(m_camera == nullptr) return;
     if(!m_camera->IsOpen()) return;
+
     while(m_camera->IsGrabbing())
     {
-        if(_oneshot) m_camera->StopGrabbing();
+        if(_oneshot)
+        {
+            _oneshot = false;
+            m_camera->StopGrabbing();
+        }
         QThread::msleep(100);
+    }
+    try
+    {
+        //Get Camera NodeMap
+        GenApi::INodeMap& _nodemap = m_camera->GetNodeMap();
+        CIntegerParameter(_nodemap, "Width").SetValue(_width); //Range 0 to 728
+        CIntegerParameter(_nodemap, "Height").SetValue(_height); //Range 0 to 544
+    }
+    catch(const GenericException &e)
+    {
+        QString _error = e.GetDescription();
+        qDebug() << "Toby:: Error in onChangeCameraGain: " + _error;
     }
     _oneshot = true;
-    m_camera->Width.SetValue(_width);
-    m_camera->Height.SetValue(_height);
-
     while(!m_camera->IsGrabbing())
     {
-        if(_oneshot) m_camera->StartGrabbing(Pylon::GrabStrategy_LatestImages, Pylon::GrabLoop_ProvidedByInstantCamera);
+        if(_oneshot)
+        {
+            m_camera->StartGrabbing(Pylon::GrabStrategy_LatestImages, Pylon::GrabLoop_ProvidedByInstantCamera);
+            _oneshot = false;
+        }
         QThread::msleep(100);
     }
-
     triggerCamera();
 }
 
@@ -257,7 +292,18 @@ void Toby::onChangeCameraExposure(double _exposure)
 {
     if(m_camera == nullptr) return;
     if(!m_camera->IsOpen()) return;
-    m_camera->ExposureTimeAbs.SetValue(_exposure);
+    try
+    {
+        //Get Camera NodeMap
+        GenApi::INodeMap& _nodemap = m_camera->GetNodeMap();
+        CFloatParameter(_nodemap, "ExposureTimeAbs").SetValue((float)_exposure);
+    }
+    catch(const GenericException &e)
+    {
+        QString _error = e.GetDescription();
+        qDebug() << "Toby:: Error in onChangeCameraExposure: " + _error;
+    }
+
 }
 
 
@@ -271,7 +317,18 @@ void Toby::onChangeCameraGain(int _gain)
 {
     if(m_camera == nullptr) return;
     if(!m_camera->IsOpen()) return;
-    m_camera->GainRaw.SetValue(_gain);
+    try
+    {
+        //Get Camera NodeMap
+        GenApi::INodeMap& _nodemap = m_camera->GetNodeMap();
+        CIntegerParameter(_nodemap, "GainRaw").SetValue(_gain); //Range 0 to 360
+    }
+    catch(const GenericException &e)
+    {
+        QString _error = e.GetDescription();
+        qDebug() << "Toby:: Error in onChangeCameraGain: " + _error;
+    }
+
 }
 
 

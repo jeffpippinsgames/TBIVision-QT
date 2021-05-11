@@ -31,6 +31,7 @@ class Toby : public QObject, public Pylon::CImageEventHandler, public Pylon::CCo
     Q_OBJECT
 
     Q_PROPERTY(double pylon_exposure READ getCameraExposure NOTIFY pylonCameraExposureChanged)
+    Q_PROPERTY(QString camera_fps READ getCameraFPS NOTIFY cameraFPSChanged)
 public:
     explicit Toby(QObject *parent = nullptr);
     ~Toby();
@@ -40,17 +41,20 @@ public:
     //Property Get Methods
     Q_INVOKABLE QString getCameraInfo();
     Q_INVOKABLE void setCameraAOIToMax();
-    Q_INVOKABLE double getCameraExposure(){return m_camera->ExposureTimeAbs.GetValue();}
+    Q_INVOKABLE double getCameraExposure();
     Q_INVOKABLE void turnOffCamera();
+    QString getCameraFPS(){return m_camera_fps;}
 
 
 private:
     //Pylon Members
-    CBaslerUniversalInstantCamera *m_camera;
+    CInstantCamera *m_camera;
+    QElapsedTimer m_timer;
+    QString m_camera_fps;
 
     //Methods
     virtual void OnImageGrabbed(Pylon::CInstantCamera& camera, const Pylon::CGrabResultPtr& ptrGrab); //Pylon Event Handler
-    void SetDefaultCameraSettings();
+    bool SetDefaultCameraSettings();
 
 public slots:
     void onChangeCameraAOI(int _width, int _height);
@@ -65,7 +69,25 @@ signals:
     void cameraOpenedChanged(bool _isopen);
     void aboutToDestroy();
     void pylonCameraExposureChanged();
+    void cameraFPSChanged();
 
 };
+
+inline double Toby::getCameraExposure()
+{
+    if(m_camera == nullptr) return 0.0;
+    try
+    {
+        //Get Camera NodeMap
+        GenApi::INodeMap& _nodemap = m_camera->GetNodeMap();
+        return CFloatParameter(_nodemap, "ExposureTimeAbs").GetValue();
+    }
+    catch(const GenericException &e)
+    {
+        QString _error = e.GetDescription();
+        qDebug() << "Toby:: Error in onChangeCameraGain: " + _error;
+    }
+    return 0.0;
+}
 
 #endif // TOBY_H

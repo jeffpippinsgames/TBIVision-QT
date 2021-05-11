@@ -189,362 +189,100 @@ bool Max::doSkeletonProcessing(Mat &_dst)
     return true;
 }
 
-bool Max::doTSLProcessing(Mat &_dst)
+bool Max::doVotingLineProcessing(Mat &_dst, TBILine &_line, int _total_iterations, int _vote_threshold,
+                                 float _distance_threshold, float _min_angle_to_horizon, float _max_angle_to_horizon,
+                                 float *_skeletalarray, int _start_index, int _end_index, Scalar _line_color)
 {
-    m_left_tsl = TBILine();
-    m_right_tsl = TBILine();
+    _line.clear();
 
-    if(_dst.channels() != 3)
-    {
-        qDebug() << "Max: fillTopSurfaceLines() requires a 3 channel Mat.";
-        emit failedTSLCheck();
-        return false;
-    }
-    if(m_flattened_iohrv  <= 1)
-    {
-        emit failedTSLCheck();
-        return false;
-    }
-    std::vector<TBILineVotingStructure> _leftlinecandidates;
-    std::vector<TBILineVotingStructure> _rightlinecandidates;
-    int _iteration = 0;
+    //std::vector<TBILineVotingStructure> _linecandidates;
+    QList<TBILineVotingStructure> _linecandidates;
     int _index1;
     int _index2;
     float _distance;
     int _highestvote_index = 0;
     int _highest_vote_count = 0;
-
-    //Fill The Candidate List
-    //1. Get Two Random Points
-    //2. Calc The Line Values
-    //3 Determine The Votes.
-
-    //Get Left Side TSL----------------------------------------------------------------
-    do
-    {
-        //Left Side
-        _index1 =  QRandomGenerator::global()->bounded(m_flattened_iohrv);
-        do
-        {
-            _index2 = QRandomGenerator::global()->bounded(m_flattened_iohrv);
-        }while(_index2 == _index1);
-        TBILineVotingStructure _leftlinecandidate;
-        _leftlinecandidate.m_line = TBILine((float)_index1, m_skeletal_line_array[_index1], (float)_index2, m_skeletal_line_array[_index2]);
-        if(_leftlinecandidate.m_line.isValid())
-        {
-            _leftlinecandidate.m_angletohorizontal = _leftlinecandidate.m_line.angleFromHorizontal();
-            if(_leftlinecandidate.m_angletohorizontal >= m_min_tslleft_angle)
-            {
-                if(_leftlinecandidate.m_angletohorizontal <= m_max_tslleft_angle)
-                {
-                    _leftlinecandidates.push_back(_leftlinecandidate);
-                }
-            }
-        }
-        ++_iteration;
-    }while(_iteration <= m_tsl_iterations);
-
-    //Fail if There are No Candidates in TSL List
-    if(_leftlinecandidates.size() == 0)
-    {
-        emit failedTSLCheck();
-        return false;
-    }
-
-    //Count Left Side Votes
-    _index1 = 0;
-    _index2 = 0;
-    do
-    {
-        TBIPoint _pnt((float)_index2, m_skeletal_line_array[_index2]);
-        _distance = _leftlinecandidates[_index1].m_line.getOrthogonalDistance(_pnt);
-        if(_distance <= m_tsl_distance_threshold)
-        {
-            ++_leftlinecandidates[_index1].m_numvotes;
-            if(_leftlinecandidates[_index1].m_numvotes > _highest_vote_count)
-            {
-                _highest_vote_count = _leftlinecandidates[_index1].m_numvotes;
-                _highestvote_index = _index1;
-            }
-        }
-        ++_index2;
-        if(_index2 == m_flattened_iohrv)
-        {
-            _index2 = 0;
-            ++_index1;
-        }
-    }while(_index1 < (int)_leftlinecandidates.size());
-
-    //Fail if Vote Count Fails
-    if(_highest_vote_count < m_min_tsl_votes)
-    {
-        emit failedTSLCheck();
-        return false;
-    }
-
-    //Set Left TSL
-    m_left_tsl = _leftlinecandidates[_highestvote_index].m_line;
-    m_left_tsl.remakeLine(0, m_flattened_iohrv);
-
-    //Start Right TSL---------------------------------------------------------------------
-    _index1 = 0;
-    _index2 = 0;
-    _iteration = 0;
-    _highest_vote_count = 0;
-    _highestvote_index = 0;
-    _distance = 0.0;
-
-    //Get Right Side TSL
-    do
-    {
-        //Left Side
-        _index1 =  QRandomGenerator::global()->bounded(m_flattened_iohrv, _dst.cols-1);
-        do
-        {
-            _index2 = QRandomGenerator::global()->bounded(m_flattened_iohrv, _dst.cols-1);
-        }while(_index2 == _index1);
-        TBILineVotingStructure _rightlinecandidate;
-        _rightlinecandidate.m_line = TBILine((float)_index1, m_skeletal_line_array[_index1], (float)_index2, m_skeletal_line_array[_index2]);
-        if(_rightlinecandidate.m_line.isValid())
-        {
-            _rightlinecandidate.m_angletohorizontal = _rightlinecandidate.m_line.angleFromHorizontal();
-            if(_rightlinecandidate.m_angletohorizontal >= m_min_tslright_angle)
-            {
-                if(_rightlinecandidate.m_angletohorizontal <= m_max_tslright_angle)
-                {
-                    _rightlinecandidates.push_back(_rightlinecandidate);
-                }
-            }
-        }
-        ++_iteration;
-    }while(_iteration <= m_tsl_iterations);
-
-    //Fail if There are No Candidates in TSL List
-    if(_rightlinecandidates.size() == 0)
-    {
-        emit failedTSLCheck();
-        return false;
-    }
-
-    //Count Right Side Votes
-    _index1 = 0;
-    _index2 = m_flattened_iohrv;
-    do
-    {
-        TBIPoint _pnt((float)_index2, m_skeletal_line_array[_index2]);
-        _distance = _rightlinecandidates[_index1].m_line.getOrthogonalDistance(_pnt);
-        if(_distance <= m_tsl_distance_threshold)
-        {
-            ++_rightlinecandidates[_index1].m_numvotes;
-            if(_rightlinecandidates[_index1].m_numvotes > _highest_vote_count)
-            {
-                _highest_vote_count = _rightlinecandidates[_index1].m_numvotes;
-                _highestvote_index = _index1;
-            }
-        }
-        ++_index2;
-        if(_index2 == _dst.cols)
-        {
-            _index2 = 0;
-            ++_index1;
-        }
-    }while(_index1 < (int)_rightlinecandidates.size());
-
-    //Fail if Vote Count Fails
-    if(_highest_vote_count < m_min_tsl_votes)
-    {
-        emit failedTSLCheck();
-        return false;
-    }
-
-    //Set Right TSL
-    m_right_tsl = _rightlinecandidates[_highestvote_index].m_line;
-    m_right_tsl.remakeLine(m_flattened_iohrv, _dst.cols-1);
-
-    //Draw on Mat
-    m_left_tsl.drawOnMat(_dst, cv::Scalar(0,200,0), 1);
-    m_right_tsl.drawOnMat(_dst, cv::Scalar(200,0,0), 1);
-
-    return true;
-}
-
-bool Max::doBWLProcessing(Mat &_dst)
-{
-    m_left_bwl = TBILine();
-    m_right_bwl = TBILine();
+    int _iteration = 0;
 
     if(_dst.channels() != 3)
     {
-        qDebug() << "Max: fillTopSurfaceLines() requires a 3 channel Mat.";
-        emit failedTSLCheck();
+        qDebug() << "Max: doVotingLineProcessing() requires a 3 channel Mat.";
+        emit failedVLCheck();
         return false;
     }
-    if(m_flattened_iohrv  <= 1)
-    {
-        emit failedTSLCheck();
-        return false;
-    }
-    std::vector<TBILineVotingStructure> _leftlinecandidates;
-    std::vector<TBILineVotingStructure> _rightlinecandidates;
-    int _iteration = 0;
-    int _index1;
-    int _index2;
-    float _distance;
-    int _highestvote_index = 0;
-    int _highest_vote_count = 0;
 
-    //Fill The Candidate List
-    //1. Get Two Random Points
-    //2. Calc The Line Values
-    //3 Determine The Votes.
-
-    //Get Left Side BWL----------------------------------------------------------------
+    //Find Line Candidates
     do
     {
-        //Left Side
-        _index1 =  QRandomGenerator::global()->bounded(m_flattened_iohrv);
+        _index1 =  QRandomGenerator::system()->bounded(_start_index, _end_index);
         do
         {
-            _index2 = QRandomGenerator::global()->bounded(m_flattened_iohrv);
+            _index2 = QRandomGenerator::system()->bounded(_start_index, _end_index);
         }while(_index2 == _index1);
-        TBILineVotingStructure _leftlinecandidate;
-        _leftlinecandidate.m_line = TBILine((float)_index1, m_skeletal_line_array[_index1], (float)_index2, m_skeletal_line_array[_index2]);
-        if(_leftlinecandidate.m_line.isValid())
+        TBILineVotingStructure _linecandidate;
+        _linecandidate.m_line = TBILine((float)_index1, _skeletalarray[_index1], (float)_index2, _skeletalarray[_index2]);
+        if(_linecandidate.m_line.isValid())
         {
-            _leftlinecandidate.m_angletohorizontal = _leftlinecandidate.m_line.angleFromHorizontal();
-            if(_leftlinecandidate.m_angletohorizontal >= m_min_bwlleft_angle)
+            _linecandidate.m_angletohorizontal = _linecandidate.m_line.angleFromHorizontal();
+            if(_linecandidate.m_angletohorizontal >= _min_angle_to_horizon)
             {
-                if(_leftlinecandidate.m_angletohorizontal <= m_max_bwlleft_angle)
+                if(_linecandidate.m_angletohorizontal <= _max_angle_to_horizon)
                 {
-                    _leftlinecandidates.push_back(_leftlinecandidate);
+                    _linecandidates.push_back(_linecandidate);
+
                 }
             }
         }
         ++_iteration;
-    }while(_iteration <= m_bwl_iterations);
+    }while(_iteration < _total_iterations);
 
-    //Fail if There are No Candidates in TSL List
-    if(_leftlinecandidates.size() == 0)
+    //Fail if There are No Candidates in VL List
+    if(_linecandidates.size() == 0)
     {
-        emit failedTSLCheck();
+        emit failedVLCheck();
         return false;
     }
 
-    //Count Left Side Votes
-    _index1 = 0;
-    _index2 = 0;
-    do
-    {
-        TBIPoint _pnt((float)_index2, m_skeletal_line_array[_index2]);
-        _distance = _leftlinecandidates[_index1].m_line.getOrthogonalDistance(_pnt);
-        if(_distance <= m_bwl_distance_threshold)
-        {
-            ++_leftlinecandidates[_index1].m_numvotes;
-            if(_leftlinecandidates[_index1].m_numvotes > _highest_vote_count)
-            {
-                _highest_vote_count = _leftlinecandidates[_index1].m_numvotes;
-                _highestvote_index = _index1;
-            }
-        }
-        ++_index2;
-        if(_index2 == m_flattened_iohrv)
-        {
-            _index2 = 0;
-            ++_index1;
-        }
-    }while(_index1 < (int)_leftlinecandidates.size());
 
-    //Fail if Vote Count Fails
-    if(_highest_vote_count < m_min_bwl_votes)
-    {
-        emit failedTSLCheck();
-        return false;
-    }
-
-    //Set Left BWL
-    m_left_bwl = _leftlinecandidates[_highestvote_index].m_line;
-    m_left_bwl.remakeLine(0, _dst.cols);
-
-    //Start Right BWL---------------------------------------------------------------------
-    _index1 = 0;
-    _index2 = 0;
+    //Count Votes
+    _index1 = _start_index;
     _iteration = 0;
-    _highest_vote_count = 0;
-    _highestvote_index = 0;
-    _distance = 0.0;
-
-    //Get Right Side BWL
     do
     {
-        //Left Side
-        _index1 =  QRandomGenerator::global()->bounded(m_flattened_iohrv, _dst.cols-1);
-        do
+        TBIPoint _pnt((float)_index1, m_skeletal_line_array[_index1]);
+        _distance = _linecandidates[_iteration].m_line.getOrthogonalDistance(_pnt);
+        if(_distance <= _distance_threshold)
         {
-            _index2 = QRandomGenerator::global()->bounded(m_flattened_iohrv, _dst.cols-1);
-        }while(_index2 == _index1);
-        TBILineVotingStructure _rightlinecandidate;
-        _rightlinecandidate.m_line = TBILine((float)_index1, m_skeletal_line_array[_index1], (float)_index2, m_skeletal_line_array[_index2]);
-        if(_rightlinecandidate.m_line.isValid())
-        {
-            _rightlinecandidate.m_angletohorizontal = _rightlinecandidate.m_line.angleFromHorizontal();
-            if(_rightlinecandidate.m_angletohorizontal >= m_min_bwlright_angle)
+            ++_linecandidates[_iteration].m_numvotes;
+            if(_linecandidates[_iteration].m_numvotes > _highest_vote_count)
             {
-                if(_rightlinecandidate.m_angletohorizontal <= m_max_bwlright_angle)
-                {
-                    _rightlinecandidates.push_back(_rightlinecandidate);
-                }
+                _highest_vote_count = _linecandidates[_iteration].m_numvotes;
+                _highestvote_index = _iteration;
             }
         }
-        ++_iteration;
-    }while(_iteration <= m_bwl_iterations);
-
-    //Fail if There are No Candidates in TSL List
-    if(_rightlinecandidates.size() == 0)
-    {
-        emit failedTSLCheck();
-        return false;
-    }
-
-    //Count Right Side Votes
-    _index1 = 0;
-    _index2 = m_flattened_iohrv;
-    do
-    {
-        TBIPoint _pnt((float)_index2, m_skeletal_line_array[_index2]);
-        _distance = _rightlinecandidates[_index1].m_line.getOrthogonalDistance(_pnt);
-        if(_distance <= m_bwl_distance_threshold)
+        ++_index1;
+        if(_index1 > _end_index)
         {
-            ++_rightlinecandidates[_index1].m_numvotes;
-            if(_rightlinecandidates[_index1].m_numvotes > _highest_vote_count)
-            {
-                _highest_vote_count = _rightlinecandidates[_index1].m_numvotes;
-                _highestvote_index = _index1;
-            }
+            _index1 = 0;
+            ++_iteration;
         }
-        ++_index2;
-        if(_index2 == _dst.cols)
-        {
-            _index2 = 0;
-            ++_index1;
-        }
-    }while(_index1 < (int)_rightlinecandidates.size());
+    }while(_iteration < (int)_linecandidates.size());
 
     //Fail if Vote Count Fails
-    if(_highest_vote_count < m_min_bwl_votes)
+    if(_highest_vote_count < _vote_threshold)
     {
-        emit failedTSLCheck();
+        emit failedVLCheck();
         return false;
     }
 
-    //Set Right BWL
-    m_right_bwl = _rightlinecandidates[_highestvote_index].m_line;
-    m_right_bwl.remakeLine(0, _dst.cols);
+    //Set The Line
+    _line = _linecandidates[_highestvote_index].m_line;
+    _line.remakeLine(_start_index, _end_index);
 
-    //Draw on Mat
-    m_left_bwl.drawOnMat(_dst, cv::Scalar(0,200,0), 1);
-    m_right_bwl.drawOnMat(_dst, cv::Scalar(200,0,0), 1);
+    //Draw The Line
+     _line.drawOnMat(_dst, _line_color, 1);
 
-    return true;
+     return true;
 }
 
 //The Recieve New CV::Mat Method
@@ -592,7 +330,7 @@ void Max::recieveNewCVMat(const Mat &_mat)
     cv::GaussianBlur(_raw_mat, _blurr_mat, Size(m_blur,m_blur), 0);
     cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
 
-
+    cv::cvtColor(_raw_mat, _operation_mat, cv::COLOR_GRAY2BGR);
     blankProcessingArrays();
     if(doPixelColumnProcessing(_threshold_mat, _pixelcolumn_mat)) //The TII Check is Done Here
     {
@@ -602,10 +340,23 @@ void Max::recieveNewCVMat(const Mat &_mat)
         {
 
             cv::cvtColor(_skel_mat, _tsl_mat, cv::COLOR_GRAY2BGR);
-            if(doTSLProcessing(_tsl_mat) && doBWLProcessing(_tsl_mat))
+            bool _left_tsl_good = doVotingLineProcessing(_tsl_mat, m_left_tsl, m_tsl_iterations, m_min_tsl_votes, m_tsl_distance_threshold,
+                                                         m_min_tslleft_angle, m_max_tslleft_angle, m_skeletal_line_array, 0, m_flattened_iohrv,
+                                                         CV_RGB(0,200,0));
+            bool _right_tsl_good = doVotingLineProcessing(_tsl_mat, m_right_tsl, m_tsl_iterations, m_min_tsl_votes, m_tsl_distance_threshold,
+                                                          m_min_tslright_angle, m_max_tslright_angle, m_skeletal_line_array, m_flattened_iohrv, _skel_mat.cols,
+                                                          CV_RGB(200,0,0));
+            bool _left_bwl_good = doVotingLineProcessing(_tsl_mat, m_left_bwl, m_bwl_iterations, m_min_bwl_votes, m_bwl_distance_threshold,
+                                                         m_min_bwlleft_angle, m_max_bwlleft_angle, m_skeletal_line_array, 0, m_flattened_iohrv,
+                                                         CV_RGB(0,200,0));
+            bool _right_bwl_good = doVotingLineProcessing(_tsl_mat, m_right_bwl, m_bwl_iterations, m_min_bwl_votes, m_bwl_distance_threshold,
+                                                          m_min_bwlright_angle, m_max_bwlright_angle, m_skeletal_line_array, m_flattened_iohrv, _skel_mat.cols,
+                                                          CV_RGB(200,0,0));
+
+            if(_left_tsl_good && _right_tsl_good && _left_bwl_good && _right_bwl_good)
             {
 
-                _operation_mat = _tsl_mat.clone();
+
                 TBIPoint _intersectionpnt;
                 if(m_left_tsl.findPointofIntersection(m_left_bwl, _intersectionpnt))
                 {
@@ -617,6 +368,7 @@ void Max::recieveNewCVMat(const Mat &_mat)
                     cv::drawMarker(_operation_mat, cv::Point((int)_intersectionpnt.getX(), (int)_intersectionpnt.getY()),
                                   CV_RGB(0,200,200), cv::MARKER_CROSS, 20, 2);
                 }
+
 
             }
             else
@@ -646,7 +398,7 @@ void Max::recieveNewCVMat(const Mat &_mat)
     emit newTSLMatProcessed(_tsl_mat);
     emit newOperationMatProcessed(_operation_mat);
 
-    m_timeinloop = QString("Time in Loop: " + QString::number(m_timer.elapsed()) + " ms.-Camera FPS = " + QString::number(1000/m_timer.elapsed()));
+    m_timeinloop = QString("Time in Loop: " + QString::number(m_timer.elapsed()));
     emit timeInLoopChanged(m_timeinloop);
     m_in_proccesing_loop = false;
     emit processingComplete(); //Must Be Last Signal Sent
