@@ -19,7 +19,7 @@ Gary::Gary(QObject *parent) : QObject(parent)
     m_x_position = 10.2345;
     this->findOpenTeensy();
     emit completed();
-    qDebug() << "Gary: Gary Object Created.";
+    qDebug() << "Gary::Gary() Object Created.";
 }
 //--------------------------------------------------------------
 
@@ -33,14 +33,14 @@ Description:
 Gary::~Gary()
 {
     emit aboutToDestroy();
-    qDebug() << "Gary: Gary Object Destroyed.";
+    qDebug() << "Gary::~Gary() Object Destroyed.";
     m_serial_port->close();
     if(m_serial_port)
     {
         if(m_serial_port->isOpen())
         {
             m_serial_port->close();
-            qDebug() << "Gary: Serial Port Closed.";
+            qDebug() << "Gary::~Gary() Serial Port Closed.";
         }
     }
 }
@@ -174,14 +174,14 @@ bool Gary::findOpenTeensy()
                    m_serial_port->setFlowControl(QSerialPort::NoFlowControl);
                    if(m_serial_port->open(QIODevice::ReadWrite))
                    {
-                       qDebug() << "Gary: Serial Port Opened.";
+                       qDebug() << "Gary::findOpenTeensy() Serial Port Opened.";
                        QObject::connect(m_serial_port, SIGNAL(errorOccured(QSerialPort::SerialPortError)), this, SLOT(serialError(QSerialPort::SerialPortError)));
                        setOperationStatus(GaryOperationStatus::TBI_OPERATION_OK);
                        return true;
                    }
                    else
                    {
-                       qDebug() << "Gary: Error Opening Serial Port";
+                       qDebug() << "Gary::findOpenTeensy() Error Opening Serial Port";
                        setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
                        return false;
                    }
@@ -189,7 +189,7 @@ bool Gary::findOpenTeensy()
            }
        }
     }
-    qDebug() << "Gary: Could Not Find Teensy 3.2 Serial Device. Microcontroller not Available.";
+    qDebug() << "Gary::findOpenTeensy() Could Not Find Teensy 3.2 Serial Device.";
     return false;
 }
 //--------------------------------------------------------------
@@ -301,17 +301,17 @@ void Gary::sendSerialCommand(QByteArray &_data)
 
     if(m_serial_port == nullptr)
     {
-        qDebug() << "Gary: Error in sendSerialCommand: m_serial_port is null";
+        qDebug() << "Gary::sendSerialCommand() Error in sendSerialCommand: m_serial_port is null";
         return;
     }
     if(m_serial_port->isOpen())
     {
         m_serial_port->write(_data);
-        qDebug() << "Gary: Sending Command to Controller: " << _data.toHex(',');
+        qDebug() << "Gary::sendSerialCommand() Sending Command to Controller: " << _data.toHex(',');
     }
     else
     {
-        qDebug() << "Gary: Error in sendSerialCommand: m_serial_port is not open";
+        qDebug() << "Gary::sendSerialCommand() Error in sendSerialCommand: m_serial_port is not open";
     }
 }
 //--------------------------------------------------------------

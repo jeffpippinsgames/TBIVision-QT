@@ -36,17 +36,20 @@ Item {
     readonly property string pixelcolumnstateframeactive: "PixelColumnStateFrameActive"
     readonly property string skeletalstateframenotactive: "SkeletalStateFrameNotActive"
     readonly property string skeletalstateframeactive: "SkeletalStateFrameActive"
-    readonly property string tslstateframenotactive: "TSLStateFrameNotActive" //Top Surface Lines
-    readonly property string tslstateframeactive: "TSLStateFrameActive" //Top Surface Lines
+    readonly property string ransacstateframenotactive: "RansacStateFrameNotActive" //Top Surface Lines
+    readonly property string ransacstateframeactive: "RansacStateFrameActive" //Top Surface Lines
+    readonly property string splitmergestateframenotactive: "SplitMergeStateFrameNotActive" //Topography Lines
+    readonly property string splitmergestateframeactive: "SplitMergeStateFrameActive" //Topography Lines
 
     //Frame Constants. For Display Switching and Signal Connections to Max
     readonly property string emptyframe: "NoFrame"
-    readonly property string rawframe: "Camera"
-    readonly property string blurframe: "Blur"
-    readonly property string thresholdframe: "Threshold"
-    readonly property string pixelcolumnframe: "PixelColumn"
-    readonly property string skeletalframe: "Skeletal"
-    readonly property string tslframe: "TSL" //Top Surface Lines
+    readonly property string rawframe: "1-Camera"
+    readonly property string blurframe: "2-Blur"
+    readonly property string thresholdframe: "3-Threshold"
+    readonly property string pixelcolumnframe: "4-PixelColumn"
+    readonly property string skeletalframe: "5-Skeletal"
+    readonly property string ransacframe: "6-Ransac"
+    readonly property string splitmergeframe: "7-SplitMerge"
 
     //For Rectangle Placements
     //The MainView Rect Derives From FrameSelect and Settings
@@ -76,18 +79,18 @@ Item {
 
     function cleanupForDestruction()
     {
-        //detach any bindings
+        //Stop The Camera For Transition
+        Toby.stopCamera();
 
-        //Save Mary
+        //Save Mary and Update Singletons
         Mary.saveMaryToFile();
+        Mary.broadcastSingletonSignals();
+
 
         //disconnect all connected signals
         Max.processingComplete.disconnect(rootpageId.triggerTobyNextFrame);
         Max.skeletalArrayChanged.disconnect(skeletalarrayId.updateArray);
-        mainviewrectId.disconnectSignal();
-
-        //Handle Camera
-        Toby.turnOffCamera();
+        mainviewrectId.disconnectSignal();        
     }
 
     function triggerTobyNextFrame()
@@ -98,21 +101,21 @@ Item {
     //Slots---------------------------------------------------------
     Component.onCompleted:
     {
+
         //Connect Signals
         Max.processingComplete.connect(rootpageId.triggerTobyNextFrame);
 
         //Set The State of the Root Component
         rootpageId.state = rootpageId.camerastateframeactive;
 
-        //Handle Camera
-        Toby.startCamera();
+
+        //Load Mary Settings and Update QML and Singletons
         Mary.loadMaryFromFile();
+
+
+        //Setup and Start Camera
         Toby.setCameraAOIToMax();
-
-        //Update Control Bindings
-        cameradeviceinfotextId.text = Toby.getCameraInfo();
-
-        console.log("QML: ImageProcessingSettingPage Created.");
+        Toby.startCamera();
     }
 
     //Page States---------------------------------------------------
@@ -127,6 +130,7 @@ Item {
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -136,6 +140,7 @@ Item {
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.rawframe}
@@ -152,6 +157,7 @@ Item {
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.focuscolor}
@@ -161,6 +167,7 @@ Item {
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.rawframe}
@@ -176,6 +183,7 @@ Item {
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -185,6 +193,7 @@ Item {
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
@@ -198,6 +207,7 @@ Item {
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.focuscolor}
@@ -207,6 +217,7 @@ Item {
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: blursettingscontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
@@ -222,6 +233,7 @@ Item {
             PropertyChanges{ target: thresholdsettingsrectId; visible: true;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -231,6 +243,7 @@ Item {
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
@@ -244,6 +257,7 @@ Item {
             PropertyChanges{ target: thresholdsettingsrectId; visible: true;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.focuscolor}
@@ -253,6 +267,7 @@ Item {
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
@@ -268,6 +283,7 @@ Item {
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: true;}
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: pixelcolumnborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -277,6 +293,7 @@ Item {
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.pixelcolumnframe}
@@ -290,6 +307,7 @@ Item {
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: true;}
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: pixelcolumnborderrectId; border.color: rootpageId.focuscolor}
@@ -299,6 +317,7 @@ Item {
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.pixelcolumnframe}
@@ -314,6 +333,7 @@ Item {
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: skeletalsettingsrectId; visible: true;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: false;}
 
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
@@ -324,6 +344,7 @@ Item {
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.skeletalframe}
@@ -337,6 +358,7 @@ Item {
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: skeletalsettingsrectId; visible: true;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: skeletalborderrectId; border.color: rootpageId.focuscolor}
@@ -346,58 +368,114 @@ Item {
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: skeletalcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.skeletalframe}
             //Set The Interior Control State
             PropertyChanges {target: skeletalsettingsrectId; state: "ArrayState";}
         },
-        State //TSL Selected Frame Focused
+        State //Ransac Selected Frame Focused
         {
-            name: rootpageId.tslstateframeactive
+            name: rootpageId.ransacstateframeactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: true;}
 
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
-            PropertyChanges{ target: skeletalborderrectId; border.color: rootpageId.nonfocuscolor}
+            PropertyChanges{ target: ransacborderrectId; border.color: rootpageId.nonfocuscolor}
             //SetController focus To FrameSele
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
-            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.tslframe}
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.ransacframe}
         },
-        State //TSL Selected and Focused
+        State //Ransac Selected and Focused
         {
-            name: rootpageId.tslstateframenotactive
+            name: rootpageId.ransacstateframenotactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: true;}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
-            PropertyChanges{ target: skeletalborderrectId; border.color: rootpageId.focuscolor}
+            PropertyChanges{ target: ransacborderrectId; border.color: rootpageId.focuscolor}
             //SetController focus To FrameSele
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: true}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: true}
             //SetMainViewRect Display
-            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.tslframe}
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.ransacframe}
             //Set The Interior Control State
-            PropertyChanges {target: skeletalsettingsrectId; state: "ArrayState";}
+            PropertyChanges {target: ransacsettingsrectId; state: "RansacLeftTSLMinAngle";}
+        },
+        State //Split Merge Selected Frame Focused
+        {
+            name: rootpageId.splitmergestateframeactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: false;}
+            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: false;}
+
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
+            PropertyChanges{ target: ransacborderrectId; border.color: rootpageId.nonfocuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.splitmergeframe}
+        },
+        State //Split Merge Selected and Focused
+        {
+            name: rootpageId.splitmergestateframenotactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: false;}
+            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: false}
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
+            PropertyChanges{ target: ransacborderrectId; border.color: rootpageId.focuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.splitmergeframe}
+            //Set The Interior Control State
+            //PropertyChanges {target: ransacsettingsrectId; state: "RansacLeftTSLMinAngle";}
         }
 
 
@@ -466,7 +544,7 @@ Item {
 
     }
 
-    //Right Text----------------------------------------------------
+    //Time in Loop Text----------------------------------------------------
     Text
     {
         id: timeinlooptextId
@@ -477,6 +555,18 @@ Item {
         font.pixelSize: 25
         color: rootpageId.textcolor
 
+    }
+
+    //Camera FPS Text
+    Text
+    {
+        id: camerafpstextId
+        font.family: fontId.name
+        text: Toby.camera_fps
+        font.pixelSize: 25
+        x: timeinlooptextId.x + 300
+        y: 20
+        color: rootpageId.textcolor
     }
 
     //Frame Selection Rectangle-------------------------------------
@@ -545,6 +635,12 @@ Item {
                     break;
                 case rootpageId.skeletalframe:
                     rootpageId.state = rootpageId.skeletalstateframenotactive;
+                    break;
+                case rootpageId.ransacframe:
+                    rootpageId.state = rootpageId.ransacstateframenotactive;
+                    break;
+                case rootpageId.splitmergeframe:
+                    rootpageId.state = rootpageId.splitmergestateframenotactive;
                     break;
                 }
             }
@@ -645,8 +741,11 @@ Item {
                         case rootpageId.skeletalframe:
                             Max.newSkeletalMatProcessed.connect(delegateframeId.recieveCVMat);
                             break;
-                        case rootpageId.tslframe:
-                            Max.newTSLMatProcessed.connect(delegateframeId.recieveCVMat);
+                        case rootpageId.ransacframe:
+                            Max.newRansacMatProcessed.connect(delegateframeId.recieveCVMat);
+                            break;
+                        case rootpageId.splitmergeframe:
+                            Max.newSplitMergeMatProcessed.connect(delegateframeId.recieveCVMat);
                             break;
                         }
                     }
@@ -672,7 +771,7 @@ Item {
             width: frameselectionrectId.width - 10
             model: modelId
             delegate: delegateId
-            highlight: Rectangle{id: frameselecthighlightrectId; color: "green"; radius: 5; opacity: .4}
+            highlight: Rectangle{id: frameselecthighlightrectId; color: "yellow"; radius: 5; opacity: .2}
             orientation: Qt.Horizontal
             layoutDirection: Qt.LeftToRight
             spacing: 25
@@ -687,7 +786,8 @@ Item {
                 modelId.append({"frame": rootpageId.thresholdframe});
                 modelId.append({"frame": rootpageId.pixelcolumnframe});
                 modelId.append({"frame": rootpageId.skeletalframe});
-                modelId.append({"frame": rootpageId.tslframe});
+                modelId.append({"frame": rootpageId.ransacframe});
+                modelId.append({"frame": rootpageId.splitmergeframe});
 
             }
 
@@ -711,8 +811,11 @@ Item {
                 case rootpageId.skeletalframe:
                     rootpageId.state = rootpageId.skeletalstateframeactive;
                     break;
-                case rootpageId.tslframe:
-                    rootpageId.state = rootpageId.tslstateframeactive;
+                case rootpageId.ransacframe:
+                    rootpageId.state = rootpageId.ransacstateframeactive;
+                    break;
+                case rootpageId.splitmergeframe:
+                    rootpageId.state = rootpageId.splitmergestateframeactive;
                     break;
                 }
             }
@@ -939,6 +1042,7 @@ Item {
             x:10
             font.pixelSize: 20
             color: rootpageId.textcolor
+            text: Toby.getCameraInfo()
         }
 
         //Camera AOI Adjustment Button
@@ -1809,7 +1913,7 @@ Item {
             y: pixelcolumn_ttitextId.y + pixelcolumn_ttitextId.height + 20
             messagetext: "Max Image Intensity: " + Mary.pc_max_tii
             valuefrom: Mary.pc_min_tii + 1
-            valueto: 3000000
+            valueto: 15000000
             stepsize: 1
             majorstepsize: 50000
             controlstickautorepeat: true
@@ -2184,7 +2288,7 @@ Item {
             y: skeletalarrayId.y + skeletalarrayId.height + 20
             messagetext: "Maximum Discontinuities: " + Mary.sk_max_discontinuity;
             valuefrom: 0
-            valueto: 50
+            valueto: 700
             stepsize: 1
             majorstepsize: 5
             controlstickautorepeat: true;
@@ -2207,6 +2311,1858 @@ Item {
                 Mary.sk_max_discontinuity = discontinuitysliderId.value;
             }
         }
+
+
+
+    }
+
+    //Ransac Settings Rectangle
+    Rectangle
+    {
+       id: ransacsettingsrectId
+       visible: false
+       width: rootpageId.settingsrectwidth
+       height: rootpageId.settingsrectheight
+       x: rootpageId.settingsrectx
+       y: rootpageId.settingsrecty
+       color: "transparent"
+
+       readonly property int sliderwidth: 380
+       readonly property int sliderheight: 45
+       readonly property int sliderborderwidth: 3
+       readonly property int slidersverticalspacing: 5
+       readonly property int sliderleftx: 10
+       readonly property int sliderrightx: 410
+       readonly property int slidertextsize: 15
+
+       function grabFocus()
+       {
+           ransaccontrollerId.focus = true;
+       }
+
+       states:
+       [
+           State
+           {
+               name: "NonFocused"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.nonfocuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacLeftTSLMinAngle"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.highlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacLeftTSLMaxAngle"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.highlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+
+           },
+           State
+           {
+               name: "RansacLeftTSLMinVotes"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.highlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacLeftTSLDistanceThreshold"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.highlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacLeftTSLIterations"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.highlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacRightTSLMinAngle"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.highlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacRightTSLMaxAngle"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.highlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacRightTSLMinVotes"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.highlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacRightTSLDistanceThreshold"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.highlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacRightTSLIterations"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.highlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacLeftBWLMinAngle"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.highlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacLeftBWLMaxAngle"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.highlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacLeftBWLMinVotes"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.highlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacLeftBWLDistanceThreshold"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.highlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacLeftBWLIterations"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.highlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacRightBWLMinAngle"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.highlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacRightBWLMaxAngle"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.highlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacRightBWLMinVotes"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.highlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacRightBWLDistanceThreshold"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.highlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
+           },
+           State
+           {
+               name: "RansacRightBWLIterations"
+               PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+
+               PropertyChanges{target: ransaclefttslminanglesliderId; state: ransaclefttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslmaxanglesliderId; state: ransaclefttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrighttslminanglesliderId; state: ransacrighttslminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslmaxanglesliderId; state: ransacrighttslmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacleftbwlminanglesliderId; state: ransacleftbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlmaxanglesliderId; state: ransacleftbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
+
+               PropertyChanges{target: ransacrightbwlminanglesliderId; state: ransacrightbwlminanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlmaxanglesliderId; state: ransacrightbwlmaxanglesliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
+               PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.highlightedstate;}
+           }
+       ]
+
+       Rectangle
+       {
+           anchors.fill: ransacsettingsrectId
+           color: "black"
+           opacity: .8
+           radius: 10
+       }
+
+       Rectangle
+       {
+           anchors.fill: ransacsettingsrectId
+           color: "darkred"
+           opacity: .05
+           radius: 10
+       }
+
+       Rectangle
+       {
+           id: ransacborderrectId
+           anchors.fill: ransacsettingsrectId
+           color: "transparent"
+           border.color: rootpageId.nonfocuscolor
+           border.width: rootpageId.rectborderwidths
+           radius: 10
+       }
+
+       Rectangle
+       {
+           id: ransacmiddlelineId
+           anchors.centerIn: ransacsettingsrectId
+           height: ransacsettingsrectId.height*.75
+           width:6
+           color: "transparent"
+           border.color: "darkred"
+           border.width: 3
+           radius: 2
+       }
+
+
+       ControllerObject
+       {
+
+           id:ransaccontrollerId
+           focus: false
+
+           onFocusChanged:
+           {
+
+           }
+
+           onBlackButtonPressed:
+           {
+
+           }
+
+           onGreenButtonPressed:
+           {
+               switch(ransacsettingsrectId.state)
+                {
+                case "RansacLeftTSLMinAngle":
+                    ransaclefttslminanglesliderId.grabFocus();
+                    break;
+                case "RansacLeftTSLMaxAngle":
+                    ransaclefttslmaxanglesliderId.grabFocus();
+                    break;
+                case "RansacLeftTSLMinVotes":
+                    ransaclefttslminvotessliderId.grabFocus();
+                    break;
+                case "RansacLeftTSLDistanceThreshold":
+                    ransaclefttsldistancethresholdsliderId.grabFocus();
+                    break;
+                case "RansacLeftTSLIterations":
+                    ransaclefttsliterationssliderId.grabFocus();
+                    break;
+
+
+                case "RansacRightTSLMinAngle":
+                    ransacrighttslminanglesliderId.grabFocus();
+                    break;
+                case "RansacRightTSLMaxAngle":
+                    ransacrighttslmaxanglesliderId.grabFocus();
+                    break;
+                case "RansacRightTSLMinVotes":
+                    ransacrighttslminvotessliderId.grabFocus();
+                    break;
+                case "RansacRightTSLDistanceThreshold":
+                    ransacrighttsldistancethresholdsliderId.grabFocus();
+                    break;
+                case "RansacRightTSLIterations":
+                    ransacrighttsliterationssliderId.grabFocus();
+                    break;
+
+
+                case "RansacLeftBWLMinAngle":
+                    ransacleftbwlminanglesliderId.grabFocus();
+                    break;
+                case "RansacLeftBWLMaxAngle":
+                    ransacleftbwlmaxanglesliderId.grabFocus();
+                    break;
+                case "RansacLeftBWLMinVotes":
+                    ransacleftbwlminvotessliderId.grabFocus();
+                    break;
+                case "RansacLeftBWLDistanceThreshold":
+                    ransacleftbwldistancethresholdsliderId.grabFocus();
+                    break;
+                case "RansacLeftBWLIterations":
+                    ransacleftbwliterationssliderId.grabFocus();
+                    break;
+
+
+                case "RansacRightBWLMinAngle":
+                    ransacrightbwlminanglesliderId.grabFocus();
+                    break;
+                case "RansacRightBWLMaxAngle":
+                    ransacrightbwlmaxanglesliderId.grabFocus();
+                    break;
+                case "RansacRightBWLMinVotes":
+                    ransacrightbwlminvotessliderId.grabFocus();
+                    break;
+                case "RansacRightBWLDistanceThreshold":
+                    ransacrightbwldistancethresholdsliderId.grabFocus();
+                    break;
+                case "RansacRightBWLIterations":
+                    ransacrightbwliterationssliderId.grabFocus();
+                    break;
+                }
+
+           }
+
+           onRedButtonPressed:
+           {
+
+           }
+
+           onUpButtonPressed:
+           {
+
+               //Min Angle Slider
+               //Max Angle Slider
+               //Distance Threshold
+               //Iterations
+               //Min Votes
+               switch(ransacsettingsrectId.state)
+               {
+               case "RansacLeftTSLMinAngle":
+                   ransacsettingsrectId.state = "NonFocused";
+                   rootpageId.state = rootpageId.ransacstateframeactive;
+                   break;
+               case "RansacLeftTSLMaxAngle":
+                   ransacsettingsrectId.state = "RansacLeftTSLMinAngle";
+                   break;
+               case "RansacLeftTSLMinVotes":
+                   ransacsettingsrectId.state = "RansacLeftTSLIterations";
+                   break;
+               case "RansacLeftTSLDistanceThreshold":
+                   ransacsettingsrectId.state = "RansacLeftTSLMaxAngle";
+                   break;
+               case "RansacLeftTSLIterations":
+                   ransacsettingsrectId.state = "RansacLeftTSLDistanceThreshold"
+                   break;
+
+               case "RansacRightTSLMinAngle":
+                   ransacsettingsrectId.state = "NonFocused";
+                   rootpageId.state = rootpageId.ransacstateframeactive;
+                   break;
+               case "RansacRightTSLMaxAngle":
+                   ransacsettingsrectId.state = "RansacRightTSLMinAngle";
+                   break;
+               case "RansacRightTSLMinVotes":
+                   ransacsettingsrectId.state = "RansacRightTSLIterations";
+                   break;
+               case "RansacRightTSLDistanceThreshold":
+                   ransacsettingsrectId.state = "RansacRightTSLMaxAngle";
+                   break;
+               case "RansacRightTSLIterations":
+                   ransacsettingsrectId.state = "RansacRightTSLDistanceThreshold";
+                   break;
+
+
+               case "RansacLeftBWLMinAngle":
+                   ransacsettingsrectId.state = "RansacLeftTSLMinVotes";
+                   break;
+               case "RansacLeftBWLMaxAngle":
+                   ransacsettingsrectId.state = "RansacLeftBWLMinAngle";
+                   break;
+               case "RansacLeftBWLMinVotes":
+                   ransacsettingsrectId.state = "RansacLeftBWLIterations";
+                   break;
+               case "RansacLeftBWLDistanceThreshold":
+                   ransacsettingsrectId.state = "RansacLeftBWLMaxAngle";
+                   break;
+               case "RansacLeftBWLIterations":
+                   ransacsettingsrectId.state = "RansacLeftBWLDistanceThreshold";
+                   break;
+
+               case "RansacRightBWLMinAngle":
+                   ransacsettingsrectId.state = "RansacRightTSLMinVotes";
+                   break;
+               case "RansacRightBWLMaxAngle":
+                   ransacsettingsrectId.state = "RansacRightBWLMinAngle";
+                   break;
+               case "RansacRightBWLMinVotes":
+                   ransacsettingsrectId.state = "RansacRightBWLIterations";
+                   break;
+               case "RansacRightBWLDistanceThreshold":
+                   ransacsettingsrectId.state = "RansacRightBWLMaxAngle";
+                   break;
+               case "RansacRightBWLIterations":
+                   ransacsettingsrectId.state = "RansacRightBWLDistanceThreshold"
+                   break;
+               }
+           }
+
+           onDownButtonPressed:
+           {
+               //Min Angle Slider
+               //Max Angle Slider
+               //Distance Threshold
+               //Iterations
+               //Min Votes
+               switch(ransacsettingsrectId.state)
+               {
+               case "RansacLeftTSLMinAngle":
+                   ransacsettingsrectId.state = "RansacLeftTSLMaxAngle";
+                   break;
+               case "RansacLeftTSLMaxAngle":
+                   ransacsettingsrectId.state = "RansacLeftTSLDistanceThreshold";
+                   break;
+               case "RansacLeftTSLMinVotes":
+                   ransacsettingsrectId.state = "RansacLeftBWLMinAngle";
+                   break;
+               case "RansacLeftTSLDistanceThreshold":
+                   ransacsettingsrectId.state = "RansacLeftTSLIterations";
+                   break;
+               case "RansacLeftTSLIterations":
+                   ransacsettingsrectId.state = "RansacLeftTSLMinVotes";
+                   break;
+
+
+               case "RansacRightTSLMinAngle":
+                   ransacsettingsrectId.state = "RansacRightTSLMaxAngle";
+                   break;
+               case "RansacRightTSLMaxAngle":
+                   ransacsettingsrectId.state = "RansacRightTSLDistanceThreshold";
+                   break;
+               case "RansacRightTSLMinVotes":
+                   ransacsettingsrectId.state = "RansacRightBWLMinAngle";
+                   break;
+               case "RansacRightTSLDistanceThreshold":
+                   ransacsettingsrectId.state = "RansacRightTSLIterations";
+                   break;
+               case "RansacRightTSLIterations":
+                   ransacsettingsrectId.state = "RansacRightTSLMinVotes";
+                   break;
+
+
+               case "RansacLeftBWLMinAngle":
+                   ransacsettingsrectId.state = "RansacLeftBWLMaxAngle";
+                   break;
+               case "RansacLeftBWLMaxAngle":
+                   ransacsettingsrectId.state = "RansacLeftBWLDistanceThreshold";
+                   break;
+               case "RansacLeftBWLMinVotes":
+                   ransacsettingsrectId.state = "RansacLeftBWLMinVotes";
+                   break;
+               case "RansacLeftBWLDistanceThreshold":
+                   ransacsettingsrectId.state = "RansacLeftBWLIterations";
+                   break;
+               case "RansacLeftBWLIterations":
+                   ransacsettingsrectId.state = "RansacLeftBWLMinVotes";
+                   break;
+
+               case "RansacRightBWLMinAngle":
+                   ransacsettingsrectId.state = "RansacRightBWLMaxAngle";
+                   break;
+               case "RansacRightBWLMaxAngle":
+                   ransacsettingsrectId.state = "RansacRightBWLDistanceThreshold";
+                   break;
+               case "RansacRightBWLMinVotes":
+                   ransacsettingsrectId.state = "RansacRightBWLMinVotes"
+                   break;
+               case "RansacRightBWLDistanceThreshold":
+                   ransacsettingsrectId.state = "RansacRightBWLIterations";
+                   break;
+               case "RansacRightBWLIterations":
+                   ransacsettingsrectId.state = "RansacRightBWLMinVotes";
+                   break;
+               }
+           }
+
+           onLeftButtonPressed:
+           {
+               switch(ransacsettingsrectId.state)
+               {
+               case "RansacLeftTSLMinAngle":
+                   break;
+               case "RansacLeftTSLMaxAngle":
+                   break;
+               case "RansacLeftTSLMinVotes":
+                   break;
+               case "RansacLeftTSLDistanceThreshold":
+                   break;
+               case "RansacLeftTSLIterations":
+                   break;
+
+
+               case "RansacRightTSLMinAngle":
+                   ransacsettingsrectId.state = "RansacLeftTSLMinAngle";
+                   break;
+               case "RansacRightTSLMaxAngle":
+                   ransacsettingsrectId.state = "RansacLeftTSLMaxAngle";
+                   break;
+               case "RansacRightTSLMinVotes":
+                   ransacsettingsrectId.state = "RansacLeftTSLMinVotes";
+                   break;
+               case "RansacRightTSLDistanceThreshold":
+                   ransacsettingsrectId.state = "RansacLeftTSLDistanceThreshold";
+                   break;
+               case "RansacRightTSLIterations":
+                   ransacsettingsrectId.state = "RansacLeftTSLIterations"
+                   break;
+
+
+               case "RansacLeftBWLMinAngle":
+                   break;
+               case "RansacLeftBWLMaxAngle":
+                   break;
+               case "RansacLeftBWLMinVotes":
+                   break;
+               case "RansacLeftBWLDistanceThreshold":
+                   break;
+               case "RansacLeftBWLIterations":
+                   break;
+
+
+               case "RansacRightBWLMinAngle":
+                   ransacsettingsrectId.state = "RansacLeftBWLMinAngle";
+                   break;
+               case "RansacRightBWLMaxAngle":
+                   ransacsettingsrectId.state = "RansacLeftBWLMaxAngle";
+                   break;
+               case "RansacRightBWLMinVotes":
+                   ransacsettingsrectId.state = "RansacLeftBWLMinVotes";
+                   break;
+               case "RansacRightBWLDistanceThreshold":
+                   ransacsettingsrectId.state = "RansacLeftBWLDistanceThreshold";
+                   break;
+               case "RansacRightBWLIterations":
+                   ransacsettingsrectId.state = "RansacLeftBWLIterations";
+                   break;
+               }
+           }
+
+           onRightButtonPressed:
+           {
+               switch(ransacsettingsrectId.state)
+               {
+               case "RansacLeftTSLMinAngle":
+                   ransacsettingsrectId.state = "RansacRightTSLMinAngle";
+                   break;
+               case "RansacLeftTSLMaxAngle":
+                   ransacsettingsrectId.state = "RansacRightTSLMaxAngle";
+                   break;
+               case "RansacLeftTSLMinVotes":
+                   ransacsettingsrectId.state = "RansacRightTSLMinVotes";
+                   break;
+               case "RansacLeftTSLDistanceThreshold":
+                   ransacsettingsrectId.state = "RansacRightTSLDistanceThreshold";
+                   break;
+               case "RansacLeftTSLIterations":
+                   ransacsettingsrectId.state = "RansacRightTSLIterations";
+                   break;
+
+
+               case "RansacRightTSLMinAngle":
+                   break;
+               case "RansacRightTSLMaxAngle":
+                   break;
+               case "RansacRightTSLMinVotes":
+                   break;
+               case "RansacRightTSLDistanceThreshold":
+                   break;
+               case "RansacRightTSLIterations":
+                   break;
+
+
+               case "RansacLeftBWLMinAngle":
+                   ransacsettingsrectId.state = "RansacRightBWLMinAngle";
+                   break;
+               case "RansacLeftBWLMaxAngle":
+                   ransacsettingsrectId.state = "RansacRightBWLMaxAngle";
+                   break;
+               case "RansacLeftBWLMinVotes":
+                   ransacsettingsrectId.state = "RansacRightBWLMinVotes"
+                   break;
+               case "RansacLeftBWLDistanceThreshold":
+                   ransacsettingsrectId.state = "RansacRightBWLDistanceThreshold"
+                   break;
+               case "RansacLeftBWLIterations":
+                   ransacsettingsrectId.state = "RansacRightBWLIterations"
+                   break;
+
+
+               case "RansacRightBWLMinAngle":
+                   break;
+               case "RansacRightBWLMaxAngle":
+                   break;
+               case "RansacRightBWLMinVotes":
+                   break;
+               case "RansacRightBWLDistanceThreshold":
+                   break;
+               case "RansacRightBWLIterations":
+                   break;
+               }
+           }
+
+           onUpButtonReleased:
+           {
+
+           }
+
+           onDownButtonReleased:
+           {
+
+           }
+
+           onLeftButtonReleased:
+           {
+
+           }
+
+           onRightButtonReleased:
+           {
+
+           }
+       }
+
+       //Settings Text
+       Text
+       {
+           id: ransactextId
+           font.family: fontId.name
+           y: 10
+           x:10
+           text: "Ransac Settings"
+           font.pixelSize: 25
+           color: rootpageId.textcolor
+       }
+
+       //Settings Text
+       Text
+       {
+           id: ransactextleftId
+           font.family: fontId.name
+           y: 55
+           x:10
+           text: "Left Top Surface Lines(TSL)"
+           font.pixelSize: 20
+           width: ransactextleftId.implicitWidth
+           height: ransactextleftId.implicitHeight
+           color: Qt.rgba(224/255,252/255,13/255,1)
+       }
+
+       //Settings Text
+       Text
+       {
+           id: ransactextrightId
+           font.family: fontId.name
+           y: 55
+           x: ransacmiddlelineId.x+ransacmiddlelineId.width + 10
+           text: "Right Top Surface Lines(TSL)"
+           font.pixelSize: 20
+           color: Qt.rgba(224/255,252/255,13/255,1)
+       }
+
+       //Settings Text
+       Text
+       {
+           id: ransacbwltextleftId
+           font.family: fontId.name
+           y: 400
+           x:10
+           text: "Left Bevel Wall Lines(BWL)"
+           font.pixelSize: 20
+           width: ransactextleftId.implicitWidth
+           height: ransactextleftId.implicitHeight
+           color: Qt.rgba(0/255, 255/255, 179/255, 1)
+       }
+
+       //Settings Text
+       Text
+       {
+           id: ransacbwltextrightId
+           font.family: fontId.name
+           y: 400
+           x: ransacmiddlelineId.x+ransacmiddlelineId.width + 10
+           text: "Right Bevel Wall Lines(BWL)"
+           font.pixelSize: 20
+           color: Qt.rgba(0/255, 255/255, 179/255, 1)
+       }
+
+
+
+       //Left TSL-----------------------------------------
+       //Left TSL Min Angle Slider
+       SliderSettingsObject
+       {
+           id: ransaclefttslminanglesliderId
+           x:ransacsettingsrectId.sliderleftx
+           y: ransactextleftId.y+ransactextleftId.height+5
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "TSL Min Angle: " + Mary.rn_left_tsl_min_angle;
+           valuefrom: -90
+           valueto: Mary.rn_left_tsl_max_angle - 1
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransaclefttslminanglesliderId.value = Mary.rn_left_tsl_min_angle;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+              ransaclefttslminanglesliderId.state = ransaclefttslminanglesliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_left_tsl_min_angle = ransaclefttslminanglesliderId.value;
+           }
+       }
+
+       //Left TSL Max Angle Slider
+       SliderSettingsObject
+       {
+           id: ransaclefttslmaxanglesliderId
+           x: ransacsettingsrectId.sliderleftx
+           y: ransaclefttslminanglesliderId.y + ransaclefttslminanglesliderId.height + ransacsettingsrectId.slidersverticalspacing
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "TSL Max Angle: " + Mary.rn_left_tsl_max_angle;
+           valuefrom: Mary.rn_left_tsl_min_angle + 1
+           valueto: 90
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+
+               ransaclefttslmaxanglesliderId.value = Mary.rn_left_tsl_max_angle;
+           }
+
+           onEndFocus:
+           {
+               ransacsettingsrectId.grabFocus();
+              ransaclefttslmaxanglesliderId.state = ransaclefttslmaxanglesliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_left_tsl_max_angle = ransaclefttslmaxanglesliderId.value;
+           }
+       }
+
+       //Left TSL Distance Threshold
+       SliderSettingsObject
+       {
+
+           id: ransaclefttsldistancethresholdsliderId
+           x:ransacsettingsrectId.sliderleftx
+           y: ransacsettingsrectId.slidersverticalspacing + ransaclefttslmaxanglesliderId.y + ransaclefttslmaxanglesliderId.height
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "TSL Distance Threshold: " + Mary.rn_left_tsl_distance_threshold;
+           valuefrom: 1
+           valueto: 10
+           stepsize: 1
+           majorstepsize: 1
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransaclefttsldistancethresholdsliderId.value = Mary.rn_left_tsl_distance_threshold;
+           }
+
+           onEndFocus:
+           {
+               ransacsettingsrectId.grabFocus();
+              ransaclefttsldistancethresholdsliderId.state = ransaclefttsldistancethresholdsliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_left_tsl_distance_threshold = ransaclefttsldistancethresholdsliderId.value;
+           }
+       }
+
+       //Left TSL Iterations
+       SliderSettingsObject
+       {
+
+           id: ransaclefttsliterationssliderId
+           x:ransacsettingsrectId.sliderleftx
+           y: ransacsettingsrectId.slidersverticalspacing + ransaclefttsldistancethresholdsliderId.y + ransaclefttsldistancethresholdsliderId.height
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "TSL Iterations: " + Mary.rn_left_tsl_iterations;
+           valuefrom: 20
+           valueto: 300
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransaclefttsliterationssliderId.value = Mary.rn_left_tsl_iterations;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+              ransaclefttsliterationssliderId.state = ransaclefttsliterationssliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_left_tsl_iterations = ransaclefttsliterationssliderId.value;
+           }
+       }
+
+       //Left TSL Min Votes
+       SliderSettingsObject
+       {
+
+           id: ransaclefttslminvotessliderId
+           x:ransacsettingsrectId.sliderleftx
+           y: ransacsettingsrectId.slidersverticalspacing + ransaclefttsliterationssliderId.y + ransaclefttsliterationssliderId.height
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "TSL Min Votes: " + Mary.rn_left_tsl_votes;
+           valuefrom: 1
+           valueto: 200
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransaclefttslminvotessliderId.value = Mary.rn_left_tsl_votes
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+               ransaclefttslminvotessliderId.state = ransaclefttslminvotessliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_left_tsl_votes = ransaclefttslminvotessliderId.value;
+           }
+       }
+       //--------------------------------------------------
+       //--------------------------------------------------
+       //--------------------------------------------------
+       //--------------------------------------------------
+       //Left BWL-----------------------------------------
+       //Left BWL Min Angle Slider
+       SliderSettingsObject
+       {
+           id: ransacleftbwlminanglesliderId
+           x:ransacsettingsrectId.sliderleftx
+           y: 430
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "BWL Min Angle: " + Mary.rn_left_bwl_min_angle;
+           valuefrom: -90
+           valueto: Mary.rn_left_bwl_max_angle - 1
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacleftbwlminanglesliderId.value = Mary.rn_left_bwl_min_angle;
+           }
+
+           onEndFocus:
+           {
+               ransacsettingsrectId.grabFocus();
+               ransacleftbwlminanglesliderId.state = ransacleftbwlminanglesliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_left_bwl_min_angle = ransacleftbwlminanglesliderId.value;
+           }
+       }
+
+       //Left BWL Max Angle Slider
+       SliderSettingsObject
+       {
+           id: ransacleftbwlmaxanglesliderId
+           x: ransacsettingsrectId.sliderleftx
+           y: ransacleftbwlminanglesliderId.y + ransacleftbwlminanglesliderId.height + ransacsettingsrectId.slidersverticalspacing
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "BWL Max Angle: " + Mary.rn_left_bwl_max_angle;
+           valuefrom: Mary.rn_left_bwl_min_angle + 1
+           valueto: 90
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacleftbwlmaxanglesliderId.value = Mary.rn_left_bwl_max_angle;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+              ransacleftbwlmaxanglesliderId.state = ransacleftbwlmaxanglesliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_left_bwl_max_angle = ransacleftbwlmaxanglesliderId.value;
+           }
+       }
+
+       //Left BWL Distance Threshold
+       SliderSettingsObject
+       {
+
+           id: ransacleftbwldistancethresholdsliderId
+           x:ransacsettingsrectId.sliderleftx
+           y: ransacsettingsrectId.slidersverticalspacing + ransacleftbwlmaxanglesliderId.y + ransacleftbwlmaxanglesliderId.height
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "BWL Distance Threshold: " + Mary.rn_left_bwl_distance_threshold;
+           valuefrom: 1
+           valueto: 10
+           stepsize: 1
+           majorstepsize: 1
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacleftbwldistancethresholdsliderId.value = Mary.rn_left_bwl_distance_threshold;
+           }
+
+           onEndFocus:
+           {
+               ransacsettingsrectId.grabFocus();
+               ransacleftbwldistancethresholdsliderId.state = ransacleftbwldistancethresholdsliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_left_bwl_distance_threshold = ransacleftbwldistancethresholdsliderId.value;
+           }
+       }
+
+       //Left BWL Iterations
+       SliderSettingsObject
+       {
+
+           id: ransacleftbwliterationssliderId
+           x:ransacsettingsrectId.sliderleftx
+           y: ransacsettingsrectId.slidersverticalspacing + ransacleftbwldistancethresholdsliderId.y + ransacleftbwldistancethresholdsliderId.height
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "BWL Iterations: " + Mary.rn_left_bwl_iterations;
+           valuefrom: 20
+           valueto: 300
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacleftbwliterationssliderId.value = Mary.rn_left_bwl_iterations;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+              ransacleftbwliterationssliderId.state = ransacleftbwliterationssliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_left_bwl_iterations = ransacleftbwliterationssliderId.value;
+           }
+       }
+
+       //Left BWL Min Votes
+       SliderSettingsObject
+       {
+
+           id: ransacleftbwlminvotessliderId
+           x:ransacsettingsrectId.sliderleftx
+           y: ransacsettingsrectId.slidersverticalspacing + ransacleftbwliterationssliderId.y + ransacleftbwliterationssliderId.height
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "BWL Min Votes: " + Mary.rn_left_bwl_votes;
+           valuefrom: 1
+           valueto: 200
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacleftbwlminvotessliderId.value = Mary.rn_left_bwl_votes;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+              ransacleftbwlminvotessliderId.state = ransacleftbwlminvotessliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_left_bwl_votes = ransacleftbwlminvotessliderId.value;
+           }
+       }
+       //--------------------------------------------------
+
+
+       //right TSL-----------------------------------------
+       //right TSL Min Angle Slider
+       SliderSettingsObject
+       {
+           id: ransacrighttslminanglesliderId
+           x:ransacsettingsrectId.sliderrightx
+           y: ransactextrightId.y+ransactextrightId.height+5
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "TSL Min Angle: " + Mary.rn_right_tsl_min_angle;
+           valuefrom: -90
+           valueto: Mary.rn_right_tsl_max_angle - 1
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacrighttslminanglesliderId.value = Mary.rn_right_tsl_min_angle;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+               ransacrighttslminanglesliderId.state = ransacrighttslminanglesliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_right_tsl_min_angle = ransacrighttslminanglesliderId.value;
+           }
+       }
+
+       //right TSL Max Angle Slider
+       SliderSettingsObject
+       {
+           id: ransacrighttslmaxanglesliderId
+           x: ransacsettingsrectId.sliderrightx
+           y: ransacrighttslminanglesliderId.y + ransacrighttslminanglesliderId.height + ransacsettingsrectId.slidersverticalspacing
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "TSL Max Angle: " + Mary.rn_right_tsl_max_angle;
+           valuefrom: Mary.rn_right_tsl_min_angle + 1
+           valueto: 90
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacrighttslmaxanglesliderId.value = Mary.rn_right_tsl_max_angle;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+              ransacrighttslmaxanglesliderId.state = ransacrighttslmaxanglesliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_right_tsl_max_angle = ransacrighttslmaxanglesliderId.value;
+           }
+       }
+
+       //right TSL Distance Threshold
+       SliderSettingsObject
+       {
+
+           id: ransacrighttsldistancethresholdsliderId
+           x:ransacsettingsrectId.sliderrightx
+           y: ransacsettingsrectId.slidersverticalspacing + ransacrighttslmaxanglesliderId.y + ransacrighttslmaxanglesliderId.height
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "TSL Distance Threshold: " + Mary.rn_right_tsl_distance_threshold;
+           valuefrom: 1
+           valueto: 10
+           stepsize: 1
+           majorstepsize: 1
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacrighttsldistancethresholdsliderId.value = Mary.rn_right_tsl_distance_threshold;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+               ransacrighttsldistancethresholdsliderId.state = ransacrighttsldistancethresholdsliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_right_tsl_distance_threshold = ransacrighttsldistancethresholdsliderId.value;
+           }
+       }
+
+       //right TSL Iterations
+       SliderSettingsObject
+       {
+
+           id: ransacrighttsliterationssliderId
+           x:ransacsettingsrectId.sliderrightx
+           y: ransacsettingsrectId.slidersverticalspacing + ransacrighttsldistancethresholdsliderId.y + ransacrighttsldistancethresholdsliderId.height
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "TSL Iterations: " + Mary.rn_right_tsl_iterations;
+           valuefrom: 20
+           valueto: 300
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacrighttsliterationssliderId.value = Mary.rn_right_tsl_iterations;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+               ransacrighttsliterationssliderId.state = ransacrighttsliterationssliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_right_tsl_iterations = ransacrighttsliterationssliderId.value;
+           }
+       }
+
+       //right TSL Min Votes
+       SliderSettingsObject
+       {
+
+           id: ransacrighttslminvotessliderId
+           x:ransacsettingsrectId.sliderrightx
+           y: ransacsettingsrectId.slidersverticalspacing + ransacrighttsliterationssliderId.y + ransacrighttsliterationssliderId.height
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "TSL Min Votes: " + Mary.rn_right_tsl_votes;
+           valuefrom: 1
+           valueto: 200
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacrighttslminvotessliderId.value = Mary.rn_right_tsl_votes;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+           }
+
+           onValueChanged:
+           {
+              Mary.rn_right_tsl_votes = ransacrighttslminvotessliderId.value;
+           }
+       }
+       //--------------------------------------------------
+       //--------------------------------------------------
+       //--------------------------------------------------
+       //--------------------------------------------------
+       //right BWL-----------------------------------------
+       //right BWL Min Angle Slider
+       SliderSettingsObject
+       {
+           id: ransacrightbwlminanglesliderId
+           x:ransacsettingsrectId.sliderrightx
+           y: 430
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "BWL Min Angle: " + Mary.rn_right_bwl_min_angle;
+           valuefrom: -90
+           valueto: Mary.rn_right_bwl_max_angle - 1
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacrightbwlminanglesliderId.value = Mary.rn_right_bwl_min_angle;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+              ransacrightbwlminanglesliderId.state = ransacrightbwlminanglesliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_right_bwl_min_angle = ransacrightbwlminanglesliderId.value;
+           }
+       }
+
+       //right BWL Max Angle Slider
+       SliderSettingsObject
+       {
+           id: ransacrightbwlmaxanglesliderId
+           x: ransacsettingsrectId.sliderrightx
+           y: ransacrightbwlminanglesliderId.y + ransacrightbwlminanglesliderId.height + ransacsettingsrectId.slidersverticalspacing
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "BWL Max Angle: " + Mary.rn_right_bwl_max_angle;
+           valuefrom: Mary.rn_right_bwl_min_angle + 1
+           valueto: 90
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacrightbwlmaxanglesliderId.value = Mary.rn_right_bwl_max_angle;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+              ransacrightbwlmaxanglesliderId.state = ransacrightbwlmaxanglesliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_right_bwl_max_angle = ransacrightbwlmaxanglesliderId.value;
+           }
+       }
+
+       //right BWL Distance Threshold
+       SliderSettingsObject
+       {
+
+           id: ransacrightbwldistancethresholdsliderId
+           x:ransacsettingsrectId.sliderrightx
+           y: ransacsettingsrectId.slidersverticalspacing + ransacrightbwlmaxanglesliderId.y + ransacrightbwlmaxanglesliderId.height
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "BWL Distance Threshold: " + Mary.rn_right_bwl_distance_threshold;
+           valuefrom: 1
+           valueto: 10
+           stepsize: 1
+           majorstepsize: 1
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacrightbwldistancethresholdsliderId.value = Mary.rn_right_bwl_distance_threshold;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+               ransacrightbwldistancethresholdsliderId.state = ransacrightbwldistancethresholdsliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_right_bwl_distance_threshold = ransacrightbwldistancethresholdsliderId.value;
+           }
+       }
+
+       //right BWL Iterations
+       SliderSettingsObject
+       {
+
+           id: ransacrightbwliterationssliderId
+           x:ransacsettingsrectId.sliderrightx
+           y: ransacsettingsrectId.slidersverticalspacing + ransacrightbwldistancethresholdsliderId.y + ransacrightbwldistancethresholdsliderId.height
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "BWL Iterations: " + Mary.rn_right_bwl_iterations;
+           valuefrom: 20
+           valueto: 300
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacrightbwliterationssliderId.value = Mary.rn_right_bwl_iterations;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+              ransacrightbwliterationssliderId.state = ransacrightbwliterationssliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+               Mary.rn_right_bwl_iterations = ransacrightbwliterationssliderId.value;
+           }
+       }
+
+       //right BWL Min Votes
+       SliderSettingsObject
+       {
+
+           id: ransacrightbwlminvotessliderId
+           x:ransacsettingsrectId.sliderrightx
+           y: ransacsettingsrectId.slidersverticalspacing + ransacrightbwliterationssliderId.y + ransacrightbwliterationssliderId.height
+           width: ransacsettingsrectId.sliderwidth
+           height: ransacsettingsrectId.sliderheight
+           messagetext: "BWL Min Votes: " + Mary.rn_right_bwl_votes;
+           valuefrom: 1
+           valueto: 200
+           stepsize: 1
+           majorstepsize: 5
+           controlstickautorepeat: true;
+           fontsize: ransacsettingsrectId.slidertextsize
+           highlightbordersize: ransacsettingsrectId.sliderborderwidth
+
+           Component.onCompleted:
+           {
+               ransacrightbwlminvotessliderId.value = Mary.rn_right_bwl_votes;
+           }
+
+           onEndFocus:
+           {
+              ransacsettingsrectId.grabFocus();
+               ransacrightbwlminvotessliderId.state = ransacrightbwlminvotessliderId.highlightedstate;
+           }
+
+           onValueChanged:
+           {
+              Mary.rn_right_bwl_votes = ransacrightbwlminvotessliderId.value;
+           }
+       }
+       //--------------------------------------------------
+
+
 
 
 
@@ -2257,8 +4213,11 @@ Item {
                 case rootpageId.skeletalframe:
                     Max.newSkeletalMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
                     break;
-                case rootpageId.tslframe:
-                    Max.newTSLMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
+                case rootpageId.ransacframe:
+                    Max.newRansacMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
+                    break;
+                case rootpageId.splitmergeframe:
+                    Max.newSplitMergeMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
                     break;
                 }
                 mainviewrect_privateId.attached_frame = rootpageId.emptyframe;
@@ -2292,9 +4251,14 @@ Item {
                     Max.newSkeletalMatProcessed.connect(mainviewdisplayId.recieveCVMat);
                     mainviewrect_privateId.attached_frame = rootpageId.skeletalframe;
                     break;
-                case rootpageId.tslframe:
-                    Max.newTSLMatProcessed.connect(mainviewdisplayId.recieveCVMat);
-                    mainviewrect_privateId.attached_frame = rootpageId.tslframe;
+                case rootpageId.ransacframe:
+                    Max.newRansacMatProcessed.connect(mainviewdisplayId.recieveCVMat);
+                    mainviewrect_privateId.attached_frame = rootpageId.ransacframe;
+                    break;
+                case rootpageId.splitmergeframe:
+                    Max.newSplitMergeMatProcessed.connect(mainviewdisplayId.recieveCVMat);
+                    mainviewrect_privateId.attached_frame = rootpageId.splitmergeframe;
+                    console.log("Connecting Max.newSplitMergeMatProcessed");
                     break;
                 default:
                     mainviewrectId.displayed_frame = rootpageId.emptyframe;
@@ -2303,7 +4267,7 @@ Item {
             }
         }
 
-        property string displayed_frame: rootpageId.rawframe
+        property string displayed_frame: rootpageId.emptyframe
 
         onDisplayed_frameChanged:
         {
@@ -2343,7 +4307,9 @@ Item {
         QmlTBIDisplay
         {
             id: mainviewdisplayId
-            anchors.centerIn: mainviewrectId
+            x: rootpageId.rectborderwidths
+            y: rootpageId.rectborderwidths
+            //anchors.centerIn: mainviewrectId
             width: mainviewrectId.width - 2*rootpageId.rectborderwidths - 5
             //The Camera Has a Native Resolution of 720 x 540
             //It is 1.333 times as wide is it is High. Or .75 as High as it is Wide
@@ -2354,6 +4320,7 @@ Item {
             {
                 mainviewdisplayId.scaleToWidth = mainviewdisplayId.width
                 Max.newRawMatProcessed.connect(mainviewdisplayId.recieveCVMat);
+                mainviewrectId.displayed_frame = rootpageId.rawframe;
             }
 
             //AOI Rectangle

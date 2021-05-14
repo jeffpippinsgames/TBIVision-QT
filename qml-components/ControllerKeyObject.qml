@@ -20,12 +20,25 @@ Item {
     property int ymargin: 20
     property int buttonspacing: 50
 
+    property int xlocation: rootcomponentId.x
+    property int ylocation: rootcomponentId.y
+
     //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
     //property string fontsource: "qrc:/Fonts/EurostileBold.ttf"
     //property string fontsource: "qrc:/Fonts/Measurements.ttf"
     //property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
     property string fontsource: "qrc:/Fonts/PermanentMarker-Regular.ttf"
 
+
+    onEnablegreenbuttonChanged:
+    {
+
+    }
+
+    onEnableblackbuttonChanged:
+    {
+
+    }
 
     onEnableredbuttonChanged:
     {
@@ -48,7 +61,7 @@ Item {
         id: greenbuttonitemId
         x: parent.x + xmargin
         y: parent.height - greenbuttonitemId.height - ymargin
-        width: greenbuttontextId.x + greenbuttontextId.implicitWidth
+        width: greenbuttonimageId.width + greenbuttontextId.implicitWidth
         height: greenbuttonimageId.height
         Image
         {

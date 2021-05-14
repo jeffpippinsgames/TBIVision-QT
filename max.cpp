@@ -14,34 +14,48 @@ Max::Max(QObject *parent) : QObject(parent)
     m_blur = 3;
     m_thresholdmin = 100;
     m_thresholdmax = 255;
+
     m_max_image_intensity = 720*540*255*.3;
     m_min_image_intensity = 720*255;
     m_min_cluster_size = 6;
     m_max_cluster_size = 75;
+
     m_allowable_discontinuities = 20;
-    m_max_tslleft_angle = 10;
-    m_min_tslleft_angle = -10;
-    m_max_tslright_angle = 10;
-    m_min_tslright_angle = -10;
-    m_min_tsl_votes = 20;
-    m_tsl_iterations = 75;
-    m_tsl_distance_threshold = 1;
-    m_max_bwlleft_angle = -20;
+
+    m_max_tslleft_angle = 5;
+    m_min_tslleft_angle = -5;
+    m_min_tslleft_votes = 20;
+    m_tslleft_iterations = 50;
+    m_tslleft_distance_threshold = 1;
+
+    m_max_tslright_angle = 5;
+    m_min_tslright_angle = -5;
+    m_min_tslright_votes = 20;
+    m_tslright_iterations = 50;
+    m_tslright_distance_threshold = 1;
+
+    m_max_bwlleft_angle = -30;
     m_min_bwlleft_angle = -60;
+    m_min_bwlleft_votes = 20;
+    m_bwlleft_iterations = 50;
+    m_bwlleft_distance_threshold = 1;
+
     m_max_bwlright_angle = 60;
-    m_min_bwlright_angle = 20;
-    m_min_bwl_votes = 20;
-    m_bwl_iterations = 75;
-    m_bwl_distance_threshold = 1;
+    m_min_bwlright_angle = 30;
+    m_min_bwlright_votes = 20;
+    m_bwlright_iterations = 50;
+    m_bwlright_distance_threshold = 1;
+
+    m_sm_distance_threshold = 5;
 
     emit timeInLoopChanged(m_timeinloop);
-    qDebug()<<"Max: Max Object Created.";
+    qDebug()<<"Max::Max() Max Object Created.";
 }
 
 Max::~Max()
 {
     emit this->aboutToDestroy();
-    qDebug()<<"Max: Max Object Destroyed";
+    qDebug()<<"Max::~Max() Max Object Destroyed";
 }
 
 //Processing Methods------------------------------------------------------------------
@@ -64,89 +78,41 @@ void Max::blankProcessingArrays()
     m_flattened_iohrv = 0;
 }
 
-bool Max::doPixelColumnProcessing(Mat &_src, Mat &_dst)
+bool Max::doPixelColumnProcessing(Mat &_src, Mat &_dst, PixelColumnClass *_pixel_column_array, quint64 *_tii, quint64 _max_tii,
+                                  quint64 _min_tii, int _min_cluster_size, int _max_cluster_size, int _max_clusters_in_column)
 {
-    m_total_image_intensity = 0;
-
-    uint8_t * _srcdata = (uint8_t*)_src.data;
-    int _srcindex = 0;
-    int _row = 0;
-    int _col = 0;
-    PixelFundamental_t _pixel;
-    PixelClusterClass _cluster;
-
-    //Fill the PixelColumn Array
+    *_tii = 0;
+    int _column_index = 0;
+    PixelColumnProcessingReturn_t _val;
     do
     {
-        if(m_total_image_intensity > m_max_image_intensity)
+        _val = _pixel_column_array[_column_index].pixelProccessColumn(_src, _column_index, _tii, _max_tii,
+                                                                      _min_cluster_size, _max_cluster_size, _max_clusters_in_column);
+        if(_val == PCP_FAILED_MAX_TII)
         {
             emit totalImageIntensityChanged(m_total_image_intensity);
             emit failedTIICheck();
             return false;
         }
-        _srcindex = (_row * _src.cols)+_col;
-        if(_srcdata[_srcindex] > 0) //Start The Cluster Count.
+        else if(_val == PCP_OK)
         {
-            _pixel.col = _col;
-            _pixel.row = _row;
-            _pixel.intensity = _srcdata[_srcindex];
-            _cluster.pushPixelToBack(_pixel);
-            m_total_image_intensity += _srcdata[_srcindex];
+            _pixel_column_array[_column_index].drawToMat(_dst);
         }
-        if(_srcdata[_srcindex] == 0) //Check to see if We need to Build a Cluster List
-        {
-            if((_cluster.size() >= m_min_cluster_size) && (_cluster.size() <= m_max_cluster_size))
-            {
-                if(_cluster.isGausian()) m_cluster_columns[_col].pushClusterToBack(_cluster);
-            }
-            _cluster.clear();
-        }
+        ++_column_index;
 
-        ++_row;
-        if(_row == _src.rows)
-        {
-            //Check to see if this leftover cluster needs to be added.
-            if((_cluster.size() >= m_min_cluster_size) && (_cluster.size() <= m_max_cluster_size))
-            {
-                if(_cluster.isGausian()) m_cluster_columns[_col].pushClusterToBack(_cluster);
-            }
-            _cluster.clear();
-            _row = 0;
-            ++_col;
-        }
-    }while(_col < _src.cols);
+    }while(_column_index < _src.cols);
 
-    //Check TII For Min Requirement
-    if(m_total_image_intensity < m_min_image_intensity)
+    if(*_tii < _min_tii)
     {
         emit totalImageIntensityChanged(m_total_image_intensity);
         emit failedTIICheck();
         return false;
     }
 
-    //Remove Any Clusters That Do Not Meet The Max Cluster in Col Check
-    _col = 0;
-    do
-    {
-        if(m_cluster_columns[_col].size() > m_max_clusterincol)
-        {
-            m_cluster_columns[_col].clear();
-        }
-        ++_col;
-    }while(_col < _src.cols);
-
-    //Draw The Clusters in a New Mat
-    _col = 0;
-    do
-    {
-        m_cluster_columns[_col].drawToMat(_dst);
-        ++_col;
-    }while(_col < _src.cols);
-
     emit totalImageIntensityChanged(m_total_image_intensity);
     return true;
-}
 
+}
 bool Max::doSkeletonProcessing(Mat &_dst)
 {
     uint8_t* _data = (uint8_t*)_dst.data;
@@ -165,6 +131,7 @@ bool Max::doSkeletonProcessing(Mat &_dst)
             if(_rowcentroid > _highestrowvalue)
             {
                 _highestrowvalue = _rowcentroid;
+                m_flattened_hrv = _rowcentroid;
                 m_flattened_iohrv = _index;
             }
             emit skeletalArrayChanged(_rowcentroid, _index);
@@ -189,7 +156,7 @@ bool Max::doSkeletonProcessing(Mat &_dst)
     return true;
 }
 
-bool Max::doVotingLineProcessing(Mat &_dst, TBILine &_line, int _total_iterations, int _vote_threshold,
+bool Max::doRansacLineProcessing(Mat &_dst, TBILine &_line, int _total_iterations, int _vote_threshold,
                                  float _distance_threshold, float _min_angle_to_horizon, float _max_angle_to_horizon,
                                  float *_skeletalarray, int _start_index, int _end_index, Scalar _line_color)
 {
@@ -203,22 +170,45 @@ bool Max::doVotingLineProcessing(Mat &_dst, TBILine &_line, int _total_iteration
     int _highestvote_index = 0;
     int _highest_vote_count = 0;
     int _iteration = 0;
+    int _attempts=0;
+
 
     if(_dst.channels() != 3)
     {
-        qDebug() << "Max: doVotingLineProcessing() requires a 3 channel Mat.";
-        emit failedVLCheck();
+        qDebug() << "Max::doRansacLineProcessing() requires a 3 channel Mat.";
+        emit failedRansacCheck();
         return false;
     }
 
     //Find Line Candidates
     do
     {
-        _index1 =  QRandomGenerator::system()->bounded(_start_index, _end_index);
-        do
-        {
-            _index2 = QRandomGenerator::system()->bounded(_start_index, _end_index);
-        }while(_index2 == _index1);
+
+            _attempts = 0;
+            do
+            {
+                _index1 =  QRandomGenerator::system()->bounded(_start_index, _end_index);
+                ++_attempts;
+                if(_attempts == 1000)
+                {
+                    emit failedRansacCheck();
+                    return false;
+                }
+            }while(_skeletalarray[_index1] == 0);
+            _attempts = 0;
+            do
+            {
+                _index2 = QRandomGenerator::system()->bounded(_start_index, _end_index);
+                ++_attempts;
+                if(_attempts == 1000)
+                {
+                    emit failedRansacCheck();
+                    return false;
+                }
+            }while((_index2 == _index1) || (_skeletalarray[_index2]==0));
+
+
+        _attempts = 0;
         TBILineVotingStructure _linecandidate;
         _linecandidate.m_line = TBILine((float)_index1, _skeletalarray[_index1], (float)_index2, _skeletalarray[_index2]);
         if(_linecandidate.m_line.isValid())
@@ -239,7 +229,7 @@ bool Max::doVotingLineProcessing(Mat &_dst, TBILine &_line, int _total_iteration
     //Fail if There are No Candidates in VL List
     if(_linecandidates.size() == 0)
     {
-        emit failedVLCheck();
+        emit failedRansacCheck();
         return false;
     }
 
@@ -271,7 +261,7 @@ bool Max::doVotingLineProcessing(Mat &_dst, TBILine &_line, int _total_iteration
     //Fail if Vote Count Fails
     if(_highest_vote_count < _vote_threshold)
     {
-        emit failedVLCheck();
+        emit failedRansacCheck();
         return false;
     }
 
@@ -280,9 +270,117 @@ bool Max::doVotingLineProcessing(Mat &_dst, TBILine &_line, int _total_iteration
     _line.remakeLine(_start_index, _end_index);
 
     //Draw The Line
-     _line.drawOnMat(_dst, _line_color, 1);
+    _line.drawOnMat(_dst, _line_color, 1);
 
-     return true;
+    return true;
+}
+
+bool Max::doSplitMergeProcesssing(float *_data_array, int _max_index, std::vector<TBILine> &_line_vectors, float _min_distance_threshold)
+{
+    //Clear The Line Vector
+    _line_vectors.clear();
+
+    int _index_of_most_distant=0;
+    float _most_distant = 0.0;
+    float _distance = 0.0;
+    int _start_index = 0;
+    int _end_index = _max_index;
+    int _current_index = _start_index;
+    int _current_vector_index = 0;
+    float _data_value;
+
+    //Add First Line.
+    TBILine _line(0.0, _data_array[0], (float)_max_index, _data_array[_max_index]);
+    _line_vectors.push_back(_line);
+
+
+    //Get The Index and The Distance
+
+    //Get Distance From All Points start
+    do
+    {
+        //Get Distance Of All Points From _start_index to _end_index
+        _data_value = _data_array[_current_index];
+        if(_data_value > 0.0)
+        {
+           _distance = _line_vectors[_current_vector_index].getOrthogonalDistance((float)_current_index, _data_value);
+        }
+        else
+        {
+            _distance = 0;
+        }
+
+            if(_distance >= _most_distant)
+            {
+                _most_distant = _distance;
+                _index_of_most_distant = _current_index;
+            }
+            //Increment The Current Index
+            ++_current_index;
+            if(_current_index > _end_index) //All The Distant Points Are Checked. Do The Split Checks
+            {
+                if(_most_distant >= _min_distance_threshold) //The Line Can Be Split!
+                {
+                    TBILine _line1((float)_start_index, _data_array[_start_index], (float)_index_of_most_distant, _data_array[_index_of_most_distant]);
+                    TBILine _line2((float)_index_of_most_distant, _data_array[_index_of_most_distant], (float)_end_index, _data_array[_end_index]);
+                    auto _iterator = _line_vectors.begin();
+                    _line_vectors[_current_vector_index] = _line1;
+                    _line_vectors.insert(_iterator+_current_vector_index+1, _line2);
+                    ++_current_vector_index;
+                }
+                else //The Line Cannot Be Split
+                {
+                    --_current_vector_index;
+                }
+                //Adjust The Indexes and reset the distance variables
+                //For The Next Line Iteration
+                if(_current_vector_index >= 0)
+                {
+                    _start_index = (int)_line_vectors[_current_vector_index].getPoint1X();
+                    _end_index = (int)_line_vectors[_current_vector_index].getPoint2X();
+                    _current_index = _start_index;
+                    _most_distant = 0;
+                    _index_of_most_distant = 0;
+                }
+            }
+
+    }while(_current_vector_index >= 0);
+
+    if(_line_vectors.size() < 4)
+    {
+        emit failedSplitMergeCheck();
+        return false;
+    }
+    return true;
+}
+
+bool Max::setProjectedRansacLines(TBILine &_src_tsl_left, TBILine &_src_tsl_right, TBILine &_src_bwl_left, TBILine &_src_bwl_right,
+                                  TBILine &_dst_tsl_left, TBILine &_dst_tsl_right, TBILine &_dst_bwl_left, TBILine &_dst_bwl_right)
+{
+    TBIPoint _leftintersectionpnt;
+    TBIPoint _rightintersectionpnt;
+    TBIPoint _jointintersectionpnt;
+
+    bool _int1 = _src_tsl_left.findPointofIntersection(_src_bwl_left, _leftintersectionpnt);
+    bool _int2 = _src_tsl_right.findPointofIntersection(_src_bwl_right, _rightintersectionpnt);
+    bool _int3 = _src_bwl_left.findPointofIntersection(_src_bwl_right, _jointintersectionpnt);
+    if(_int1 && _int2 && _int3)
+    {
+        _dst_tsl_left.setPoint1(_src_tsl_left.getPoint1());
+        _dst_tsl_left.setPoint2(_leftintersectionpnt);
+        _dst_bwl_left.setPoint1(_leftintersectionpnt);
+        _dst_bwl_left.setPoint2(_jointintersectionpnt);
+        _dst_bwl_right.setPoint1(_jointintersectionpnt);
+        _dst_bwl_right.setPoint2(_rightintersectionpnt);
+        _dst_tsl_right.setPoint1(_rightintersectionpnt);
+        _dst_tsl_right.setPoint2(_src_tsl_right.getPoint2());
+    }
+    else
+    {
+        return false;
+    }
+
+    return true;
 }
 
 //The Recieve New CV::Mat Method
@@ -298,7 +396,7 @@ void Max::recieveNewCVMat(const Mat &_mat)
     //Make Sure Mat is Ok.
     if(_mat.channels() != 1)
     {
-        qDebug()<<"Max: recieveNewCvMat did not recieve a single Channel Mat";
+        qDebug()<<"Max::recieveNewCVMat() did not recieve a single Channel Mat";
         m_timeinloop = QString("Time in Loop: " + QString::number(m_timer.elapsed()) + " ms.-Camera FPS = " + QString::number(1000/m_timer.elapsed()));
         emit timeInLoopChanged(m_timeinloop);
         emit processingComplete(); //Must Be Last Signal Sent
@@ -306,7 +404,7 @@ void Max::recieveNewCVMat(const Mat &_mat)
     }
     if(!_mat.isContinuous())
     {
-        qDebug()<<"Max: recieveNewCvMat did not recieve a continuous Mat";
+        qDebug()<<"Max::recieveNewCVMat() did not recieve a continuous Mat";
         m_timeinloop = QString("Time in Loop: " + QString::number(m_timer.elapsed()) + " ms.-Camera FPS = " + QString::number(1000/m_timer.elapsed()));
         emit timeInLoopChanged(m_timeinloop);
         emit processingComplete(); //Must Be Last Signal Sent
@@ -322,8 +420,8 @@ void Max::recieveNewCVMat(const Mat &_mat)
     cv::Mat _threshold_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC1);
     cv::Mat _pixelcolumn_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC1);
     cv::Mat _skel_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC1);
-    cv::Mat _tsl_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3); //Mats From Here Out are Color.
-    cv::Mat _topography_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3);
+    cv::Mat _ransac_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3); //Mats From Here Out are Color.
+    cv::Mat _splitmerge_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3);
     cv::Mat _operation_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3);
 
     //Do OpenCV Proccesses
@@ -332,48 +430,64 @@ void Max::recieveNewCVMat(const Mat &_mat)
 
     cv::cvtColor(_raw_mat, _operation_mat, cv::COLOR_GRAY2BGR);
     blankProcessingArrays();
-    if(doPixelColumnProcessing(_threshold_mat, _pixelcolumn_mat)) //The TII Check is Done Here
+    if(doPixelColumnProcessing(_threshold_mat, _pixelcolumn_mat, m_cluster_columns, &m_total_image_intensity, m_max_image_intensity, m_min_image_intensity, m_min_cluster_size, m_max_cluster_size, m_max_clusterincol)) //The TII Check is Done Here
     {
 
 
         if(doSkeletonProcessing(_skel_mat)) //Fill Skeleton and Discontinuity Trap
         {
 
-            cv::cvtColor(_skel_mat, _tsl_mat, cv::COLOR_GRAY2BGR);
-            bool _left_tsl_good = doVotingLineProcessing(_tsl_mat, m_left_tsl, m_tsl_iterations, m_min_tsl_votes, m_tsl_distance_threshold,
+            cv::cvtColor(_skel_mat, _ransac_mat, cv::COLOR_GRAY2BGR);
+            bool _left_tsl_good = doRansacLineProcessing(_ransac_mat, m_left_tsl, m_tslleft_iterations, m_min_tslleft_votes, m_tslleft_distance_threshold,
                                                          m_min_tslleft_angle, m_max_tslleft_angle, m_skeletal_line_array, 0, m_flattened_iohrv,
-                                                         CV_RGB(0,200,0));
-            bool _right_tsl_good = doVotingLineProcessing(_tsl_mat, m_right_tsl, m_tsl_iterations, m_min_tsl_votes, m_tsl_distance_threshold,
+                                                         CV_RGB(13,252,224));
+            bool _right_tsl_good = doRansacLineProcessing(_ransac_mat, m_right_tsl, m_tslright_iterations, m_min_tslright_votes, m_tslright_distance_threshold,
                                                           m_min_tslright_angle, m_max_tslright_angle, m_skeletal_line_array, m_flattened_iohrv, _skel_mat.cols,
-                                                          CV_RGB(200,0,0));
-            bool _left_bwl_good = doVotingLineProcessing(_tsl_mat, m_left_bwl, m_bwl_iterations, m_min_bwl_votes, m_bwl_distance_threshold,
+                                                          CV_RGB(13,252,224));
+            bool _left_bwl_good = doRansacLineProcessing(_ransac_mat, m_left_bwl, m_bwlleft_iterations, m_min_bwlleft_votes, m_bwlleft_distance_threshold,
                                                          m_min_bwlleft_angle, m_max_bwlleft_angle, m_skeletal_line_array, 0, m_flattened_iohrv,
-                                                         CV_RGB(0,200,0));
-            bool _right_bwl_good = doVotingLineProcessing(_tsl_mat, m_right_bwl, m_bwl_iterations, m_min_bwl_votes, m_bwl_distance_threshold,
+                                                         CV_RGB(179,255,0));
+            bool _right_bwl_good = doRansacLineProcessing(_ransac_mat, m_right_bwl, m_bwlright_iterations, m_min_bwlright_votes, m_bwlright_distance_threshold,
                                                           m_min_bwlright_angle, m_max_bwlright_angle, m_skeletal_line_array, m_flattened_iohrv, _skel_mat.cols,
-                                                          CV_RGB(200,0,0));
+                                                          CV_RGB(179,255,0));
 
             if(_left_tsl_good && _right_tsl_good && _left_bwl_good && _right_bwl_good)
             {
 
-
-                TBIPoint _intersectionpnt;
-                if(m_left_tsl.findPointofIntersection(m_left_bwl, _intersectionpnt))
+                if(setProjectedRansacLines(m_left_tsl, m_right_tsl, m_left_bwl, m_right_bwl,
+                                           m_ransac_projection_lefttsl, m_ransac_projection_righttsl,
+                                           m_ransac_projection_leftbwl, m_ransac_projection_rightbwl))
                 {
-                    cv::drawMarker(_operation_mat, cv::Point((int)_intersectionpnt.getX(), (int)_intersectionpnt.getY()),
-                                  CV_RGB(0,200,200), cv::MARKER_CROSS, 20, 2);
-                }
-                if(m_right_tsl.findPointofIntersection(m_right_bwl, _intersectionpnt))
-                {
-                    cv::drawMarker(_operation_mat, cv::Point((int)_intersectionpnt.getX(), (int)_intersectionpnt.getY()),
-                                  CV_RGB(0,200,200), cv::MARKER_CROSS, 20, 2);
+                    m_ransac_projection_lefttsl.drawOnMat(_operation_mat, CV_RGB(0,0,200), 2);
+                    m_ransac_projection_righttsl.drawOnMat(_operation_mat, CV_RGB(0,0,200), 2);
+                    m_ransac_projection_leftbwl.drawOnMat(_operation_mat, CV_RGB(0,0,200), 2);
+                    m_ransac_projection_rightbwl.drawOnMat(_operation_mat, CV_RGB(0,0,200), 2);
                 }
 
+                if(doSplitMergeProcesssing(m_skeletal_line_array, (int)_skel_mat.cols-1, m_topography_lines, m_sm_distance_threshold))
+                {
+                    cv::cvtColor(_skel_mat, _splitmerge_mat, cv::COLOR_GRAY2BGR);
+                    for(int i = 0; i < (int)m_topography_lines.size(); ++i)
+                    {
+                        m_topography_lines[i].drawOnMat(_operation_mat, CV_RGB(200,0,0), 2);
+                        m_topography_lines[i].drawOnMat(_splitmerge_mat, CV_RGB(200,0,0), 2);
+                    }
+
+
+                }
+                if(m_ransac_projection_lefttsl.compareLines(m_topography_lines[0], 10) && m_ransac_projection_righttsl.compareLines(m_topography_lines[(int)m_topography_lines.size()-1], 10))
+                {
+                    TBIPoint _trackingpoint;
+                    m_ransac_projection_lefttsl.findPointofIntersection(m_ransac_projection_leftbwl, _trackingpoint);
+                    cv::drawMarker(_operation_mat, cv::Point((int)_trackingpoint.getX(), (int)_trackingpoint.getY()), CV_RGB(0,200,200), MARKER_DIAMOND, 20, 3);
+                    m_ransac_projection_righttsl.findPointofIntersection(m_ransac_projection_rightbwl, _trackingpoint);
+                    cv::drawMarker(_operation_mat, cv::Point((int)_trackingpoint.getX(), (int)_trackingpoint.getY()), CV_RGB(0,200,200), MARKER_DIAMOND, 20, 3);
+                }
 
             }
             else
             {
-                _tsl_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3);           
+                _ransac_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3);
             }
 
         }
@@ -385,20 +499,19 @@ void Max::recieveNewCVMat(const Mat &_mat)
     }
     else
     {
-      _pixelcolumn_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8SC1);
+        _pixelcolumn_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8SC1);
     }
-    //Time The Loop.
-
 
     emit newRawMatProcessed(_raw_mat);
     emit newBlurMatProcessed(_blurr_mat);
     emit newThresholdMatProcessed(_threshold_mat);
     emit newPixelColumnMatProcessed(_pixelcolumn_mat);
     emit newSkeletalMatProcessed(_skel_mat);
-    emit newTSLMatProcessed(_tsl_mat);
+    emit newRansacMatProcessed(_ransac_mat);
+    emit newSplitMergeMatProcessed(_splitmerge_mat);
     emit newOperationMatProcessed(_operation_mat);
 
-    m_timeinloop = QString("Time in Loop: " + QString::number(m_timer.elapsed()));
+    m_timeinloop = QString("Time in Loop: " + QString::number(m_timer.elapsed()) + " ms.");
     emit timeInLoopChanged(m_timeinloop);
     m_in_proccesing_loop = false;
     emit processingComplete(); //Must Be Last Signal Sent

@@ -11,7 +11,8 @@ class PixelClusterClass
 public:
     PixelClusterClass();
     void pushPixelToBack(PixelFundamental_t _pixel);
-    float getRowCentroid();
+    float getRowCentroid(){return m_rowcentroid;}
+    void setRowCentroid();
     bool isGausian();
     void clear();
     int size();
@@ -22,6 +23,7 @@ public:
 
 private:
      std::vector<PixelFundamental_t> m_pixels;
+     float m_rowcentroid;
 };
 
 #endif // PIXELCLUSTERCLASS_H

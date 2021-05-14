@@ -26,7 +26,7 @@ Rectangle
     readonly property color highlightcolor: Qt.rgba(0,1,0,.6)
     readonly property color nonhighlightcolor: Qt.rgba(1,1,1,.1)
     readonly property color valuebarcolor: Qt.rgba(1,0,0,.2)
-    readonly property int highlightbordersize: 5
+    property int highlightbordersize: 5
 
     property string messagetext: "Message Text"
     //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
@@ -41,6 +41,7 @@ Rectangle
     property real value: 0
     property real stepsize: 1
     property real majorstepsize: 10
+
 
     property bool controlstickautorepeat: false
     property bool controlbuttonautorepeat: false
@@ -185,10 +186,11 @@ Rectangle
         id: valuebarrectId
         x: rootobjectId.highlightbordersize
         y: rootobjectId.highlightbordersize
-        width: (rootobjectId.value/rootobjectId.valueto) * rootobjectId.width
+        width: (rootobjectId.value - rootobjectId.valuefrom) / (rootobjectId.valueto-rootobjectId.valuefrom) * rootobjectId.width
         height: rootobjectId.height - 2*rootobjectId.highlightbordersize
         color: rootobjectId.valuebarcolor
         visible: true
+
     }
 
     Rectangle

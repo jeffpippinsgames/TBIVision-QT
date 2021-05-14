@@ -65,13 +65,40 @@ int main(int argc, char *argv[])
     QObject::connect(&_mary, SIGNAL(signalChangeBlur(int)), &_max, SLOT(onBlurChange(int)));
     QObject::connect(&_mary, SIGNAL(signalChangeThresholdMin(int)), &_max, SLOT(onThresholdMinChange(int)));
     QObject::connect(&_mary, SIGNAL(signalChangeThresholdMax(int)), &_max, SLOT(onThresholdMaxChange(int)));
+
     QObject::connect(&_mary, SIGNAL(signalChangeMaxTII(quint64)), &_max, SLOT(onMaxTIIChange(quint64)));
     QObject::connect(&_mary, SIGNAL(signalChangeMinTII(quint64)), &_max, SLOT(onMinTIIChange(quint64)));
     QObject::connect(&_mary, SIGNAL(signalChangeMaxClusterSize(int)), &_max, SLOT(onMaxClusterSizeChange(int)));
     QObject::connect(&_mary, SIGNAL(signalChangeMaxClustersInColumn(int)), &_max, SLOT(onMaxClustersInColChange(int)));
     QObject::connect(&_mary, SIGNAL(signalChangeMinClusterSize(int)), &_max, SLOT(onMinClusterSizeChange(int)));
+
     QObject::connect(&_mary, SIGNAL(signalChangeMaxDiscontinuity(int)), &_max, SLOT(onMaxDiscontinuityChange(int)));
+
+    QObject::connect(&_mary, SIGNAL(signalLeftTSLMinAngle(float)), &_max, SLOT(onLeftTSLMinAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalLeftTSLMaxAngle(float)), &_max, SLOT(onLeftTSLMaxAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalLeftTSLMinVotes(int)), &_max, SLOT(onLeftTSLMinVotes(int)));
+    QObject::connect(&_mary, SIGNAL(signalLeftTSLDistanceThreshold(float)), &_max, SLOT(onLeftTSLDistanceThreshold(float)));
+    QObject::connect(&_mary, SIGNAL(signalLeftTSLIterations(int)), &_max, SLOT(onLeftTSLIterations(int)));
+
+    QObject::connect(&_mary, SIGNAL(signalRightTSLMinAngle(float)), &_max, SLOT(onRightTSLMinAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalRightTSLMaxAngle(float)), &_max, SLOT(onRightTSLMaxAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalRightTSLMinVotes(int)), &_max, SLOT(onRightTSLMinVotes(int)));
+    QObject::connect(&_mary, SIGNAL(signalRightTSLDistanceThreshold(float)), &_max, SLOT(onRightTSLDistanceThreshold(float)));
+    QObject::connect(&_mary, SIGNAL(signalRightTSLIterations(int)), &_max, SLOT(onRightTSLIterations(int)));
+
+    QObject::connect(&_mary, SIGNAL(signalLeftBWLMinAngle(float)), &_max, SLOT(onLeftBWLMinAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalLeftBWLMaxAngle(float)), &_max, SLOT(onLeftBWLMaxAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalLeftBWLMinVotes(int)), &_max, SLOT(onLeftBWLMinVotes(int)));
+    QObject::connect(&_mary, SIGNAL(signalLeftBWLDistanceThreshold(float)), &_max, SLOT(onLeftBWLDistanceThreshold(float)));
+    QObject::connect(&_mary, SIGNAL(signalLeftBWLIterations(int)), &_max, SLOT(onLeftBWLIterations(int)));
+
+    QObject::connect(&_mary, SIGNAL(signalRightBWLMinAngle(float)), &_max, SLOT(onRightBWLMinAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalRightBWLMaxAngle(float)), &_max, SLOT(onRightBWLMaxAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalRightBWLMinVotes(int)), &_max, SLOT(onRightBWLMinVotes(int)));
+    QObject::connect(&_mary, SIGNAL(signalRightBWLDistanceThreshold(float)), &_max, SLOT(onRightBWLDistanceThreshold(float)));
+    QObject::connect(&_mary, SIGNAL(signalRightBWLIterations(int)), &_max, SLOT(onRightBWLIterations(int)));
     //Set Mary's Default Values... This must Be Done After the Signals and Slot of the Singletons are connected.
+    _mary.loadMaryFromFile();
 
 
 

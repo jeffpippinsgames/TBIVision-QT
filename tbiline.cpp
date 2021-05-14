@@ -31,15 +31,21 @@ void TBILine::setPoint2(TBIPoint _pnt)
     updateInternals();
 }
 
-bool TBILine::canLineBeSplitForSplitMerge(const TBIPoint &_pnt, float _distance) const
+bool TBILine::canLineBeSplitForSplitMerge(float *_data, int _start_index, int _end_index, int *_split_index, float _distance_threshold) const
 {
-    return false;
+    return true;
 }
 
 float TBILine::getOrthogonalDistance(const TBIPoint &_pnt) const
 {
     if(!m_validline) return 0.0;
     return abs((m_slope*_pnt.getX() - _pnt.getY() + m_intercept)/(sqrt(m_slope*m_slope + 1)));
+}
+
+float TBILine::getOrthogonalDistance(float _x, float _y) const
+{
+    if(!m_validline) return 0.0;
+    return abs((m_slope*_x - _y + m_intercept)/(sqrt(m_slope*m_slope + 1)));
 }
 
 float TBILine::interiorAngleToLine(const TBILine &_line) const
@@ -127,6 +133,20 @@ void TBILine::drawOnMat(cv::Mat &_dst, cv::Scalar _color, int _thickness)
     cv::Point _p2((int)this->m_point2.getX(), (int)this->m_point2.getY());
     cv::line(_dst, _p1, _p2, _color, _thickness);
 
+}
+
+bool TBILine::compareLines(TBILine &_line, float _distance_threshold)
+{
+    if(!m_validline) return false;
+    if(!_line.isValid()) return false;
+
+    float _distance1 = _line.getPoint1().distance(m_point1);
+    float _distance2 = _line.getPoint2().distance(m_point2);
+    if((_distance1 + _distance2) <= _distance_threshold ) return true;
+    _distance1 = _line.getPoint1().distance(m_point2);
+    _distance2 = _line.getPoint2().distance(m_point1);
+    if((_distance1 + _distance2) <= _distance_threshold ) return true;
+    return false;
 }
 
 void TBILine::updateInternals()

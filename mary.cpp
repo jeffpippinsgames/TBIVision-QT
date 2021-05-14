@@ -11,7 +11,7 @@ Description:
 Mary::Mary(QObject *parent) : QObject(parent)
 {
 
-    qDebug() << "Mary: Mary Object Created.";
+    qDebug() << "Mary::Mary() Mary Object Created.";
 
 }
 
@@ -24,7 +24,7 @@ Description:
 Mary::~Mary()
 {
     emit aboutToDestroy();
-    qDebug() << "Mary: Mary Object Destroyed.";
+    qDebug() << "Mary::~Mary Mary Object Destroyed.";
 }
 
 /**************************************************************
@@ -38,17 +38,46 @@ void Mary::SetMaryDefaultValues()
     m_cv_blur = 3;
     m_cv_thresholdmax = 255;
     m_cv_thresholdmin = 0;
+    //-----------------------------
     m_gui_showdebuginfo = true;
+    //-----------------------------
     m_pylon_aoiheight = m_pylon_maxcameraheight;
     m_pylon_aoiwidth = m_pylon_maxcamerawidth; 
     m_pylon_exposuretime = 2500.0;
     m_pylon_gain = 0;
+    //-----------------------------
     m_pc_max_tii = 2500000;
     m_pc_min_tii = 250000;
     m_pc_max_clustersize = 75;
     m_pc_min_clustersize = 10;
     m_pc_max_clustersincolumn = 1;
+    //------------------------------
     m_sk_max_discontinuity = 20;
+    //------------------------------
+    m_left_tsl_min_angle = -10;
+    m_left_tsl_max_angle = 10;
+    m_left_tsl_min_votes = 20;
+    m_left_tsl_iterations = 50;
+    m_left_tsl_distance_threshold = 1.0;
+
+    m_right_tsl_min_angle = -10;
+    m_right_tsl_max_angle = 10;
+    m_right_tsl_min_votes = 20;
+    m_right_tsl_iterations = 50;
+    m_right_tsl_distance_threshold = 1.0;
+
+    m_left_bwl_min_angle = -60;
+    m_left_bwl_max_angle = -30;
+    m_left_bwl_min_votes = 20;
+    m_left_bwl_iterations = 50;
+    m_left_bwl_distance_threshold = 1.0;
+
+    m_right_bwl_min_angle = 30;
+    m_right_bwl_max_angle = 60;
+    m_right_bwl_min_votes = 20;
+    m_right_bwl_iterations = 50;
+    m_right_bwl_distance_threshold = 1.0;
+    //---------------------------------------
 }
 
 /**************************************************************
@@ -88,9 +117,29 @@ void Mary::saveMaryToFile()
     _ds << m_pc_min_clustersize;
     _ds << m_pc_max_clustersincolumn;
     _ds << m_sk_max_discontinuity;
+    _ds << m_left_tsl_min_angle;
+    _ds << m_left_tsl_max_angle;
+    _ds << m_left_tsl_min_votes;
+    _ds << m_left_tsl_iterations;
+    _ds << m_left_tsl_distance_threshold;
+    _ds << m_right_tsl_min_angle;
+    _ds << m_right_tsl_max_angle;
+    _ds << m_right_tsl_min_votes;
+    _ds << m_right_tsl_iterations;
+    _ds << m_right_tsl_distance_threshold;
+    _ds << m_left_bwl_min_angle;
+    _ds << m_left_bwl_max_angle;
+    _ds << m_left_bwl_min_votes;
+    _ds << m_left_bwl_iterations;
+    _ds << m_left_bwl_distance_threshold;
+    _ds << m_right_bwl_min_angle;
+    _ds << m_right_bwl_max_angle;
+    _ds << m_right_bwl_min_votes;
+    _ds << m_right_bwl_iterations;
+    _ds << m_right_bwl_distance_threshold;
     _ds.setVersion(QDataStream::Qt_5_12);
     _savefile.close();
-    qDebug() << "Mary: Mary Saved To " << _filepath;
+    qDebug() << "Mary::saveMaryToFile() Settings Saved To " << _filepath;
 
 
 
@@ -109,9 +158,7 @@ void Mary::loadMaryFromFile()
     if(!_savefile.exists())
     {
         SetMaryDefaultValues();
-        broadcastQMLSignals();
-        broadcastSingletonSignals();
-        qDebug("Mary: marydefualt.tbi Does Not Exsist. Loading Default Values.");
+        qDebug("Mary::loadMaryFromFile() marydefualt.tbi Does Not Exsist. Loading Default Values.");
         return;
     }
     _savefile.open(QIODevice::ReadOnly);
@@ -130,8 +177,28 @@ void Mary::loadMaryFromFile()
     _ds >> m_pc_min_clustersize;
     _ds >> m_pc_max_clustersincolumn;
     _ds >> m_sk_max_discontinuity;
+    _ds >> m_left_tsl_min_angle;
+    _ds >> m_left_tsl_max_angle;
+    _ds >> m_left_tsl_min_votes;
+    _ds >> m_left_tsl_iterations;
+    _ds >> m_left_tsl_distance_threshold;
+    _ds >> m_right_tsl_min_angle;
+    _ds >> m_right_tsl_max_angle;
+    _ds >> m_right_tsl_min_votes;
+    _ds >> m_right_tsl_iterations;
+    _ds >> m_right_tsl_distance_threshold;
+    _ds >> m_left_bwl_min_angle;
+    _ds >> m_left_bwl_max_angle;
+    _ds >> m_left_bwl_min_votes;
+    _ds >> m_left_bwl_iterations;
+    _ds >> m_left_bwl_distance_threshold;
+    _ds >> m_right_bwl_min_angle;
+    _ds >> m_right_bwl_max_angle;
+    _ds >> m_right_bwl_min_votes;
+    _ds >> m_right_bwl_iterations;
+    _ds >> m_right_bwl_distance_threshold;
     _savefile.close();
-    qDebug("Mary: marydefualt.tbi Loaded.");
+    qDebug("Mary::loadMaryFromFile() marydefualt.tbi Loaded.");
     broadcastQMLSignals();
     broadcastSingletonSignals();
 }
@@ -350,10 +417,330 @@ Description:
 **************************************************************/
 void Mary::setMaxDiscontinuity(int _disc)
 {
-    if((_disc < 0) || (_disc > 50)) return;
+    if((_disc < 0) || (_disc > 701)) return;
     m_sk_max_discontinuity = _disc;
     emit skMaxDiscontuityChanged();
     emit signalChangeMaxDiscontinuity(m_sk_max_discontinuity);
+}
+
+/**************************************************************
+setLeftTSLMinAngle
+Set Function
+Description:
+  Sets the Left TSL Min Angle Setting
+**************************************************************/
+void Mary::setLeftTSLMinAngle(float _minangle)
+{
+    if((_minangle >= -90) && _minangle < m_left_tsl_max_angle)
+    {
+        m_left_tsl_min_angle = _minangle;
+        emit rnLeftTSLMinAngleChanged();
+        emit signalLeftTSLMinAngle(m_left_tsl_min_angle);
+    }
+}
+
+/**************************************************************
+setLeftTSLMaxAngle
+Set Function
+Description:
+  Sets the Left TSL Max Angle Setting
+**************************************************************/
+void Mary::setLeftTSLMaxAngle(float _maxangle)
+{
+    if((_maxangle > m_left_tsl_min_angle) && (_maxangle <= 90))
+    {
+        m_left_tsl_max_angle = _maxangle;
+        emit rnLeftTSLMaxAngleChanged();
+        emit signalLeftTSLMaxAngle(m_left_tsl_max_angle);
+    }
+}
+
+/**************************************************************
+setLeftTSLMinVotes
+Set Function
+Description:
+  Sets the Left TSL Votes
+**************************************************************/
+void Mary::setLeftTSLMinVotes(int _minvotes)
+{
+    if(_minvotes > 1)
+    {
+        m_left_tsl_min_votes = _minvotes;
+        emit rnLeftTSLMinVotesChanged();
+        emit signalLeftTSLMinVotes(m_left_tsl_min_votes);
+    }
+}
+
+/**************************************************************
+setLeftTSLMinVotes
+Set Function
+Description:
+  Sets the Left TSL Distance Threshold
+**************************************************************/
+void Mary::setLeftTSLDistanceThreshold(float _distthreshold)
+{
+    if((_distthreshold >= 0))
+    {
+        m_left_tsl_distance_threshold = _distthreshold;
+        emit rnLeftTSLDistanceThresholdChanged();
+        emit signalLeftTSLDistanceThreshold(m_left_tsl_distance_threshold);
+    }
+}
+
+/**************************************************************
+setLeftTSLMinVotes
+Set Function
+Description:
+  Sets the Left TSL Iterations
+**************************************************************/
+void Mary::setLeftTSLIterations(int _iterations)
+{
+    if(_iterations > 0)
+    {
+        m_left_tsl_iterations = _iterations;
+        emit rnLeftTSLIterationsChanged();
+        emit signalLeftTSLIterations(m_left_tsl_iterations);
+    }
+}
+
+/**************************************************************
+setRightTSLMinAngle
+Set Function
+Description:
+  Sets the Right TSL Min Angle Setting
+**************************************************************/
+void Mary::setRightTSLMinAngle(float _minangle)
+{
+    if((_minangle >= -90) && (_minangle < m_right_tsl_max_angle))
+    {
+        m_right_tsl_min_angle = _minangle;
+        emit rnRightTSLMinAngleChanged();
+        emit signalRightTSLMinAngle(m_right_tsl_min_angle);
+    }
+}
+
+/**************************************************************
+setRightTSLMaxAngle
+Set Function
+Description:
+  Sets the Right TSL Max Angle Setting
+**************************************************************/
+void Mary::setRightTSLMaxAngle(float _maxangle)
+{
+    if((_maxangle > m_right_tsl_min_angle) && (_maxangle <= 90))
+    {
+        m_right_tsl_max_angle = _maxangle;
+        emit rnRightTSLMaxAngleChanged();
+        emit signalRightTSLMaxAngle(m_right_tsl_max_angle);
+    }
+}
+
+/**************************************************************
+setRightTSLMinVotes
+Set Function
+Description:
+  Sets the Right TSL Votes
+**************************************************************/
+void Mary::setRightTSLMinVotes(int _minvotes)
+{
+    if(_minvotes > 1)
+    {
+        m_right_tsl_min_votes = _minvotes;
+        emit rnRightTSLMinVotesChanged();
+        emit signalRightTSLMinVotes(m_right_tsl_min_votes);
+    }
+}
+
+/**************************************************************
+setRightTSLMinVotes
+Set Function
+Description:
+  Sets the Right TSL Distance Threshold
+**************************************************************/
+void Mary::setRightTSLDistanceThreshold(float _distthreshold)
+{
+    if((_distthreshold >= 0))
+    {
+        m_right_tsl_distance_threshold = _distthreshold;
+        emit rnRightTSLDistanceThresholdChanged();
+        emit signalRightTSLDistanceThreshold(m_right_tsl_distance_threshold);
+    }
+}
+
+/**************************************************************
+setRightTSLMinVotes
+Set Function
+Description:
+  Sets the Right TSL Iterations
+**************************************************************/
+void Mary::setRightTSLIterations(int _iterations)
+{
+    if(_iterations > 0)
+    {
+        m_right_tsl_iterations = _iterations;
+        emit rnRightTSLIterationsChanged();
+        emit signalRightTSLIterations(m_right_tsl_iterations);
+    }
+}
+
+/**************************************************************
+setLeftBWLMinAngle
+Set Function
+Description:
+  Sets the Left BWL Min Angle Setting
+**************************************************************/
+void Mary::setLeftBWLMinAngle(float _minangle)
+{
+    if((_minangle >= -90) && _minangle < m_left_bwl_max_angle)
+    {
+        m_left_bwl_min_angle = _minangle;
+        emit rnLeftBWLMinAngleChanged();
+        emit signalLeftBWLMinAngle(m_left_bwl_min_angle);
+    }
+}
+
+/**************************************************************
+setLeftBWLMaxAngle
+Set Function
+Description:
+  Sets the Left BWL Max Angle Setting
+**************************************************************/
+void Mary::setLeftBWLMaxAngle(float _maxangle)
+{
+    if((_maxangle > m_left_bwl_min_angle) && (_maxangle <= 90))
+    {
+        m_left_bwl_max_angle = _maxangle;
+        emit rnLeftBWLMaxAngleChanged();
+        emit signalLeftBWLMaxAngle(m_left_bwl_max_angle);
+    }
+}
+
+/**************************************************************
+setLeftBWLMinVotes
+Set Function
+Description:
+  Sets the Left BWL Votes
+**************************************************************/
+void Mary::setLeftBWLMinVotes(int _minvotes)
+{
+    if(_minvotes > 1)
+    {
+        m_left_bwl_min_votes = _minvotes;
+        emit rnLeftBWLMinVotesChanged();
+        emit signalLeftBWLMinVotes(m_left_bwl_min_votes);
+    }
+}
+
+/**************************************************************
+setLeftBWLMinVotes
+Set Function
+Description:
+  Sets the Left BWL Distance Threshold
+**************************************************************/
+void Mary::setLeftBWLDistanceThreshold(float _distthreshold)
+{
+    if((_distthreshold >= 0))
+    {
+        m_left_bwl_distance_threshold = _distthreshold;
+        emit rnLeftBWLDistanceThresholdChanged();
+        emit signalLeftBWLDistanceThreshold(m_left_bwl_distance_threshold);
+    }
+}
+
+/**************************************************************
+setLeftBWLMinVotes
+Set Function
+Description:
+  Sets the Left BWL Iterations
+**************************************************************/
+void Mary::setLeftBWLIterations(int _iterations)
+{
+    if(_iterations > 0)
+    {
+        m_left_bwl_iterations = _iterations;
+        emit rnLeftBWLIterationsChanged();
+        emit signalLeftBWLIterations(m_left_bwl_iterations);
+    }
+}
+
+/**************************************************************
+setRightBWLMinAngle
+Set Function
+Description:
+  Sets the Right BWL Min Angle Setting
+**************************************************************/
+void Mary::setRightBWLMinAngle(float _minangle)
+{
+    if((_minangle >= -90) && (_minangle < m_right_bwl_max_angle))
+    {
+        m_right_bwl_min_angle = _minangle;
+        emit rnRightBWLMinAngleChanged();
+        emit signalRightBWLMinAngle(m_right_bwl_min_angle);
+    }
+}
+
+/**************************************************************
+setRightBWLMaxAngle
+Set Function
+Description:
+  Sets the Right BWL Max Angle Setting
+**************************************************************/
+void Mary::setRightBWLMaxAngle(float _maxangle)
+{
+    if((_maxangle > m_right_bwl_min_angle) && (_maxangle <= 90))
+    {
+        m_right_bwl_max_angle = _maxangle;
+        emit rnRightBWLMaxAngleChanged();
+        emit signalRightBWLMaxAngle(m_right_bwl_max_angle);
+    }
+}
+
+/**************************************************************
+setRightBWLMinVotes
+Set Function
+Description:
+  Sets the Right BWL Votes
+**************************************************************/
+void Mary::setRightBWLMinVotes(int _minvotes)
+{
+    if(_minvotes > 1)
+    {
+        m_right_bwl_min_votes = _minvotes;
+        emit rnRightBWLMinVotesChanged();
+        emit signalRightBWLMinVotes(m_right_bwl_min_votes);
+    }
+}
+
+/**************************************************************
+setRightBWLMinVotes
+Set Function
+Description:
+  Sets the Right BWL Distance Threshold
+**************************************************************/
+void Mary::setRightBWLDistanceThreshold(float _distthreshold)
+{
+    if((_distthreshold >= 0))
+    {
+        m_right_bwl_distance_threshold = _distthreshold;
+        emit rnRightBWLDistanceThresholdChanged();
+        emit signalRightBWLDistanceThreshold(m_right_bwl_distance_threshold);
+    }
+}
+
+/**************************************************************
+setRightBWLMinVotes
+Set Function
+Description:
+  Sets the Right BWL Iterations
+**************************************************************/
+void Mary::setRightBWLIterations(int _iterations)
+{
+    if(_iterations > 0)
+    {
+        m_right_bwl_iterations = _iterations;
+        emit rnRightBWLIterationsChanged();
+        emit signalRightBWLIterations(m_right_bwl_iterations);
+    }
 }
 
 /**************************************************************

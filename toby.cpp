@@ -3,6 +3,8 @@
 #include <QThread>
 
 
+
+//Constructors and Deconstructors
 /**************************************************************
 Toby()
 Public
@@ -15,8 +17,9 @@ Toby::Toby(QObject *parent) : QObject(parent)
     m_camera = nullptr;
     m_timer.start();
     m_camera_fps = "Error";
-    emit cameraFPSChanged();
-    qDebug() << "Toby: Toby Object Created.";
+    emit cameraFPSChanged(m_camera_fps);
+    initializeCamera();
+    qDebug() << "Toby::Toby() Toby Object Created.";
 }
 
 /**************************************************************
@@ -33,117 +36,13 @@ Toby::~Toby()
         if(m_camera->IsOpen()) m_camera->Close();
         m_camera->DestroyDevice();
     }
-    qDebug() << "Toby: Toby Object Destroyed.";
+    qDebug() << "Toby::~Toby() Toby Object Destroyed.";
 }
 
-/**************************************************************
-triggerCamera()
-Public, Q_INVOKABLE
-Description:
-  Instructs Toby to Send a Software Trigger to the Camera
- **************************************************************/
-void Toby::triggerCamera()
-{
-    if(m_camera == nullptr) return;
-    if(!m_camera->IsOpen()) return;
-    if(!m_camera->IsGrabbing()) return;
-    if(m_camera->CanWaitForFrameTriggerReady())
-    {
-        //m_camera->WaitForFrameTriggerReady(20);
-        m_camera->ExecuteSoftwareTrigger();
-    }
-}
-
-/**************************************************************
-startCamera()
-Public, Q_INVOKABLE
-Description:
-  Sets up the camera object within the Pylon Runtime
-  and starts grabbing.
- **************************************************************/
-void Toby::startCamera()
-{
-    try
-    {
-        m_camera = new Pylon::CInstantCamera(Pylon::CTlFactory::GetInstance().CreateFirstDevice());
-        //m_camera = new Pylon::CInstantCamera(Pylon::CTlFactory::GetInstance().CreateFirstDevice());
-        m_camera->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
-        m_camera->Open();
-        m_camera->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
-
-        if(!SetDefaultCameraSettings())
-        {
-            turnOffCamera();
-            return;
-        }
-
-        m_camera->StartGrabbing(Pylon::GrabStrategy_LatestImages, Pylon::GrabLoop_ProvidedByInstantCamera);
-        this->triggerCamera();
-        emit cameraOpenedChanged(m_camera->IsOpen());
-    }
-    catch(const Pylon::GenericException e)
-    {
-        qDebug() << "Toby: Pylon Error - " << e.GetDescription();
-        m_camera = nullptr;
-        return;
-    }
 
 
-}
 
-/**************************************************************
-getCameraInfo()
-Public, Q_INVOKABLE
-Description:
-  Returns The Model and Manufacture of the Camera
- **************************************************************/
-QString Toby::getCameraInfo()
-{
-    if(m_camera != nullptr)
-    {
-        if(m_camera->IsOpen())
-        {
-            CDeviceInfo _deviceinfo = m_camera->GetDeviceInfo();
-            QString _model = QString(_deviceinfo.GetFriendlyName().c_str());
-            return QString("Current Camera: " + _model);
-        }
-        else
-        {
-            return QString("There is No Camera Running");
-        }
-    }
-    return QString("There is No Camera Running");
-}
-
-/**************************************************************
-setCameraAOIToMax()
-Public, Q_INVOKABLE
-Description:
-  Sets The Camera AOI to Maximum and the Offsets to 0
- **************************************************************/
-void Toby::setCameraAOIToMax()
-{
-    onChangeCameraAOI(720, 540);
-}
-
-void Toby::turnOffCamera()
-{
-    while(m_camera->IsGrabbing())
-    {
-        m_camera->StopGrabbing();
-    }
-    while(m_camera->IsOpen())
-    {
-        m_camera->Close();
-    }
-    while(m_camera->IsPylonDeviceAttached())
-    {
-        m_camera->DetachDevice();
-    }
-    m_camera->DestroyDevice();
-    qDebug() << "Toby: Pylon Device Closed and Destroyed.";
-}
-
+//Pylon Overloaded onImageGrabbed Method
 /**************************************************************
 OnImageGrabbed(CInstantCamera &camera, const CGrabResultPtr &ptrGrab)
 Private
@@ -153,18 +52,48 @@ Description:
 void Toby::OnImageGrabbed(CInstantCamera &camera, const CGrabResultPtr &ptrGrab)
 {
     m_camera_fps = QString("Camera FPS = " + QString::number(1000/m_timer.elapsed()));
+
     if(ptrGrab->GrabSucceeded())
     {
         m_timer.start();
         cv::Mat _mat = cv::Mat(ptrGrab->GetHeight(), ptrGrab->GetWidth(), CV_8UC1, (uint8_t *) ptrGrab->GetBuffer());
-        emit cameraFPSChanged();
+        emit cameraFPSChanged(m_camera_fps);
         emit newCVMatFrameGrabbed(_mat);
         return;
     }
-    emit cameraFPSChanged();
+    emit cameraFPSChanged(m_camera_fps);
 
 }
 
+
+
+
+
+//Get Methods
+/**************************************************************
+getCameraInfo()
+Public, Q_INVOKABLE
+Description:
+  Returns The Model and Manufacture of the Camera
+ **************************************************************/
+QString Toby::getCameraInfo()
+{
+    if(!isCameraInitialized())
+    {
+        qDebug() << "Toby::getCameraInfo() called without camera being initialized.";
+        return QString("No Camera Initialized.");
+    }
+    CDeviceInfo _deviceinfo = m_camera->GetDeviceInfo();
+    QString _model = QString(_deviceinfo.GetFriendlyName().c_str());
+    return QString("Current Camera: " + _model);
+}
+
+
+
+
+
+
+//Camera Settings Related Slots
 /**************************************************************
 CameraSettings()
 Private
@@ -175,6 +104,12 @@ Description:
  **************************************************************/
 bool Toby::SetDefaultCameraSettings()
 {
+    if(!isCameraInitialized())
+    {
+        qDebug() << "Toby::SetDefaultConfiguration() called without a camera being initialized.";
+        return false;
+    }
+
     try
     {
         //Get Camera NodeMap
@@ -230,7 +165,7 @@ bool Toby::SetDefaultCameraSettings()
     catch(const GenericException &e)
     {
         QString _error = e.GetDescription();
-        qDebug() << "Toby:: Error in SetDefaultCameraSettings: " + _error;
+        qDebug() << "Toby:: Error in SetDefaultCameraSettings(): " + _error;
         return false;
     }
     return true;
@@ -244,19 +179,18 @@ Description:
  **************************************************************/
 void Toby::onChangeCameraAOI(int _width, int _height)
 {
-    bool _oneshot = true;
-    if(m_camera == nullptr) return;
-    if(!m_camera->IsOpen()) return;
-
-    while(m_camera->IsGrabbing())
+    if(!isCameraInitialized())
     {
-        if(_oneshot)
-        {
-            _oneshot = false;
-            m_camera->StopGrabbing();
-        }
-        QThread::msleep(100);
+        qDebug() << "Toby::onChangeCameraAOI() called without camera being initialized.";
+        return;
     }
+
+    if(isCameraOn())
+    {
+        qDebug() << "Toby::onChangeCameraAOI() called while camera is on.";
+        return;
+    }
+
     try
     {
         //Get Camera NodeMap
@@ -269,17 +203,6 @@ void Toby::onChangeCameraAOI(int _width, int _height)
         QString _error = e.GetDescription();
         qDebug() << "Toby:: Error in onChangeCameraGain: " + _error;
     }
-    _oneshot = true;
-    while(!m_camera->IsGrabbing())
-    {
-        if(_oneshot)
-        {
-            m_camera->StartGrabbing(Pylon::GrabStrategy_LatestImages, Pylon::GrabLoop_ProvidedByInstantCamera);
-            _oneshot = false;
-        }
-        QThread::msleep(100);
-    }
-    triggerCamera();
 }
 
 /**************************************************************
@@ -290,8 +213,12 @@ Description:
  **************************************************************/
 void Toby::onChangeCameraExposure(double _exposure)
 {
-    if(m_camera == nullptr) return;
-    if(!m_camera->IsOpen()) return;
+    if(!isCameraInitialized())
+    {
+        qDebug() << "Toby::onChangeCameraExposure() called without camera being initialized.";
+        return;
+    }
+
     try
     {
         //Get Camera NodeMap
@@ -306,7 +233,6 @@ void Toby::onChangeCameraExposure(double _exposure)
 
 }
 
-
 /**************************************************************
 onChangeCameraGain(int _gain)
 Slot
@@ -315,8 +241,12 @@ Description:
  **************************************************************/
 void Toby::onChangeCameraGain(int _gain)
 {
-    if(m_camera == nullptr) return;
-    if(!m_camera->IsOpen()) return;
+    if(!isCameraInitialized())
+    {
+        qDebug() << "Toby::onChangeCameraGain() called without camera being initialized.";
+        return;
+    }
+
     try
     {
         //Get Camera NodeMap
@@ -332,3 +262,176 @@ void Toby::onChangeCameraGain(int _gain)
 }
 
 
+
+//Camera Control and Interation Methods
+/**************************************************************
+initializeCamera()
+Private
+Description:
+  Created an Instance of the CInstantCamera Object.
+  Sets The Configuration and Opens the Camera.
+ **************************************************************/
+bool Toby::initializeCamera()
+{
+    if(!isCameraInitialized())
+    {
+        try
+        {
+            m_camera = new Pylon::CInstantCamera(Pylon::CTlFactory::GetInstance().CreateFirstDevice());
+            m_camera->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
+            m_camera->Open();
+            m_camera->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
+            if(!SetDefaultCameraSettings())
+            {
+                qDebug() << "Toby::initializeCamera(): Error Setting Default Settings";
+                return false;
+            }
+            else
+            {
+                qDebug() << "Toby::initializeCamera(): Default Settings Applied.";
+            }
+        }
+        catch(const Pylon::GenericException e)
+        {
+            qDebug()<<"Toby::initializeCamera() Pylon Error: " << e.GetDescription();
+            return false;
+        }
+        emit cameraInitialized();
+        qDebug()<<"Toby::initializeCamera(): Camera is Initialized: ";
+        return true;
+    }
+    else
+    {
+        qDebug() << "Toby::initializeCamera() called without camera being initialized.";
+    }
+}
+
+/**************************************************************
+startCamera()
+Public, Q_INVOKABLE
+Description:
+  Starts the camera grabbing images
+ **************************************************************/
+void Toby::startCamera()
+{
+    if(!isCameraInitialized())
+    {
+        qDebug() << "Toby::startCamera() called without camera being initialized";
+        return;
+    }
+
+    if(isCameraOn())
+    {
+        qDebug() << "Toby::startCamera() called with camera already running.";
+        return;
+    }
+
+    try
+    {
+        m_camera->StartGrabbing(Pylon::GrabStrategy_LatestImages, Pylon::GrabLoop_ProvidedByInstantCamera);
+        this->triggerCamera();
+    }
+    catch(const Pylon::GenericException e)
+    {
+        qDebug() << "Toby::startCamera(): Pylon Error: " << e.GetDescription();
+        m_camera = nullptr;
+        return;
+    }
+    qDebug() << "Toby::startCamera(): Camera has been turned on.";
+    emit cameraTurnedOn();
+}
+
+/**************************************************************
+stopCamera()
+Public, Q_INVOKABLE
+Description:
+  Stops the Camera From Grabbing Images.
+ **************************************************************/
+void Toby::stopCamera()
+{
+    if(!isCameraInitialized())
+    {
+        qDebug() << "Toby: turnOffCamera() called without the camera being initialized.";
+        return;
+    }
+
+    if(!isCameraOn())
+    {
+        qDebug() << "Toby: turnOffCamera() called. Camera is already off.";
+        return;
+    }
+
+    while(m_camera->IsGrabbing())
+    {
+        m_camera->StopGrabbing();
+    }
+    qDebug() << "Toby: turnOffCamera(). Camera has been turned off.";
+    emit cameraTurnedOff();
+}
+
+/**************************************************************
+isCameraInitialized()
+Private
+Description:
+  Checks if the Camera object is instantiated,
+  connected to Pylon and open.
+ **************************************************************/
+bool Toby::isCameraInitialized()
+{
+    if(m_camera == nullptr) return false;
+    if(!m_camera->IsPylonDeviceAttached()) return false;
+    if(!m_camera->IsOpen()) return false;
+    return true;
+}
+
+/**************************************************************
+isCameraOn()
+Private
+Description:
+  Determines if the Camera is Grabbing Images.
+ **************************************************************/
+bool Toby::isCameraOn()
+{
+    if(!isCameraInitialized()) return false;
+    if(!m_camera->IsGrabbing()) return false;
+    return true;
+}
+
+/**************************************************************
+triggerCamera()
+Public, Q_INVOKABLE
+Description:
+  Instructs Toby to Send a Software Trigger to the Camera
+ **************************************************************/
+void Toby::triggerCamera()
+{
+    if(!isCameraInitialized())
+    {
+        qDebug() << "Toby: triggerCamera() called without camera being initialized";
+        return;
+    }
+
+    if(!isCameraOn())
+    {
+        qDebug() << "Toby: triggerCamera() called without camera running.";
+        return;
+    }
+
+    if(m_camera->CanWaitForFrameTriggerReady())
+    {
+        m_camera->WaitForFrameTriggerReady(20);
+    }
+    m_camera->ExecuteSoftwareTrigger();
+
+}
+
+/**************************************************************
+setCameraAOIToMax()
+Public, Q_INVOKABLE
+Description:
+  Sets The Camera AOI to Maximum and the Offsets to 0
+ **************************************************************/
+void Toby::setCameraAOIToMax()
+{
+    onChangeCameraAOI(720, 540);
+}

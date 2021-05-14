@@ -10,22 +10,26 @@ void PixelClusterClass::pushPixelToBack(PixelFundamental_t _pixel)
     m_pixels.push_back(_pixel);
 }
 
-float PixelClusterClass::getRowCentroid()
+void PixelClusterClass::setRowCentroid()
 {
     //calculate the weighted average using intensity as a weight
     int _numofpixels = m_pixels.size();
-    if(_numofpixels == 0 ) return 0.0;
+    if(_numofpixels == 0 ) return;
     float _weight_sum = 0.0;
     float _weight_data_product_sum = 0.0;
     int _element = 0;
     do
     {
+        //_weight_sum += m_pixels.at(_element).intensity;
+        //_weight_data_product_sum += (m_pixels.at(_element).row * m_pixels.at(_element).intensity);
         _weight_sum += m_pixels[_element].intensity;
         _weight_data_product_sum += (m_pixels[_element].row * m_pixels[_element].intensity);
         ++_element;
     }while(_element < _numofpixels);
-    return _weight_data_product_sum/_weight_sum;
+    m_rowcentroid = _weight_data_product_sum/_weight_sum;
 }
+
+
 
 bool PixelClusterClass::isGausian()
 {
@@ -37,11 +41,11 @@ bool PixelClusterClass::isGausian()
 
     do
     {
-        if((m_pixels[_element].intensity < m_pixels[_element - 1].intensity) && !_hithighvalue)
+        if((m_pixels[_element].intensity < m_pixels[_element-1].intensity) && !_hithighvalue)
         {
             _hithighvalue = true;
         }
-        else if(_hithighvalue && (m_pixels[_element].intensity > m_pixels[_element - 1].intensity))
+        else if(_hithighvalue && (m_pixels[_element].intensity > m_pixels[_element-1].intensity))
         {
             return false;
         }

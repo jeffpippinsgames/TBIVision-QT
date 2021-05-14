@@ -25,9 +25,6 @@ Item
     //property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
     property string fontsource: "qrc:/Fonts/PermanentMarker-Regular.ttf"
 
-    //Custom Properties-------------------------
-    property var page: null
-
     //Misc Functions-------------------------
     function grabFocus()
     {
@@ -35,20 +32,19 @@ Item
     }
 
     //Dialog and Menu Functions------------------
-
     function cleanupForDestruction()
     {
+        Toby.stopCamera();
         //Kill All Bindings For The Destruction
         timeinlooptextId.text = "";
         //Disconnect All Signals
         Max.newOperationMatProcessed.disconnect(operationviewId.recieveCVMat);
         Max.processingComplete.disconnect(mainpageID.triggerTobyNextFrame);
-        Toby.turnOffCamera();
     }
 
     function triggerTobyNextFrame()
     {
-        if(page == null) Toby.triggerCamera();
+        Toby.triggerCamera();
     }
 
     //Slots
@@ -56,10 +52,9 @@ Item
     {
         Max.processingComplete.connect(mainpageID.triggerTobyNextFrame);
         Toby.startCamera();
-        Mary.loadMaryFromFile();
     }
 
-    //Signals-----------------------------------
+    //Signals
     signal destroyPage(string _transition_page)
 
     //Required For Every Page
@@ -68,7 +63,7 @@ Item
         id:pagesId
     }
 
-    //OML Components----------------------------
+    //OML Components
     ControllerObject
     {
 
@@ -182,12 +177,11 @@ Item
         font.pointSize: 15
         width: camerafpstextId.implicitWidth
         height: camerafpstextId.implicitHeight
-        x: 200
+        x: 300
         y: 10
         color: Qt.rgba(1,1,.95,1)
     }
 
-    /*
     //Gary Notification Icon
     IconInfoStatusObject
     {
@@ -217,16 +211,17 @@ Item
             Gary.operationStatusChanged.connect(garystatusId.garyChangedOperationStatus);
         }
     }
-*/
+
     //Control Key Display
     ControllerKeyObject
     {
         id: controlkeyId
-        greenbuttonmessage: "Selection"
-        redbuttonmessage: "Leave Selection"
-        blackbuttonmessage: "Main Menu"
+        enableredbutton: false
+        greenbuttonmessage: "Activate"
+        blackbuttonmessage: "Menu"
+        buttonspacing: 150
     }
-/*
+
     //Testing Keypad Object
     KeypadObject
     {
@@ -248,32 +243,34 @@ Item
             console.log("Keypad Returned: " + returnedvalue);
         }
     }
-*/
+
+    //Background Rectangle For QmlTBIDisplay
     Rectangle
     {
         id: viewbackgroundrectId
-        width:800
-        height:600
+        width:1034
+        height:770
         x:50
-        y: 200
+        y: 100
         color: "black"
         border.color: Qt.rgba(1,1,1,.1)
         border.width: 5
-    }
 
-    QmlTBIDisplay
-    {
-        id: operationviewId
-        width: 720
-        height: 540
 
-        anchors.centerIn: viewbackgroundrectId
-
-        Component.onCompleted:
+        QmlTBIDisplay
         {
-            operationviewId.scaleToWidth = operationviewId.width;
-            Max.newOperationMatProcessed.connect(operationviewId.recieveCVMat);
+            id: operationviewId
+            width: 1024
+            height:450
+            anchors.centerIn: viewbackgroundrectId
+
+            Component.onCompleted:
+            {
+                operationviewId.scaleToWidth = operationviewId.width;
+                Max.newOperationMatProcessed.connect(operationviewId.recieveCVMat);
+            }
         }
+
     }
 
 }

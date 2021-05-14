@@ -30,19 +30,22 @@ class Toby : public QObject, public Pylon::CImageEventHandler, public Pylon::CCo
 
     Q_OBJECT
 
-    Q_PROPERTY(double pylon_exposure READ getCameraExposure NOTIFY pylonCameraExposureChanged)
     Q_PROPERTY(QString camera_fps READ getCameraFPS NOTIFY cameraFPSChanged)
 public:
     explicit Toby(QObject *parent = nullptr);
     ~Toby();
-    Q_INVOKABLE void triggerCamera();
+
+    //Public Camera Control and Interagation Methods
+    Q_INVOKABLE bool initializeCamera();
     Q_INVOKABLE void startCamera();
+    Q_INVOKABLE void stopCamera();
+    Q_INVOKABLE bool isCameraOn();
+    Q_INVOKABLE void triggerCamera();
+    Q_INVOKABLE bool isCameraInitialized();
 
     //Property Get Methods
     Q_INVOKABLE QString getCameraInfo();
     Q_INVOKABLE void setCameraAOIToMax();
-    Q_INVOKABLE double getCameraExposure();
-    Q_INVOKABLE void turnOffCamera();
     QString getCameraFPS(){return m_camera_fps;}
 
 
@@ -57,37 +60,22 @@ private:
     bool SetDefaultCameraSettings();
 
 public slots:
+    //Camera Settings Slots
     void onChangeCameraAOI(int _width, int _height);
     void onChangeCameraExposure(double _exposure);
     void onChangeCameraGain(int _gain);
 
 signals:
-
     void signalMaryForCameraSettings();
     void newQImageFrameGrabbed(const QImage &qimageframe);
     void newCVMatFrameGrabbed(const cv::Mat &matframe);
-    void cameraOpenedChanged(bool _isopen);
     void aboutToDestroy();
-    void pylonCameraExposureChanged();
-    void cameraFPSChanged();
+    void cameraFPSChanged(QString _fps);
+    void cameraInitialized();
+    void cameraTurnedOff();
+    void cameraTurnedOn();
 
 };
 
-inline double Toby::getCameraExposure()
-{
-    if(m_camera == nullptr) return 0.0;
-    try
-    {
-        //Get Camera NodeMap
-        GenApi::INodeMap& _nodemap = m_camera->GetNodeMap();
-        return CFloatParameter(_nodemap, "ExposureTimeAbs").GetValue();
-    }
-    catch(const GenericException &e)
-    {
-        QString _error = e.GetDescription();
-        qDebug() << "Toby:: Error in onChangeCameraGain: " + _error;
-    }
-    return 0.0;
-}
 
 #endif // TOBY_H

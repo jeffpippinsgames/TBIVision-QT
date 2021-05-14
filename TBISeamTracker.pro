@@ -41,6 +41,7 @@ HEADERS += \
     max.h \
     pixelclusterclass.h \
     pixelcolumnclass.h \
+    pixelcolumnprocessreturn_t.h \
     pixelfundamental.h \
     tbiline.h \
     tbipoint.h \

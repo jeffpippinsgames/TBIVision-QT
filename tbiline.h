@@ -15,8 +15,9 @@ public:
     TBILine(const TBILine &_line); //Copy Constructor
     void setPoint1(TBIPoint _pnt);
     void setPoint2(TBIPoint _pnt);
-    bool canLineBeSplitForSplitMerge(const TBIPoint &_pnt, float _distance) const;
+    bool canLineBeSplitForSplitMerge(float *_data, int _start_index, int _end_index, int *_split_index, float _distance_threshold) const;
     float getOrthogonalDistance(const TBIPoint &_pnt) const;
+    float getOrthogonalDistance(float _x, float _y) const;
     float interiorAngleToLine(const TBILine &_line) const;
     float angleFromHorizontal() const;
     float getXatY(float _y) const;
@@ -36,6 +37,7 @@ public:
     float getPoint1Y() const{return m_point1.getY();}
     float getPoint2X() const{return m_point2.getX();}
     float getPoint2Y() const{return m_point2.getY();}
+    bool compareLines(TBILine &_line, float _distance_threshold);
 
 
     void operator = (const TBILine &_line)

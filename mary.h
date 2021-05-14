@@ -20,7 +20,7 @@
  Mary Will Attempt to load the file default.tbi
 
  int m_cvblur
- int m_cvthresholdmin
+ int m_cvthresholdMax
  int m_cvthresholdmax
 */
 
@@ -57,6 +57,34 @@ class Mary : public QObject
     Q_PROPERTY(int pc_max_clusters_in_column READ getMaxClusterInCol WRITE setMaxClusterInCol NOTIFY pcMaxClusterInColChanged)
     //Skeletal Processing Properties-------------------------------------------------------------
     Q_PROPERTY(int sk_max_discontinuity READ getMaxDiscontinuity WRITE setMaxDiscontinuity NOTIFY skMaxDiscontuityChanged)
+    //Ransac Processing Properties-------------------------------------------------------------
+    Q_PROPERTY(float rn_left_tsl_min_angle READ getLeftTSLMinAngle WRITE setLeftTSLMinAngle NOTIFY rnLeftTSLMinAngleChanged)
+    Q_PROPERTY(float rn_left_tsl_max_angle READ getLeftTSLMaxAngle WRITE setLeftTSLMaxAngle NOTIFY rnLeftTSLMaxAngleChanged)
+    Q_PROPERTY(int rn_left_tsl_votes READ getLeftTSLMinVotes WRITE setLeftTSLMinVotes NOTIFY rnLeftTSLMinVotesChanged)
+    Q_PROPERTY(float rn_left_tsl_distance_threshold READ getLeftTSLDistanceThreshold WRITE setLeftTSLDistanceThreshold NOTIFY rnLeftTSLDistanceThresholdChanged)
+    Q_PROPERTY(int rn_left_tsl_iterations READ getLeftTSLIterations WRITE setLeftTSLIterations NOTIFY rnLeftTSLIterationsChanged)
+
+    Q_PROPERTY(float rn_right_tsl_min_angle READ getRightTSLMinAngle WRITE setRightTSLMinAngle NOTIFY rnRightTSLMinAngleChanged)
+    Q_PROPERTY(float rn_right_tsl_max_angle READ getRightTSLMaxAngle WRITE setRightTSLMaxAngle NOTIFY rnRightTSLMaxAngleChanged)
+    Q_PROPERTY(int rn_right_tsl_votes READ getRightTSLMinVotes WRITE setRightTSLMinVotes NOTIFY rnRightTSLMinVotesChanged)
+    Q_PROPERTY(float rn_right_tsl_distance_threshold READ getRightTSLDistanceThreshold WRITE setRightTSLDistanceThreshold NOTIFY rnRightTSLDistanceThresholdChanged)
+    Q_PROPERTY(int rn_right_tsl_iterations READ getRightTSLIterations WRITE setRightTSLIterations NOTIFY rnRightTSLIterationsChanged)
+
+    Q_PROPERTY(float rn_left_bwl_min_angle READ getLeftBWLMinAngle WRITE setLeftBWLMinAngle NOTIFY rnLeftBWLMinAngleChanged)
+    Q_PROPERTY(float rn_left_bwl_max_angle READ getLeftBWLMaxAngle WRITE setLeftBWLMaxAngle NOTIFY rnLeftBWLMaxAngleChanged)
+    Q_PROPERTY(int rn_left_bwl_votes READ getLeftBWLMinVotes WRITE setLeftBWLMinVotes NOTIFY rnLeftBWLMinVotesChanged)
+    Q_PROPERTY(float rn_left_bwl_distance_threshold READ getLeftBWLDistanceThreshold WRITE setLeftBWLDistanceThreshold NOTIFY rnLeftBWLDistanceThresholdChanged)
+    Q_PROPERTY(int rn_left_bwl_iterations READ getLeftBWLIterations WRITE setLeftBWLIterations NOTIFY rnLeftBWLIterationsChanged)
+
+    Q_PROPERTY(float rn_right_bwl_min_angle READ getRightBWLMinAngle WRITE setRightBWLMinAngle NOTIFY rnRightBWLMinAngleChanged)
+    Q_PROPERTY(float rn_right_bwl_max_angle READ getRightBWLMaxAngle WRITE setRightBWLMaxAngle NOTIFY rnRightBWLMaxAngleChanged)
+    Q_PROPERTY(int rn_right_bwl_votes READ getRightBWLMinVotes WRITE setRightBWLMinVotes NOTIFY rnRightBWLMinVotesChanged)
+    Q_PROPERTY(float rn_right_bwl_distance_threshold READ getRightBWLDistanceThreshold WRITE setRightBWLDistanceThreshold NOTIFY rnRightBWLDistanceThresholdChanged)
+    Q_PROPERTY(int rn_right_bwl_iterations READ getRightBWLIterations WRITE setRightBWLIterations NOTIFY rnRightBWLIterationsChanged)
+
+
+
+
 
     //GUI Properties Changed--------------------------------------------------------------------
     Q_PROPERTY(bool showdebuginfo READ getShowDebugInfo WRITE setShowDebugInfo NOTIFY showDebugInfoChanged)
@@ -93,26 +121,74 @@ public:
     Q_INVOKABLE int getMaxClusterInCol(){return m_pc_max_clustersincolumn;}
     //Skeletal Processing Get Functions
     Q_INVOKABLE int getMaxDiscontinuity(){return m_sk_max_discontinuity;}
-    //GUI Property Get Functions--------------------------------------------------------------
+    //Ransac Processing Get Functions
+    Q_INVOKABLE float getLeftTSLMinAngle(){return m_left_tsl_min_angle;}
+    Q_INVOKABLE float getLeftTSLMaxAngle(){return m_left_tsl_max_angle;}
+    Q_INVOKABLE int getLeftTSLMinVotes(){return m_left_tsl_min_votes;}
+    Q_INVOKABLE float getLeftTSLDistanceThreshold(){return m_left_tsl_distance_threshold;}
+    Q_INVOKABLE float getLeftTSLIterations(){return m_left_tsl_iterations;}
+
+    Q_INVOKABLE float getRightTSLMinAngle(){return m_right_tsl_min_angle;}
+    Q_INVOKABLE float getRightTSLMaxAngle(){return m_right_tsl_max_angle;}
+    Q_INVOKABLE int getRightTSLMinVotes(){return m_right_tsl_min_votes;}
+    Q_INVOKABLE float getRightTSLDistanceThreshold(){return m_right_tsl_distance_threshold;}
+    Q_INVOKABLE int getRightTSLIterations(){return m_right_tsl_iterations;}
+
+    Q_INVOKABLE float getLeftBWLMinAngle(){return m_left_bwl_min_angle;}
+    Q_INVOKABLE float getLeftBWLMaxAngle(){return m_left_bwl_max_angle;}
+    Q_INVOKABLE int getLeftBWLMinVotes(){return m_left_bwl_min_votes;}
+    Q_INVOKABLE float getLeftBWLDistanceThreshold(){return m_left_bwl_distance_threshold;}
+    Q_INVOKABLE int getLeftBWLIterations(){return m_left_bwl_iterations;}
+
+    Q_INVOKABLE float getRightBWLMinAngle(){return m_right_bwl_min_angle;}
+    Q_INVOKABLE float getRightBWLMaxAngle(){return m_right_bwl_max_angle;}
+    Q_INVOKABLE int getRightBWLMinVotes(){return m_right_bwl_min_votes;}
+    Q_INVOKABLE float getRightBWLDistanceThreshold(){return m_right_bwl_distance_threshold;}
+    Q_INVOKABLE int getRightBWLIterations(){return m_right_bwl_iterations;}
+    //GUI Property Get Functions-------------------------------------------------------------
     Q_INVOKABLE bool getShowDebugInfo(){return m_gui_showdebuginfo;}
 
-    //Pylon Property Set Functions------------------------------------------------------------
+    //Pylon Property Set Functions-----------------------------------------------------------
     void setCameraAOIWidth(int _width);
     void setCameraAOIHeight(int _height);
     void setCameraExposure(double _exposure);
     void setCameraGain(int _gain);
-    //OpenC V Property Set Functions----------------------------------------------------------
+    //OpenC V Property Set Functions---------------------------------------------------------
     void setCVBlurValue(int _value);
-    void setCVThresholdMinValue(int _value);
     void setCVThresholdMaxValue(int _value);
+    void setCVThresholdMinValue(int _value);
     //Pixel Column Set Functions-------------------------------------------------------------
     void setMaxTII(quint64 _maxtii);
     void setMinTII(quint64 _mintii);
-    void setMinClusterSize(int _cs);
     void setMaxClusterSize(int _cs);
+    void setMinClusterSize(int _cs);
     void setMaxClusterInCol(int _csincol);
-    //Skeletal Set Functions-------------------------------------------------------------
+    //Skeletal Set Functions-----------------------------------------------------------------
     void setMaxDiscontinuity(int _disc);
+    //Ransac Set Functions-------------------------------------------------------------------
+    void setLeftTSLMinAngle(float _minangle);
+    void setLeftTSLMaxAngle(float _maxangle);
+    void setLeftTSLMinVotes(int _minvotes);
+    void setLeftTSLDistanceThreshold(float _distthreshold);
+    void setLeftTSLIterations(int _iterations);
+
+    void setRightTSLMinAngle(float _minangle);
+    void setRightTSLMaxAngle(float _maxangle);
+    void setRightTSLMinVotes(int _minvotes);
+    void setRightTSLDistanceThreshold(float _distthreshold);
+    void setRightTSLIterations(int _iterations);
+
+    void setLeftBWLMinAngle(float _minangle);
+    void setLeftBWLMaxAngle(float _maxangle);
+    void setLeftBWLMinVotes(int _minvotes);
+    void setLeftBWLDistanceThreshold(float _distthreshold);
+    void setLeftBWLIterations(int _iterations);
+
+    void setRightBWLMinAngle(float _minangle);
+    void setRightBWLMaxAngle(float _maxangle);
+    void setRightBWLMinVotes(int _minvotes);
+    void setRightBWLDistanceThreshold(float _distthreshold);
+    void setRightBWLIterations(int _iterations);
     //GUI Property Set Functions--------------------------------------------------------------
     void setShowDebugInfo(bool _value);
 
@@ -125,15 +201,42 @@ signals:
     void signalChangeCameraExposure(double _exposure);
     void signalChangeCameraGain(int _gain);
     //Max Related Signals---------------------------------------------------------------------
+    //OpenCV
     void signalChangeBlur(int _blur);
     void signalChangeThresholdMin(int _min);
     void signalChangeThresholdMax(int _max);
+    //Pixel Cluster
     void signalChangeMaxTII(quint64 _maxtii);
     void signalChangeMinTII(quint64 _mintii);
     void signalChangeMaxClusterSize(int _size);
     void signalChangeMaxClustersInColumn(int _numofclusters);
     void signalChangeMinClusterSize(int _size);
+    //Skeletal
     void signalChangeMaxDiscontinuity(int _value);
+    //RANSAC
+    void signalLeftTSLMinAngle(float _minangle);
+    void signalLeftTSLMaxAngle(float _maxangle);
+    void signalLeftTSLMinVotes(int _minvotes);
+    void signalLeftTSLDistanceThreshold(float _distthreshold);
+    void signalLeftTSLIterations(int _iterations);
+
+    void signalRightTSLMinAngle(float _minangle);
+    void signalRightTSLMaxAngle(float _maxangle);
+    void signalRightTSLMinVotes(int _minvotes);
+    void signalRightTSLDistanceThreshold(float _distthreshold);
+    void signalRightTSLIterations(int _iterations);
+
+    void signalLeftBWLMinAngle(float _minangle);
+    void signalLeftBWLMaxAngle(float _maxangle);
+    void signalLeftBWLMinVotes(int _minvotes);
+    void signalLeftBWLDistanceThreshold(float _distthreshold);
+    void signalLeftBWLIterations(int _iterations);
+
+    void signalRightBWLMinAngle(float _minangle);
+    void signalRightBWLMaxAngle(float _maxangle);
+    void signalRightBWLMinVotes(int _minvotes);
+    void signalRightBWLDistanceThreshold(float _distthreshold);
+    void signalRightBWLIterations(int _iterations);
     //Pylon Related Signals-------------------------------------------------------------------
     void pylonCameraMaxHeightChanged();
     void pylonCameraMaxWidthChanged();
@@ -144,16 +247,40 @@ signals:
     void pylonCameraGainChanged();
     //Open CV Related Signals-----------------------------------------------------------------
     void cvBlurValueChanged();
-    void cvThresholdMinValueChanged();
     void cvThresholdMaxValueChanged();
+    void cvThresholdMinValueChanged();
     //Pixel Column Related Signals------------------------------------------------------------
     void pcMaxTIIChanged();
     void pcMinTIIChanged();
-    void pcMinClusterSizeChanged();
     void pcMaxClusterSizeChanged();
+    void pcMinClusterSizeChanged();
     void pcMaxClusterInColChanged();
     //Skeletal Related Signals----------------------------------------------------------------
     void skMaxDiscontuityChanged();
+    //Ransac Related Signals------------------------------------------------------------------
+    void rnLeftTSLMinAngleChanged();
+    void rnLeftTSLMaxAngleChanged();
+    void rnLeftTSLMinVotesChanged();
+    void rnLeftTSLDistanceThresholdChanged();
+    void rnLeftTSLIterationsChanged();
+
+    void rnRightTSLMinAngleChanged();
+    void rnRightTSLMaxAngleChanged();
+    void rnRightTSLMinVotesChanged();
+    void rnRightTSLDistanceThresholdChanged();
+    void rnRightTSLIterationsChanged();
+
+    void rnLeftBWLMinAngleChanged();
+    void rnLeftBWLMaxAngleChanged();
+    void rnLeftBWLMinVotesChanged();
+    void rnLeftBWLDistanceThresholdChanged();
+    void rnLeftBWLIterationsChanged();
+
+    void rnRightBWLMinAngleChanged();
+    void rnRightBWLMaxAngleChanged();
+    void rnRightBWLMinVotesChanged();
+    void rnRightBWLDistanceThresholdChanged();
+    void rnRightBWLIterationsChanged();
     //GUI Related Signals---------------------------------------------------------------------
     void showDebugInfoChanged();
 
@@ -164,8 +291,8 @@ private:
     //Pylon Settings and Stuff
     const int m_pylon_maxcamerawidth = 724;
     const int m_pylon_maxcameraheight = 542;
-    const int m_pylon_minoffsetx = 0;
-    const int m_pylon_minoffsety = 0;
+    const int m_pylon_Maxoffsetx = 0;
+    const int m_pylon_Maxoffsety = 0;
     QString m_pylon_cameraname;
     int m_pylon_aoiwidth;
     int m_pylon_aoiheight;
@@ -189,8 +316,35 @@ private:
     //Skeletal Processing Settings and Stuff
     int m_sk_max_discontinuity;
 
+    //Ransac Processing Settings and Stuff
+    float m_left_tsl_min_angle;
+    float m_left_tsl_max_angle;
+    int m_left_tsl_min_votes;
+    int m_left_tsl_iterations;
+    float m_left_tsl_distance_threshold;
+
+    float m_right_tsl_min_angle;
+    float m_right_tsl_max_angle;
+    int m_right_tsl_min_votes;
+    int m_right_tsl_iterations;
+    float m_right_tsl_distance_threshold;
+
+    float m_left_bwl_min_angle;
+    float m_left_bwl_max_angle;
+    int m_left_bwl_min_votes;
+    int m_left_bwl_iterations;
+    float m_left_bwl_distance_threshold;
+
+    float m_right_bwl_min_angle;
+    float m_right_bwl_max_angle;
+    int m_right_bwl_min_votes;
+    int m_right_bwl_iterations;
+    float m_right_bwl_distance_threshold;
+
+
     //GUI UI Settings and Stuff
     bool m_gui_showdebuginfo;
+
 
 
 
