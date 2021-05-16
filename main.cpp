@@ -97,6 +97,9 @@ int main(int argc, char *argv[])
     QObject::connect(&_mary, SIGNAL(signalRightBWLMinVotes(int)), &_max, SLOT(onRightBWLMinVotes(int)));
     QObject::connect(&_mary, SIGNAL(signalRightBWLDistanceThreshold(float)), &_max, SLOT(onRightBWLDistanceThreshold(float)));
     QObject::connect(&_mary, SIGNAL(signalRightBWLIterations(int)), &_max, SLOT(onRightBWLIterations(int)));
+
+    QObject::connect(&_mary, SIGNAL(signalSplitDistance(float)), &_max, SLOT(onSplitDistance(float)));
+    QObject::connect(&_mary, SIGNAL(signalSplitLength(float)), &_max, SLOT(onSplitLength(float)));
     //Set Mary's Default Values... This must Be Done After the Signals and Slot of the Singletons are connected.
     _mary.loadMaryFromFile();
 

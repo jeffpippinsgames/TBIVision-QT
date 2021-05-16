@@ -131,7 +131,7 @@ void TBILine::drawOnMat(cv::Mat &_dst, cv::Scalar _color, int _thickness)
     if(!m_validline) return;
     cv::Point _p1((int)this->m_point1.getX(), (int)this->m_point1.getY());
     cv::Point _p2((int)this->m_point2.getX(), (int)this->m_point2.getY());
-    cv::line(_dst, _p1, _p2, _color, _thickness);
+    cv::line(_dst, _p1, _p2, _color, _thickness, cv::LINE_AA);
 
 }
 

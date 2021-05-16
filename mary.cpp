@@ -78,6 +78,8 @@ void Mary::SetMaryDefaultValues()
     m_right_bwl_iterations = 50;
     m_right_bwl_distance_threshold = 1.0;
     //---------------------------------------
+    m_split_distance = 8.0;
+    m_split_length = 10.0;
 }
 
 /**************************************************************
@@ -137,6 +139,8 @@ void Mary::saveMaryToFile()
     _ds << m_right_bwl_min_votes;
     _ds << m_right_bwl_iterations;
     _ds << m_right_bwl_distance_threshold;
+    _ds << m_split_distance;
+    _ds << m_split_length;
     _ds.setVersion(QDataStream::Qt_5_12);
     _savefile.close();
     qDebug() << "Mary::saveMaryToFile() Settings Saved To " << _filepath;
@@ -197,6 +201,8 @@ void Mary::loadMaryFromFile()
     _ds >> m_right_bwl_min_votes;
     _ds >> m_right_bwl_iterations;
     _ds >> m_right_bwl_distance_threshold;
+    _ds >> m_split_distance;
+    _ds >> m_split_length;
     _savefile.close();
     qDebug("Mary::loadMaryFromFile() marydefualt.tbi Loaded.");
     broadcastQMLSignals();
@@ -744,6 +750,38 @@ void Mary::setRightBWLIterations(int _iterations)
 }
 
 /**************************************************************
+setSplitDistance
+Set Function
+Description:
+  Sets the Split Merge Distance Threshold
+**************************************************************/
+void Mary::setSplitDistance(float _distance)
+{
+    if(_distance > 0)
+    {
+        m_split_distance = _distance;
+        emit smSplitDistanceChanged();
+        emit signalSplitDistance(m_split_distance);
+    }
+}
+
+/**************************************************************
+setSplitLength
+Set Function
+Description:
+  Sets the Split Merge Line Length Threshold
+**************************************************************/
+void Mary::setSplitLength(float _length)
+{
+    if(_length > 0)
+    {
+        m_split_length = _length;
+        emit smSplitLengthChanged();
+        emit signalSplitLength(m_split_length);
+    }
+}
+
+/**************************************************************
 setShowDebugInfo(bool _value)
 Public
 Description:
@@ -769,17 +807,50 @@ void Mary::broadcastQMLSignals()
     emit cvBlurValueChanged();
     emit cvThresholdMaxValueChanged();
     emit cvThresholdMinValueChanged();
+
     emit showDebugInfoChanged();
+
     emit pylonCameraAOIHeightChanged();
     emit pylonCameraAOIWidthChanged();
     emit pylonCameraExposureChanged();
     emit pylonCameraGainChanged();
+
     emit pcMaxTIIChanged();
     emit pcMinTIIChanged();
     emit pcMaxClusterSizeChanged();
     emit pcMinClusterSizeChanged();
     emit pcMaxClusterInColChanged();
+
     emit skMaxDiscontuityChanged();
+
+    emit rnLeftTSLMinAngleChanged();
+    emit rnLeftTSLMaxAngleChanged();
+    emit rnLeftTSLMinVotesChanged();
+    emit rnLeftTSLDistanceThresholdChanged();
+    emit rnLeftTSLIterationsChanged();
+
+    emit rnRightTSLMinAngleChanged();
+    emit rnRightTSLMaxAngleChanged();
+    emit rnRightTSLMinVotesChanged();
+    emit rnRightTSLDistanceThresholdChanged();
+    emit rnRightTSLIterationsChanged();
+
+    emit rnLeftBWLMinAngleChanged();
+    emit rnLeftBWLMaxAngleChanged();
+    emit rnLeftBWLMinVotesChanged();
+    emit rnLeftBWLDistanceThresholdChanged();
+    emit rnLeftBWLIterationsChanged();
+
+    emit rnRightBWLMinAngleChanged();
+    emit rnRightBWLMaxAngleChanged();
+    emit rnRightBWLMinVotesChanged();
+    emit rnRightBWLDistanceThresholdChanged();
+    emit rnRightBWLIterationsChanged();
+
+    emit smSplitDistanceChanged();
+    emit smSplitLengthChanged();
+
+
 }
 
 /**************************************************************
@@ -793,15 +864,46 @@ void Mary::broadcastSingletonSignals()
     emit signalChangeCameraAOI(m_pylon_aoiwidth, m_pylon_aoiheight);
     emit signalChangeCameraExposure(m_pylon_exposuretime);
     emit signalChangeCameraGain(m_pylon_gain);
+
     emit signalChangeBlur(m_cv_blur);
     emit signalChangeThresholdMin(m_cv_thresholdmin);
     emit signalChangeThresholdMax(m_cv_thresholdmax);
+
     emit signalChangeMaxTII(m_pc_max_tii);
     emit signalChangeMinTII(m_pc_min_tii);
     emit signalChangeMaxClusterSize(m_pc_max_clustersize);
     emit signalChangeMaxClustersInColumn(m_pc_max_clustersincolumn);
     emit signalChangeMinClusterSize(m_pc_min_clustersize);
+
     emit signalChangeMaxDiscontinuity(m_sk_max_discontinuity);
+
+    emit signalLeftTSLMinAngle(m_left_tsl_min_angle);
+    emit signalLeftTSLMaxAngle(m_left_tsl_max_angle);
+    emit signalLeftTSLMinVotes(m_left_tsl_min_votes);
+    emit signalLeftTSLDistanceThreshold(m_left_tsl_distance_threshold);
+    emit signalLeftTSLIterations(m_left_tsl_iterations);
+
+    emit signalRightTSLMinAngle(m_right_tsl_min_angle);
+    emit signalRightTSLMaxAngle(m_right_tsl_max_angle);
+    emit signalRightTSLMinVotes(m_right_tsl_min_votes);
+    emit signalRightTSLDistanceThreshold(m_right_tsl_distance_threshold);
+    emit signalRightTSLIterations(m_right_tsl_iterations);
+
+    emit signalLeftBWLMinAngle(m_left_bwl_min_angle);
+    emit signalLeftBWLMaxAngle(m_left_bwl_max_angle);
+    emit signalLeftBWLMinVotes(m_left_bwl_min_votes);
+    emit signalLeftBWLDistanceThreshold(m_left_bwl_distance_threshold);
+    emit signalLeftBWLIterations(m_left_bwl_iterations);
+
+    emit signalRightBWLMinAngle(m_right_bwl_min_angle);
+    emit signalRightBWLMaxAngle(m_right_bwl_max_angle);
+    emit signalRightBWLMinVotes(m_right_bwl_min_votes);
+    emit signalRightBWLDistanceThreshold(m_right_bwl_distance_threshold);
+    emit signalRightBWLIterations(m_right_bwl_iterations);
+
+    emit signalSplitDistance(m_split_distance);
+    emit signalSplitLength(m_split_length);
+
 }
 
 

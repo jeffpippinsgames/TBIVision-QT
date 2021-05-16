@@ -9,6 +9,8 @@
 //Constructors and Destructor--------------------------------------------------------
 Max::Max(QObject *parent) : QObject(parent)
 {
+    m_emitextramats = false;
+
     m_in_proccesing_loop = false;
     m_timeinloop = "Error:";
     m_blur = 3;
@@ -47,6 +49,7 @@ Max::Max(QObject *parent) : QObject(parent)
     m_bwlright_distance_threshold = 1;
 
     m_sm_distance_threshold = 5;
+    m_sm_length_threshold = 20;
 
     emit timeInLoopChanged(m_timeinloop);
     qDebug()<<"Max::Max() Max Object Created.";
@@ -469,8 +472,16 @@ void Max::recieveNewCVMat(const Mat &_mat)
                     cv::cvtColor(_skel_mat, _splitmerge_mat, cv::COLOR_GRAY2BGR);
                     for(int i = 0; i < (int)m_topography_lines.size(); ++i)
                     {
+                        if(i%2 == 0)
+                        {
+                           m_topography_lines[i].drawOnMat(_splitmerge_mat, CV_RGB(0,200,0), 2);
+                        }
+                        else
+                        {
+                            m_topography_lines[i].drawOnMat(_splitmerge_mat, CV_RGB(0,0,200), 2);
+                        }
                         m_topography_lines[i].drawOnMat(_operation_mat, CV_RGB(200,0,0), 2);
-                        m_topography_lines[i].drawOnMat(_splitmerge_mat, CV_RGB(200,0,0), 2);
+
                     }
 
 
@@ -502,13 +513,16 @@ void Max::recieveNewCVMat(const Mat &_mat)
         _pixelcolumn_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8SC1);
     }
 
-    emit newRawMatProcessed(_raw_mat);
-    emit newBlurMatProcessed(_blurr_mat);
-    emit newThresholdMatProcessed(_threshold_mat);
-    emit newPixelColumnMatProcessed(_pixelcolumn_mat);
-    emit newSkeletalMatProcessed(_skel_mat);
-    emit newRansacMatProcessed(_ransac_mat);
-    emit newSplitMergeMatProcessed(_splitmerge_mat);
+    if(m_emitextramats)
+    {
+        emit newRawMatProcessed(_raw_mat);
+        emit newBlurMatProcessed(_blurr_mat);
+        emit newThresholdMatProcessed(_threshold_mat);
+        emit newPixelColumnMatProcessed(_pixelcolumn_mat);
+        emit newSkeletalMatProcessed(_skel_mat);
+        emit newRansacMatProcessed(_ransac_mat);
+        emit newSplitMergeMatProcessed(_splitmerge_mat);
+    }
     emit newOperationMatProcessed(_operation_mat);
 
     m_timeinloop = QString("Time in Loop: " + QString::number(m_timer.elapsed()) + " ms.");

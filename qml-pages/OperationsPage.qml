@@ -52,6 +52,7 @@ Item
     {
         Max.processingComplete.connect(mainpageID.triggerTobyNextFrame);
         Toby.startCamera();
+        Max.emitExtraMats = false;
     }
 
     //Signals

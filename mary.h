@@ -82,8 +82,9 @@ class Mary : public QObject
     Q_PROPERTY(float rn_right_bwl_distance_threshold READ getRightBWLDistanceThreshold WRITE setRightBWLDistanceThreshold NOTIFY rnRightBWLDistanceThresholdChanged)
     Q_PROPERTY(int rn_right_bwl_iterations READ getRightBWLIterations WRITE setRightBWLIterations NOTIFY rnRightBWLIterationsChanged)
 
-
-
+    //Split Merge Processing Properties-------------------------------------------------------------
+    Q_PROPERTY(float sm_split_distance READ getSplitDistance WRITE setSplitDistance NOTIFY smSplitDistanceChanged)
+    Q_PROPERTY(float sm_split_length READ getSplitLength WRITE setSplitLength NOTIFY smSplitLengthChanged)
 
 
     //GUI Properties Changed--------------------------------------------------------------------
@@ -145,6 +146,11 @@ public:
     Q_INVOKABLE int getRightBWLMinVotes(){return m_right_bwl_min_votes;}
     Q_INVOKABLE float getRightBWLDistanceThreshold(){return m_right_bwl_distance_threshold;}
     Q_INVOKABLE int getRightBWLIterations(){return m_right_bwl_iterations;}
+
+    //SplitMerge Processing Get Functions
+    Q_INVOKABLE float getSplitDistance(){return m_split_distance;}
+    Q_INVOKABLE float getSplitLength(){return m_split_length;}
+
     //GUI Property Get Functions-------------------------------------------------------------
     Q_INVOKABLE bool getShowDebugInfo(){return m_gui_showdebuginfo;}
 
@@ -189,6 +195,11 @@ public:
     void setRightBWLMinVotes(int _minvotes);
     void setRightBWLDistanceThreshold(float _distthreshold);
     void setRightBWLIterations(int _iterations);
+
+    //Split Merge Set Functions---------------------------------------------------------------
+    void setSplitDistance(float _distance);
+    void setSplitLength(float _length);
+
     //GUI Property Set Functions--------------------------------------------------------------
     void setShowDebugInfo(bool _value);
 
@@ -237,6 +248,11 @@ signals:
     void signalRightBWLMinVotes(int _minvotes);
     void signalRightBWLDistanceThreshold(float _distthreshold);
     void signalRightBWLIterations(int _iterations);
+
+    //Split Merge
+    void signalSplitDistance(float _distance);
+    void signalSplitLength(float _length);
+
     //Pylon Related Signals-------------------------------------------------------------------
     void pylonCameraMaxHeightChanged();
     void pylonCameraMaxWidthChanged();
@@ -281,6 +297,9 @@ signals:
     void rnRightBWLMinVotesChanged();
     void rnRightBWLDistanceThresholdChanged();
     void rnRightBWLIterationsChanged();
+
+    void smSplitDistanceChanged();
+    void smSplitLengthChanged();
     //GUI Related Signals---------------------------------------------------------------------
     void showDebugInfoChanged();
 
@@ -341,6 +360,9 @@ private:
     int m_right_bwl_iterations;
     float m_right_bwl_distance_threshold;
 
+    //Split Merge Processing Settings and Stuff
+    float m_split_distance;
+    float m_split_length;
 
     //GUI UI Settings and Stuff
     bool m_gui_showdebuginfo;

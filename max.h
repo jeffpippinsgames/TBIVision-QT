@@ -60,6 +60,7 @@ class Max : public QObject
     Q_OBJECT
     Q_PROPERTY(QString timeinloop READ getTimeinLoop NOTIFY timeInLoopChanged)
     Q_PROPERTY(quint64 total_image_intensity READ getTotalImageIntensity NOTIFY totalImageIntensityChanged)
+    Q_PROPERTY(bool emitExtraMats READ getEmitExtraMats WRITE setEmitExtraMats NOTIFY emitExtraMatsChanged)
 
 private:
     void blankProcessingArrays();
@@ -91,7 +92,8 @@ public:
     ~Max();
     QString getTimeinLoop(){return m_timeinloop;}
     quint64 getTotalImageIntensity(){return m_total_image_intensity;}
-
+    Q_INVOKABLE bool getEmitExtraMats(){return m_emitextramats;}
+    void setEmitExtraMats(bool _flag){m_emitextramats = _flag; emit emitExtraMatsChanged();}
 private:
     //The Maximum Frame Size For The Camera
     static const int Mat_Max_Width = 728;
@@ -102,6 +104,7 @@ private:
     //Elements For GUI Display----------------------------------------
     QString m_timeinloop;
     QElapsedTimer m_timer;
+    bool m_emitextramats;
 
     //CV Processing Variables-----------------------------------------
     int m_blur;
@@ -169,6 +172,7 @@ private:
     //Linear Topography. (Split and Merge Algorythms)-------------------
     std::vector<TBILine> m_topography_lines;
     float m_sm_distance_threshold;
+    float m_sm_length_threshold;
 
 
     //Geometric Construction Phase Data Variables-----------------------
@@ -217,6 +221,9 @@ public slots:
     void onRightBWLDistanceThreshold(float _distthreshold){m_bwlright_distance_threshold = _distthreshold;}
     void onRightBWLIterations(int _iterations){m_bwlright_iterations = _iterations;}
 
+    void onSplitDistance(float _distance){m_sm_distance_threshold = _distance;}
+    void onSplitLength(float _length){m_sm_length_threshold = _length;}
+
 //Signals----------------------------------------------------------------
 signals:
     //QML Signals--------------------------------------------------------
@@ -242,7 +249,7 @@ signals:
     void failedDiscontinuityCheck();
     void failedRansacCheck(); //Voting Lines
     void failedSplitMergeCheck();
-
+    void emitExtraMatsChanged();
 
 };
 
