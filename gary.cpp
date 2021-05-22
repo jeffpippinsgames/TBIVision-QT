@@ -17,7 +17,8 @@ Gary::Gary(QObject *parent) : QObject(parent)
     setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
     m_homing_status = new GaryHomingStatus();
     m_x_position = 10.2345;
-    this->findOpenTeensy();
+    //this->findOpenTeensy();
+    this->findOpenArduinoUno();
     emit completed();
     qDebug() << "Gary::Gary() Object Created.";
 }
@@ -192,7 +193,55 @@ bool Gary::findOpenTeensy()
     qDebug() << "Gary::findOpenTeensy() Could Not Find Teensy 3.2 Serial Device.";
     return false;
 }
+
+
+/**************************************************************
+findOpenArduinoUno()
+Public
+Description:
+  Public Method that finds the Arduino Uno USB device and opens
+  a serial connection to it.
+ **************************************************************/
+bool Gary::findOpenArduinoUno()
+{
+    m_serial_port = nullptr;
+    m_serial_info = new QSerialPortInfo();
+    foreach(QSerialPortInfo _serialinfo, m_serial_info->availablePorts())
+    {
+       if(_serialinfo.hasProductIdentifier() && _serialinfo.hasVendorIdentifier() )
+       {
+           if(_serialinfo.vendorIdentifier() == m_arduino_uno_vendorID)
+           {
+               if(_serialinfo.productIdentifier() == m_arduino_uno_productID)
+               {
+                   m_serial_port = new QSerialPort(_serialinfo, this);
+                   m_serial_port->setBaudRate(QSerialPort::Baud115200);
+                   m_serial_port->setStopBits(QSerialPort::OneStop);
+                   m_serial_port->setParity(QSerialPort::EvenParity);
+                   m_serial_port->setDataBits(QSerialPort::Data8);
+                   m_serial_port->setFlowControl(QSerialPort::NoFlowControl);
+                   if(m_serial_port->open(QIODevice::ReadWrite))
+                   {
+                       qDebug() << "Gary::findOpenArduinoUno() Serial Port Opened.";
+                       setOperationStatus(GaryOperationStatus::TBI_OPERATION_OK);
+                       return true;
+                   }
+                   else
+                   {
+                       qDebug() << "Gary::findOpenArduinoUno() Error Opening Serial Port";
+                       setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
+                       return false;
+                   }
+               }
+           }
+       }
+    }
+    qDebug() << "Gary::findOpenArduinoUno() Could Not Find Arduino Uno.";
+    return false;
+
+}
 //--------------------------------------------------------------
+
 
 
 /**************************************************************
