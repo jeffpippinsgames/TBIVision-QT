@@ -271,6 +271,7 @@ Q_INVOKABLE void Gary::sendJogUp()
 {
        QByteArray _cmd;
        _cmd.append(char(GaryCommands::TBI_CMD_JOG_UP));
+
        sendSerialCommand(_cmd);
 }
 //--------------------------------------------------------------
@@ -287,6 +288,7 @@ Q_INVOKABLE void Gary::sendJogDown()
 {
     QByteArray _cmd;
     _cmd.append(char(GaryCommands::TBI_CMD_JOG_DOWN));
+
     sendSerialCommand(_cmd);
 }
 //--------------------------------------------------------------
@@ -303,6 +305,7 @@ Q_INVOKABLE void Gary::sendJogLeft()
 {
     QByteArray _cmd;
     _cmd.append(char(GaryCommands::TBI_CMD_JOG_LEFT));
+
     sendSerialCommand(_cmd);
 }
 //--------------------------------------------------------------
@@ -347,7 +350,6 @@ Description:
  **************************************************************/
 void Gary::sendSerialCommand(QByteArray &_data)
 {
-
     if(m_serial_port == nullptr)
     {
         qDebug() << "Gary::sendSerialCommand() Error in sendSerialCommand: m_serial_port is null";
@@ -355,6 +357,7 @@ void Gary::sendSerialCommand(QByteArray &_data)
     }
     if(m_serial_port->isOpen())
     {
+       _data.append(char(GaryCommands::TBI_CMD_DELMIITER_LF));
         m_serial_port->write(_data);
         qDebug() << "Gary::sendSerialCommand() Sending Command to Controller: " << _data.toHex(',');
     }
