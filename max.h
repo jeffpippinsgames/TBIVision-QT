@@ -68,7 +68,7 @@ private:
     bool doPixelColumnProcessing(cv::Mat &_src, cv::Mat &_dst, PixelColumnClass* _pixel_column_array, quint64 *_tii,
                                  quint64 _max_tii, quint64 _min_tii, int _min_cluster_size, int _max_cluster_size,
                                  int _max_clusters_in_column);
-    bool doSkeletonProcessing(cv::Mat &_dst);
+    bool doSkeletonProcessing(cv::Mat &_dst, PixelColumnClass *_pixel_column_array, float *_skel_array, float _continuity_threshold);
 
     bool doRansacLineProcessing(cv::Mat &_dst, TBILine &_line, int _total_iterations, int _vote_threshold,
                                 float _distance_threshold, float _min_angle_to_horizon, float _max_angle_to_horizon,

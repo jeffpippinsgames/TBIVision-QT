@@ -87,6 +87,9 @@ bool Max::doPixelColumnProcessing(Mat &_src, Mat &_dst, PixelColumnClass *_pixel
     *_tii = 0;
     int _column_index = 0;
     PixelColumnProcessingReturn_t _val;
+    int _cont_index_start = -1;
+
+    //Create The Column List.
     do
     {
         _val = _pixel_column_array[_column_index].pixelProccessColumn(_src, _column_index, _tii, _max_tii,
@@ -105,6 +108,7 @@ bool Max::doPixelColumnProcessing(Mat &_src, Mat &_dst, PixelColumnClass *_pixel
 
     }while(_column_index < _src.cols);
 
+    //Check For Min Total Image Intensity
     if(*_tii < _min_tii)
     {
         emit totalImageIntensityChanged(m_total_image_intensity);
@@ -112,49 +116,154 @@ bool Max::doPixelColumnProcessing(Mat &_src, Mat &_dst, PixelColumnClass *_pixel
         return false;
     }
 
+
+
+
+
+    //No Starting Continuity Location.
+    //Continuity faled. Return false;
+    if(_cont_index_start == -1)
+    {
+        return false;
+    }
+
+    //start the right side continuity check.
+
     emit totalImageIntensityChanged(m_total_image_intensity);
     return true;
 
 }
-bool Max::doSkeletonProcessing(Mat &_dst)
+bool Max::doSkeletonProcessing(Mat &_dst, PixelColumnClass *_pixel_column_array, float *_skel_array, float _continuity_threshold)
 {
     uint8_t* _data = (uint8_t*)_dst.data;
-    int _dataindex;
+    int _closest_index_left = -1;
+    int _closest_index_right = -1;
+    int _total_discontinuities = 0;
+    //int _empty_cols = 0;
     int _index = 0;
-    float _rowcentroid;
-    int _empty_cols = 0;
-    float _highestrowvalue = 0.0;
+     bool _added_point = false;
+    int _dataindex;
+    //float _rowcentroid;
+    //float _highestrowvalue = 0.0;
+    //const float _max_continuity = 2;
 
+
+
+
+
+    //Build initial skeleton with a single cluster---------------------------------------
     do
     {
-        if(m_cluster_columns[_index].size() == 1) //One Cluster Pop it
+        if(_pixel_column_array[_index].size() == 1)
         {
-            _rowcentroid = m_cluster_columns[_index].getCentroidofCluster(0);
-            m_skeletal_line_array[_index] = _rowcentroid;
-            if(_rowcentroid > _highestrowvalue)
-            {
-                _highestrowvalue = _rowcentroid;
-                m_flattened_hrv = _rowcentroid;
-                m_flattened_iohrv = _index;
-            }
-            emit skeletalArrayChanged(_rowcentroid, _index);
-            _dataindex = ((int)_rowcentroid * _dst.cols) + _index;
-            _data[_dataindex] = 255;
+            _skel_array[_index] = _pixel_column_array[_index].getCentroidofCluster(0);
         }
         else
         {
-            emit skeletalArrayChanged(0.0, _index);
-            ++_empty_cols;
+            _skel_array[_index] = -1.0;
         }
-        ++_index;
-    }while(_index < _dst.cols);
 
-    if(_empty_cols > m_allowable_discontinuities)
+    }while(_index < Mat_Max_Width);
+    //------------------------------------------------------------------------------------
+
+    //Continue to Iterate and pull out continuous centroids of clusters until no more can be rebuilt.
+    do
     {
-        emit failedDiscontinuityCheck();
-        return false;
-    }
+        //Reset the control internals
+        _added_point = false;
+        _index = 0;
+        // Go Thru The Skeletal Array and look for compatible clusters
+        do
+        {
+            _closest_index_left = -1;
+            _closest_index_right = -1;
+            //Mulitple Clusters. See if one of them meets the continuity requirement.
+            if(_pixel_column_array[_index].size() > 1)
+            {
+                //Look left side if not index 0
+                if(_index > 0)
+                {
+                   _closest_index_left = _pixel_column_array[_index].getIndexOfClosestCentroid(_skel_array[_index-1], _continuity_threshold);
+                }
+                //Look Right Side if not index Mat_Max_width - 1
+                if(_index < Mat_Max_Width - 1)
+                {
+                    _closest_index_right = _pixel_column_array[_index].getIndexOfClosestCentroid(_skel_array[_index + 1], _continuity_threshold);
+                }
+                //There is a cluster that needs to be kept
+                //One Side or the other has to be chosen to place the value
+                if(_closest_index_left != -1)
+                {
+                    //This data point is part of the left side
+                    _skel_array[_index] = _pixel_column_array[_index].getCentroidofCluster(_closest_index_left);
+                    _added_point = true;
+                }
+                else if(_closest_index_right != -1)
+                {
+                    //This data point is part of the right side
+                    _skel_array[_index] = _pixel_column_array[_index].getCentroidofCluster(_closest_index_right);
+                    _added_point = true;
+                }
+            }
+            ++_index;
+        }while(_index < Mat_Max_Width);
+    }while(_added_point);
 
+
+    //Count the Discontinuities in the Skeletal Array and Draw To Mat
+     _index = 0;
+     do
+     {
+         if(_skel_array[_index] == -1.0) //Non Valid Centroid
+         {
+             ++_total_discontinuities;
+         }
+         else
+         {
+             _dataindex = ((int)_skel_array[_index] * _dst.cols) + _index;
+             _data[_dataindex] = 255;
+         }
+           ++_index;
+     }while(_index < Mat_Max_Width);
+     if(_total_discontinuities > m_allowable_discontinuities)
+     {
+         emit failedDiscontinuityCheck();
+         return false;
+     }
+
+     //Old Skeletal Algorythm
+     /*
+
+     do
+     {
+         if(m_cluster_columns[_index].size() == 1) //One Cluster Pop it
+         {
+             _rowcentroid = m_cluster_columns[_index].getCentroidofCluster(0);
+             m_skeletal_line_array[_index] = _rowcentroid;
+             if(_rowcentroid > _highestrowvalue)
+             {
+                 _highestrowvalue = _rowcentroid;
+                 m_flattened_hrv = _rowcentroid;
+                 m_flattened_iohrv = _index;
+             }
+             emit skeletalArrayChanged(_rowcentroid, _index);
+             _dataindex = ((int)_rowcentroid * _dst.cols) + _index;
+             _data[_dataindex] = 255;
+         }
+         else
+         {
+             emit skeletalArrayChanged(0.0, _index);
+             ++_empty_cols;
+         }
+         ++_index;
+     }while(_index < _dst.cols);
+
+     if(_empty_cols > m_allowable_discontinuities)
+     {
+         emit failedDiscontinuityCheck();
+         return false;
+     }
+ */
 
     return true;
 }
@@ -437,7 +546,7 @@ void Max::recieveNewCVMat(const Mat &_mat)
     {
 
 
-        if(doSkeletonProcessing(_skel_mat)) //Fill Skeleton and Discontinuity Trap
+        if(doSkeletonProcessing(_skel_mat, m_cluster_columns, m_skeletal_line_array, 2)) //Fill Skeleton and Discontinuity Trap
         {
 
             cv::cvtColor(_skel_mat, _ransac_mat, cv::COLOR_GRAY2BGR);
