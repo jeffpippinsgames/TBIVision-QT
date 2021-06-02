@@ -395,20 +395,48 @@ bool Max::doSplitMergeProcesssing(float *_data_array, int _max_index, std::vecto
     int _index_of_most_distant=0;
     float _most_distant = 0.0;
     float _distance = 0.0;
-    int _start_index = 0;
-    int _end_index = _max_index;
+    int _start_index = -1;
+    int _end_index = -1;
     int _current_index = _start_index;
     int _current_vector_index = 0;
     float _data_value;
 
+
+    //Set the Start and Ending index
+    _current_index = 0;
+    do
+    {
+        if(_data_array[_current_index] != -1)
+        {
+            _start_index = _current_index;
+            _current_index = _max_index;
+        }
+        ++_current_index;
+    }while(_current_index < _max_index);
+    //Set the Ending Index
+    _current_index = _max_index;
+    do
+    {
+        if(_data_array[_current_index] != -1)
+        {
+            _end_index= _current_index;
+            _current_index = _start_index;
+        }
+        --_current_index;
+    }while(_current_index > _start_index);
+
+    //Make Sure The start and ending index is ok
+    if((_start_index == -1) || (_end_index == -1))
+    {
+        return false;
+    }
+
     //Add First Line.
-    TBILine _line(0.0, _data_array[0], (float)_max_index, _data_array[_max_index]);
+    TBILine _line((float)_start_index, _data_array[_start_index], (float)_end_index, _data_array[_end_index]);
     _line_vectors.push_back(_line);
 
-
-    //Get The Index and The Distance
-
     //Get Distance From All Points start
+    _current_index = _start_index;
     do
     {
         //Get Distance Of All Points From _start_index to _end_index
@@ -495,6 +523,45 @@ bool Max::setProjectedRansacLines(TBILine &_src_tsl_left, TBILine &_src_tsl_righ
     return true;
 }
 
+void Max::trimRansacTopSurfaceLinesForVGroove(TBILine &_src_tsl_left, TBILine &_src_tsl_right, float *_skel_array, float _cutoff_threshold)
+{
+    int _index = 0;
+    float _distance;
+    //Trim Left TSL
+    do
+    {
+        if(_skel_array[_index] != -1)
+        {
+        TBIPoint _pnt((float)_index, _skel_array[_index]);
+        _distance = _src_tsl_left.getOrthogonalDistance(_pnt);
+        if(_distance <= _cutoff_threshold)
+        {
+            _src_tsl_left.setPoint2(_pnt);
+            _index = Mat_Max_Width;
+        }
+        }
+        ++_index;
+    }while (_index < Mat_Max_Width);
+
+    //Trim Right TSL
+    _index = Mat_Max_Width - 1;
+    do
+    {
+        if(_skel_array[_index] != -1)
+        {
+        TBIPoint _pnt((float)_index, _skel_array[_index]);
+        _distance = _src_tsl_right.getOrthogonalDistance(_pnt);
+        if(_distance <= _cutoff_threshold)
+        {
+            _src_tsl_right.setPoint1(_pnt);
+            _index = 0;
+        }
+        }
+        --_index;
+    }while (_index > 0);
+
+}
+
 //The Recieve New CV::Mat Method
 void Max::recieveNewCVMat(const Mat &_mat)
 {
@@ -556,25 +623,25 @@ void Max::recieveNewCVMat(const Mat &_mat)
             bool _right_tsl_good = doRansacLineProcessing(_ransac_mat, m_right_tsl, m_tslright_iterations, m_min_tslright_votes, m_tslright_distance_threshold,
                                                           m_min_tslright_angle, m_max_tslright_angle, m_skeletal_line_array, m_flattened_iohrv, _skel_mat.cols,
                                                           CV_RGB(13,252,224));
-            bool _left_bwl_good = doRansacLineProcessing(_ransac_mat, m_left_bwl, m_bwlleft_iterations, m_min_bwlleft_votes, m_bwlleft_distance_threshold,
-                                                         m_min_bwlleft_angle, m_max_bwlleft_angle, m_skeletal_line_array, 0, m_flattened_iohrv,
-                                                         CV_RGB(179,255,0));
-            bool _right_bwl_good = doRansacLineProcessing(_ransac_mat, m_right_bwl, m_bwlright_iterations, m_min_bwlright_votes, m_bwlright_distance_threshold,
-                                                          m_min_bwlright_angle, m_max_bwlright_angle, m_skeletal_line_array, m_flattened_iohrv, _skel_mat.cols,
-                                                          CV_RGB(179,255,0));
 
-            if(_left_tsl_good && _right_tsl_good && _left_bwl_good && _right_bwl_good)
+
+            if(_left_tsl_good && _right_tsl_good)
             {
-
-                if(setProjectedRansacLines(m_left_tsl, m_right_tsl, m_left_bwl, m_right_bwl,
-                                           m_ransac_projection_lefttsl, m_ransac_projection_righttsl,
-                                           m_ransac_projection_leftbwl, m_ransac_projection_rightbwl))
                 {
-                    m_ransac_projection_lefttsl.drawOnMat(_operation_mat, CV_RGB(0,0,200), 2);
-                    m_ransac_projection_righttsl.drawOnMat(_operation_mat, CV_RGB(0,0,200), 2);
-                    m_ransac_projection_leftbwl.drawOnMat(_operation_mat, CV_RGB(0,0,200), 2);
-                    m_ransac_projection_rightbwl.drawOnMat(_operation_mat, CV_RGB(0,0,200), 2);
+
+                    if(setProjectedRansacLines(m_left_tsl, m_right_tsl, m_left_bwl, m_right_bwl,
+                                               m_ransac_projection_lefttsl, m_ransac_projection_righttsl,
+                                               m_ransac_projection_leftbwl, m_ransac_projection_rightbwl))
+                    {
+
+                        m_ransac_projection_leftbwl.drawOnMat(_operation_mat, CV_RGB(0,0,200), 2);
+                        m_ransac_projection_rightbwl.drawOnMat(_operation_mat, CV_RGB(0,0,200), 2);
+                    }
                 }
+
+                trimRansacTopSurfaceLinesForVGroove(m_left_tsl, m_right_tsl, m_skeletal_line_array, 3);
+                m_ransac_projection_lefttsl.drawOnMat(_operation_mat, CV_RGB(0,0,200), 2);
+                m_ransac_projection_righttsl.drawOnMat(_operation_mat, CV_RGB(0,0,200), 2);
 
                 if(doSplitMergeProcesssing(m_skeletal_line_array, (int)_skel_mat.cols-1, m_topography_lines, m_sm_distance_threshold))
                 {

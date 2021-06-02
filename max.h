@@ -85,7 +85,7 @@ private:
     bool updateFlattenedMembers(cv::Mat &_src); //Almost All Other Functions Require this to be run first.
 
 
-
+    void trimRansacTopSurfaceLinesForVGroove(TBILine &_src_tsl_left, TBILine &_src_tsl_right, float *_skel_array, float _cutoff_threshold);
 
 public:
     explicit Max(QObject *parent = nullptr);
