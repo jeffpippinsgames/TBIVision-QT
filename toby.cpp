@@ -91,8 +91,6 @@ QString Toby::getCameraInfo()
 
 
 
-
-
 //Camera Settings Related Slots
 /**************************************************************
 CameraSettings()

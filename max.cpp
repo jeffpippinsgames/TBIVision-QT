@@ -559,6 +559,12 @@ void Max::trimRansacTopSurfaceLinesForVGroove(TBILine &_src_tsl_left, TBILine &_
 
 }
 
+void Max::openStillImagetoProcess(QFile _file)
+{
+    m_still_debug_image = QImage(_file.fileName());
+    emit emitProcessingStillImageChanged();
+}
+
 void Max::closeStillImagetoProcess()
 {
  if(!m_still_debug_image.isNull())
