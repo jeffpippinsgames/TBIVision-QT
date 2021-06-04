@@ -51,6 +51,7 @@ Max::Max(QObject *parent) : QObject(parent)
     m_sm_distance_threshold = 5;
     m_sm_length_threshold = 20;
 
+
     emit timeInLoopChanged(m_timeinloop);
     qDebug()<<"Max::Max() Max Object Created.";
 }
@@ -146,10 +147,6 @@ bool Max::doSkeletonProcessing(Mat &_dst, PixelColumnClass *_pixel_column_array,
     //float _rowcentroid;
     //float _highestrowvalue = 0.0;
     //const float _max_continuity = 2;
-
-
-
-
 
     //Build initial skeleton with a single cluster---------------------------------------
     do
@@ -560,6 +557,14 @@ void Max::trimRansacTopSurfaceLinesForVGroove(TBILine &_src_tsl_left, TBILine &_
         --_index;
     }while (_index > 0);
 
+}
+
+void Max::closeStillImagetoProcess()
+{
+ if(!m_still_debug_image.isNull())
+ {
+     m_still_debug_image = QImage();
+ }
 }
 
 //The Recieve New CV::Mat Method
