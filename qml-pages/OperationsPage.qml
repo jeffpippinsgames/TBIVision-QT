@@ -44,7 +44,7 @@ Item
 
     function triggerTobyNextFrame()
     {
-        Toby.triggerCamera();
+        imagegrabtimerId.restart();
     }
 
     //Slots
@@ -65,6 +65,21 @@ Item
     }
 
     //OML Components
+
+    Timer
+    {
+        id: imagegrabtimerId
+        interval: 1
+        running: false
+        repeat: false
+        triggeredOnStart: false
+
+        onTriggered:
+        {
+            Toby.triggerNextFrame();
+        }
+    }
+
     ControllerObject
     {
 

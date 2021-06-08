@@ -3,19 +3,13 @@
 PixelClusterClass::PixelClusterClass()
 {
     m_pixels.clear();
-    m_highestintensityindex = -1;
-    m_highestintensityvalue = -1;
     m_rowcentroid = -1;
 }
 
 void PixelClusterClass::pushPixelToBack(PixelFundamental_t _pixel)
 {
     m_pixels.push_back(_pixel);
-    if(_pixel.intensity >= m_highestintensityvalue)
-    {
-        m_highestintensityvalue = _pixel.intensity;
-        m_highestintensityindex = m_pixels.size() - 1;
-    }
+
 }
 
 void PixelClusterClass::setRowCentroid()
@@ -34,8 +28,6 @@ void PixelClusterClass::setRowCentroid()
     }while(_element < _numofpixels);
     m_rowcentroid = _weight_data_product_sum/_weight_sum;
 }
-
-
 
 bool PixelClusterClass::isGausian()
 {
@@ -67,8 +59,6 @@ bool PixelClusterClass::isGausian()
 void PixelClusterClass::clear()
 {
     m_pixels.clear();
-    m_highestintensityindex = -1;
-    m_highestintensityvalue = -1;
     m_rowcentroid = -1;
 }
 
@@ -124,72 +114,4 @@ int PixelClusterClass::getColumn()
     if(m_pixels.size() == 0) return -1;
     return m_pixels[0].col;
 }
-
-bool PixelClusterClass::addPixelForGausianCluster(PixelFundamental_t _pixel)
-{
-    //There are no pixels add it automaticly
-    if(m_pixels.size() == 0)
-    {
-        m_highestintensityvalue = _pixel.intensity;
-        m_highestintensityindex = 0;
-        m_pixels.push_back(_pixel);
-        return true;
-    }
-
-    /*
-     The Gausian Distrubtion pixel add requires a complete gausian distribution.
-     It Requires a build up to a maximum value then a build up to a  min value.
-     */
-
-    //The High Side Rising the when the new incomming intensity is greater or equal the last pixel entered
-    if((_pixel.intensity >= m_pixels[m_pixels.size()-1].intensity) && (m_highestintensityindex == (int)(m_pixels.size() - 1))) //The New Incomming Pixel is More or equally intense than the highest inten
-    {
-        //Update the highest intensity values and index
-        m_highestintensityvalue = _pixel.intensity;
-        m_highestintensityindex = m_pixels.size();
-        //add the pixel to the cluster
-        m_pixels.push_back(_pixel);
-        return true;
-    }
-    //Else the pixel is less than the high spot. The High Intensity has already been hit.
-    //Keep Adding pixels until the intensity increases then return a false
-    else
-    {
-        //The New incomming pixel is greater than the last pixel entered. We cannot add it. Return False;
-        if(_pixel.intensity > m_pixels[m_pixels.size()-1].intensity)
-        {
-            return false;
-        }
-
-        //Make sure there is a lead up of intensities.
-        //The high value index cannot be 0
-        if(m_pixels.size() == 1)
-        {
-            //Clear the vector and return false
-            this->clear();
-            return false;
-        }
-
-        //add the new pixel
-        m_pixels.push_back(_pixel);
-        return true;
-    }
-
-    //The pixel was added. return true.
-    return false;
-}
-
-int PixelClusterClass::getHighestInstensityPixelValue()
-{
-    return m_highestintensityvalue;
-
-}
-
-int PixelClusterClass::getHighestIntensityPixelIndex()
-{
-    return m_highestintensityindex;
-}
-
-
-
 

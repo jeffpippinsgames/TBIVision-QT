@@ -19,16 +19,13 @@ public:
     void DrawToMat(cv::Mat &_mat);
     void EraseFromMat(cv::Mat &_mat);
     int getColumn();
-    bool addPixelForGausianCluster(PixelFundamental_t _pixel);
-    int getHighestInstensityPixelValue();
-    int getHighestIntensityPixelIndex();
+
 
 
 private:
      std::vector<PixelFundamental_t> m_pixels;
      float m_rowcentroid;
-     int m_highestintensityvalue;
-     int m_highestintensityindex;
+
 };
 
 #endif // PIXELCLUSTERCLASS_H

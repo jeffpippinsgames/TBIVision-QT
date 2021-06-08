@@ -57,8 +57,10 @@ DEPENDPATH += $$PWD/../../../../../opt/pylon/include
 
 unix:!macx: LIBS += -L$$PWD/../../../../../usr/local/lib/ -lopencv_core
 unix:!macx: LIBS += -L$$PWD/../../../../../usr/local/lib/ -lopencv_imgproc
+unix:!macx: LIBS += -L$$PWD/../../../../../usr/local/lib/ -lopencv_imgcodecs
 
 INCLUDEPATH += $$PWD/../../../../../usr/local/include
 DEPENDPATH += $$PWD/../../../../../usr/local/include
 INCLUDEPATH += $$PWD/../../../../../usr/local/include/opencv4
 DEPENDPATH += $$PWD/../../../../../usr/local/include/opencv4
+

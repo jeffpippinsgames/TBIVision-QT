@@ -1,6 +1,9 @@
 #include "toby.h"
 #include <QDebug>
 #include <QThread>
+#include <QDir>
+
+
 
 
 
@@ -17,9 +20,12 @@ Toby::Toby(QObject *parent) : QObject(parent)
     m_camera = nullptr;
     m_timer.start();
     m_camera_fps = "Error";
+    m_processsing_debug_image = false;
     emit cameraFPSChanged(m_camera_fps);
     initializeCamera();
     qDebug() << "Toby::Toby() Toby Object Created.";
+
+
 }
 
 /**************************************************************
@@ -261,6 +267,75 @@ void Toby::onChangeCameraGain(int _gain)
 
 
 
+//Still Image Processing Functions
+void Toby::openStillImagetoProcess(QString _filename)
+{
+
+    //Have to do a bunch of funky string conversions for cv::imread()
+    QString __filename = getCurrentApplicationPath() + "/stills/" + _filename;
+    QByteArray __filenamearray = __filename.toLocal8Bit();
+    char *__filenamebuffer = __filenamearray.data();
+    cv::String ___filename(__filenamebuffer);
+
+    cv::Mat _newmat = cv::imread(___filename);
+
+    //Make Sure Image is right size
+
+
+    //Convert. The Processing Pipeline requires a CV_8UC1 Mat
+    switch(_newmat.type())
+    {
+        case CV_8UC3:
+            cv::cvtColor(_newmat, m_still_debug_image, cv::COLOR_BGR2GRAY, 1);
+            m_processsing_debug_image = true;
+            emit emitProcessingStillImageChanged();
+        break;
+        case CV_8UC1:
+            m_still_debug_image = _newmat.clone();
+            m_processsing_debug_image = true;
+            emit emitProcessingStillImageChanged();
+        break;
+        default:
+            qDebug() << "Toby: openStillImagetoProcess() cannot process the image file " << _filename;
+            return;
+        break;
+
+    }
+
+
+    qDebug() << "Toby: openStillImagetoProcess() Called. m_processing_debug_image = true. Now Processsing " << _filename;
+
+}
+
+void Toby::closeStillImagetoProcess()
+{
+    if(m_processsing_debug_image)
+    {
+        m_processsing_debug_image = false;
+        emit emitProcessingStillImageChanged();
+        qDebug() << "Toby: closeStillImagetoProcess() Called. m_processing_debug_image = false";
+    }
+}
+
+void Toby::updateStillImageFileList()
+{
+
+    QDir _dir(qApp->applicationDirPath() + "/stills");
+    if(!_dir.exists())
+    {
+        qDebug() << "Toby: Error in updateDtillImageFileList(). the /stills directory does not exsist.";
+        return;
+    }
+    QStringList _filenamefilters;
+    _filenamefilters << "*.png";
+    _dir.setNameFilters(_filenamefilters);
+    m_still_file_names.empty();
+    m_still_file_names = _dir.entryList(_filenamefilters, QDir::Files);
+    emit onStillImageFileModelChanged();
+}
+
+
+
 //Camera Control and Interation Methods
 /**************************************************************
 initializeCamera()
@@ -327,7 +402,7 @@ void Toby::startCamera()
     try
     {
         m_camera->StartGrabbing(Pylon::GrabStrategy_LatestImages, Pylon::GrabLoop_ProvidedByInstantCamera);
-        this->triggerCamera();
+        this->triggerNextFrame();
     }
     catch(const Pylon::GenericException e)
     {
@@ -337,6 +412,7 @@ void Toby::startCamera()
     }
     qDebug() << "Toby::startCamera(): Camera has been turned on.";
     emit cameraTurnedOn();
+    emit emitProcessingCameraChanged();
 }
 
 /**************************************************************
@@ -365,6 +441,7 @@ void Toby::stopCamera()
     }
     qDebug() << "Toby: turnOffCamera(). Camera has been turned off.";
     emit cameraTurnedOff();
+    emit emitProcessingCameraChanged();
 }
 
 /**************************************************************
@@ -401,20 +478,32 @@ Public, Q_INVOKABLE
 Description:
   Instructs Toby to Send a Software Trigger to the Camera
  **************************************************************/
-void Toby::triggerCamera()
+void Toby::triggerNextFrame()
 {
+
+    //Process the Still Image if the debug image is not null
+    if(m_processsing_debug_image)
+    {
+
+          qDebug() <<"Time Till Last trigger frame " << QString::number(m_timer.elapsed()) << " ms";
+          m_camera_fps = QString("Still Image FPS = " + QString::number(1000/m_timer.elapsed()));
+          m_timer.start();
+          emit cameraFPSChanged(m_camera_fps);
+          emit newCVMatFrameGrabbed(m_still_debug_image.clone());
+          return;
+    }
+
+    //If the m_still_debug_image is false then Trigger The Camera to Produce The Next Frame
     if(!isCameraInitialized())
     {
         qDebug() << "Toby: triggerCamera() called without camera being initialized";
         return;
     }
-
     if(!isCameraOn())
     {
         qDebug() << "Toby: triggerCamera() called without camera running.";
         return;
     }
-
     if(m_camera->CanWaitForFrameTriggerReady())
     {
         m_camera->WaitForFrameTriggerReady(20);

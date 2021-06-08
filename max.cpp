@@ -5,6 +5,7 @@
 #include "pixelfundamental.h"
 #include "TBITopSurfaceLineVotingStructure.h"
 #include <QRandomGenerator>
+#include <QThread>
 
 //Constructors and Destructor--------------------------------------------------------
 Max::Max(QObject *parent) : QObject(parent)
@@ -88,17 +89,20 @@ bool Max::doPixelColumnProcessing(Mat &_src, Mat &_dst, PixelColumnClass *_pixel
     *_tii = 0;
     int _column_index = 0;
     PixelColumnProcessingReturn_t _val;
-    int _cont_index_start = -1;
+
+
 
     //Create The Column List.
     do
     {
         _val = _pixel_column_array[_column_index].pixelProccessColumn(_src, _column_index, _tii, _max_tii,
                                                                       _min_cluster_size, _max_cluster_size, _max_clusters_in_column);
+
         if(_val == PCP_FAILED_MAX_TII)
         {
             emit totalImageIntensityChanged(m_total_image_intensity);
             emit failedTIICheck();
+
             return false;
         }
         else if(_val == PCP_OK)
@@ -119,15 +123,6 @@ bool Max::doPixelColumnProcessing(Mat &_src, Mat &_dst, PixelColumnClass *_pixel
 
 
 
-
-
-    //No Starting Continuity Location.
-    //Continuity faled. Return false;
-    if(_cont_index_start == -1)
-    {
-        return false;
-    }
-
     //start the right side continuity check.
 
     emit totalImageIntensityChanged(m_total_image_intensity);
@@ -137,99 +132,16 @@ bool Max::doPixelColumnProcessing(Mat &_src, Mat &_dst, PixelColumnClass *_pixel
 bool Max::doSkeletonProcessing(Mat &_dst, PixelColumnClass *_pixel_column_array, float *_skel_array, float _continuity_threshold)
 {
     uint8_t* _data = (uint8_t*)_dst.data;
-    int _closest_index_left = -1;
-    int _closest_index_right = -1;
-    int _total_discontinuities = 0;
-    //int _empty_cols = 0;
+    int _empty_cols = 0;
     int _index = 0;
-     bool _added_point = false;
     int _dataindex;
-    //float _rowcentroid;
-    //float _highestrowvalue = 0.0;
-    //const float _max_continuity = 2;
-
-    //Build initial skeleton with a single cluster---------------------------------------
-    do
-    {
-        if(_pixel_column_array[_index].size() == 1)
-        {
-            _skel_array[_index] = _pixel_column_array[_index].getCentroidofCluster(0);
-        }
-        else
-        {
-            _skel_array[_index] = -1.0;
-        }
-
-    }while(_index < Mat_Max_Width);
-    //------------------------------------------------------------------------------------
-
-    //Continue to Iterate and pull out continuous centroids of clusters until no more can be rebuilt.
-    do
-    {
-        //Reset the control internals
-        _added_point = false;
-        _index = 0;
-        // Go Thru The Skeletal Array and look for compatible clusters
-        do
-        {
-            _closest_index_left = -1;
-            _closest_index_right = -1;
-            //Mulitple Clusters. See if one of them meets the continuity requirement.
-            if(_pixel_column_array[_index].size() > 1)
-            {
-                //Look left side if not index 0
-                if(_index > 0)
-                {
-                   _closest_index_left = _pixel_column_array[_index].getIndexOfClosestCentroid(_skel_array[_index-1], _continuity_threshold);
-                }
-                //Look Right Side if not index Mat_Max_width - 1
-                if(_index < Mat_Max_Width - 1)
-                {
-                    _closest_index_right = _pixel_column_array[_index].getIndexOfClosestCentroid(_skel_array[_index + 1], _continuity_threshold);
-                }
-                //There is a cluster that needs to be kept
-                //One Side or the other has to be chosen to place the value
-                if(_closest_index_left != -1)
-                {
-                    //This data point is part of the left side
-                    _skel_array[_index] = _pixel_column_array[_index].getCentroidofCluster(_closest_index_left);
-                    _added_point = true;
-                }
-                else if(_closest_index_right != -1)
-                {
-                    //This data point is part of the right side
-                    _skel_array[_index] = _pixel_column_array[_index].getCentroidofCluster(_closest_index_right);
-                    _added_point = true;
-                }
-            }
-            ++_index;
-        }while(_index < Mat_Max_Width);
-    }while(_added_point);
+    float _rowcentroid;
+    float _highestrowvalue = 0.0;
 
 
-    //Count the Discontinuities in the Skeletal Array and Draw To Mat
-     _index = 0;
-     do
-     {
-         if(_skel_array[_index] == -1.0) //Non Valid Centroid
-         {
-             ++_total_discontinuities;
-         }
-         else
-         {
-             _dataindex = ((int)_skel_array[_index] * _dst.cols) + _index;
-             _data[_dataindex] = 255;
-         }
-           ++_index;
-     }while(_index < Mat_Max_Width);
-     if(_total_discontinuities > m_allowable_discontinuities)
-     {
-         emit failedDiscontinuityCheck();
-         return false;
-     }
 
      //Old Skeletal Algorythm
-     /*
+
 
      do
      {
@@ -260,8 +172,6 @@ bool Max::doSkeletonProcessing(Mat &_dst, PixelColumnClass *_pixel_column_array,
          emit failedDiscontinuityCheck();
          return false;
      }
- */
-
     return true;
 }
 
@@ -559,23 +469,10 @@ void Max::trimRansacTopSurfaceLinesForVGroove(TBILine &_src_tsl_left, TBILine &_
 
 }
 
-void Max::openStillImagetoProcess(QFile _file)
-{
-    m_still_debug_image = QImage(_file.fileName());
-    emit emitProcessingStillImageChanged();
-}
-
-void Max::closeStillImagetoProcess()
-{
- if(!m_still_debug_image.isNull())
- {
-     m_still_debug_image = QImage();
- }
-}
-
 //The Recieve New CV::Mat Method
 void Max::recieveNewCVMat(const Mat &_mat)
 {
+
 
     if(m_in_proccesing_loop) return;
     m_in_proccesing_loop = true;
@@ -715,6 +612,8 @@ void Max::recieveNewCVMat(const Mat &_mat)
     m_timeinloop = QString("Time in Loop: " + QString::number(m_timer.elapsed()) + " ms.");
     emit timeInLoopChanged(m_timeinloop);
     m_in_proccesing_loop = false;
+
+    qDebug() << "Time in loop " << m_timer.elapsed();
     emit processingComplete(); //Must Be Last Signal Sent
 
 }

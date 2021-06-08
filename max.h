@@ -61,7 +61,7 @@ class Max : public QObject
     Q_PROPERTY(QString timeinloop READ getTimeinLoop NOTIFY timeInLoopChanged)
     Q_PROPERTY(quint64 total_image_intensity READ getTotalImageIntensity NOTIFY totalImageIntensityChanged)
     Q_PROPERTY(bool emitExtraMats READ getEmitExtraMats WRITE setEmitExtraMats NOTIFY emitExtraMatsChanged)
-    Q_PROPERTY(bool processingStillImage READ getProcessingStillImage NOTIFY emitProcessingStillImageChanged)
+
 
 private:
     void blankProcessingArrays();
@@ -88,8 +88,7 @@ private:
 
     void trimRansacTopSurfaceLinesForVGroove(TBILine &_src_tsl_left, TBILine &_src_tsl_right, float *_skel_array, float _cutoff_threshold);
 
-    void openStillImagetoProcess(QFile _file);
-    void closeStillImagetoProcess();
+
 
 
 
@@ -99,11 +98,11 @@ public:
     QString getTimeinLoop(){return m_timeinloop;}
     quint64 getTotalImageIntensity(){return m_total_image_intensity;}
     Q_INVOKABLE bool getEmitExtraMats(){return m_emitextramats;}
-    bool getProcessingStillImage(){if(m_still_debug_image.isNull()) return false; return true;}
     void setEmitExtraMats(bool _flag){m_emitextramats = _flag; emit emitExtraMatsChanged();}
+
 private:
     //The Maximum Frame Size For The Camera
-    QImage m_still_debug_image;
+
     static const int Mat_Max_Width = 728;
     static const int Mat_Max_Height = 544;
     bool m_in_proccesing_loop;
@@ -258,7 +257,7 @@ signals:
     void failedRansacCheck(); //Voting Lines
     void failedSplitMergeCheck();
     void emitExtraMatsChanged();
-    void emitProcessingStillImageChanged();
+
 
 };
 
