@@ -72,7 +72,6 @@
         <file>Icons/microcontroller(white).png</file>
         <file>qml-pages/ImageProcessingSettingsPage.qml</file>
         <file>qml-components/SliderSettingsObject.qml</file>
-        <file>qml-components/ArrayViewerObject.qml</file>
         <file>qml-components/PagesDescriptionObject.qml</file>
         <file>qml-components/empty_qml.qml</file>
         <file>qml-dialogs/StillImageFileOpenDialog.qml</file>

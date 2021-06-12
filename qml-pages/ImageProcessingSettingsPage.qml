@@ -41,6 +41,8 @@ Item {
     readonly property string ransacstateframeactive: "RansacStateFrameActive" //Top Surface Lines
     readonly property string splitmergestateframenotactive: "SplitMergeStateFrameNotActive" //Topography Lines
     readonly property string splitmergestateframeactive: "SplitMergeStateFrameActive" //Topography Lines
+    readonly property string operationstateframenotactive: "OperationStateFrameNotActive" //Operation
+    readonly property string operationstateframeactive: "OperationStateFrameActive" //Operation
 
     //Frame Constants. For Display Switching and Signal Connections to Max
     readonly property string emptyframe: "NoFrame"
@@ -51,6 +53,7 @@ Item {
     readonly property string skeletalframe: "5-Skeletal"
     readonly property string ransacframe: "6-Ransac"
     readonly property string splitmergeframe: "7-SplitMerge"
+    readonly property string operationframe: "8-Operations"
 
     //For Rectangle Placements
     //The MainView Rect Derives From FrameSelect and Settings
@@ -93,8 +96,9 @@ Item {
 
         //disconnect all connected signals
         Max.processingComplete.disconnect(rootpageId.triggerTobyNextFrame);
-        Max.skeletalArrayChanged.disconnect(skeletalarrayId.updateArray);
         mainviewrectId.disconnectSignal();
+
+        Max.emitExtraMats = false;
     }
 
     function triggerTobyNextFrame()
@@ -138,6 +142,7 @@ Item {
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -149,6 +154,7 @@ Item {
             PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.rawframe}
@@ -167,6 +173,7 @@ Item {
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.focuscolor}
@@ -178,6 +185,7 @@ Item {
             PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.rawframe}
@@ -195,6 +203,7 @@ Item {
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -206,6 +215,7 @@ Item {
             PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
@@ -221,6 +231,7 @@ Item {
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.focuscolor}
@@ -232,6 +243,7 @@ Item {
             PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: blursettingscontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
@@ -249,6 +261,7 @@ Item {
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -260,6 +273,7 @@ Item {
             PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
@@ -275,6 +289,7 @@ Item {
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.focuscolor}
@@ -286,6 +301,7 @@ Item {
             PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.thresholdframe}
@@ -303,6 +319,7 @@ Item {
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: pixelcolumnborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -314,6 +331,7 @@ Item {
             PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.pixelcolumnframe}
@@ -329,6 +347,7 @@ Item {
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: pixelcolumnborderrectId; border.color: rootpageId.focuscolor}
@@ -340,6 +359,7 @@ Item {
             PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.pixelcolumnframe}
@@ -357,6 +377,7 @@ Item {
             PropertyChanges{ target: skeletalsettingsrectId; visible: true;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: operationsettingsrectId; visible: false}
 
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
@@ -369,6 +390,7 @@ Item {
             PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.skeletalframe}
@@ -384,6 +406,7 @@ Item {
             PropertyChanges{ target: skeletalsettingsrectId; visible: true;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: skeletalborderrectId; border.color: rootpageId.focuscolor}
@@ -395,11 +418,12 @@ Item {
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: skeletalcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.skeletalframe}
             //Set The Interior Control State
-            PropertyChanges {target: skeletalsettingsrectId; state: "ArrayState";}
+            PropertyChanges {target: skeletalsettingsrectId; state: "DiscState";}
         },
         State //Ransac Selected Frame Focused
         {
@@ -412,6 +436,7 @@ Item {
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: true;}
             PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: operationsettingsrectId; visible: false}
 
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
@@ -424,6 +449,7 @@ Item {
             PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.ransacframe}
@@ -439,6 +465,7 @@ Item {
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: true;}
             PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: ransacborderrectId; border.color: rootpageId.focuscolor}
@@ -450,6 +477,7 @@ Item {
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.ransacframe}
@@ -467,6 +495,7 @@ Item {
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
             PropertyChanges{ target: splitmergesettingsrectId; visible: true}
+            PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: splitmergeborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -478,6 +507,7 @@ Item {
             PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.splitmergeframe}
@@ -493,6 +523,7 @@ Item {
             PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false}
             PropertyChanges{ target: splitmergesettingsrectId; visible: true}
+            PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: ransacborderrectId; border.color: rootpageId.focuscolor}
@@ -504,14 +535,73 @@ Item {
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: skeletalcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: splitmergecontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.splitmergeframe}
             //Set The Interior Control State
             PropertyChanges {target: splitmergesettingsrectId; state: "SplitDistance";}
+        },
+        State //Operation Selected Frame Focused
+        {
+            name: rootpageId.operationstateframeactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: false;}
+            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: false;}
+            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: operationsettingsrectId; visible: true}
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
+            PropertyChanges{ target: operationborderrectId; border.color: rootpageId.nonfocuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: false}
+            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.operationframe}
+        },
+        State //Operation Selected and Focused
+        {
+            name: rootpageId.operationstateframenotactive
+            //Set Displayed Setting Rect
+            PropertyChanges{ target: camerasettingsrectId; visible: false;}
+            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
+            PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
+            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: ransacsettingsrectId; visible: false}
+            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: operationsettingsrectId; visible: true}
+
+            //Set The Highlighted Rect
+            PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
+            PropertyChanges{ target: operationborderrectId; border.color: rootpageId.focuscolor}
+            //SetController focus To FrameSele
+            PropertyChanges{target: camerasettingscontrollerId; focus: false}
+            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: frameselectcontrollerId; focus: false}
+            PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
+            PropertyChanges{target: pixelcolumncontrollerId; focus: false}
+            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: ransaccontrollerId; focus: false}
+            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: operationcontrollerId; focus: true}
+            //SetMainViewRect Display
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.operationframe}
+            //Set The Interior Control State
+            PropertyChanges {target: operationsettingsrectId; state: "NonFocused";}
         }
-
-
 
     ]
 
@@ -624,7 +714,6 @@ Item {
         height:rootpageId.frameselectrectheight
         width: rootpageId.frameselectrectwidth
         color: "transparent"
-
 
         ControllerObject
         {
@@ -793,6 +882,9 @@ Item {
                         case rootpageId.splitmergeframe:
                             Max.newSplitMergeMatProcessed.connect(delegateframeId.recieveCVMat);
                             break;
+                        case rootpageId.operationframe:
+                            Max.newOperationMatProcessed.connect(delegateframeId.recieveCVMat);
+                            break;
                         }
                     }
                 }
@@ -820,7 +912,7 @@ Item {
             highlight: Rectangle{id: frameselecthighlightrectId; color: "yellow"; radius: 5; opacity: .2}
             orientation: Qt.Horizontal
             layoutDirection: Qt.LeftToRight
-            spacing: 25
+            spacing: 38
             visible: true
 
             Component.onCompleted:
@@ -834,6 +926,7 @@ Item {
                 modelId.append({"frame": rootpageId.skeletalframe});
                 modelId.append({"frame": rootpageId.ransacframe});
                 modelId.append({"frame": rootpageId.splitmergeframe});
+                modelId.append({"frame": rootpageId.operationframe});
 
             }
 
@@ -863,6 +956,8 @@ Item {
                 case rootpageId.splitmergeframe:
                     rootpageId.state = rootpageId.splitmergestateframeactive;
                     break;
+                case rootpageId.operationframe:
+                    rootpageId.state = rootpageId.operationstateframeactive;
                 }
             }
 
@@ -2190,21 +2285,12 @@ Item {
             {
                 name: "NonFocused"
                 PropertyChanges{target: skeletalborderrectId; border.color:rootpageId.nonfocuscolor;}
-                PropertyChanges{target: skeletalarrayId; state: skeletalarrayId.nothighlightedstate;}
-                PropertyChanges{target: discontinuitysliderId; state: discontinuitysliderId.nothighlightedstate;}
-            },
-            State
-            {
-                name: "ArrayState"
-                PropertyChanges{target: skeletalborderrectId; border.color:rootpageId.focuscolor;}
-                PropertyChanges{target: skeletalarrayId; state: skeletalarrayId.highlightedstate;}
                 PropertyChanges{target: discontinuitysliderId; state: discontinuitysliderId.nothighlightedstate;}
             },
             State
             {
                 name: "DiscState"
                 PropertyChanges{target: skeletalborderrectId; border.color:rootpageId.focuscolor;}
-                PropertyChanges{target: skeletalarrayId; state: skeletalarrayId.nothighlightedstate;}
                 PropertyChanges{target: discontinuitysliderId; state: discontinuitysliderId.highlightedstate;}
             }
         ]
@@ -2258,9 +2344,6 @@ Item {
             {
                 switch(skeletalsettingsrectId.state)
                 {
-                case "ArrayState":
-                    skeletalarrayId.grabFocus();
-                    break;
                 case "DiscState":
                     discontinuitysliderId.grabFocus();
                     break;
@@ -2278,12 +2361,9 @@ Item {
 
                 switch(skeletalsettingsrectId.state)
                 {
-                case "ArrayState":
+                case "DiscState":
                     rootpageId.state = skeletalstateframeactive;
                     skeletalsettingsrectId.state = "NonFocused";
-                    break;
-                case "DiscState":
-                    skeletalsettingsrectId.state = "ArrayState";
                     break;
                 }
             }
@@ -2292,9 +2372,7 @@ Item {
             {
                 switch(skeletalsettingsrectId.state)
                 {
-                case "ArrayState":
-                    skeletalsettingsrectId.state = "DiscState";
-                    break;
+
                 }
             }
 
@@ -2341,39 +2419,6 @@ Item {
             color: rootpageId.textcolor
         }
 
-        //Skeletal Array
-        ArrayViewerObject
-        {
-            id: skeletalarrayId
-            x:20
-            y:100
-            width:760
-            title_text: "Skeletal Array"
-            controlstickautorepeat: true
-
-            function updateArray(_value, _index)
-            {
-                if(_index < skeletalarrayId.listModelSize())
-                {
-                    skeletalarrayId.updateElementValue(_value, _index);
-                }
-                else
-                {
-                    skeletalarrayId.addListElement(_value, _index);
-                }
-            }
-
-            Component.onCompleted:
-            {
-                Max.skeletalArrayChanged.connect(skeletalarrayId.updateArray);
-            }
-
-            onEndFocus:
-            {
-                skeletalsettingsrectId.grabFocus();
-                skeletalsettingsrectId.state = "ArrayState";
-            }
-        }
 
         //Discontinuity Slider
         SliderSettingsObject
@@ -2381,7 +2426,7 @@ Item {
             id: discontinuitysliderId
             controlname: "MaxDiscontinuities"
             x:20
-            y: skeletalarrayId.y + skeletalarrayId.height + 20
+            y: 100
             messagetext: "Maximum Discontinuities: " + Mary.sk_max_discontinuity;
             valuefrom: 0
             valueto: 700
@@ -2407,8 +2452,6 @@ Item {
                 Mary.sk_max_discontinuity = discontinuitysliderId.value;
             }
         }
-
-
 
     }
 
@@ -4433,6 +4476,134 @@ Item {
 
     }
 
+    //Operations Page Setttings Rectangle
+    Rectangle
+    {
+        id: operationsettingsrectId
+        visible: false
+        width: rootpageId.settingsrectwidth
+        height: rootpageId.settingsrectheight
+        x: rootpageId.settingsrectx
+        y: rootpageId.settingsrecty
+        color: "transparent"
+
+        function grabFocus()
+        {
+            operationcontrollerId.focus = true;
+        }
+
+
+        states:
+        [
+            State
+            {
+                name: "NonFocused"
+                PropertyChanges{target: operationborderrectId; border.color:rootpageId.nonfocuscolor;}
+            }
+        ]
+        //OML Components------------------------------------------------
+        ControllerObject
+        {
+
+            id:operationcontrollerId
+            focus: false
+
+            onBlackButtonPressed:
+            {
+            }
+
+            onGreenButtonPressed:
+            {
+            }
+
+            onRedButtonPressed:
+            {
+
+            }
+
+            onUpButtonPressed:
+            {
+
+            }
+
+            onDownButtonPressed:
+            {
+
+            }
+
+            onLeftButtonPressed:
+            {
+
+            }
+
+            onRightButtonPressed:
+            {
+
+            }
+
+            onUpButtonReleased:
+            {
+
+            }
+
+            onDownButtonReleased:
+            {
+
+            }
+
+            onLeftButtonReleased:
+            {
+
+            }
+
+            onRightButtonReleased:
+            {
+
+            }
+        }
+
+
+        Rectangle
+        {
+            anchors.fill: operationsettingsrectId
+            color: "black"
+            opacity: .8
+            radius: 10
+        }
+
+        Rectangle
+        {
+            anchors.fill: operationsettingsrectId
+            color: "darkred"
+            opacity: .05
+            radius: 10
+        }
+
+        Rectangle
+        {
+            id: operationborderrectId
+            anchors.fill: operationsettingsrectId
+            color: "transparent"
+            border.color: rootpageId.nonfocuscolor
+            border.width: rootpageId.rectborderwidths
+            radius: 10
+        }
+
+        //Settings Text
+        Text
+        {
+            id: operationtextId
+            font.family: fontId.name
+            y: 10
+            x:10
+            text: "Operational Settings"
+            font.pixelSize: 25
+            color: rootpageId.textcolor
+        }
+
+
+    }
+
     //Main View Rectangle-------------------------------------------
     Rectangle
     {
@@ -4484,6 +4655,9 @@ Item {
                 case rootpageId.splitmergeframe:
                     Max.newSplitMergeMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
                     break;
+                case rootpageId.operationframe:
+                    Max.newOperationMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
+                    break;
                 }
                 mainviewrect_privateId.attached_frame = rootpageId.emptyframe;
             }
@@ -4524,6 +4698,10 @@ Item {
                     Max.newSplitMergeMatProcessed.connect(mainviewdisplayId.recieveCVMat);
                     mainviewrect_privateId.attached_frame = rootpageId.splitmergeframe;
                     console.log("Connecting Max.newSplitMergeMatProcessed");
+                    break;
+                case rootpageId.operationframe:
+                    Max.newOperationMatProcessed.connect(mainviewdisplayId.recieveCVMat);
+                    mainviewrect_privateId.attached_frame = rootpageId.operationframe;
                     break;
                 default:
                     mainviewrectId.displayed_frame = rootpageId.emptyframe;

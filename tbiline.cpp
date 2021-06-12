@@ -9,6 +9,7 @@ TBILine::TBILine()
     m_point2.setY(0);
     m_validline = false;
     updateInternals();
+    m_thickness = 1;
 
 }
 

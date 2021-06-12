@@ -5,6 +5,7 @@ TBIPoint::TBIPoint()
 {
     m_x = 0;
     m_y = 0;
+    m_valid = true;
 }
 
 TBIPoint::TBIPoint(float _x, float _y)

@@ -16,6 +16,9 @@ public:
     float getY() const {return m_y;}
     void setY(float _y){m_y=_y;}
     void zero();
+    void inValidate(){m_valid = false;}
+    void validate(){m_valid = true;}
+    bool isValid(){return m_valid;}
 
     void operator=(const TBIPoint&_pnt)
     {
@@ -33,6 +36,7 @@ public:
 private:
     float m_x;
     float m_y;
+    bool m_valid;
 };
 
 #endif // TBIPOINT_H

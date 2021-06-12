@@ -71,9 +71,13 @@ private:
                                  int _max_clusters_in_column);
     bool doSkeletonProcessing(cv::Mat &_dst, PixelColumnClass *_pixel_column_array, float *_skel_array, float _continuity_threshold);
 
+    void deleteSkelPointsAbovePZL(TBILine &_lpzl, TBILine &_rpzl, float *_skel_array);
+
     bool doRansacLineProcessing(cv::Mat &_dst, TBILine &_line, int _total_iterations, int _vote_threshold,
                                 float _distance_threshold, float _min_angle_to_horizon, float _max_angle_to_horizon,
                                 float* _skeletalarray, int _start_index, int _end_index, cv::Scalar _line_color);
+
+    bool doRansacVertexProcessing(TBILine &_ltsl, TBILine &_rtsl, float *_skel_array, TBIPoint &_lv, TBIPoint &_rv, const float _left_vertex_dist_threshold, const float _right_vertex_dist_threshold);
 
     bool doSplitMergeProcesssing(float *_skel_array, int _max_index, std::vector<TBILine> &_line_vectors,
                                  float _min_distance_threshold);
@@ -85,8 +89,6 @@ private:
 
     bool updateFlattenedMembers(cv::Mat &_src); //Almost All Other Functions Require this to be run first.
 
-
-    void trimRansacTopSurfaceLinesForVGroove(TBILine &_src_tsl_left, TBILine &_src_tsl_right, float *_skel_array, float _cutoff_threshold);
 
 
 
@@ -157,6 +159,9 @@ private:
     int m_tslright_iterations;
     float m_tslright_distance_threshold;
 
+    TBIPoint m_right_ransac_vertex;
+    TBIPoint m_left_ransac_vertex;
+
     TBILine m_left_bwl;
     float m_max_bwlleft_angle;
     float m_min_bwlleft_angle;
@@ -171,10 +176,6 @@ private:
     int m_bwlright_iterations;
     float m_bwlright_distance_threshold;
 
-    TBILine m_ransac_projection_lefttsl;
-    TBILine m_ransac_projection_righttsl;
-    TBILine m_ransac_projection_leftbwl;
-    TBILine m_ransac_projection_rightbwl;
 
     //Linear Topography. (Split and Merge Algorythms)-------------------
     std::vector<TBILine> m_topography_lines;
@@ -238,7 +239,6 @@ signals:
     void viewportChanged();
     void aboutToDestroy();
     void totalImageIntensityChanged(quint64 _tii);
-    void skeletalArrayChanged(float _value, int _index);
     //Mat Delivery Signals-----------------------------------------------
     void newFrameProcessed(const QImage& _qimage);
     void newRawMatProcessed(const cv::Mat& _raw_frame);
@@ -256,6 +256,7 @@ signals:
     void failedDiscontinuityCheck();
     void failedRansacCheck(); //Voting Lines
     void failedSplitMergeCheck();
+    void failedRansacVertexProcesssing();
     void emitExtraMatsChanged();
 
 

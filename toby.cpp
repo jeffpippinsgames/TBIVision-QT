@@ -277,8 +277,32 @@ void Toby::openStillImagetoProcess(QString _filename)
     char *__filenamebuffer = __filenamearray.data();
     cv::String ___filename(__filenamebuffer);
 
-    cv::Mat _newmat = cv::imread(___filename);
+    cv::Mat _mat = cv::imread(___filename);
+    cv::Mat _newmat;
 
+    int _width = _mat.cols;
+    int _height  = _mat.rows;
+
+    //Resize the Image if its too Big
+    if((_width > 720) || (_height > 540))
+    {
+        float  _wscale = (float)720/_width;
+        float _hscale = (float)540/_height;
+        float _scale;
+        if(_wscale < _hscale)
+        {
+            _scale = _wscale;
+        }
+        else
+        {
+            _scale = _hscale;
+        }
+        cv::resize(_mat, _newmat, cv::Size(_width*_scale,_height*_scale), 0.0,0.0, cv::INTER_AREA);
+    }
+    else
+    {
+        _newmat = _mat.clone();
+    }
     //Make Sure Image is right size
 
 
@@ -485,7 +509,6 @@ void Toby::triggerNextFrame()
     if(m_processsing_debug_image)
     {
 
-          qDebug() <<"Time Till Last trigger frame " << QString::number(m_timer.elapsed()) << " ms";
           m_camera_fps = QString("Still Image FPS = " + QString::number(1000/m_timer.elapsed()));
           m_timer.start();
           emit cameraFPSChanged(m_camera_fps);
