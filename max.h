@@ -14,6 +14,7 @@
 #include "pixelcolumnclass.h"
 #include "tbiline.h"
 #include <QRandomGenerator>
+#include "tbilinearransac.h"
 
 using namespace cv;
 
@@ -63,22 +64,37 @@ class Max : public QObject
     Q_PROPERTY(bool emitExtraMats READ getEmitExtraMats WRITE setEmitExtraMats NOTIFY emitExtraMatsChanged)
 
 
+
 private:
     void blankProcessingArrays();
 
+
+    //Scan Data Flattening Processing
+    bool doImageFlattening(cv::Mat &_src, std::vector<TBIPoint> &_data, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii);
+    void drawFlattenedImageDataToMat(cv::Mat &_dst, const std::vector<TBIPoint> &_data);
+
+    //Scan Data Ransac Processing
+    bool doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint> &_vector);
+
+   //Pixel Column Processing
     bool doPixelColumnProcessing(cv::Mat &_src, cv::Mat &_dst, PixelColumnClass* _pixel_column_array, quint64 *_tii,
                                  quint64 _max_tii, quint64 _min_tii, int _min_cluster_size, int _max_cluster_size,
                                  int _max_clusters_in_column);
+
+    //Skeleton Processing
     bool doSkeletonProcessing(cv::Mat &_dst, PixelColumnClass *_pixel_column_array, float *_skel_array, float _continuity_threshold);
 
     void deleteSkelPointsAbovePZL(TBILine &_lpzl, TBILine &_rpzl, float *_skel_array);
 
-    bool doRansacLineProcessing(cv::Mat &_dst, TBILine &_line, int _total_iterations, int _vote_threshold,
-                                float _distance_threshold, float _min_angle_to_horizon, float _max_angle_to_horizon,
-                                float* _skeletalarray, int _start_index, int _end_index, cv::Scalar _line_color);
+
+    //Ransac Type Processing
+    bool doRansacLineProcessing(cv::Mat &_dst, TBILine &_line, TBILinearRansac &_ransac, float* _skeletalarray, int _start_index, int _end_index, cv::Scalar _line_color);
+
 
     bool doRansacVertexProcessing(TBILine &_ltsl, TBILine &_rtsl, float *_skel_array, TBIPoint &_lv, TBIPoint &_rv, const float _left_vertex_dist_threshold, const float _right_vertex_dist_threshold);
 
+
+    //Split Merge Processing
     bool doSplitMergeProcesssing(float *_skel_array, int _max_index, std::vector<TBILine> &_line_vectors,
                                  float _min_distance_threshold);
 
@@ -88,6 +104,10 @@ private:
                                  TBILine &_dst_bwl_left, TBILine &_dst_swl_right);
 
     bool updateFlattenedMembers(cv::Mat &_src); //Almost All Other Functions Require this to be run first.
+
+
+    //Misc Functions
+    int randomInt(int _min, int _max);
 
 
 
@@ -108,7 +128,6 @@ private:
     static const int Mat_Max_Width = 728;
     static const int Mat_Max_Height = 544;
     bool m_in_proccesing_loop;
-
 
     //Elements For GUI Display----------------------------------------
     QString m_timeinloop;
@@ -136,6 +155,7 @@ private:
     float m_flattened_hrv; //Highest Row Value
 
     //Pixel Column Phase Processing Variables--------------------------
+    std::vector<TBIPoint> m_flattened_scan_data;
     quint64 m_total_image_intensity;
     PixelColumnClass m_cluster_columns[Mat_Max_Width];
 
@@ -145,37 +165,19 @@ private:
 
     //Ransac. Left and Right Top Surface Lines and Bevel Wall Lines(Voting Algorythms)-------
     TBILine m_left_tsl;
-
-    float m_max_tslleft_angle;
-    float m_min_tslleft_angle;
-    int m_min_tslleft_votes;
-    int m_tslleft_iterations;
-    float m_tslleft_distance_threshold;
+    TBILinearRansac m_left_tsl_ransac;
 
     TBILine m_right_tsl;
-    float m_max_tslright_angle;
-    float m_min_tslright_angle;
-    int m_min_tslright_votes;
-    int m_tslright_iterations;
-    float m_tslright_distance_threshold;
+    TBILinearRansac m_right_tsl_ransac;
+
+    TBILine m_left_bwl;
+    TBILinearRansac m_left_bwl_ransac;
+
+    TBILine m_right_bwl;
+    TBILinearRansac m_right_bwl_ransac;
 
     TBIPoint m_right_ransac_vertex;
     TBIPoint m_left_ransac_vertex;
-
-    TBILine m_left_bwl;
-    float m_max_bwlleft_angle;
-    float m_min_bwlleft_angle;
-    int m_min_bwlleft_votes;
-    int m_bwlleft_iterations;
-    float m_bwlleft_distance_threshold;
-
-    TBILine m_right_bwl;
-    float m_max_bwlright_angle;
-    float m_min_bwlright_angle;
-    int m_min_bwlright_votes;
-    int m_bwlright_iterations;
-    float m_bwlright_distance_threshold;
-
 
     //Linear Topography. (Split and Merge Algorythms)-------------------
     std::vector<TBILine> m_topography_lines;
@@ -205,29 +207,29 @@ public slots:
 
     void onMaxDiscontinuityChange(int _value);
 
-    void onLeftTSLMinAngle(float _minangle){m_min_tslleft_angle = _minangle;}
-    void onLeftTSLMaxAngle(float _maxangle){m_max_tslleft_angle = _maxangle;}
-    void onLeftTSLMinVotes(int _minvotes){m_min_tslleft_votes = _minvotes;}
-    void onLeftTSLDistanceThreshold(float _distthreshold){m_tslleft_distance_threshold = _distthreshold;}
-    void onLeftTSLIterations(int _iterations){m_tslleft_iterations = _iterations;}
+    void onLeftTSLIdealAngle(float _idealangle){m_left_tsl_ransac.setIdealAngle(_idealangle);}
+    void onLeftTSLAllowedAngleVariance(float _allowedanglevariance){m_left_tsl_ransac.setAllowedAngleVariance(_allowedanglevariance);}
+    void onLeftTSLMinVotes(int _minvotes){m_left_tsl_ransac.setMinVotes(_minvotes);}
+    void onLeftTSLDistanceThreshold(float _distthreshold){m_left_tsl_ransac.setDistanceThreshold(_distthreshold);}
+    void onLeftTSLIterations(int _iterations){m_left_tsl_ransac.setIterations(_iterations);}
 
-    void onRightTSLMinAngle(float _minangle){m_min_tslright_angle = _minangle;}
-    void onRightTSLMaxAngle(float _maxangle){m_max_tslright_angle = _maxangle;}
-    void onRightTSLMinVotes(int _minvotes){m_min_tslright_votes = _minvotes;}
-    void onRightTSLDistanceThreshold(float _distthreshold){m_tslright_distance_threshold = _distthreshold;}
-    void onRightTSLIterations(int _iterations){m_tslright_iterations = _iterations;}
+    void onRightTSLIdealAngle(float _idealangle){m_right_tsl_ransac.setIdealAngle(_idealangle);}
+    void onRightTSLAllowedAngleVariance(float _allowedanglevariance){m_right_tsl_ransac.setAllowedAngleVariance(_allowedanglevariance);}
+    void onRightTSLMinVotes(int _minvotes){m_right_tsl_ransac.setMinVotes(_minvotes);}
+    void onRightTSLDistanceThreshold(float _distthreshold){m_right_tsl_ransac.setDistanceThreshold(_distthreshold);}
+    void onRightTSLIterations(int _iterations){m_right_tsl_ransac.setIterations(_iterations);}
 
-    void onLeftBWLMinAngle(float _minangle){m_min_bwlleft_angle = _minangle;}
-    void onLeftBWLMaxAngle(float _maxangle){m_max_bwlleft_angle = _maxangle;}
-    void onLeftBWLMinVotes(int _minvotes){m_min_bwlleft_votes = _minvotes;}
-    void onLeftBWLDistanceThreshold(float _distthreshold){m_bwlleft_distance_threshold = _distthreshold;}
-    void onLeftBWLIterations(int _iterations){m_bwlleft_iterations = _iterations;}
+    void onLeftBWLIdealAngle(float _idealangle){m_left_bwl_ransac.setIdealAngle(_idealangle);}
+    void onLeftBWLAllowedAngleVariance(float _allowedanglevariance){m_left_bwl_ransac.setAllowedAngleVariance(_allowedanglevariance);}
+    void onLeftBWLMinVotes(int _minvotes){m_left_bwl_ransac.setMinVotes(_minvotes);}
+    void onLeftBWLDistanceThreshold(float _distthreshold){m_left_bwl_ransac.setDistanceThreshold(_distthreshold);}
+    void onLeftBWLIterations(int _iterations){m_left_bwl_ransac.setIterations(_iterations);}
 
-    void onRightBWLMinAngle(float _minangle){m_min_bwlright_angle = _minangle;}
-    void onRightBWLMaxAngle(float _maxangle){m_max_bwlright_angle = _maxangle;}
-    void onRightBWLMinVotes(int _minvotes){m_min_bwlright_votes = _minvotes;}
-    void onRightBWLDistanceThreshold(float _distthreshold){m_bwlright_distance_threshold = _distthreshold;}
-    void onRightBWLIterations(int _iterations){m_bwlright_iterations = _iterations;}
+    void onRightBWLIdealAngle(float _idealangle){m_right_bwl_ransac.setIdealAngle(_idealangle);}
+    void onRightBWLAllowedAngleVariance(float _allowedanglevariance){m_right_bwl_ransac.setAllowedAngleVariance(_allowedanglevariance);}
+    void onRightBWLMinVotes(int _minvotes){m_right_bwl_ransac.setMinVotes(_minvotes);}
+    void onRightBWLDistanceThreshold(float _distthreshold){m_right_bwl_ransac.setDistanceThreshold(_distthreshold);}
+    void onRightBWLIterations(int _iterations){m_right_bwl_ransac.setIterations(_iterations);}
 
     void onSplitDistance(float _distance){m_sm_distance_threshold = _distance;}
     void onSplitLength(float _length){m_sm_length_threshold = _length;}
@@ -257,6 +259,7 @@ signals:
     void failedRansacCheck(); //Voting Lines
     void failedSplitMergeCheck();
     void failedRansacVertexProcesssing();
+    void failedFlattenImageData();
     void emitExtraMatsChanged();
 
 

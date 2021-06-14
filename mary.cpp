@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QDataStream>
 
+
 /**************************************************************
 Mary(QObject *parent) : QObject(parent)
 Public
@@ -54,26 +55,26 @@ void Mary::SetMaryDefaultValues()
     //------------------------------
     m_sk_max_discontinuity = 20;
     //------------------------------
-    m_left_tsl_min_angle = -10;
-    m_left_tsl_max_angle = 10;
+    m_left_tsl_ideal_angle = -10;
+    m_left_tsl_allowed_angle_variance = 10;
     m_left_tsl_min_votes = 20;
     m_left_tsl_iterations = 50;
     m_left_tsl_distance_threshold = 1.0;
 
-    m_right_tsl_min_angle = -10;
-    m_right_tsl_max_angle = 10;
+    m_right_tsl_ideal_angle = -10;
+    m_right_tsl_allowed_angle_variance = 10;
     m_right_tsl_min_votes = 20;
     m_right_tsl_iterations = 50;
     m_right_tsl_distance_threshold = 1.0;
 
-    m_left_bwl_min_angle = -60;
-    m_left_bwl_max_angle = -30;
+    m_left_bwl_ideal_angle = -60;
+    m_left_bwl_allowed_angle_variance = -30;
     m_left_bwl_min_votes = 20;
     m_left_bwl_iterations = 50;
     m_left_bwl_distance_threshold = 1.0;
 
-    m_right_bwl_min_angle = 30;
-    m_right_bwl_max_angle = 60;
+    m_right_bwl_ideal_angle = 30;
+    m_right_bwl_allowed_angle_variance = 60;
     m_right_bwl_min_votes = 20;
     m_right_bwl_iterations = 50;
     m_right_bwl_distance_threshold = 1.0;
@@ -119,23 +120,23 @@ void Mary::saveMaryToFile()
     _ds << m_pc_min_clustersize;
     _ds << m_pc_max_clustersincolumn;
     _ds << m_sk_max_discontinuity;
-    _ds << m_left_tsl_min_angle;
-    _ds << m_left_tsl_max_angle;
+    _ds << m_left_tsl_ideal_angle;
+    _ds << m_left_tsl_allowed_angle_variance;
     _ds << m_left_tsl_min_votes;
     _ds << m_left_tsl_iterations;
     _ds << m_left_tsl_distance_threshold;
-    _ds << m_right_tsl_min_angle;
-    _ds << m_right_tsl_max_angle;
+    _ds << m_right_tsl_ideal_angle;
+    _ds << m_right_tsl_allowed_angle_variance;
     _ds << m_right_tsl_min_votes;
     _ds << m_right_tsl_iterations;
     _ds << m_right_tsl_distance_threshold;
-    _ds << m_left_bwl_min_angle;
-    _ds << m_left_bwl_max_angle;
+    _ds << m_left_bwl_ideal_angle;
+    _ds << m_left_bwl_allowed_angle_variance;
     _ds << m_left_bwl_min_votes;
     _ds << m_left_bwl_iterations;
     _ds << m_left_bwl_distance_threshold;
-    _ds << m_right_bwl_min_angle;
-    _ds << m_right_bwl_max_angle;
+    _ds << m_right_bwl_ideal_angle;
+    _ds << m_right_bwl_allowed_angle_variance;
     _ds << m_right_bwl_min_votes;
     _ds << m_right_bwl_iterations;
     _ds << m_right_bwl_distance_threshold;
@@ -181,23 +182,23 @@ void Mary::loadMaryFromFile()
     _ds >> m_pc_min_clustersize;
     _ds >> m_pc_max_clustersincolumn;
     _ds >> m_sk_max_discontinuity;
-    _ds >> m_left_tsl_min_angle;
-    _ds >> m_left_tsl_max_angle;
+    _ds >> m_left_tsl_ideal_angle;
+    _ds >> m_left_tsl_allowed_angle_variance;
     _ds >> m_left_tsl_min_votes;
     _ds >> m_left_tsl_iterations;
     _ds >> m_left_tsl_distance_threshold;
-    _ds >> m_right_tsl_min_angle;
-    _ds >> m_right_tsl_max_angle;
+    _ds >> m_right_tsl_ideal_angle;
+    _ds >> m_right_tsl_allowed_angle_variance;
     _ds >> m_right_tsl_min_votes;
     _ds >> m_right_tsl_iterations;
     _ds >> m_right_tsl_distance_threshold;
-    _ds >> m_left_bwl_min_angle;
-    _ds >> m_left_bwl_max_angle;
+    _ds >> m_left_bwl_ideal_angle;
+    _ds >> m_left_bwl_allowed_angle_variance;
     _ds >> m_left_bwl_min_votes;
     _ds >> m_left_bwl_iterations;
     _ds >> m_left_bwl_distance_threshold;
-    _ds >> m_right_bwl_min_angle;
-    _ds >> m_right_bwl_max_angle;
+    _ds >> m_right_bwl_ideal_angle;
+    _ds >> m_right_bwl_allowed_angle_variance;
     _ds >> m_right_bwl_min_votes;
     _ds >> m_right_bwl_iterations;
     _ds >> m_right_bwl_distance_threshold;
@@ -430,34 +431,34 @@ void Mary::setMaxDiscontinuity(int _disc)
 }
 
 /**************************************************************
-setLeftTSLMinAngle
+setLeftTSLIdealAngle
 Set Function
 Description:
   Sets the Left TSL Min Angle Setting
 **************************************************************/
-void Mary::setLeftTSLMinAngle(float _minangle)
+void Mary::setLeftTSLIdealAngle(float _IdealAngle)
 {
-    if((_minangle >= -90) && _minangle < m_left_tsl_max_angle)
+    if((_IdealAngle >= -90) && (_IdealAngle <= 90))
     {
-        m_left_tsl_min_angle = _minangle;
-        emit rnLeftTSLMinAngleChanged();
-        emit signalLeftTSLMinAngle(m_left_tsl_min_angle);
+        m_left_tsl_ideal_angle = _IdealAngle;
+        emit rnLeftTSLIdealAngleChanged();
+        emit signalLeftTSLIdealAngle(m_left_tsl_ideal_angle);
     }
 }
 
 /**************************************************************
-setLeftTSLMaxAngle
+setLeftTSLAllowedAngleVariance
 Set Function
 Description:
   Sets the Left TSL Max Angle Setting
 **************************************************************/
-void Mary::setLeftTSLMaxAngle(float _maxangle)
+void Mary::setLeftTSLAllowedAngleVariance(float _AllowedAngleVariance)
 {
-    if((_maxangle > m_left_tsl_min_angle) && (_maxangle <= 90))
+    if((_AllowedAngleVariance >= 0) && (_AllowedAngleVariance <= 90))
     {
-        m_left_tsl_max_angle = _maxangle;
-        emit rnLeftTSLMaxAngleChanged();
-        emit signalLeftTSLMaxAngle(m_left_tsl_max_angle);
+        m_left_tsl_allowed_angle_variance = _AllowedAngleVariance;
+        emit rnLeftTSLAllowedAngleVarianceChanged();
+        emit signalLeftTSLAllowedAngleVariance(m_left_tsl_allowed_angle_variance);
     }
 }
 
@@ -510,34 +511,34 @@ void Mary::setLeftTSLIterations(int _iterations)
 }
 
 /**************************************************************
-setRightTSLMinAngle
+setRightTSLIdealAngle
 Set Function
 Description:
   Sets the Right TSL Min Angle Setting
 **************************************************************/
-void Mary::setRightTSLMinAngle(float _minangle)
+void Mary::setRightTSLIdealAngle(float _IdealAngle)
 {
-    if((_minangle >= -90) && (_minangle < m_right_tsl_max_angle))
+    if((_IdealAngle >= -90) && (_IdealAngle <= 90))
     {
-        m_right_tsl_min_angle = _minangle;
-        emit rnRightTSLMinAngleChanged();
-        emit signalRightTSLMinAngle(m_right_tsl_min_angle);
+        m_right_tsl_ideal_angle = _IdealAngle;
+        emit rnRightTSLIdealAngleChanged();
+        emit signalRightTSLIdealAngle(m_right_tsl_ideal_angle);
     }
 }
 
 /**************************************************************
-setRightTSLMaxAngle
+setRightTSLAllowedAngleVariance
 Set Function
 Description:
   Sets the Right TSL Max Angle Setting
 **************************************************************/
-void Mary::setRightTSLMaxAngle(float _maxangle)
+void Mary::setRightTSLAllowedAngleVariance(float _AllowedAngleVariance)
 {
-    if((_maxangle > m_right_tsl_min_angle) && (_maxangle <= 90))
+    if((_AllowedAngleVariance >= 0) && (_AllowedAngleVariance <= 90))
     {
-        m_right_tsl_max_angle = _maxangle;
-        emit rnRightTSLMaxAngleChanged();
-        emit signalRightTSLMaxAngle(m_right_tsl_max_angle);
+        m_right_tsl_allowed_angle_variance = _AllowedAngleVariance;
+        emit rnRightTSLAllowedAngleVarianceChanged();
+        emit signalRightTSLAllowedAngleVariance(m_right_tsl_allowed_angle_variance);
     }
 }
 
@@ -590,34 +591,34 @@ void Mary::setRightTSLIterations(int _iterations)
 }
 
 /**************************************************************
-setLeftBWLMinAngle
+setLeftBWLIdealAngle
 Set Function
 Description:
   Sets the Left BWL Min Angle Setting
 **************************************************************/
-void Mary::setLeftBWLMinAngle(float _minangle)
+void Mary::setLeftBWLIdealAngle(float _IdealAngle)
 {
-    if((_minangle >= -90) && _minangle < m_left_bwl_max_angle)
+    if((_IdealAngle >= -90) && (_IdealAngle <= 90))
     {
-        m_left_bwl_min_angle = _minangle;
-        emit rnLeftBWLMinAngleChanged();
-        emit signalLeftBWLMinAngle(m_left_bwl_min_angle);
+        m_left_bwl_ideal_angle = _IdealAngle;
+        emit rnLeftBWLIdealAngleChanged();
+        emit signalLeftBWLIdealAngle(m_left_bwl_ideal_angle);
     }
 }
 
 /**************************************************************
-setLeftBWLMaxAngle
+setLeftBWLAllowedAngleVariance
 Set Function
 Description:
   Sets the Left BWL Max Angle Setting
 **************************************************************/
-void Mary::setLeftBWLMaxAngle(float _maxangle)
+void Mary::setLeftBWLAllowedAngleVariance(float _AllowedAngleVariance)
 {
-    if((_maxangle > m_left_bwl_min_angle) && (_maxangle <= 90))
+    if((_AllowedAngleVariance >= 0) && (_AllowedAngleVariance <= 90))
     {
-        m_left_bwl_max_angle = _maxangle;
-        emit rnLeftBWLMaxAngleChanged();
-        emit signalLeftBWLMaxAngle(m_left_bwl_max_angle);
+        m_left_bwl_allowed_angle_variance = _AllowedAngleVariance;
+        emit rnLeftBWLAllowedAngleVarianceChanged();
+        emit signalLeftBWLAllowedAngleVariance(m_left_bwl_allowed_angle_variance);
     }
 }
 
@@ -670,34 +671,34 @@ void Mary::setLeftBWLIterations(int _iterations)
 }
 
 /**************************************************************
-setRightBWLMinAngle
+setRightBWLIdealAngle
 Set Function
 Description:
   Sets the Right BWL Min Angle Setting
 **************************************************************/
-void Mary::setRightBWLMinAngle(float _minangle)
+void Mary::setRightBWLIdealAngle(float _IdealAngle)
 {
-    if((_minangle >= -90) && (_minangle < m_right_bwl_max_angle))
+    if((_IdealAngle >= -90) && (_IdealAngle <= 90))
     {
-        m_right_bwl_min_angle = _minangle;
-        emit rnRightBWLMinAngleChanged();
-        emit signalRightBWLMinAngle(m_right_bwl_min_angle);
+        m_right_bwl_ideal_angle = _IdealAngle;
+        emit rnRightBWLIdealAngleChanged();
+        emit signalRightBWLIdealAngle(m_right_bwl_ideal_angle);
     }
 }
 
 /**************************************************************
-setRightBWLMaxAngle
+setRightBWLAllowedAngleVariance
 Set Function
 Description:
   Sets the Right BWL Max Angle Setting
 **************************************************************/
-void Mary::setRightBWLMaxAngle(float _maxangle)
+void Mary::setRightBWLAllowedAngleVariance(float _AllowedAngleVariance)
 {
-    if((_maxangle > m_right_bwl_min_angle) && (_maxangle <= 90))
+    if((_AllowedAngleVariance >= 0) && (_AllowedAngleVariance <= 90))
     {
-        m_right_bwl_max_angle = _maxangle;
-        emit rnRightBWLMaxAngleChanged();
-        emit signalRightBWLMaxAngle(m_right_bwl_max_angle);
+        m_right_bwl_allowed_angle_variance = _AllowedAngleVariance;
+        emit rnRightBWLAllowedAngleVarianceChanged();
+        emit signalRightBWLAllowedAngleVariance(m_right_bwl_allowed_angle_variance);
     }
 }
 
@@ -823,26 +824,26 @@ void Mary::broadcastQMLSignals()
 
     emit skMaxDiscontuityChanged();
 
-    emit rnLeftTSLMinAngleChanged();
-    emit rnLeftTSLMaxAngleChanged();
+    emit rnLeftTSLIdealAngleChanged();
+    emit rnLeftTSLAllowedAngleVarianceChanged();
     emit rnLeftTSLMinVotesChanged();
     emit rnLeftTSLDistanceThresholdChanged();
     emit rnLeftTSLIterationsChanged();
 
-    emit rnRightTSLMinAngleChanged();
-    emit rnRightTSLMaxAngleChanged();
+    emit rnRightTSLIdealAngleChanged();
+    emit rnRightTSLAllowedAngleVarianceChanged();
     emit rnRightTSLMinVotesChanged();
     emit rnRightTSLDistanceThresholdChanged();
     emit rnRightTSLIterationsChanged();
 
-    emit rnLeftBWLMinAngleChanged();
-    emit rnLeftBWLMaxAngleChanged();
+    emit rnLeftBWLIdealAngleChanged();
+    emit rnLeftBWLAllowedAngleVarianceChanged();
     emit rnLeftBWLMinVotesChanged();
     emit rnLeftBWLDistanceThresholdChanged();
     emit rnLeftBWLIterationsChanged();
 
-    emit rnRightBWLMinAngleChanged();
-    emit rnRightBWLMaxAngleChanged();
+    emit rnRightBWLIdealAngleChanged();
+    emit rnRightBWLAllowedAngleVarianceChanged();
     emit rnRightBWLMinVotesChanged();
     emit rnRightBWLDistanceThresholdChanged();
     emit rnRightBWLIterationsChanged();
@@ -877,26 +878,26 @@ void Mary::broadcastSingletonSignals()
 
     emit signalChangeMaxDiscontinuity(m_sk_max_discontinuity);
 
-    emit signalLeftTSLMinAngle(m_left_tsl_min_angle);
-    emit signalLeftTSLMaxAngle(m_left_tsl_max_angle);
+    emit signalLeftTSLIdealAngle(m_left_tsl_ideal_angle);
+    emit signalLeftTSLAllowedAngleVariance(m_left_tsl_allowed_angle_variance);
     emit signalLeftTSLMinVotes(m_left_tsl_min_votes);
     emit signalLeftTSLDistanceThreshold(m_left_tsl_distance_threshold);
     emit signalLeftTSLIterations(m_left_tsl_iterations);
 
-    emit signalRightTSLMinAngle(m_right_tsl_min_angle);
-    emit signalRightTSLMaxAngle(m_right_tsl_max_angle);
+    emit signalRightTSLIdealAngle(m_right_tsl_ideal_angle);
+    emit signalRightTSLAllowedAngleVariance(m_right_tsl_allowed_angle_variance);
     emit signalRightTSLMinVotes(m_right_tsl_min_votes);
     emit signalRightTSLDistanceThreshold(m_right_tsl_distance_threshold);
     emit signalRightTSLIterations(m_right_tsl_iterations);
 
-    emit signalLeftBWLMinAngle(m_left_bwl_min_angle);
-    emit signalLeftBWLMaxAngle(m_left_bwl_max_angle);
+    emit signalLeftBWLIdealAngle(m_left_bwl_ideal_angle);
+    emit signalLeftBWLAllowedAngleVariance(m_left_bwl_allowed_angle_variance);
     emit signalLeftBWLMinVotes(m_left_bwl_min_votes);
     emit signalLeftBWLDistanceThreshold(m_left_bwl_distance_threshold);
     emit signalLeftBWLIterations(m_left_bwl_iterations);
 
-    emit signalRightBWLMinAngle(m_right_bwl_min_angle);
-    emit signalRightBWLMaxAngle(m_right_bwl_max_angle);
+    emit signalRightBWLIdealAngle(m_right_bwl_ideal_angle);
+    emit signalRightBWLAllowedAngleVariance(m_right_bwl_allowed_angle_variance);
     emit signalRightBWLMinVotes(m_right_bwl_min_votes);
     emit signalRightBWLDistanceThreshold(m_right_bwl_distance_threshold);
     emit signalRightBWLIterations(m_right_bwl_iterations);

@@ -17,6 +17,7 @@ SOURCES += \
         pixelclusterclass.cpp \
         pixelcolumnclass.cpp \
         tbiline.cpp \
+        tbilinearransac.cpp \
         tbipoint.cpp \
         toby.cpp
 
@@ -35,7 +36,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     QmlTBIDisplay.h \
-    TBITopSurfaceLineVotingStructure.h \
+    TBILinearRansacVotingStructure.h \
     gary.h \
     mary.h \
     max.h \
@@ -44,6 +45,7 @@ HEADERS += \
     pixelcolumnprocessreturn_t.h \
     pixelfundamental.h \
     tbiline.h \
+    tbilinearransac.h \
     tbipoint.h \
     toby.h
 
@@ -55,12 +57,13 @@ unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lGenApi_gcc_v3_1_Basl
 INCLUDEPATH += $$PWD/../../../../../opt/pylon/include
 DEPENDPATH += $$PWD/../../../../../opt/pylon/include
 
-unix:!macx: LIBS += -L$$PWD/../../../../../usr/local/lib/ -lopencv_core
-unix:!macx: LIBS += -L$$PWD/../../../../../usr/local/lib/ -lopencv_imgproc
-unix:!macx: LIBS += -L$$PWD/../../../../../usr/local/lib/ -lopencv_imgcodecs
+unix:!macx: LIBS += -L$$PWD/../../../../../usr/lib/ -lopencv_core
+unix:!macx: LIBS += -L$$PWD/../../../../../usr/lib/ -lopencv_imgproc
+unix:!macx: LIBS += -L$$PWD/../../../../../usr/lib/ -lopencv_ximgproc
+unix:!macx: LIBS += -L$$PWD/../../../../../usr/lib/ -lopencv_imgcodecs
 
 INCLUDEPATH += $$PWD/../../../../../usr/local/include
 DEPENDPATH += $$PWD/../../../../../usr/local/include
-INCLUDEPATH += $$PWD/../../../../../usr/local/include/opencv4
-DEPENDPATH += $$PWD/../../../../../usr/local/include/opencv4
+INCLUDEPATH += $$PWD/../../../../../usr/include/opencv4
+DEPENDPATH += $$PWD/../../../../../usr/include/opencv4
 

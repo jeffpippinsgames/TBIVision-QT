@@ -3,9 +3,11 @@
 #include "pixelcolumnclass.h"
 #include "pixelclusterclass.h"
 #include "pixelfundamental.h"
-#include "TBITopSurfaceLineVotingStructure.h"
+#include "TBILinearRansacVotingStructure.h"
 #include <QRandomGenerator>
 #include <QThread>
+#include <vector>
+#include <random>
 
 //Constructors and Destructor--------------------------------------------------------
 Max::Max(QObject *parent) : QObject(parent)
@@ -25,29 +27,33 @@ Max::Max(QObject *parent) : QObject(parent)
 
     m_allowable_discontinuities = 20;
 
-    m_max_tslleft_angle = 5;
-    m_min_tslleft_angle = -5;
-    m_min_tslleft_votes = 20;
-    m_tslleft_iterations = 50;
-    m_tslleft_distance_threshold = 1;
 
-    m_max_tslright_angle = 5;
-    m_min_tslright_angle = -5;
-    m_min_tslright_votes = 20;
-    m_tslright_iterations = 50;
-    m_tslright_distance_threshold = 1;
 
-    m_max_bwlleft_angle = -30;
-    m_min_bwlleft_angle = -60;
-    m_min_bwlleft_votes = 20;
-    m_bwlleft_iterations = 50;
-    m_bwlleft_distance_threshold = 1;
+    m_left_tsl_ransac.setIdealAngle(0);
+    m_left_tsl_ransac.setAllowedAngleVariance(10);
+    m_left_tsl_ransac.setDistanceThreshold(2.0);
+    m_left_tsl_ransac.setIterations(50);
+    m_left_tsl_ransac.setMinVotes(20);
 
-    m_max_bwlright_angle = 60;
-    m_min_bwlright_angle = 30;
-    m_min_bwlright_votes = 20;
-    m_bwlright_iterations = 50;
-    m_bwlright_distance_threshold = 1;
+    m_right_tsl_ransac.setIdealAngle(0);
+    m_right_tsl_ransac.setAllowedAngleVariance(10);
+    m_right_tsl_ransac.setDistanceThreshold(2.0);
+    m_right_tsl_ransac.setIterations(50);
+    m_right_tsl_ransac.setMinVotes(20);
+
+    m_left_bwl_ransac.setIdealAngle(-30);
+    m_left_bwl_ransac.setAllowedAngleVariance(10);
+    m_left_bwl_ransac.setDistanceThreshold(2.0);
+    m_left_bwl_ransac.setIterations(50);
+    m_left_bwl_ransac.setMinVotes(20);
+
+    m_right_bwl_ransac.setIdealAngle(30);
+    m_right_bwl_ransac.setAllowedAngleVariance(10);
+    m_right_bwl_ransac.setDistanceThreshold(2.0);
+    m_right_bwl_ransac.setIterations(50);
+    m_right_bwl_ransac.setMinVotes(20);
+
+
 
     m_right_ransac_vertex.inValidate();
     m_left_ransac_vertex.inValidate();
@@ -86,7 +92,187 @@ void Max::blankProcessingArrays()
     m_left_ransac_vertex.inValidate();
     m_topography_lines.clear();
     m_flattened_iohrv = 0;
+    m_total_image_intensity = 0;
 }
+
+bool Max::doImageFlattening(Mat &_src, std::vector<TBIPoint> &_data, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii)
+{
+    *_tii = 0;
+    _data.clear();
+
+    if(_src.type() != CV_8UC1)
+    {
+        emit failedFlattenImageData();
+        return false;
+    }
+
+    int _row = 0;
+    int _col = 0;
+    int _dataindex = 0;
+    uint8_t * _srcdata = _src.data;
+
+    do
+    {
+        _dataindex = (_row * _src.cols) + _col;
+        if(_srcdata[_dataindex] > 0)
+        {
+            _data.push_back(TBIPoint((float)_col, (float)_row));
+            *_tii += _srcdata[_dataindex];
+        }
+
+        if(*_tii > _max_tii)
+        {
+            emit failedTIICheck();
+            return false;
+        }
+
+        ++_row;
+        if(_row >= _src.rows)
+        {
+            ++_col;
+            _row = 0;
+        }
+    }while(_col < _src.cols);
+
+    if(*_tii < _min_tii)
+    {
+        emit failedTIICheck();
+        return false;
+    }
+    return true;
+}
+
+void Max::drawFlattenedImageDataToMat(Mat &_dst, const std::vector<TBIPoint> &_data)
+{
+    if(_dst.type() != CV_8UC1)
+    {
+        return;
+    }
+
+    if(_data.size() == 0)
+    {
+        return;
+    }
+
+    int _row = 0;
+    int _col = 0;
+    const int _vectorsize = _data.size();
+    int _vectorindex = 0;
+    uint8_t * _matdata = _dst.data;
+    int _matindex = 0;
+
+    do
+    {
+
+        _col = (int)_data[_vectorindex].getX();
+        _row = (int)_data[_vectorindex].getY();
+        _matindex = (_row * _dst.cols) + _col;
+        _matdata[_matindex] = 255;
+        ++_vectorindex;
+
+    }while(_vectorindex < _vectorsize);
+
+}
+
+bool Max::doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint> &_vector)
+{
+    _line.clear();
+
+    if(_vector.size() < 50)
+    {
+        emit failedRansacCheck();
+        return false;
+    }
+
+    std::vector<TBILinearRansacVotingStructure> _linecandidates;
+
+    int _iteration = 0;
+    int _pnt1index;
+    int _pnt2index;
+    int _votingindex = 0;
+    float _distance = 0;
+
+    const int _vectorsize = _vector.size();
+    const int _requiredvotes = _ransac.getMinVotes();
+    const int _totaliterations = _ransac.getIteration();
+    const float _distancethreshold = _ransac.getDistanceThreshold();
+    float _minanglefromhorizon = _ransac.getIdealAngle() - _ransac.getAllowedAngleVariance();
+    float _maxanglefromhorizon = _ransac.getIdealAngle() + _ransac.getAllowedAngleVariance();
+    float _idealanglefromhorizon = _ransac.getIdealAngle();
+
+    //Do the Ransac
+    do
+    {
+        //Instantiate the Voting Container
+        TBILinearRansacVotingStructure _linecandidate;
+        //Start Getting Two Random Points
+        _pnt1index = randomInt(0, _vectorsize-1);
+        do
+        {
+            _pnt2index = randomInt(0, _vectorsize-1);
+        }while(_pnt1index == _pnt2index);
+        //Build The Line From The Two Data Points
+        _linecandidate.m_line = TBILine(_vector[_pnt1index], _vector[_pnt2index]);
+        //If Horizonal Angle Check is Good Do The Voting.
+        _linecandidate.m_angletohorizontal = _linecandidate.m_line.angleFromHorizontal();
+        if((_linecandidate.m_angletohorizontal >= _minanglefromhorizon) && (_linecandidate.m_angletohorizontal <= _maxanglefromhorizon))
+        {
+            //Horizon Angle Check is Good Do The Voting
+            _votingindex = 0;
+            do
+            {
+                _distance = _linecandidate.m_line.getOrthogonalDistance(_vector[_votingindex]);
+                if(_distance <= _distancethreshold)
+                {
+                    ++_linecandidate.m_numvotes;
+                }
+                ++_votingindex;
+            }while(_votingindex < _vectorsize);
+            //Process The Voting And Add the Candidate If Ok
+            if(_linecandidate.m_numvotes >= _requiredvotes)
+            {
+                _linecandidates.push_back(_linecandidate);
+            }
+        }
+        ++_iteration;
+    }while(_iteration < _totaliterations);
+
+    //Evaluate The Candidate List and set the Line if Ok
+    if(_linecandidates.size() == 0)
+    {
+        emit failedRansacCheck();
+        return false;
+    }
+
+    //Choose the Line Candidate That has the Most Votes
+    const int _candidatesize = (int)_linecandidates.size();
+    int _candidateindex = 0;
+    int _highestvotecount = -1;
+    int _highestcandidateindex = -1;
+    do
+    {
+
+        if(_highestvotecount < _linecandidates[_candidateindex].m_numvotes)
+        {
+            _highestvotecount = _linecandidates[_candidateindex].m_numvotes;
+            _highestcandidateindex = _candidateindex;
+        }
+        ++_candidateindex;
+    }while(_candidateindex < _candidatesize);
+    if(_highestcandidateindex != -1)
+    {
+        _line = _linecandidates[_highestcandidateindex].m_line;
+    }
+    else
+    {
+        emit failedRansacCheck();
+        return false;
+    }
+
+
+    return true;
+}
+
 
 bool Max::doPixelColumnProcessing(Mat &_src, Mat &_dst, PixelColumnClass *_pixel_column_array, quint64 *_tii, quint64 _max_tii,
                                   quint64 _min_tii, int _min_cluster_size, int _max_cluster_size, int _max_clusters_in_column)
@@ -222,14 +408,13 @@ void Max::deleteSkelPointsAbovePZL(TBILine &_lpzl, TBILine &_rpzl, float *_skel_
 
 
 
-bool Max::doRansacLineProcessing(Mat &_dst, TBILine &_line, int _total_iterations, int _vote_threshold,
-                                 float _distance_threshold, float _min_angle_to_horizon, float _max_angle_to_horizon,
+bool Max::doRansacLineProcessing(Mat &_dst, TBILine &_line, TBILinearRansac &_ransac,
                                  float *_skeletalarray, int _start_index, int _end_index, Scalar _line_color)
 {
     _line.clear();
 
     //std::vector<TBILineVotingStructure> _linecandidates;
-    QList<TBILineVotingStructure> _linecandidates;
+    QList<TBILinearRansacVotingStructure> _linecandidates;
     int _index1;
     int _index2;
     float _distance;
@@ -237,6 +422,15 @@ bool Max::doRansacLineProcessing(Mat &_dst, TBILine &_line, int _total_iteration
     int _highest_vote_count = 0;
     int _iteration = 0;
     int _attempts=0;
+
+
+    const int _total_iterations = _ransac.getIteration();
+    const int _vote_threshold = _ransac.getMinVotes();
+    const float _distance_threshold = _ransac.getDistanceThreshold();
+    const float _min_angle_to_horizon = _ransac.getIdealAngle() - _ransac.getAllowedAngleVariance();
+    const float _max_angle_to_horizon = _ransac.getIdealAngle() + _ransac.getAllowedAngleVariance();
+
+
 
 
     if(_dst.channels() != 3)
@@ -275,7 +469,7 @@ bool Max::doRansacLineProcessing(Mat &_dst, TBILine &_line, int _total_iteration
 
 
         _attempts = 0;
-        TBILineVotingStructure _linecandidate;
+        TBILinearRansacVotingStructure _linecandidate;
         _linecandidate.m_line = TBILine((float)_index1, _skeletalarray[_index1], (float)_index2, _skeletalarray[_index2]);
         if(_linecandidate.m_line.isValid())
         {
@@ -562,6 +756,14 @@ bool Max::setProjectedRansacLines(TBILine &_src_tsl_left, TBILine &_src_tsl_righ
     return true;
 }
 
+int Max::randomInt(int _min, int _max)
+{
+    //C++ 11 Random Number Engine. #include <random>
+    std::random_device seeder; //the random device that will seed the generator
+    std::mt19937 engine(seeder()); //then make a mersenne twister engine
+    std::uniform_int_distribution<int> dist(_min, _max); //then the easy part... the distribution
+    return dist(engine); //Return the Number From The Distrobution
+}
 
 //The Recieve New CV::Mat Method
 void Max::recieveNewCVMat(const Mat &_mat)
@@ -611,6 +813,31 @@ void Max::recieveNewCVMat(const Mat &_mat)
 
     cv::cvtColor(_raw_mat, _operation_mat, cv::COLOR_GRAY2BGR);
     blankProcessingArrays();
+    if(doImageFlattening(_threshold_mat, m_flattened_scan_data, &m_total_image_intensity, m_max_image_intensity, m_min_image_intensity))
+    {
+        drawFlattenedImageDataToMat(_skel_mat, m_flattened_scan_data);
+        cv::cvtColor(_threshold_mat, _ransac_mat, cv::COLOR_GRAY2BGR);
+
+        if(doRansacLineProcessing(m_left_tsl, m_left_tsl_ransac, m_flattened_scan_data))
+        {
+           m_left_tsl.drawOnMat(_ransac_mat, CV_RGB(0,200,200), 1);
+           TBILinearRansac _leftbwlransac;
+           _leftbwlransac.makeEqual(m_left_bwl_ransac);
+           _leftbwlransac.setIdealAngle(m_left_tsl.angleFromHorizontal() - m_left_bwl_ransac.getIdealAngle());
+           if(doRansacLineProcessing(m_left_bwl, _leftbwlransac, m_flattened_scan_data))
+           {
+               m_left_bwl.drawOnMat(_ransac_mat, CV_RGB(0,200,0), 1);
+           }
+        }
+
+
+    }
+
+
+
+
+
+    /*
     if(doPixelColumnProcessing(_threshold_mat, _pixelcolumn_mat, m_cluster_columns, &m_total_image_intensity, m_max_image_intensity, m_min_image_intensity, m_min_cluster_size, m_max_cluster_size, m_max_clusterincol)) //The TII Check is Done Here
     {
 
@@ -619,15 +846,17 @@ void Max::recieveNewCVMat(const Mat &_mat)
         {
 
             cv::cvtColor(_skel_mat, _ransac_mat, cv::COLOR_GRAY2BGR);
-            bool _left_tsl_good = doRansacLineProcessing(_ransac_mat, m_left_tsl, m_tslleft_iterations, m_min_tslleft_votes, m_tslleft_distance_threshold,
-                                                         m_min_tslleft_angle, m_max_tslleft_angle, m_skeletal_line_array, 0, m_flattened_iohrv,
-                                                         CV_RGB(13,252,224));
-            bool _right_tsl_good = doRansacLineProcessing(_ransac_mat, m_right_tsl, m_tslright_iterations, m_min_tslright_votes, m_tslright_distance_threshold,
-                                                          m_min_tslright_angle, m_max_tslright_angle, m_skeletal_line_array, m_flattened_iohrv, _skel_mat.cols,
-                                                          CV_RGB(13,252,224));
+            //bool _left_tsl_good = doRansacLineProcessing(_ransac_mat, m_left_tsl, m_left_tsl_ransac, m_skeletal_line_array, 0, m_flattened_iohrv, CV_RGB(13,252,224));
+            //bool _right_tsl_good = doRansacLineProcessing(_ransac_mat, m_right_tsl, m_right_tsl_ransac, m_skeletal_line_array, m_flattened_iohrv, _skel_mat.cols, CV_RGB(13,252,224));
+            //bool _left_bwl_good = doRansacLineProcessing(_ransac_mat, m_left_bwl, m_left_bwl_ransac, m_skeletal_line_array, 0, m_flattened_iohrv, CV_RGB(13,252,224));
+            //bool _right_bwl_good = doRansacLineProcessing(_ransac_mat, m_right_bwl, m_right_bwl_ransac, m_skeletal_line_array, m_flattened_iohrv, _skel_mat.cols, CV_RGB(13,252,224));
 
+            bool _left_tsl_good = doRansacLineProcessing(_ransac_mat, m_left_tsl, m_left_tsl_ransac, m_skeletal_line_array, 0, m_flattened_iohrv, CV_RGB(13,252,224));
+            bool _right_tsl_good = doRansacLineProcessing(_ransac_mat, m_right_tsl, m_right_tsl_ransac, m_skeletal_line_array, m_flattened_iohrv, _skel_mat.cols, CV_RGB(13,252,224));
+            bool _left_bwl_good = doRansacLineProcessing(_ransac_mat, m_left_bwl, m_left_bwl_ransac, m_skeletal_line_array, 0, _skel_mat.cols-1, CV_RGB(13,252,224));
+            bool _right_bwl_good = doRansacLineProcessing(_ransac_mat, m_right_bwl, m_right_bwl_ransac, m_skeletal_line_array, 0, _skel_mat.cols-1, CV_RGB(13,252,224));
 
-            if(_left_tsl_good && _right_tsl_good)
+            if(_left_tsl_good && _right_tsl_good && _left_bwl_good && _right_bwl_good)
             {
 
 
@@ -635,10 +864,9 @@ void Max::recieveNewCVMat(const Mat &_mat)
                 deleteSkelPointsAbovePZL(m_left_tsl, m_right_tsl, m_skeletal_line_array);
 
 
-                if(doRansacVertexProcessing(m_left_tsl, m_right_tsl, m_skeletal_line_array, m_left_ransac_vertex, m_right_ransac_vertex, m_tslleft_distance_threshold, m_tslright_distance_threshold))
-                {
-                    cv::drawMarker(_ransac_mat, cv::Point((int)m_left_ransac_vertex.getX(), (int)m_left_ransac_vertex.getY()), CV_RGB(0,200,200), MARKER_DIAMOND, 20, 3);
-                    cv::drawMarker(_ransac_mat, cv::Point((int)m_right_ransac_vertex.getX(), (int)m_right_ransac_vertex.getY()), CV_RGB(0,200,200), MARKER_DIAMOND, 20, 3);
+
+                   // cv::drawMarker(_ransac_mat, cv::Point((int)m_left_ransac_vertex.getX(), (int)m_left_ransac_vertex.getY()), CV_RGB(0,200,200), MARKER_DIAMOND, 20, 3);
+                    //cv::drawMarker(_ransac_mat, cv::Point((int)m_right_ransac_vertex.getX(), (int)m_right_ransac_vertex.getY()), CV_RGB(0,200,200), MARKER_DIAMOND, 20, 3);
                     if(doSplitMergeProcesssing(m_skeletal_line_array, (int)_skel_mat.cols-1, m_topography_lines, m_sm_distance_threshold))
                     {
                         cv::cvtColor(_skel_mat, _splitmerge_mat, cv::COLOR_GRAY2BGR);
@@ -658,13 +886,13 @@ void Max::recieveNewCVMat(const Mat &_mat)
 
 
                     }
-                }
+
 
 
             }
             else
             {
-                _ransac_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3);
+                //_ransac_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3);
             }
 
         }
@@ -672,13 +900,12 @@ void Max::recieveNewCVMat(const Mat &_mat)
         {
             _skel_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8SC1);
         }
-
     }
     else
     {
         _pixelcolumn_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8SC1);
     }
-
+*/
     if(m_emitextramats)
     {
         emit newRawMatProcessed(_raw_mat);

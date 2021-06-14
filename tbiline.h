@@ -33,6 +33,7 @@ public:
     void clear();
     void remakeLine(int _startcol, int _endcol);
     void drawOnMat(cv::Mat &_dst, cv::Scalar _color, int _thickness = 1);
+    void drawOnMat(cv::Mat &_dst);
     float getPoint1X() const{return m_point1.getX();}
     float getPoint1Y() const{return m_point1.getY();}
     float getPoint2X() const{return m_point2.getX();}
@@ -40,6 +41,9 @@ public:
     bool compareLines(TBILine &_line, float _distance_threshold);
     int getThickness(){return m_thickness;}
     void setThickness(int _thickness){if(_thickness > 0)m_thickness=_thickness;}
+    void setColor(cv::Scalar _color) {m_color = _color;}
+    void setColor(uint8_t _r, uint8_t _g, uint8_t _b) { m_color = CV_RGB(_r,_g,_b);}
+
 
 
     void operator = (const TBILine &_line)
@@ -64,6 +68,7 @@ private:
     float m_length;
     bool m_validline;
     int m_thickness;
+    cv::Scalar m_color;
 
 
     void updateInternals();

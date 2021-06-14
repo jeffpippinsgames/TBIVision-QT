@@ -8,6 +8,7 @@
 #include "mary.h"
 #include "QmlTBIDisplay.h"
 #include "opencv4/opencv2/core.hpp"
+#include "tbilinearransac.h"
 
 using namespace Pylon;
 using namespace cv;
@@ -44,6 +45,7 @@ int main(int argc, char *argv[])
     //Register The QmlTBIDisplay QML Type
     QmlTBIDisplay::declareQML();
 
+
     //The QML Application engine----------------------------------
     QQmlApplicationEngine engine;
 
@@ -74,26 +76,26 @@ int main(int argc, char *argv[])
 
     QObject::connect(&_mary, SIGNAL(signalChangeMaxDiscontinuity(int)), &_max, SLOT(onMaxDiscontinuityChange(int)));
 
-    QObject::connect(&_mary, SIGNAL(signalLeftTSLMinAngle(float)), &_max, SLOT(onLeftTSLMinAngle(float)));
-    QObject::connect(&_mary, SIGNAL(signalLeftTSLMaxAngle(float)), &_max, SLOT(onLeftTSLMaxAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalLeftTSLIdealAngle(float)), &_max, SLOT(onLeftTSLIdealAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalLeftTSLAllowedAngleVariance(float)), &_max, SLOT(onLeftTSLAllowedAngleVariance(float)));
     QObject::connect(&_mary, SIGNAL(signalLeftTSLMinVotes(int)), &_max, SLOT(onLeftTSLMinVotes(int)));
     QObject::connect(&_mary, SIGNAL(signalLeftTSLDistanceThreshold(float)), &_max, SLOT(onLeftTSLDistanceThreshold(float)));
     QObject::connect(&_mary, SIGNAL(signalLeftTSLIterations(int)), &_max, SLOT(onLeftTSLIterations(int)));
 
-    QObject::connect(&_mary, SIGNAL(signalRightTSLMinAngle(float)), &_max, SLOT(onRightTSLMinAngle(float)));
-    QObject::connect(&_mary, SIGNAL(signalRightTSLMaxAngle(float)), &_max, SLOT(onRightTSLMaxAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalRightTSLIdealAngle(float)), &_max, SLOT(onRightTSLIdealAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalRightTSLAllowedAngleVariance(float)), &_max, SLOT(onRightTSLAllowedAngleVariance(float)));
     QObject::connect(&_mary, SIGNAL(signalRightTSLMinVotes(int)), &_max, SLOT(onRightTSLMinVotes(int)));
     QObject::connect(&_mary, SIGNAL(signalRightTSLDistanceThreshold(float)), &_max, SLOT(onRightTSLDistanceThreshold(float)));
     QObject::connect(&_mary, SIGNAL(signalRightTSLIterations(int)), &_max, SLOT(onRightTSLIterations(int)));
 
-    QObject::connect(&_mary, SIGNAL(signalLeftBWLMinAngle(float)), &_max, SLOT(onLeftBWLMinAngle(float)));
-    QObject::connect(&_mary, SIGNAL(signalLeftBWLMaxAngle(float)), &_max, SLOT(onLeftBWLMaxAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalLeftBWLIdealAngle(float)), &_max, SLOT(onLeftBWLIdealAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalLeftBWLAllowedAngleVariance(float)), &_max, SLOT(onLeftBWLAllowedAngleVariance(float)));
     QObject::connect(&_mary, SIGNAL(signalLeftBWLMinVotes(int)), &_max, SLOT(onLeftBWLMinVotes(int)));
     QObject::connect(&_mary, SIGNAL(signalLeftBWLDistanceThreshold(float)), &_max, SLOT(onLeftBWLDistanceThreshold(float)));
     QObject::connect(&_mary, SIGNAL(signalLeftBWLIterations(int)), &_max, SLOT(onLeftBWLIterations(int)));
 
-    QObject::connect(&_mary, SIGNAL(signalRightBWLMinAngle(float)), &_max, SLOT(onRightBWLMinAngle(float)));
-    QObject::connect(&_mary, SIGNAL(signalRightBWLMaxAngle(float)), &_max, SLOT(onRightBWLMaxAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalRightBWLIdealAngle(float)), &_max, SLOT(onRightBWLIdealAngle(float)));
+    QObject::connect(&_mary, SIGNAL(signalRightBWLAllowedAngleVariance(float)), &_max, SLOT(onRightBWLAllowedAngleVariance(float)));
     QObject::connect(&_mary, SIGNAL(signalRightBWLMinVotes(int)), &_max, SLOT(onRightBWLMinVotes(int)));
     QObject::connect(&_mary, SIGNAL(signalRightBWLDistanceThreshold(float)), &_max, SLOT(onRightBWLDistanceThreshold(float)));
     QObject::connect(&_mary, SIGNAL(signalRightBWLIterations(int)), &_max, SLOT(onRightBWLIterations(int)));

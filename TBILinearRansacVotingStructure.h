@@ -1,20 +1,20 @@
-#ifndef TBITOPSURFACELINEVOTINGSTRUCTURE_H
-#define TBITOPSURFACELINEVOTINGSTRUCTURE_H
+#ifndef TBILINEARRANSACVOTINGSTRUCTURE_H
+#define TBILINEARRANSACVOTINGSTRUCTURE_H
 
 #include "tbiline.h"
 
-struct TBILineVotingStructure
+struct TBILinearRansacVotingStructure
 {
     int m_numvotes;
     float m_angletohorizontal;
     TBILine m_line;
 
-    TBILineVotingStructure()
+    TBILinearRansacVotingStructure()
     {
         m_numvotes = 0;
         m_angletohorizontal = 99999.99999;
     }
-    TBILineVotingStructure(const TBILineVotingStructure& _lvs)
+    TBILinearRansacVotingStructure(const TBILinearRansacVotingStructure& _lvs)
     {
         m_numvotes = _lvs.m_numvotes;
         m_angletohorizontal = _lvs.m_angletohorizontal;
@@ -23,4 +23,4 @@ struct TBILineVotingStructure
     }
 };
 
-#endif // TBITOPSURFACELINEVOTINGSTRUCTURE_H
+#endif // TBILINEARRANSACVOTINGSTRUCTURE_H

@@ -10,6 +10,7 @@ TBILine::TBILine()
     m_validline = false;
     updateInternals();
     m_thickness = 1;
+    m_color = CV_RGB(255,255,255);
 
 }
 
@@ -134,6 +135,14 @@ void TBILine::drawOnMat(cv::Mat &_dst, cv::Scalar _color, int _thickness)
     cv::Point _p2((int)this->m_point2.getX(), (int)this->m_point2.getY());
     cv::line(_dst, _p1, _p2, _color, _thickness, cv::LINE_AA);
 
+}
+
+void TBILine::drawOnMat(cv::Mat &_dst)
+{
+    if(!m_validline) return;
+    cv::Point _p1((int)this->m_point1.getX(), (int)this->m_point1.getY());
+    cv::Point _p2((int)this->m_point2.getX(), (int)this->m_point2.getY());
+    cv::line(_dst, _p1, _p2, m_color, m_thickness, cv::LINE_AA);
 }
 
 bool TBILine::compareLines(TBILine &_line, float _distance_threshold)

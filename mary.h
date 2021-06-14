@@ -58,26 +58,26 @@ class Mary : public QObject
     //Skeletal Processing Properties-------------------------------------------------------------
     Q_PROPERTY(int sk_max_discontinuity READ getMaxDiscontinuity WRITE setMaxDiscontinuity NOTIFY skMaxDiscontuityChanged)
     //Ransac Processing Properties-------------------------------------------------------------
-    Q_PROPERTY(float rn_left_tsl_min_angle READ getLeftTSLMinAngle WRITE setLeftTSLMinAngle NOTIFY rnLeftTSLMinAngleChanged)
-    Q_PROPERTY(float rn_left_tsl_max_angle READ getLeftTSLMaxAngle WRITE setLeftTSLMaxAngle NOTIFY rnLeftTSLMaxAngleChanged)
+    Q_PROPERTY(float rn_left_tsl_ideal_angle READ getLeftTSLIdealAngle WRITE setLeftTSLIdealAngle NOTIFY rnLeftTSLIdealAngleChanged)
+    Q_PROPERTY(float rn_left_tsl_allowed_angle_variance READ getLeftTSLAllowedAngleVariance WRITE setLeftTSLAllowedAngleVariance NOTIFY rnLeftTSLAllowedAngleVarianceChanged)
     Q_PROPERTY(int rn_left_tsl_votes READ getLeftTSLMinVotes WRITE setLeftTSLMinVotes NOTIFY rnLeftTSLMinVotesChanged)
     Q_PROPERTY(float rn_left_tsl_distance_threshold READ getLeftTSLDistanceThreshold WRITE setLeftTSLDistanceThreshold NOTIFY rnLeftTSLDistanceThresholdChanged)
     Q_PROPERTY(int rn_left_tsl_iterations READ getLeftTSLIterations WRITE setLeftTSLIterations NOTIFY rnLeftTSLIterationsChanged)
 
-    Q_PROPERTY(float rn_right_tsl_min_angle READ getRightTSLMinAngle WRITE setRightTSLMinAngle NOTIFY rnRightTSLMinAngleChanged)
-    Q_PROPERTY(float rn_right_tsl_max_angle READ getRightTSLMaxAngle WRITE setRightTSLMaxAngle NOTIFY rnRightTSLMaxAngleChanged)
+    Q_PROPERTY(float rn_right_tsl_ideal_angle READ getRightTSLIdealAngle WRITE setRightTSLIdealAngle NOTIFY rnRightTSLIdealAngleChanged)
+    Q_PROPERTY(float rn_right_tsl_allowed_angle_variance READ getRightTSLAllowedAngleVariance WRITE setRightTSLAllowedAngleVariance NOTIFY rnRightTSLAllowedAngleVarianceChanged)
     Q_PROPERTY(int rn_right_tsl_votes READ getRightTSLMinVotes WRITE setRightTSLMinVotes NOTIFY rnRightTSLMinVotesChanged)
     Q_PROPERTY(float rn_right_tsl_distance_threshold READ getRightTSLDistanceThreshold WRITE setRightTSLDistanceThreshold NOTIFY rnRightTSLDistanceThresholdChanged)
     Q_PROPERTY(int rn_right_tsl_iterations READ getRightTSLIterations WRITE setRightTSLIterations NOTIFY rnRightTSLIterationsChanged)
 
-    Q_PROPERTY(float rn_left_bwl_min_angle READ getLeftBWLMinAngle WRITE setLeftBWLMinAngle NOTIFY rnLeftBWLMinAngleChanged)
-    Q_PROPERTY(float rn_left_bwl_max_angle READ getLeftBWLMaxAngle WRITE setLeftBWLMaxAngle NOTIFY rnLeftBWLMaxAngleChanged)
+    Q_PROPERTY(float rn_left_bwl_ideal_angle READ getLeftBWLIdealAngle WRITE setLeftBWLIdealAngle NOTIFY rnLeftBWLIdealAngleChanged)
+    Q_PROPERTY(float rn_left_bwl_allowed_angle_variance READ getLeftBWLAllowedAngleVariance WRITE setLeftBWLAllowedAngleVariance NOTIFY rnLeftBWLAllowedAngleVarianceChanged)
     Q_PROPERTY(int rn_left_bwl_votes READ getLeftBWLMinVotes WRITE setLeftBWLMinVotes NOTIFY rnLeftBWLMinVotesChanged)
     Q_PROPERTY(float rn_left_bwl_distance_threshold READ getLeftBWLDistanceThreshold WRITE setLeftBWLDistanceThreshold NOTIFY rnLeftBWLDistanceThresholdChanged)
     Q_PROPERTY(int rn_left_bwl_iterations READ getLeftBWLIterations WRITE setLeftBWLIterations NOTIFY rnLeftBWLIterationsChanged)
 
-    Q_PROPERTY(float rn_right_bwl_min_angle READ getRightBWLMinAngle WRITE setRightBWLMinAngle NOTIFY rnRightBWLMinAngleChanged)
-    Q_PROPERTY(float rn_right_bwl_max_angle READ getRightBWLMaxAngle WRITE setRightBWLMaxAngle NOTIFY rnRightBWLMaxAngleChanged)
+    Q_PROPERTY(float rn_right_bwl_ideal_angle READ getRightBWLIdealAngle WRITE setRightBWLIdealAngle NOTIFY rnRightBWLIdealAngleChanged)
+    Q_PROPERTY(float rn_right_bwl_allowed_angle_variance READ getRightBWLAllowedAngleVariance WRITE setRightBWLAllowedAngleVariance NOTIFY rnRightBWLAllowedAngleVarianceChanged)
     Q_PROPERTY(int rn_right_bwl_votes READ getRightBWLMinVotes WRITE setRightBWLMinVotes NOTIFY rnRightBWLMinVotesChanged)
     Q_PROPERTY(float rn_right_bwl_distance_threshold READ getRightBWLDistanceThreshold WRITE setRightBWLDistanceThreshold NOTIFY rnRightBWLDistanceThresholdChanged)
     Q_PROPERTY(int rn_right_bwl_iterations READ getRightBWLIterations WRITE setRightBWLIterations NOTIFY rnRightBWLIterationsChanged)
@@ -123,26 +123,26 @@ public:
     //Skeletal Processing Get Functions
     Q_INVOKABLE int getMaxDiscontinuity(){return m_sk_max_discontinuity;}
     //Ransac Processing Get Functions
-    Q_INVOKABLE float getLeftTSLMinAngle(){return m_left_tsl_min_angle;}
-    Q_INVOKABLE float getLeftTSLMaxAngle(){return m_left_tsl_max_angle;}
+    Q_INVOKABLE float getLeftTSLIdealAngle(){return m_left_tsl_ideal_angle;}
+    Q_INVOKABLE float getLeftTSLAllowedAngleVariance(){return m_left_tsl_allowed_angle_variance;}
     Q_INVOKABLE int getLeftTSLMinVotes(){return m_left_tsl_min_votes;}
     Q_INVOKABLE float getLeftTSLDistanceThreshold(){return m_left_tsl_distance_threshold;}
     Q_INVOKABLE float getLeftTSLIterations(){return m_left_tsl_iterations;}
 
-    Q_INVOKABLE float getRightTSLMinAngle(){return m_right_tsl_min_angle;}
-    Q_INVOKABLE float getRightTSLMaxAngle(){return m_right_tsl_max_angle;}
+    Q_INVOKABLE float getRightTSLIdealAngle(){return m_right_tsl_ideal_angle;}
+    Q_INVOKABLE float getRightTSLAllowedAngleVariance(){return m_right_tsl_allowed_angle_variance;}
     Q_INVOKABLE int getRightTSLMinVotes(){return m_right_tsl_min_votes;}
     Q_INVOKABLE float getRightTSLDistanceThreshold(){return m_right_tsl_distance_threshold;}
     Q_INVOKABLE int getRightTSLIterations(){return m_right_tsl_iterations;}
 
-    Q_INVOKABLE float getLeftBWLMinAngle(){return m_left_bwl_min_angle;}
-    Q_INVOKABLE float getLeftBWLMaxAngle(){return m_left_bwl_max_angle;}
+    Q_INVOKABLE float getLeftBWLIdealAngle(){return m_left_bwl_ideal_angle;}
+    Q_INVOKABLE float getLeftBWLAllowedAngleVariance(){return m_left_bwl_allowed_angle_variance;}
     Q_INVOKABLE int getLeftBWLMinVotes(){return m_left_bwl_min_votes;}
     Q_INVOKABLE float getLeftBWLDistanceThreshold(){return m_left_bwl_distance_threshold;}
     Q_INVOKABLE int getLeftBWLIterations(){return m_left_bwl_iterations;}
 
-    Q_INVOKABLE float getRightBWLMinAngle(){return m_right_bwl_min_angle;}
-    Q_INVOKABLE float getRightBWLMaxAngle(){return m_right_bwl_max_angle;}
+    Q_INVOKABLE float getRightBWLIdealAngle(){return m_right_bwl_ideal_angle;}
+    Q_INVOKABLE float getRightBWLAllowedAngleVariance(){return m_right_bwl_allowed_angle_variance;}
     Q_INVOKABLE int getRightBWLMinVotes(){return m_right_bwl_min_votes;}
     Q_INVOKABLE float getRightBWLDistanceThreshold(){return m_right_bwl_distance_threshold;}
     Q_INVOKABLE int getRightBWLIterations(){return m_right_bwl_iterations;}
@@ -172,26 +172,26 @@ public:
     //Skeletal Set Functions-----------------------------------------------------------------
     void setMaxDiscontinuity(int _disc);
     //Ransac Set Functions-------------------------------------------------------------------
-    void setLeftTSLMinAngle(float _minangle);
-    void setLeftTSLMaxAngle(float _maxangle);
+    void setLeftTSLIdealAngle(float _IdealAngle);
+    void setLeftTSLAllowedAngleVariance(float _AllowedAngleVariance);
     void setLeftTSLMinVotes(int _minvotes);
     void setLeftTSLDistanceThreshold(float _distthreshold);
     void setLeftTSLIterations(int _iterations);
 
-    void setRightTSLMinAngle(float _minangle);
-    void setRightTSLMaxAngle(float _maxangle);
+    void setRightTSLIdealAngle(float _IdealAngle);
+    void setRightTSLAllowedAngleVariance(float _AllowedAngleVariance);
     void setRightTSLMinVotes(int _minvotes);
     void setRightTSLDistanceThreshold(float _distthreshold);
     void setRightTSLIterations(int _iterations);
 
-    void setLeftBWLMinAngle(float _minangle);
-    void setLeftBWLMaxAngle(float _maxangle);
+    void setLeftBWLIdealAngle(float _IdealAngle);
+    void setLeftBWLAllowedAngleVariance(float _AllowedAngleVariance);
     void setLeftBWLMinVotes(int _minvotes);
     void setLeftBWLDistanceThreshold(float _distthreshold);
     void setLeftBWLIterations(int _iterations);
 
-    void setRightBWLMinAngle(float _minangle);
-    void setRightBWLMaxAngle(float _maxangle);
+    void setRightBWLIdealAngle(float _IdealAngle);
+    void setRightBWLAllowedAngleVariance(float _AllowedAngleVariance);
     void setRightBWLMinVotes(int _minvotes);
     void setRightBWLDistanceThreshold(float _distthreshold);
     void setRightBWLIterations(int _iterations);
@@ -225,26 +225,26 @@ signals:
     //Skeletal
     void signalChangeMaxDiscontinuity(int _value);
     //RANSAC
-    void signalLeftTSLMinAngle(float _minangle);
-    void signalLeftTSLMaxAngle(float _maxangle);
+    void signalLeftTSLIdealAngle(float _IdealAngle);
+    void signalLeftTSLAllowedAngleVariance(float _AllowedAngleVariance);
     void signalLeftTSLMinVotes(int _minvotes);
     void signalLeftTSLDistanceThreshold(float _distthreshold);
     void signalLeftTSLIterations(int _iterations);
 
-    void signalRightTSLMinAngle(float _minangle);
-    void signalRightTSLMaxAngle(float _maxangle);
+    void signalRightTSLIdealAngle(float _IdealAngle);
+    void signalRightTSLAllowedAngleVariance(float _AllowedAngleVariance);
     void signalRightTSLMinVotes(int _minvotes);
     void signalRightTSLDistanceThreshold(float _distthreshold);
     void signalRightTSLIterations(int _iterations);
 
-    void signalLeftBWLMinAngle(float _minangle);
-    void signalLeftBWLMaxAngle(float _maxangle);
+    void signalLeftBWLIdealAngle(float _IdealAngle);
+    void signalLeftBWLAllowedAngleVariance(float _AllowedAngleVariance);
     void signalLeftBWLMinVotes(int _minvotes);
     void signalLeftBWLDistanceThreshold(float _distthreshold);
     void signalLeftBWLIterations(int _iterations);
 
-    void signalRightBWLMinAngle(float _minangle);
-    void signalRightBWLMaxAngle(float _maxangle);
+    void signalRightBWLIdealAngle(float _IdealAngle);
+    void signalRightBWLAllowedAngleVariance(float _AllowedAngleVariance);
     void signalRightBWLMinVotes(int _minvotes);
     void signalRightBWLDistanceThreshold(float _distthreshold);
     void signalRightBWLIterations(int _iterations);
@@ -274,26 +274,26 @@ signals:
     //Skeletal Related Signals----------------------------------------------------------------
     void skMaxDiscontuityChanged();
     //Ransac Related Signals------------------------------------------------------------------
-    void rnLeftTSLMinAngleChanged();
-    void rnLeftTSLMaxAngleChanged();
+    void rnLeftTSLIdealAngleChanged();
+    void rnLeftTSLAllowedAngleVarianceChanged();
     void rnLeftTSLMinVotesChanged();
     void rnLeftTSLDistanceThresholdChanged();
     void rnLeftTSLIterationsChanged();
 
-    void rnRightTSLMinAngleChanged();
-    void rnRightTSLMaxAngleChanged();
+    void rnRightTSLIdealAngleChanged();
+    void rnRightTSLAllowedAngleVarianceChanged();
     void rnRightTSLMinVotesChanged();
     void rnRightTSLDistanceThresholdChanged();
     void rnRightTSLIterationsChanged();
 
-    void rnLeftBWLMinAngleChanged();
-    void rnLeftBWLMaxAngleChanged();
+    void rnLeftBWLIdealAngleChanged();
+    void rnLeftBWLAllowedAngleVarianceChanged();
     void rnLeftBWLMinVotesChanged();
     void rnLeftBWLDistanceThresholdChanged();
     void rnLeftBWLIterationsChanged();
 
-    void rnRightBWLMinAngleChanged();
-    void rnRightBWLMaxAngleChanged();
+    void rnRightBWLIdealAngleChanged();
+    void rnRightBWLAllowedAngleVarianceChanged();
     void rnRightBWLMinVotesChanged();
     void rnRightBWLDistanceThresholdChanged();
     void rnRightBWLIterationsChanged();
@@ -336,26 +336,26 @@ private:
     int m_sk_max_discontinuity;
 
     //Ransac Processing Settings and Stuff
-    float m_left_tsl_min_angle;
-    float m_left_tsl_max_angle;
+    float m_left_tsl_ideal_angle;
+    float m_left_tsl_allowed_angle_variance;
     int m_left_tsl_min_votes;
     int m_left_tsl_iterations;
     float m_left_tsl_distance_threshold;
 
-    float m_right_tsl_min_angle;
-    float m_right_tsl_max_angle;
+    float m_right_tsl_ideal_angle;
+    float m_right_tsl_allowed_angle_variance;
     int m_right_tsl_min_votes;
     int m_right_tsl_iterations;
     float m_right_tsl_distance_threshold;
 
-    float m_left_bwl_min_angle;
-    float m_left_bwl_max_angle;
+    float m_left_bwl_ideal_angle;
+    float m_left_bwl_allowed_angle_variance;
     int m_left_bwl_min_votes;
     int m_left_bwl_iterations;
     float m_left_bwl_distance_threshold;
 
-    float m_right_bwl_min_angle;
-    float m_right_bwl_max_angle;
+    float m_right_bwl_ideal_angle;
+    float m_right_bwl_allowed_angle_variance;
     int m_right_bwl_min_votes;
     int m_right_bwl_iterations;
     float m_right_bwl_distance_threshold;
