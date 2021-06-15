@@ -159,6 +159,78 @@ bool TBILine::compareLines(TBILine &_line, float _distance_threshold)
     return false;
 }
 
+bool TBILine::isPointAboveLine(const TBIPoint &_pnt) const
+{
+
+    //Note: Because The System Stays In Basic Screen Coordinates Where Y Down is Positive
+    //The Slopes are actually inverse to the standard model.
+
+    if(!m_validline) return false;
+    float _x1 = _pnt.getX();
+    float _y1 = _pnt.getY();
+    float _x2 = (_x1 + m_slope*(_y1 - m_intercept))/(1+(m_slope*m_slope));
+    float _y2 = ((m_slope*_x1) + (m_slope*m_slope*_y1) + m_intercept) / (1+(m_slope*m_slope));
+
+    float _i = _x1 - _x2;
+    float _j = _y1 - _y2;
+
+
+    if(m_slope == 0)
+    {
+        if(_j < 0) return true;
+
+    }
+    if(m_slope > 0)
+    {
+        if((_j < 0) && (_i > 0)) return true;
+    }
+    if(m_slope < 0)
+    {
+        if((_j < 0) && (_i < 0)) return true;
+    }
+    return false;
+}
+
+bool TBILine::isPointBelowLine(const TBIPoint &_pnt) const
+{
+    //Note: Because The System Stays In Basic Screen Coordinates Where Y Down is Positive
+    //The Slopes are actually inverse to the standard model.
+
+    if(!m_validline) return false;
+    float _x1 = _pnt.getX();
+    float _y1 = _pnt.getY();
+    float _x2 = (_x1 + m_slope*(_y1 - m_intercept))/(1+(m_slope*m_slope));
+    float _y2 = ((m_slope*_x1) + (m_slope*m_slope*_y1) + m_intercept) / (1+(m_slope*m_slope));
+
+    float _i = _x1 - _x2;
+    float _j = _y1 - _y2;
+
+    if(m_slope == 0)
+    {
+        if(_j > 0 ) return true;
+    }
+    if(m_slope > 0)
+    {
+        if((_j > 0) && (_i < 0)) return true;
+    }
+    if(m_slope < 0)
+    {
+        if((_j > 0) && (_i > 0)) return true;
+    }
+    return false;
+}
+
+bool TBILine::isPointOnLine(const TBIPoint &_pnt) const
+{
+    if(!m_validline) return false;
+
+    float _dist = this->getOrthogonalDistance(_pnt);
+    if(_dist < .010) return true;
+    return false;
+}
+
+
+
 void TBILine::updateInternals()
 {
     updateValidLine();

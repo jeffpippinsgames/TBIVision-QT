@@ -72,9 +72,20 @@ private:
     //Scan Data Flattening Processing
     bool doImageFlattening(cv::Mat &_src, std::vector<TBIPoint> &_data, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii);
     void drawFlattenedImageDataToMat(cv::Mat &_dst, const std::vector<TBIPoint> &_data);
+    void drawFlattenedImageDataToMat(cv::Mat &_dst, const std::vector<TBIPoint> &_data, const cv::Scalar _color);
+
+    void copyFlattenedData(const std::vector<TBIPoint> &_src, std::vector<TBIPoint> &_dst);
+
+    void removeInliersFromFlattenedData(std::vector<TBIPoint> &_dstdata, const TBILine &_line, const float _distance_threshold_top, const float _distance_threshold_bottom);
+    void buildFlattenDataFromInliers(const std::vector<TBIPoint> &_srcdata, std::vector<TBIPoint> &_dstdata, const TBILine &_line, const float _distance_threshold_top, const float _distance_threshold_bottom);
+    bool buildFlattenDataFromBegining(const std::vector<TBIPoint> &_srcdata, std::vector<TBIPoint> &_dstdata, const int _consequetiverows);
+    bool buildFlattenDataFromEnd(const std::vector<TBIPoint> &_srcdata, std::vector<TBIPoint> &_dstdata, const int _consequetiverows);
+
 
     //Scan Data Ransac Processing
     bool doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint> &_vector);
+    bool doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint> &_vector, const int _startvectorindex, const int _endvectorindex);
+
 
    //Pixel Column Processing
     bool doPixelColumnProcessing(cv::Mat &_src, cv::Mat &_dst, PixelColumnClass* _pixel_column_array, quint64 *_tii,
@@ -156,6 +167,11 @@ private:
 
     //Pixel Column Phase Processing Variables--------------------------
     std::vector<TBIPoint> m_flattened_scan_data;
+    std::vector<TBIPoint> m_flattened_left_tsl_data;
+    std::vector<TBIPoint> m_flattened_right_tsl_data;
+    std::vector<TBIPoint> m_flattened_left_bwl_data;
+    std::vector<TBIPoint> m_flattened_right_bwl_data;
+    std::vector<TBIPoint> m_flattened_bevel_wall_data;
     quint64 m_total_image_intensity;
     PixelColumnClass m_cluster_columns[Mat_Max_Width];
 

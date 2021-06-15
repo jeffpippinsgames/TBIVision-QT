@@ -43,6 +43,9 @@ public:
     void setThickness(int _thickness){if(_thickness > 0)m_thickness=_thickness;}
     void setColor(cv::Scalar _color) {m_color = _color;}
     void setColor(uint8_t _r, uint8_t _g, uint8_t _b) { m_color = CV_RGB(_r,_g,_b);}
+    bool isPointAboveLine(const TBIPoint &_pnt) const;
+    bool isPointBelowLine(const TBIPoint &_pnt) const;
+    bool isPointOnLine (const TBIPoint &_pnt) const;
 
 
 
