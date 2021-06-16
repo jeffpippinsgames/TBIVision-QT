@@ -87,10 +87,13 @@ private:
     bool doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint> &_vector, const int _startvectorindex, const int _endvectorindex);
 
 
-   //Pixel Column Processing
+   //Pixel Column  and Cluster Processing
     bool doPixelColumnProcessing(cv::Mat &_src, cv::Mat &_dst, PixelColumnClass* _pixel_column_array, quint64 *_tii,
                                  quint64 _max_tii, quint64 _min_tii, int _min_cluster_size, int _max_cluster_size,
                                  int _max_clusters_in_column);
+
+    bool clusterProcessThresholdMat(cv::Mat &_src, cv::Mat &_dst, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii, const int _min_cluster_size,
+                                    const int _max_cluster_size, const int _max_clusters_in_column, std::vector<TBIPoint> &_scan_data_vector);
 
     //Skeleton Processing
     bool doSkeletonProcessing(cv::Mat &_dst, PixelColumnClass *_pixel_column_array, float *_skel_array, float _continuity_threshold);
@@ -172,6 +175,8 @@ private:
     std::vector<TBIPoint> m_flattened_left_bwl_data;
     std::vector<TBIPoint> m_flattened_right_bwl_data;
     std::vector<TBIPoint> m_flattened_bevel_wall_data;
+    std::vector<TBIPoint> m_flattened_left_bevel_wall_data;
+    std::vector<TBIPoint> m_flattened_right_bevel_wall_data;
     quint64 m_total_image_intensity;
     PixelColumnClass m_cluster_columns[Mat_Max_Width];
 
@@ -276,6 +281,7 @@ signals:
     void failedSplitMergeCheck();
     void failedRansacVertexProcesssing();
     void failedFlattenImageData();
+    void failedSkeletonizeMat();
     void emitExtraMatsChanged();
 
 

@@ -20,7 +20,10 @@ public:
     void EraseFromMat(cv::Mat &_mat);
     int getColumn();
 
-
+PixelFundamental_t& operator[](std::size_t _index)
+{
+    return m_pixels[_index];
+}
 
 private:
      std::vector<PixelFundamental_t> m_pixels;
