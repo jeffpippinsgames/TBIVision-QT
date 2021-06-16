@@ -70,21 +70,21 @@ private:
 
 
     //Scan Data Flattening Processing
-    bool doImageFlattening(cv::Mat &_src, std::vector<TBIPoint> &_data, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii);
-    void drawFlattenedImageDataToMat(cv::Mat &_dst, const std::vector<TBIPoint> &_data);
-    void drawFlattenedImageDataToMat(cv::Mat &_dst, const std::vector<TBIPoint> &_data, const cv::Scalar _color);
+    bool doImageFlattening(cv::Mat &_src, std::vector<TBIPoint_Float> &_data, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii);
+    void drawFlattenedImageDataToMat(cv::Mat &_dst, const std::vector<TBIPoint_Float> &_data);
+    void drawFlattenedImageDataToMat(cv::Mat &_dst, const std::vector<TBIPoint_Float> &_data, const cv::Scalar _color);
 
-    void copyFlattenedData(const std::vector<TBIPoint> &_src, std::vector<TBIPoint> &_dst);
+    void copyFlattenedData(const std::vector<TBIPoint_Float> &_src, std::vector<TBIPoint_Float> &_dst);
 
-    void removeInliersFromFlattenedData(std::vector<TBIPoint> &_dstdata, const TBILine &_line, const float _distance_threshold_top, const float _distance_threshold_bottom);
-    void buildFlattenDataFromInliers(const std::vector<TBIPoint> &_srcdata, std::vector<TBIPoint> &_dstdata, const TBILine &_line, const float _distance_threshold_top, const float _distance_threshold_bottom);
-    bool buildFlattenDataFromBegining(const std::vector<TBIPoint> &_srcdata, std::vector<TBIPoint> &_dstdata, const int _consequetiverows);
-    bool buildFlattenDataFromEnd(const std::vector<TBIPoint> &_srcdata, std::vector<TBIPoint> &_dstdata, const int _consequetiverows);
+    void removeInliersFromFlattenedData(std::vector<TBIPoint_Float> &_dstdata, const TBILine &_line, const float _distance_threshold_top, const float _distance_threshold_bottom);
+    void buildFlattenDataFromInliers(const std::vector<TBIPoint_Float> &_srcdata, std::vector<TBIPoint_Float> &_dstdata, const TBILine &_line, const float _distance_threshold_top, const float _distance_threshold_bottom);
+    bool buildFlattenDataFromBegining(const std::vector<TBIPoint_Float> &_srcdata, std::vector<TBIPoint_Float> &_dstdata, const int _consequetiverows);
+    bool buildFlattenDataFromEnd(const std::vector<TBIPoint_Float> &_srcdata, std::vector<TBIPoint_Float> &_dstdata, const int _consequetiverows);
 
 
     //Scan Data Ransac Processing
-    bool doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint> &_vector);
-    bool doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint> &_vector, const int _startvectorindex, const int _endvectorindex);
+    bool doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint_Float> &_vector);
+    bool doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint_Float> &_vector, const int _startvectorindex, const int _endvectorindex);
 
 
    //Pixel Column  and Cluster Processing
@@ -93,7 +93,7 @@ private:
                                  int _max_clusters_in_column);
 
     bool clusterProcessThresholdMat(cv::Mat &_src, cv::Mat &_dst, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii, const int _min_cluster_size,
-                                    const int _max_cluster_size, const int _max_clusters_in_column, std::vector<TBIPoint> &_scan_data_vector);
+                                    const int _max_cluster_size, const int _max_clusters_in_column, std::vector<TBIPoint_Float> &_scan_data_vector);
 
     //Skeleton Processing
     bool doSkeletonProcessing(cv::Mat &_dst, PixelColumnClass *_pixel_column_array, float *_skel_array, float _continuity_threshold);
@@ -105,7 +105,7 @@ private:
     bool doRansacLineProcessing(cv::Mat &_dst, TBILine &_line, TBILinearRansac &_ransac, float* _skeletalarray, int _start_index, int _end_index, cv::Scalar _line_color);
 
 
-    bool doRansacVertexProcessing(TBILine &_ltsl, TBILine &_rtsl, float *_skel_array, TBIPoint &_lv, TBIPoint &_rv, const float _left_vertex_dist_threshold, const float _right_vertex_dist_threshold);
+    bool doRansacVertexProcessing(TBILine &_ltsl, TBILine &_rtsl, float *_skel_array, TBIPoint_Float &_lv, TBIPoint_Float &_rv, const float _left_vertex_dist_threshold, const float _right_vertex_dist_threshold);
 
 
     //Split Merge Processing
@@ -169,14 +169,14 @@ private:
     float m_flattened_hrv; //Highest Row Value
 
     //Pixel Column Phase Processing Variables--------------------------
-    std::vector<TBIPoint> m_flattened_scan_data;
-    std::vector<TBIPoint> m_flattened_left_tsl_data;
-    std::vector<TBIPoint> m_flattened_right_tsl_data;
-    std::vector<TBIPoint> m_flattened_left_bwl_data;
-    std::vector<TBIPoint> m_flattened_right_bwl_data;
-    std::vector<TBIPoint> m_flattened_bevel_wall_data;
-    std::vector<TBIPoint> m_flattened_left_bevel_wall_data;
-    std::vector<TBIPoint> m_flattened_right_bevel_wall_data;
+    std::vector<TBIPoint_Float> m_flattened_scan_data;
+    std::vector<TBIPoint_Float> m_flattened_left_tsl_data;
+    std::vector<TBIPoint_Float> m_flattened_right_tsl_data;
+    std::vector<TBIPoint_Float> m_flattened_left_bwl_data;
+    std::vector<TBIPoint_Float> m_flattened_right_bwl_data;
+    std::vector<TBIPoint_Float> m_flattened_bevel_wall_data;
+    std::vector<TBIPoint_Float> m_flattened_left_bevel_wall_data;
+    std::vector<TBIPoint_Float> m_flattened_right_bevel_wall_data;
     quint64 m_total_image_intensity;
     PixelColumnClass m_cluster_columns[Mat_Max_Width];
 
@@ -197,8 +197,8 @@ private:
     TBILine m_right_bwl;
     TBILinearRansac m_right_bwl_ransac;
 
-    TBIPoint m_right_ransac_vertex;
-    TBIPoint m_left_ransac_vertex;
+    TBIPoint_Float m_right_ransac_vertex;
+    TBIPoint_Float m_left_ransac_vertex;
 
     //Linear Topography. (Split and Merge Algorythms)-------------------
     std::vector<TBILine> m_topography_lines;

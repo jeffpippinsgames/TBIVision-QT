@@ -3,7 +3,7 @@
 #include "pixelcolumnclass.h"
 #include "pixelclusterclass.h"
 #include "pixelfundamental.h"
-#include "TBILinearRansacVotingStructure.h"
+#include "tbilinearransacvotingstructure.h"
 #include <QRandomGenerator>
 #include <QThread>
 #include <vector>
@@ -118,7 +118,7 @@ int Max::randomInt(int _min, int _max)
 
 
 //Flattned Data Functions
-bool Max::doImageFlattening(Mat &_src, std::vector<TBIPoint> &_data, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii)
+bool Max::doImageFlattening(Mat &_src, std::vector<TBIPoint_Float> &_data, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii)
 {
     *_tii = 0;
     _data.clear();
@@ -140,7 +140,7 @@ bool Max::doImageFlattening(Mat &_src, std::vector<TBIPoint> &_data, quint64 *_t
         if(_srcdata[_dataindex] > 0)
         {
 
-            _data.push_back(TBIPoint((float)_col, (float)_row));
+            _data.push_back(TBIPoint_Float((float)_col, (float)_row));
             *_tii += _srcdata[_dataindex];
         }
 
@@ -173,7 +173,7 @@ bool Max::doImageFlattening(Mat &_src, std::vector<TBIPoint> &_data, quint64 *_t
     return true;
 }
 
-void Max::drawFlattenedImageDataToMat(Mat &_dst, const std::vector<TBIPoint> &_data)
+void Max::drawFlattenedImageDataToMat(Mat &_dst, const std::vector<TBIPoint_Float> &_data)
 {
     if(_dst.type() != CV_8UC1)
     {
@@ -205,7 +205,7 @@ void Max::drawFlattenedImageDataToMat(Mat &_dst, const std::vector<TBIPoint> &_d
 
 }
 
-void Max::drawFlattenedImageDataToMat(Mat &_dst, const std::vector<TBIPoint> &_data, const Scalar _color)
+void Max::drawFlattenedImageDataToMat(Mat &_dst, const std::vector<TBIPoint_Float> &_data, const Scalar _color)
 {
     if(_dst.type() != CV_8UC3)
     {
@@ -248,7 +248,7 @@ void Max::drawFlattenedImageDataToMat(Mat &_dst, const std::vector<TBIPoint> &_d
 
 }
 
-void Max::copyFlattenedData(const std::vector<TBIPoint> &_src, std::vector<TBIPoint> &_dst)
+void Max::copyFlattenedData(const std::vector<TBIPoint_Float> &_src, std::vector<TBIPoint_Float> &_dst)
 {
 
     _dst.clear();
@@ -258,13 +258,13 @@ void Max::copyFlattenedData(const std::vector<TBIPoint> &_src, std::vector<TBIPo
     const int _srcsize = _src.size();
     do
     {
-        TBIPoint _pnt = _src[(_srcsize-1) - _index];
+        TBIPoint_Float _pnt = _src[(_srcsize-1) - _index];
         _dst.push_back(_pnt);
         ++_index;
     }while(_index < _srcsize);
 }
 
-void Max::removeInliersFromFlattenedData(std::vector<TBIPoint> &_dstdata, const TBILine &_line, const float _distance_threshold_top, const float _distance_threshold_bottom)
+void Max::removeInliersFromFlattenedData(std::vector<TBIPoint_Float> &_dstdata, const TBILine &_line, const float _distance_threshold_top, const float _distance_threshold_bottom)
 {
     if(_dstdata.size() == 0)
     {
@@ -305,7 +305,7 @@ void Max::removeInliersFromFlattenedData(std::vector<TBIPoint> &_dstdata, const 
     }while((_index >= 0));
 }
 
-void Max::buildFlattenDataFromInliers(const std::vector<TBIPoint> &_srcdata, std::vector<TBIPoint> &_dstdata, const TBILine &_line, const float _distance_threshold_top, const float _distance_threshold_bottom)
+void Max::buildFlattenDataFromInliers(const std::vector<TBIPoint_Float> &_srcdata, std::vector<TBIPoint_Float> &_dstdata, const TBILine &_line, const float _distance_threshold_top, const float _distance_threshold_bottom)
 {
     _dstdata.clear();
     if(_srcdata.size() == 0) return;
@@ -341,7 +341,7 @@ void Max::buildFlattenDataFromInliers(const std::vector<TBIPoint> &_srcdata, std
     }while(_index < _srcvector_size);
 }
 
-bool Max::buildFlattenDataFromBegining(const std::vector<TBIPoint> &_srcdata, std::vector<TBIPoint> &_dstdata, const int _consequetiverows)
+bool Max::buildFlattenDataFromBegining(const std::vector<TBIPoint_Float> &_srcdata, std::vector<TBIPoint_Float> &_dstdata, const int _consequetiverows)
 {
     _dstdata.clear();
 
@@ -374,7 +374,7 @@ bool Max::buildFlattenDataFromBegining(const std::vector<TBIPoint> &_srcdata, st
     return true;
 }
 
-bool Max::buildFlattenDataFromEnd(const std::vector<TBIPoint> &_srcdata, std::vector<TBIPoint> &_dstdata, const int _consequetiverows)
+bool Max::buildFlattenDataFromEnd(const std::vector<TBIPoint_Float> &_srcdata, std::vector<TBIPoint_Float> &_dstdata, const int _consequetiverows)
 {
     _dstdata.clear();
 
@@ -458,7 +458,7 @@ bool Max::doPixelColumnProcessing(Mat &_src, Mat &_dst, PixelColumnClass *_pixel
 }
 
 bool Max::clusterProcessThresholdMat(Mat &_src, Mat &_dst, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii,
-                                     const int _min_cluster_size, const int _max_cluster_size, const int _max_clusters_in_column, std::vector<TBIPoint> &_scan_data_vector)
+                                     const int _min_cluster_size, const int _max_cluster_size, const int _max_clusters_in_column, std::vector<TBIPoint_Float> &_scan_data_vector)
 {
 
     /*
@@ -483,8 +483,10 @@ bool Max::clusterProcessThresholdMat(Mat &_src, Mat &_dst, quint64 *_tii, const 
     int _clusterindex;
     PixelClusterClass _cluster;
 
+    //Mat_Index = ((Y) * Mat.cols) + X
     uint8_t *_srcdata = _src.data;
     uint8_t *_dstdata = _dst.data;
+
     int _srcindex = 0;
     int _dstindex = 0;
 
@@ -514,7 +516,7 @@ bool Max::clusterProcessThresholdMat(Mat &_src, Mat &_dst, quint64 *_tii, const 
                       _cluster.setRowCentroid();
                       _dstindex = ((int)_cluster.getRowCentroid() * _dst.cols) + _x;
                       _dstdata[_dstindex] = 255;
-                      _scan_data_vector.push_back(TBIPoint((float)_x, _cluster.getRowCentroid()));
+                      _scan_data_vector.push_back(TBIPoint_Float((float)_x, _cluster.getRowCentroid()));
 
                 }
                 else //The Cluster Is Not Centroid Put Them all in the _dst mat
@@ -524,7 +526,7 @@ bool Max::clusterProcessThresholdMat(Mat &_src, Mat &_dst, quint64 *_tii, const 
                     {
                        _dstindex = (_cluster[_clusterindex].row * _dst.cols) + _cluster[_clusterindex].col;
                        _dstdata[_dstindex] = 255;
-                       _scan_data_vector.push_back(TBIPoint((float)_cluster[_clusterindex].col, (float)_cluster[_clusterindex].row));
+                       _scan_data_vector.push_back(TBIPoint_Float((float)_cluster[_clusterindex].col, (float)_cluster[_clusterindex].row));
                         ++_clusterindex;
                     }while(_clusterindex < _cluster.size());
                 }
@@ -543,7 +545,7 @@ bool Max::clusterProcessThresholdMat(Mat &_src, Mat &_dst, quint64 *_tii, const 
                     _cluster.setRowCentroid();
                    _dstindex = ((int)_cluster.getRowCentroid() * _dst.cols) + _x;
                    _dstdata[_dstindex] = 255;
-                   _scan_data_vector.push_back(TBIPoint((float)_x, _cluster.getRowCentroid()));
+                   _scan_data_vector.push_back(TBIPoint_Float((float)_x, _cluster.getRowCentroid()));
                 }
                 else //The Cluster Is Not Centroid Put Them all in the _dst mat
                 {
@@ -552,7 +554,7 @@ bool Max::clusterProcessThresholdMat(Mat &_src, Mat &_dst, quint64 *_tii, const 
                     {
                        _dstindex = (_cluster[_clusterindex].row * _dst.cols) + _cluster[_clusterindex].col;
                        _dstdata[_dstindex] = 255;
-                       _scan_data_vector.push_back(TBIPoint((float)_cluster[_clusterindex].col, (float)_cluster[_clusterindex].row));
+                       _scan_data_vector.push_back(TBIPoint_Float((float)_cluster[_clusterindex].col, (float)_cluster[_clusterindex].row));
                         ++_clusterindex;
                     }while(_clusterindex < _cluster.size());
                 }
@@ -778,7 +780,7 @@ bool Max::doSplitMergeProcesssing(float *_data_array, int _max_index, std::vecto
 
 
 //Ransac Functions
-bool Max::doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint> &_vector)
+bool Max::doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint_Float> &_vector)
 {
     _line.clear();
 
@@ -877,7 +879,7 @@ bool Max::doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac,
     return true;
 }
 
-bool Max::doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint> &_vector, const int _startvectorindex, const int _endvectorindex)
+bool Max::doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint_Float> &_vector, const int _startvectorindex, const int _endvectorindex)
 {
     _line.clear();
 
@@ -1073,7 +1075,7 @@ bool Max::doRansacLineProcessing(Mat &_dst, TBILine &_line, TBILinearRansac &_ra
     _iteration = 0;
     do
     {
-        TBIPoint _pnt((float)_index1, m_skeletal_line_array[_index1]);
+        TBIPoint_Float _pnt((float)_index1, m_skeletal_line_array[_index1]);
         _distance = _linecandidates[_iteration].m_line.getOrthogonalDistance(_pnt);
         if(_distance <= _distance_threshold)
         {
@@ -1109,7 +1111,7 @@ bool Max::doRansacLineProcessing(Mat &_dst, TBILine &_line, TBILinearRansac &_ra
     return true;
 }
 
-bool Max::doRansacVertexProcessing(TBILine &_ltsl, TBILine &_rtsl, float *_skel_array, TBIPoint &_lv, TBIPoint &_rv, const float _left_vertex_dist_threshold, const float _right_vertex_dist_threshold)
+bool Max::doRansacVertexProcessing(TBILine &_ltsl, TBILine &_rtsl, float *_skel_array, TBIPoint_Float &_lv, TBIPoint_Float &_rv, const float _left_vertex_dist_threshold, const float _right_vertex_dist_threshold)
 {
     /*
      Finding the Left and Right Side Vertexes is critical.
@@ -1148,7 +1150,7 @@ bool Max::doRansacVertexProcessing(TBILine &_ltsl, TBILine &_rtsl, float *_skel_
     {
         if(_skel_array[_currentindex] != -1)
         {
-            _distance = _ltsl.getOrthogonalDistance(TBIPoint((float)_currentindex, _skel_array[_currentindex]));
+            _distance = _ltsl.getOrthogonalDistance(TBIPoint_Float((float)_currentindex, _skel_array[_currentindex]));
             if(_distance <= _left_vertex_dist_threshold + 2)
             {
                 _lastvalidindex = _currentindex;
@@ -1173,7 +1175,7 @@ bool Max::doRansacVertexProcessing(TBILine &_ltsl, TBILine &_rtsl, float *_skel_
     {
         if(_skel_array[_currentindex] != -1)
         {
-            _distance = _rtsl.getOrthogonalDistance(TBIPoint((float)_currentindex, _skel_array[_currentindex]));
+            _distance = _rtsl.getOrthogonalDistance(TBIPoint_Float((float)_currentindex, _skel_array[_currentindex]));
             if(_distance <= _right_vertex_dist_threshold + 2)
             {
                 _lastvalidindex = _currentindex;
@@ -1197,9 +1199,9 @@ bool Max::doRansacVertexProcessing(TBILine &_ltsl, TBILine &_rtsl, float *_skel_
 bool Max::setProjectedRansacLines(TBILine &_src_tsl_left, TBILine &_src_tsl_right, TBILine &_src_bwl_left, TBILine &_src_bwl_right,
                                   TBILine &_dst_tsl_left, TBILine &_dst_tsl_right, TBILine &_dst_bwl_left, TBILine &_dst_bwl_right)
 {
-    TBIPoint _leftintersectionpnt;
-    TBIPoint _rightintersectionpnt;
-    TBIPoint _jointintersectionpnt;
+    TBIPoint_Float _leftintersectionpnt;
+    TBIPoint_Float _rightintersectionpnt;
+    TBIPoint_Float _jointintersectionpnt;
 
     bool _int1 = _src_tsl_left.findPointofIntersection(_src_bwl_left, _leftintersectionpnt);
     bool _int2 = _src_tsl_right.findPointofIntersection(_src_bwl_right, _rightintersectionpnt);
@@ -1328,8 +1330,8 @@ void Max::recieveNewCVMat(const Mat &_mat)
                                 removeInliersFromFlattenedData(m_flattened_right_bevel_wall_data, m_right_tsl, _raw_mat.rows, 5);
                                 if((m_flattened_left_bevel_wall_data.size() > 10) && (m_flattened_right_bevel_wall_data.size() > 10))
                                 {
-                                TBIPoint _leftrootpnt(m_flattened_left_bevel_wall_data[m_flattened_left_bevel_wall_data.size()-1].getX(), m_left_tsl.getYatX(m_flattened_left_bevel_wall_data[m_flattened_left_bevel_wall_data.size()-1].getX()));
-                                TBIPoint _rightrootpnt(m_flattened_right_bevel_wall_data[0].getX(), m_right_tsl.getYatX(m_flattened_right_bevel_wall_data[0].getX()));
+                                TBIPoint_Float _leftrootpnt(m_flattened_left_bevel_wall_data[m_flattened_left_bevel_wall_data.size()-1].getX(), m_left_tsl.getYatX(m_flattened_left_bevel_wall_data[m_flattened_left_bevel_wall_data.size()-1].getX()));
+                                TBIPoint_Float _rightrootpnt(m_flattened_right_bevel_wall_data[0].getX(), m_right_tsl.getYatX(m_flattened_right_bevel_wall_data[0].getX()));
                                 cv::drawMarker(_operation_mat, cv::Point((int)_leftrootpnt.getX(), (int)_leftrootpnt.getY()), CV_RGB(0,200,200), MARKER_DIAMOND, 20, 3);
                                 cv::drawMarker(_operation_mat, cv::Point((int)_rightrootpnt.getX(), (int)_rightrootpnt.getY()), CV_RGB(0,200,200), MARKER_DIAMOND, 20, 3);
                                 }
@@ -1412,9 +1414,9 @@ void Max::recieveNewCVMat(const Mat &_mat)
                                         m_right_bwl.drawOnMat(_ransac_mat, CV_RGB(125,125,125), 1);
 
                                         //Trim Ransac Lines and OverView Tracking Points
-                                        TBIPoint _intersectionpnt1;
-                                        TBIPoint _intersectionpnt2;
-                                        TBIPoint _intersectionpnt3;
+                                        TBIPoint_Float _intersectionpnt1;
+                                        TBIPoint_Float _intersectionpnt2;
+                                        TBIPoint_Float _intersectionpnt3;
 
                                         if(m_left_tsl.findPointofIntersection(m_left_bwl, _intersectionpnt1))
                                         {

@@ -21,13 +21,13 @@ TBILine::TBILine(const TBILine &_line)
     updateInternals();
 }
 
-void TBILine::setPoint1(TBIPoint _pnt)
+void TBILine::setPoint1(TBIPoint_Float _pnt)
 {
     m_point1 = _pnt;
     updateInternals();
 }
 
-void TBILine::setPoint2(TBIPoint _pnt)
+void TBILine::setPoint2(TBIPoint_Float _pnt)
 {
     m_point2 = _pnt;
     updateInternals();
@@ -38,7 +38,7 @@ bool TBILine::canLineBeSplitForSplitMerge(float *_data, int _start_index, int _e
     return true;
 }
 
-float TBILine::getOrthogonalDistance(const TBIPoint &_pnt) const
+float TBILine::getOrthogonalDistance(const TBIPoint_Float &_pnt) const
 {
     if(!m_validline) return 0.0;
     return abs((m_slope*_pnt.getX() - _pnt.getY() + m_intercept)/(sqrt(m_slope*m_slope + 1)));
@@ -54,8 +54,8 @@ float TBILine::interiorAngleToLine(const TBILine &_line) const
 {
     if(!m_validline) return 0.0;
     if(!_line.isValid()) return 0.0;
-    TBIPoint _v1(_line.getVector());
-    TBIPoint _v2(this->getVector());
+    TBIPoint_Float _v1(_line.getVector());
+    TBIPoint_Float _v2(this->getVector());
     float _xa = _v1.getX();
     float _ya = _v1.getY();
     float _xb = _v2.getX();
@@ -85,22 +85,22 @@ float TBILine::getYatX(float _x) const
     return m_slope*_x+m_intercept;
 }
 
-TBIPoint TBILine::getPoint1() const
+TBIPoint_Float TBILine::getPoint1() const
 {
     return m_point1;
 }
 
-TBIPoint TBILine::getPoint2() const
+TBIPoint_Float TBILine::getPoint2() const
 {
     return m_point2;
 }
 
-TBIPoint TBILine::getVector() const
+TBIPoint_Float TBILine::getVector() const
 {
-    return(TBIPoint((m_point2.getX() - m_point1.getX()),(m_point2.getY() - m_point2.getY())));
+    return(TBIPoint_Float((m_point2.getX() - m_point1.getX()),(m_point2.getY() - m_point2.getY())));
 }
 
-bool TBILine::findPointofIntersection(const TBILine &_line, TBIPoint &_intersectionpnt)
+bool TBILine::findPointofIntersection(const TBILine &_line, TBIPoint_Float &_intersectionpnt)
 {
     if(!m_validline) return false;
     if(!_line.isValid()) return false;
@@ -159,7 +159,7 @@ bool TBILine::compareLines(TBILine &_line, float _distance_threshold)
     return false;
 }
 
-bool TBILine::isPointAboveLine(const TBIPoint &_pnt) const
+bool TBILine::isPointAboveLine(const TBIPoint_Float &_pnt) const
 {
 
     //Note: Because The System Stays In Basic Screen Coordinates Where Y Down is Positive
@@ -191,7 +191,7 @@ bool TBILine::isPointAboveLine(const TBIPoint &_pnt) const
     return false;
 }
 
-bool TBILine::isPointBelowLine(const TBIPoint &_pnt) const
+bool TBILine::isPointBelowLine(const TBIPoint_Float &_pnt) const
 {
     //Note: Because The System Stays In Basic Screen Coordinates Where Y Down is Positive
     //The Slopes are actually inverse to the standard model.
@@ -220,7 +220,7 @@ bool TBILine::isPointBelowLine(const TBIPoint &_pnt) const
     return false;
 }
 
-bool TBILine::isPointOnLine(const TBIPoint &_pnt) const
+bool TBILine::isPointOnLine(const TBIPoint_Float &_pnt) const
 {
     if(!m_validline) return false;
 
@@ -279,7 +279,7 @@ void TBILine::updateValidLine()
     }
 }
 
-TBILine::TBILine(const TBIPoint &_p1, const TBIPoint &_p2)
+TBILine::TBILine(const TBIPoint_Float &_p1, const TBIPoint_Float &_p2)
 {
     m_point1.setX(_p1.getX());
     m_point1.setY(_p1.getY());
@@ -290,7 +290,7 @@ TBILine::TBILine(const TBIPoint &_p1, const TBIPoint &_p2)
 
 TBILine::TBILine(const float _x1, const float _y1, const float _x2, const float _y2)
 {
-    m_point1 = TBIPoint(_x1, _y1);
-    m_point2 = TBIPoint(_x2, _y2);
+    m_point1 = TBIPoint_Float(_x1, _y1);
+    m_point2 = TBIPoint_Float(_x2, _y2);
     updateInternals();
 }

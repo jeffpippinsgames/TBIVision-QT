@@ -16,9 +16,11 @@ SOURCES += \
         max.cpp \
         pixelclusterclass.cpp \
         pixelcolumnclass.cpp \
+        tbidataset.cpp \
         tbiline.cpp \
         tbilinearransac.cpp \
-        tbipoint.cpp \
+        tbipoint_float.cpp \
+        tbipoint_int.cpp \
         toby.cpp
 
 RESOURCES += qml.qrc
@@ -36,7 +38,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     QmlTBIDisplay.h \
-    TBILinearRansacVotingStructure.h \
     gary.h \
     mary.h \
     max.h \
@@ -44,9 +45,12 @@ HEADERS += \
     pixelcolumnclass.h \
     pixelcolumnprocessreturn_t.h \
     pixelfundamental.h \
+    tbidataset.h \
     tbiline.h \
     tbilinearransac.h \
-    tbipoint.h \
+    tbilinearransacvotingstructure.h \
+    tbipoint_float.h \
+    tbipoint_int.h \
     toby.h
 
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonbase-6.2.0

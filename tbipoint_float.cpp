@@ -1,26 +1,26 @@
-#include "tbipoint.h"
+#include "tbipoint_float.h"
 #include "math.h"
 
-TBIPoint::TBIPoint()
+TBIPoint_Float::TBIPoint_Float()
 {
     m_x = 0;
     m_y = 0;
     m_valid = true;
 }
 
-TBIPoint::TBIPoint(float _x, float _y)
+TBIPoint_Float::TBIPoint_Float(float _x, float _y)
 {
     m_x = _x;
     m_y = _y;
 }
 
-TBIPoint::TBIPoint(const TBIPoint &_pnt)
+TBIPoint_Float::TBIPoint_Float(const TBIPoint_Float &_pnt)
 {
     this->m_x=_pnt.m_x;
     this->m_y=_pnt.m_y;
 }
 
-void TBIPoint::drawtoCVMat(cv::Mat &_dst, uint8_t _value)
+void TBIPoint_Float::drawtoCVMat(cv::Mat &_dst, uint8_t _value)
 {
     if(_dst.channels() != 1) return;
     if(_dst.rows == -1) return;
@@ -34,12 +34,12 @@ void TBIPoint::drawtoCVMat(cv::Mat &_dst, uint8_t _value)
     _dst.data[_dataindex] = _value;
 }
 
-float TBIPoint::distance(const TBIPoint &_pnt) const
+float TBIPoint_Float::distance(const TBIPoint_Float &_pnt) const
 {
     return sqrt(((m_x - _pnt.m_x)*(m_x - _pnt.m_x)) + ((m_y - _pnt.m_y)*(m_y - _pnt.m_y)));
 }
 
-void TBIPoint::zero()
+void TBIPoint_Float::zero()
 {
     m_x = 0;
     m_y = 0;
