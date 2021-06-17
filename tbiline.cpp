@@ -1,12 +1,10 @@
 #include "tbiline.h"
 #include "math.h"
 
+
 TBILine::TBILine()
 {
-    m_point1.setX(0);
-    m_point1.setY(0);
-    m_point2.setX(0);
-    m_point2.setY(0);
+
     m_validline = false;
     updateInternals();
     m_thickness = 1;
@@ -14,64 +12,7 @@ TBILine::TBILine()
 
 }
 
-TBILine::TBILine(const TBILine &_line)
-{
-    this->m_point1 = _line.m_point1;
-    this->m_point2 = _line.m_point2;
-    updateInternals();
-}
-
-void TBILine::setPoint1(TBIPoint_Float _pnt)
-{
-    m_point1 = _pnt;
-    updateInternals();
-}
-
-void TBILine::setPoint2(TBIPoint_Float _pnt)
-{
-    m_point2 = _pnt;
-    updateInternals();
-}
-
-bool TBILine::canLineBeSplitForSplitMerge(float *_data, int _start_index, int _end_index, int *_split_index, float _distance_threshold) const
-{
-    return true;
-}
-
-float TBILine::getOrthogonalDistance(const TBIPoint_Float &_pnt) const
-{
-    if(!m_validline) return 0.0;
-    return abs((m_slope*_pnt.getX() - _pnt.getY() + m_intercept)/(sqrt(m_slope*m_slope + 1)));
-}
-
-float TBILine::getOrthogonalDistance(float _x, float _y) const
-{
-    if(!m_validline) return 0.0;
-    return abs((m_slope*_x - _y + m_intercept)/(sqrt(m_slope*m_slope + 1)));
-}
-
-float TBILine::interiorAngleToLine(const TBILine &_line) const
-{
-    if(!m_validline) return 0.0;
-    if(!_line.isValid()) return 0.0;
-    TBIPoint_Float _v1(_line.getVector());
-    TBIPoint_Float _v2(this->getVector());
-    float _xa = _v1.getX();
-    float _ya = _v1.getY();
-    float _xb = _v2.getX();
-    float _yb = _v2.getY();
-
-    float _ans = - acos(((_xa*_xb) + (_ya*_yb))/(sqrt((_xa*_xa)+(_ya*_ya))*sqrt((_xb*_xb)+(_yb*_yb))));
-    return _ans * 57.2958;
-}
-
-float TBILine::angleFromHorizontal() const
-{
-    if(!m_validline) return 9999999.9999999;
-
-    return -atan(m_slope) * 57.2958;
-}
-
+//Get Functions-----------------------------------------------------------------
 float TBILine::getXatY(float _y) const
 {
     if(!m_validline) return 99999.99999;
@@ -87,6 +28,7 @@ float TBILine::getYatX(float _x) const
 
 TBIPoint_Float TBILine::getPoint1() const
 {
+
     return m_point1;
 }
 
@@ -97,7 +39,92 @@ TBIPoint_Float TBILine::getPoint2() const
 
 TBIPoint_Float TBILine::getVector() const
 {
-    return(TBIPoint_Float((m_point2.getX() - m_point1.getX()),(m_point2.getY() - m_point2.getY())));
+    return(TBIPoint_Float((m_point2.m_x - m_point1.m_x),(m_point2.m_y - m_point2.m_y)));
+}
+
+
+//Set Functions------------------------------------------------------------------
+void TBILine::setPoint1(TBIPoint_Float _pnt)
+{
+    m_point1 = _pnt;
+    updateInternals();
+}
+
+void TBILine::setPoint2(TBIPoint_Float _pnt)
+{
+    m_point2 = _pnt;
+    updateInternals();
+}
+
+
+//Distance Functions------------------------------------------------------------
+float TBILine::distance(const TBIPoint_Float &_pnt) const
+{
+    if(!m_validline) return 0.0;
+    return (m_slope*_pnt.m_x - _pnt.m_y + m_intercept)/(sqrt(m_slope*m_slope + 1));
+}
+
+float TBILine::distance(const TBIPoint_Int &_pnt) const
+{
+    if(!m_validline) return 0.0;
+    return (m_slope*(float)_pnt.m_x - (float)_pnt.m_y + m_intercept)/(sqrt(m_slope*m_slope + 1));
+}
+
+float TBILine::distance(float _x, float _y) const
+{
+    if(!m_validline) return 0.0;
+    return (m_slope*_x - _y + m_intercept)/(sqrt(m_slope*m_slope + 1));
+}
+
+float TBILine::distanceAbs(const TBIPoint_Float &_pnt) const
+{
+    if(!m_validline) return 0.0;
+    return abs((m_slope*_pnt.m_x - _pnt.m_y + m_intercept)/(sqrt(m_slope*m_slope + 1)));
+}
+
+float TBILine::distanceAbs(const TBIPoint_Int &_pnt) const
+{
+    if(!m_validline) return 0.0;
+    return abs((m_slope*(float)_pnt.m_x - (float)_pnt.m_y + m_intercept)/(sqrt(m_slope*m_slope + 1)));
+}
+
+float TBILine::distanceAbs(float _x, float _y) const
+{
+    if(!m_validline) return 0.0;
+    return abs((m_slope*_x - _y + m_intercept)/(sqrt(m_slope*m_slope + 1)));
+}
+
+//OpenCV Functions---------------------------------------------------------------
+
+void TBILine::drawOnMat(cv::Mat &_dst, cv::Scalar _color, int _thickness)
+{
+    if(!m_validline) return;
+    cv::Point _p1((int)this->m_point1.m_x, (int)this->m_point1.m_y);
+    cv::Point _p2((int)this->m_point2.m_x, (int)this->m_point2.m_y);
+    cv::line(_dst, _p1, _p2, _color, _thickness, cv::LINE_AA);
+
+}
+
+void TBILine::drawOnMat(cv::Mat &_dst)
+{
+    if(!m_validline) return;
+    cv::Point _p1((int)this->m_point1.m_x, (int)this->m_point1.m_y);
+    cv::Point _p2((int)this->m_point2.m_x, (int)this->m_point2.m_y);
+    cv::line(_dst, _p1, _p2, m_color, m_thickness, cv::LINE_AA);
+}
+
+
+//Utility Functions--------------------------------------------------------------
+bool TBILine::canLineBeSplitForSplitMerge(float *_data, int _start_index, int _end_index, int *_split_index, float _distance_threshold) const
+{
+    return true;
+}
+
+float TBILine::angleFromHorizontal() const
+{
+    if(!m_validline) return 9999999.9999999;
+
+    return -atan(m_slope) * 57.2958;
 }
 
 bool TBILine::findPointofIntersection(const TBILine &_line, TBIPoint_Float &_intersectionpnt)
@@ -108,15 +135,30 @@ bool TBILine::findPointofIntersection(const TBILine &_line, TBIPoint_Float &_int
 
     float _x = (m_intercept-_line.getIntercept())/(_line.getSlope() - m_slope);
     float _y = m_slope*_x+m_intercept;
-    _intersectionpnt.setX(_x);
-    _intersectionpnt.setY(_y);
+    _intersectionpnt.m_x = _x;
+    _intersectionpnt.m_y = _y;
+    return true;
+}
+
+bool TBILine::findPointofIntersection(const TBILine &_line, TBIPoint_Int &_intersectionpnt)
+{
+    if(!m_validline) return false;
+    if(!_line.isValid()) return false;
+    if(m_slope == _line.getSlope()) return false;
+
+    float _x = (m_intercept-_line.getIntercept())/(_line.getSlope() - m_slope);
+    float _y = m_slope*_x+m_intercept;
+    _intersectionpnt.m_x = (int)_x;
+    _intersectionpnt.m_y = (int)_y;
     return true;
 }
 
 void TBILine::clear()
 {
-    m_point1.zero();
-    m_point2.zero();
+    m_point1.m_x=0;
+    m_point1.m_y=0;
+    m_point2.m_x=0;
+    m_point2.m_y=0;
     updateInternals();
 }
 
@@ -126,23 +168,6 @@ void TBILine::remakeLine(int _startcol, int _endcol)
     {
         *this = TBILine((float)_startcol, this->getYatX((float)_startcol), (float)_endcol, this->getYatX((float)_endcol));
     }
-}
-
-void TBILine::drawOnMat(cv::Mat &_dst, cv::Scalar _color, int _thickness)
-{
-    if(!m_validline) return;
-    cv::Point _p1((int)this->m_point1.getX(), (int)this->m_point1.getY());
-    cv::Point _p2((int)this->m_point2.getX(), (int)this->m_point2.getY());
-    cv::line(_dst, _p1, _p2, _color, _thickness, cv::LINE_AA);
-
-}
-
-void TBILine::drawOnMat(cv::Mat &_dst)
-{
-    if(!m_validline) return;
-    cv::Point _p1((int)this->m_point1.getX(), (int)this->m_point1.getY());
-    cv::Point _p2((int)this->m_point2.getX(), (int)this->m_point2.getY());
-    cv::line(_dst, _p1, _p2, m_color, m_thickness, cv::LINE_AA);
 }
 
 bool TBILine::compareLines(TBILine &_line, float _distance_threshold)
@@ -166,8 +191,8 @@ bool TBILine::isPointAboveLine(const TBIPoint_Float &_pnt) const
     //The Slopes are actually inverse to the standard model.
 
     if(!m_validline) return false;
-    float _x1 = _pnt.getX();
-    float _y1 = _pnt.getY();
+    float _x1 = _pnt.m_x;
+    float _y1 = _pnt.m_y;
     float _x2 = (_x1 + m_slope*(_y1 - m_intercept))/(1+(m_slope*m_slope));
     float _y2 = ((m_slope*_x1) + (m_slope*m_slope*_y1) + m_intercept) / (1+(m_slope*m_slope));
 
@@ -197,8 +222,8 @@ bool TBILine::isPointBelowLine(const TBIPoint_Float &_pnt) const
     //The Slopes are actually inverse to the standard model.
 
     if(!m_validline) return false;
-    float _x1 = _pnt.getX();
-    float _y1 = _pnt.getY();
+    float _x1 = _pnt.m_x;
+    float _y1 = _pnt.m_y;
     float _x2 = (_x1 + m_slope*(_y1 - m_intercept))/(1+(m_slope*m_slope));
     float _y2 = ((m_slope*_x1) + (m_slope*m_slope*_y1) + m_intercept) / (1+(m_slope*m_slope));
 
@@ -224,13 +249,13 @@ bool TBILine::isPointOnLine(const TBIPoint_Float &_pnt) const
 {
     if(!m_validline) return false;
 
-    float _dist = this->getOrthogonalDistance(_pnt);
-    if(_dist < .010) return true;
+    float _dist = this->distanceAbs(_pnt);
+    if(_dist < .00010) return true;
     return false;
 }
 
 
-
+//Internal Update Functions.
 void TBILine::updateInternals()
 {
     updateValidLine();
@@ -261,15 +286,15 @@ void TBILine::updateSlopeandIntercept()
     }
     else
     {
-        m_slope = (m_point1.getY() - m_point2.getY())/(m_point1.getX()-m_point2.getX());
-        m_intercept = m_point1.getY() - m_slope*m_point1.getX();
+        m_slope = (m_point1.m_y - m_point2.m_y)/(m_point1.m_x-m_point2.m_x);
+        m_intercept = m_point1.m_y - m_slope*m_point1.m_x;
     }
 }
 
 void TBILine::updateValidLine()
 {
 
-    if(abs((m_point1.getX() - m_point2.getX())) < m_vertical_asymptote_criteria)
+    if(abs((m_point1.m_x - m_point2.m_x)) < m_vertical_asymptote_criteria)
     {
         m_validline = false;
     }
@@ -279,18 +304,3 @@ void TBILine::updateValidLine()
     }
 }
 
-TBILine::TBILine(const TBIPoint_Float &_p1, const TBIPoint_Float &_p2)
-{
-    m_point1.setX(_p1.getX());
-    m_point1.setY(_p1.getY());
-    m_point2.setX(_p2.getX());
-    m_point2.setY(_p2.getY());
-    updateInternals();
-}
-
-TBILine::TBILine(const float _x1, const float _y1, const float _x2, const float _y2)
-{
-    m_point1 = TBIPoint_Float(_x1, _y1);
-    m_point2 = TBIPoint_Float(_x2, _y2);
-    updateInternals();
-}

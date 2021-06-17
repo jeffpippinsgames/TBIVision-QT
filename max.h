@@ -15,6 +15,7 @@
 #include "tbiline.h"
 #include <QRandomGenerator>
 #include "tbilinearransac.h"
+#include "tbidataset.h"
 
 using namespace cv;
 
@@ -70,6 +71,7 @@ private:
 
 
     //Scan Data Flattening Processing
+    /*
     bool doImageFlattening(cv::Mat &_src, std::vector<TBIPoint_Float> &_data, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii);
     void drawFlattenedImageDataToMat(cv::Mat &_dst, const std::vector<TBIPoint_Float> &_data);
     void drawFlattenedImageDataToMat(cv::Mat &_dst, const std::vector<TBIPoint_Float> &_data, const cv::Scalar _color);
@@ -83,6 +85,7 @@ private:
 
 
     //Scan Data Ransac Processing
+
     bool doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint_Float> &_vector);
     bool doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint_Float> &_vector, const int _startvectorindex, const int _endvectorindex);
 
@@ -94,19 +97,18 @@ private:
 
     bool clusterProcessThresholdMat(cv::Mat &_src, cv::Mat &_dst, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii, const int _min_cluster_size,
                                     const int _max_cluster_size, const int _max_clusters_in_column, std::vector<TBIPoint_Float> &_scan_data_vector);
+*/
+bool clusterProcessThresholdMat(cv::Mat &_src, cv::Mat &_dst, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii, const int _min_cluster_size,
+                                    const int _max_cluster_size, const int _max_clusters_in_column, TBIDataSet &_scandataset);
 
     //Skeleton Processing
-    bool doSkeletonProcessing(cv::Mat &_dst, PixelColumnClass *_pixel_column_array, float *_skel_array, float _continuity_threshold);
+   // bool doSkeletonProcessing(cv::Mat &_dst, PixelColumnClass *_pixel_column_array, float *_skel_array, float _continuity_threshold);
 
-    void deleteSkelPointsAbovePZL(TBILine &_lpzl, TBILine &_rpzl, float *_skel_array);
+    //void deleteSkelPointsAbovePZL(TBILine &_lpzl, TBILine &_rpzl, float *_skel_array);
 
 
     //Ransac Type Processing
-    bool doRansacLineProcessing(cv::Mat &_dst, TBILine &_line, TBILinearRansac &_ransac, float* _skeletalarray, int _start_index, int _end_index, cv::Scalar _line_color);
-
-
-    bool doRansacVertexProcessing(TBILine &_ltsl, TBILine &_rtsl, float *_skel_array, TBIPoint_Float &_lv, TBIPoint_Float &_rv, const float _left_vertex_dist_threshold, const float _right_vertex_dist_threshold);
-
+   // bool doRansacLineProcessing(cv::Mat &_dst, TBILine &_line, TBILinearRansac &_ransac, float* _skeletalarray, int _start_index, int _end_index, cv::Scalar _line_color);
 
     //Split Merge Processing
     bool doSplitMergeProcesssing(float *_skel_array, int _max_index, std::vector<TBILine> &_line_vectors,
@@ -169,19 +171,20 @@ private:
     float m_flattened_hrv; //Highest Row Value
 
     //Pixel Column Phase Processing Variables--------------------------
-    std::vector<TBIPoint_Float> m_flattened_scan_data;
-    std::vector<TBIPoint_Float> m_flattened_left_tsl_data;
-    std::vector<TBIPoint_Float> m_flattened_right_tsl_data;
-    std::vector<TBIPoint_Float> m_flattened_left_bwl_data;
-    std::vector<TBIPoint_Float> m_flattened_right_bwl_data;
-    std::vector<TBIPoint_Float> m_flattened_bevel_wall_data;
-    std::vector<TBIPoint_Float> m_flattened_left_bevel_wall_data;
-    std::vector<TBIPoint_Float> m_flattened_right_bevel_wall_data;
     quint64 m_total_image_intensity;
-    PixelColumnClass m_cluster_columns[Mat_Max_Width];
+    //PixelColumnClass m_cluster_columns[Mat_Max_Width];
+
+    TBIDataSet *m_scan_ds;
+    TBIDataSet *m_roughing_left_tsl_ds;
+    TBIDataSet *m_roughing_right_tsl_ds;
+    TBIDataSet *m_left_tsl_inliers_ds;
+    TBIDataSet *m_right_tsl_inliers_ds;
+    TBIDataSet *m_joint_ds;
+    TBIDataSet *m_dummy_set1; //Used For Static Storage. So Other Functions Dont Have To Recreate Them in the Loops.
+    TBIDataSet *m_dummy_set2; //Used For Static Storage. So Other Functions Dont Have To Recreate Them in the Loops.
 
     //Skeletal Phase Data Variables-------------------------------------
-    float m_skeletal_line_array[Mat_Max_Width];
+    //float m_skeletal_line_array[Mat_Max_Width];
     int m_allowable_discontinuities;
 
     //Ransac. Left and Right Top Surface Lines and Bevel Wall Lines(Voting Algorythms)-------
@@ -196,9 +199,6 @@ private:
 
     TBILine m_right_bwl;
     TBILinearRansac m_right_bwl_ransac;
-
-    TBIPoint_Float m_right_ransac_vertex;
-    TBIPoint_Float m_left_ransac_vertex;
 
     //Linear Topography. (Split and Merge Algorythms)-------------------
     std::vector<TBILine> m_topography_lines;

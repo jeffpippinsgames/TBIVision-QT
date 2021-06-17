@@ -372,7 +372,7 @@ Description:
 **************************************************************/
 void Mary::setMinClusterSize(int _cs)
 {
-    if(_cs > 2)
+    if(_cs > 0)
     {
         if(_cs < m_pc_max_clustersize)
         {

@@ -8,7 +8,7 @@
 #include "mary.h"
 #include "QmlTBIDisplay.h"
 #include "opencv4/opencv2/core.hpp"
-#include "tbilinearransac.h"
+//#include "tbilinearransac.h"
 
 using namespace Pylon;
 using namespace cv;

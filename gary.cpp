@@ -34,8 +34,6 @@ Description:
 Gary::~Gary()
 {
     emit aboutToDestroy();
-    qDebug() << "Gary::~Gary() Object Destroyed.";
-    m_serial_port->close();
     if(m_serial_port)
     {
         if(m_serial_port->isOpen())
@@ -44,6 +42,7 @@ Gary::~Gary()
             qDebug() << "Gary::~Gary() Serial Port Closed.";
         }
     }
+    qDebug() << "Gary::~Gary() Object Destroyed.";
 }
 //--------------------------------------------------------------
 

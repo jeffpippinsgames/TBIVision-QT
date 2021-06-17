@@ -21,6 +21,7 @@ SOURCES += \
         tbilinearransac.cpp \
         tbipoint_float.cpp \
         tbipoint_int.cpp \
+        tbiransac.cpp \
         toby.cpp
 
 RESOURCES += qml.qrc
@@ -51,6 +52,7 @@ HEADERS += \
     tbilinearransacvotingstructure.h \
     tbipoint_float.h \
     tbipoint_int.h \
+    tbiransac.h \
     toby.h
 
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonbase-6.2.0

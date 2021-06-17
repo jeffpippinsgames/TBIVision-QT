@@ -2202,7 +2202,7 @@ Item {
             x: 20
             y: maxclustersizesliderId.y + maxclustersizesliderId.height + 20
             messagetext: "Min Pixel Cluster Size: " + Mary.pc_min_cluster_size
-            valuefrom: 3
+            valuefrom: 1
             valueto: Mary.pc_max_cluster_size - 1
             stepsize: 1
             majorstepsize: 10

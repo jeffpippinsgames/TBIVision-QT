@@ -8,10 +8,23 @@
 #include <QThread>
 #include <vector>
 #include <random>
+#include "tbipoint_int.h"
+#include "tbiransac.h"
 
 //Constructors and Destructor--------------------------------------------------------
 Max::Max(QObject *parent) : QObject(parent)
 {
+
+    m_scan_ds = new TBIDataSet();
+    m_roughing_left_tsl_ds = new TBIDataSet();
+    m_roughing_right_tsl_ds = new TBIDataSet();
+    m_left_tsl_inliers_ds = new TBIDataSet();
+    m_right_tsl_inliers_ds = new TBIDataSet();
+    m_joint_ds = new TBIDataSet();
+    m_dummy_set1 = new TBIDataSet();
+    m_dummy_set2 = new TBIDataSet();
+
+
     m_emitextramats = false;
 
     m_in_proccesing_loop = false;
@@ -54,10 +67,6 @@ Max::Max(QObject *parent) : QObject(parent)
     m_right_bwl_ransac.setMinVotes(20);
 
 
-
-    m_right_ransac_vertex.inValidate();
-    m_left_ransac_vertex.inValidate();
-
     m_sm_distance_threshold = 5;
     m_sm_length_threshold = 20;
 
@@ -68,6 +77,14 @@ Max::Max(QObject *parent) : QObject(parent)
 
 Max::~Max()
 {
+    delete m_scan_ds;
+    delete m_roughing_left_tsl_ds;
+    delete m_roughing_right_tsl_ds;
+    delete m_left_tsl_inliers_ds;
+    delete m_right_tsl_inliers_ds;
+    delete m_joint_ds;
+    delete m_dummy_set1;
+    delete m_dummy_set2;
     emit this->aboutToDestroy();
     qDebug()<<"Max::~Max() Max Object Destroyed";
 }
@@ -79,32 +96,28 @@ Max::~Max()
 void Max::blankProcessingArrays()
 {
 
-    int _col=0;
-    do
-    {
-        m_cluster_columns[_col].clear();
-        m_skeletal_line_array[_col] = -1;
-        ++_col;
-    }while(_col < Mat_Max_Width);
 
     m_left_tsl.clear();
     m_right_tsl.clear();
     m_right_bwl.clear();
     m_left_bwl.clear();
-    m_right_ransac_vertex.inValidate();
-    m_left_ransac_vertex.inValidate();
     m_topography_lines.clear();
     m_flattened_iohrv = 0;
     m_total_image_intensity = 0;
 
-    m_flattened_bevel_wall_data.clear();
-    m_flattened_left_bevel_wall_data.clear();
-    m_flattened_right_bevel_wall_data.clear();
-    m_flattened_left_bwl_data.clear();
-    m_flattened_left_tsl_data.clear();
-    m_flattened_right_bwl_data.clear();
-    m_flattened_right_tsl_data.clear();
-    m_flattened_scan_data.clear();
+    m_scan_ds->clear();
+    //m_left_tsl_inliers_ds.clear();
+    // m_right_tsl_inliers_ds.clear();
+    // m_joint_ds.clear();
+
+    // m_flattened_bevel_wall_data.clear();
+    // m_flattened_left_bevel_wall_data.clear();
+    // m_flattened_right_bevel_wall_data.clear();
+    // m_flattened_left_bwl_data.clear();
+    // m_flattened_left_tsl_data.clear();
+    // m_flattened_right_bwl_data.clear();
+    // m_flattened_right_tsl_data.clear();
+    // m_flattened_scan_data.clear();
 }
 
 int Max::randomInt(int _min, int _max)
@@ -116,7 +129,7 @@ int Max::randomInt(int _min, int _max)
     return dist(engine); //Return the Number From The Distrobution
 }
 
-
+/*
 //Flattned Data Functions
 bool Max::doImageFlattening(Mat &_src, std::vector<TBIPoint_Float> &_data, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii)
 {
@@ -195,8 +208,8 @@ void Max::drawFlattenedImageDataToMat(Mat &_dst, const std::vector<TBIPoint_Floa
     do
     {
 
-        _col = (int)_data[_vectorindex].getX();
-        _row = (int)_data[_vectorindex].getY();
+        _col = (int)_data[_vectorindex].m_x;
+        _row = (int)_data[_vectorindex].m_y;
         _matindex = (_row * _dst.cols) + _col;
         _matdata[_matindex] = 255;
         ++_vectorindex;
@@ -235,8 +248,8 @@ void Max::drawFlattenedImageDataToMat(Mat &_dst, const std::vector<TBIPoint_Floa
     //float value = pImgData[img.channels() * (img.cols * row + column) + channel];
     do
     {
-        _col = (int)_data[_vectorindex].getX();
-        _row = (int)_data[_vectorindex].getY();
+        _col = (int)_data[_vectorindex].m_x;
+        _row = (int)_data[_vectorindex].m_y;
         _matindexc1 = _matchannels * (_dst.cols * _row + _col) + 0;
         _matindexc2 = _matchannels * (_dst.cols * _row + _col) + 1;
         _matindexc3 = _matchannels * (_dst.cols * _row + _col) + 2;
@@ -282,7 +295,7 @@ void Max::removeInliersFromFlattenedData(std::vector<TBIPoint_Float> &_dstdata, 
 
     do
     {
-        _distance = _line.getOrthogonalDistance(_dstdata[_index]);
+        _distance = _line.distanceAbs(_dstdata[_index]);
         if(_line.isPointOnLine(_dstdata[_index]))
         {
             _dstdata.erase(_dstdata.begin() + _index);
@@ -317,7 +330,7 @@ void Max::buildFlattenDataFromInliers(const std::vector<TBIPoint_Float> &_srcdat
 
     do
     {
-        _distance = _line.getOrthogonalDistance(_srcdata[_index]);
+        _distance = _line.distanceAbs(_srcdata[_index]);
         if(_line.isPointOnLine(_srcdata[_index]))
         {
             _dstdata.push_back(_srcdata[_index]);
@@ -345,7 +358,7 @@ bool Max::buildFlattenDataFromBegining(const std::vector<TBIPoint_Float> &_srcda
 {
     _dstdata.clear();
 
-    if(_srcdata[_srcdata.size() - 1].getX() < _consequetiverows)
+    if(_srcdata[_srcdata.size() - 1].m_x < _consequetiverows)
     {
         return false;
     }
@@ -357,9 +370,9 @@ bool Max::buildFlattenDataFromBegining(const std::vector<TBIPoint_Float> &_srcda
 
     do
     {
-        if(_currentrow != _srcdata[_index].getX())
+        if(_currentrow != _srcdata[_index].m_x)
         {
-            _currentrow = _srcdata[_index].getX();
+            _currentrow = _srcdata[_index].m_x;
             ++_newrowsencoutered;
         }
         _dstdata.push_back(_srcdata[_index]);
@@ -378,7 +391,7 @@ bool Max::buildFlattenDataFromEnd(const std::vector<TBIPoint_Float> &_srcdata, s
 {
     _dstdata.clear();
 
-    if(_srcdata[_srcdata.size() - 1].getX() < _consequetiverows)
+    if(_srcdata[_srcdata.size() - 1].m_x < _consequetiverows)
     {
         return false;
     }
@@ -390,9 +403,9 @@ bool Max::buildFlattenDataFromEnd(const std::vector<TBIPoint_Float> &_srcdata, s
 
     do
     {
-        if(_currentrow != _srcdata[_index].getX())
+        if(_currentrow != _srcdata[_index].m_x)
         {
-            _currentrow = _srcdata[_index].getX();
+            _currentrow = _srcdata[_index].m_x;
             ++_newrowsencoutered;
         }
         _dstdata.push_back(_srcdata[_index]);
@@ -461,13 +474,7 @@ bool Max::clusterProcessThresholdMat(Mat &_src, Mat &_dst, quint64 *_tii, const 
                                      const int _min_cluster_size, const int _max_cluster_size, const int _max_clusters_in_column, std::vector<TBIPoint_Float> &_scan_data_vector)
 {
 
-    /*
-     From OpenCV Documentaion:
-     addr(M@i,j) = M.data + M.step[0]*i + M.step[1]*j
-     2 Dimensional Arrays are Stored Row By Row.
 
-
-     */
     if(_src.type() != CV_8UC1)
     {
         emit failedSkeletonizeMat();
@@ -576,10 +583,127 @@ bool Max::clusterProcessThresholdMat(Mat &_src, Mat &_dst, quint64 *_tii, const 
 
     return true;
 }
+*/
+bool Max::clusterProcessThresholdMat(Mat &_src, Mat &_dst, quint64 *_tii, const quint64 _max_tii,
+                                     const quint64 _min_tii, const int _min_cluster_size,
+                                     const int _max_cluster_size, const int _max_clusters_in_column, TBIDataSet &_scandataset)
+{
+
+    if(_src.type() != CV_8UC1)
+    {
+        emit failedSkeletonizeMat();
+        return false;
+    }
+
+    _scandataset.clear();
+    *_tii = 0;
+
+    int _x = 0;
+    int _y = 0;
+    uint8_t _value;
+    int _clusterindex;
+    PixelClusterClass _cluster;
+
+    //Mat_Index = ((Y) * Mat.cols) + X
+    uint8_t *_srcdata = _src.data;
+    uint8_t *_dstdata = _dst.data;
+
+    int _srcindex = 0;
+    int _dstindex = 0;
+
+    //Iterate Thru The Src Mat And Find Clusters
+    do
+    {
+        _srcindex = (_y * _src.cols) + _x;
+        _value = _srcdata[_srcindex];
+        if(_value > 0)
+        {
+            *_tii += _value;
+            if(*_tii > _max_tii)
+            {
+                emit failedTIICheck();
+                return false;
+            }
+            PixelFundamental_t _pixel(_y, _x, _value);
+            _cluster.pushPixelToBack(_pixel);
+        }
+        else if(_value == 0)
+        {
+            int _cluster_size = _cluster.size();
+            if(_cluster_size > 0) //The Cluster Has Pixels in it.
+            {
+                if((_cluster_size >= _min_cluster_size) && (_cluster_size <= _max_cluster_size)) //The Cluster Needs a Centroid
+                {
+                    _cluster.setRowCentroid();
+                    _dstindex = ((int)_cluster.getRowCentroid() * _dst.cols) + _x;
+                    _dstdata[_dstindex] = 255;
+                    TBIPoint_Int ___pnt(_x, (int)_cluster.getRowCentroid());
+                    _scandataset.insert(___pnt);
+                }
+                else //The Cluster Is Not Centroid Put Them all in the _dst mat
+                {
+                    _clusterindex = 0;
+                    do
+                    {
+                        _dstindex = (_cluster[_clusterindex].row * _dst.cols) + _cluster[_clusterindex].col;
+                        _dstdata[_dstindex] = 255;
+                        TBIPoint_Int ___pnt(_cluster[_clusterindex].col, _cluster[_clusterindex].row);
+                        _scandataset.insert(___pnt);
+                        ++_clusterindex;
+                    }while(_clusterindex < _cluster.size());
+                }
+            }
+            _cluster.clear();
+        }
+        ++_y;
+        if(_y == _src.rows)
+        {
+
+            int _cluster_size = _cluster.size();
+            if(_cluster_size > 0) //The Cluster Has Pixels in it.
+            {
+                if((_cluster_size >= _min_cluster_size) && (_cluster_size <= _max_cluster_size)) //The Cluster Needs a Centroid
+                {
+                    _cluster.setRowCentroid();
+                    _dstindex = ((int)_cluster.getRowCentroid() * _dst.cols) + _x;
+                    _dstdata[_dstindex] = 255;
+                    TBIPoint_Int ___pnt(_x, (int)_cluster.getRowCentroid());
+                    _scandataset.insert(___pnt);
+                }
+                else //The Cluster Is Not Centroid Put Them all in the _dst mat
+                {
+                    _clusterindex = 0;
+                    do
+                    {
+                        _dstindex = (_cluster[_clusterindex].row * _dst.cols) + _cluster[_clusterindex].col;
+                        _dstdata[_dstindex] = 255;
+                        TBIPoint_Int ___pnt(_cluster[_clusterindex].col, _cluster[_clusterindex].row);
+                        _scandataset.insert(___pnt);
+                        ++_clusterindex;
+                    }while(_clusterindex < _cluster.size());
+                }
+            }
+            _cluster.clear();
+            _y = 0;
+            ++_x;
+        }
+
+    }while(_x < _src.cols);
+
+    if(*_tii < _min_tii)
+    {
+        emit failedTIICheck();
+        return false;
+    }
 
 
 
+    return true;
+}
 
+
+
+/*
 //Skeletal Functions
 bool Max::doSkeletonProcessing(Mat &_dst, PixelColumnClass *_pixel_column_array, float *_skel_array, float _continuity_threshold)
 {
@@ -666,7 +790,7 @@ void Max::deleteSkelPointsAbovePZL(TBILine &_lpzl, TBILine &_rpzl, float *_skel_
     }while(_currentindex < Mat_Max_Width);
 
 }
-
+*/
 bool Max::doSplitMergeProcesssing(float *_data_array, int _max_index, std::vector<TBILine> &_line_vectors, float _min_distance_threshold)
 {
     //Clear The Line Vector
@@ -723,7 +847,7 @@ bool Max::doSplitMergeProcesssing(float *_data_array, int _max_index, std::vecto
         _data_value = _data_array[_current_index];
         if(_data_value > 0.0)
         {
-            _distance = _line_vectors[_current_vector_index].getOrthogonalDistance((float)_current_index, _data_value);
+            _distance = _line_vectors[_current_vector_index].distanceAbs((float)_current_index, _data_value);
         }
         else
         {
@@ -777,7 +901,7 @@ bool Max::doSplitMergeProcesssing(float *_data_array, int _max_index, std::vecto
 
 
 
-
+/*
 
 //Ransac Functions
 bool Max::doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint_Float> &_vector)
@@ -827,7 +951,7 @@ bool Max::doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac,
             _votingindex = 0;
             do
             {
-                _distance = _linecandidate.m_line.getOrthogonalDistance(_vector[_votingindex]);
+                _distance = _linecandidate.m_line.distanceAbs(_vector[_votingindex]);
                 if(_distance <= _distancethreshold)
                 {
                     ++_linecandidate.m_numvotes;
@@ -934,7 +1058,7 @@ bool Max::doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac,
             _votingindex = 0;
             do
             {
-                _distance = _linecandidate.m_line.getOrthogonalDistance(_vector[_votingindex]);
+                _distance = _linecandidate.m_line.distanceAbs(_vector[_votingindex]);
                 if(_distance <= _distancethreshold)
                 {
                     ++_linecandidate.m_numvotes;
@@ -1076,7 +1200,7 @@ bool Max::doRansacLineProcessing(Mat &_dst, TBILine &_line, TBILinearRansac &_ra
     do
     {
         TBIPoint_Float _pnt((float)_index1, m_skeletal_line_array[_index1]);
-        _distance = _linecandidates[_iteration].m_line.getOrthogonalDistance(_pnt);
+        _distance = _linecandidates[_iteration].m_line.distanceAbs(_pnt);
         if(_distance <= _distance_threshold)
         {
             ++_linecandidates[_iteration].m_numvotes;
@@ -1110,91 +1234,7 @@ bool Max::doRansacLineProcessing(Mat &_dst, TBILine &_line, TBILinearRansac &_ra
 
     return true;
 }
-
-bool Max::doRansacVertexProcessing(TBILine &_ltsl, TBILine &_rtsl, float *_skel_array, TBIPoint_Float &_lv, TBIPoint_Float &_rv, const float _left_vertex_dist_threshold, const float _right_vertex_dist_threshold)
-{
-    /*
-     Finding the Left and Right Side Vertexes is critical.
-     Each vertex uses a left side right side comparison.
-     */
-    _lv.inValidate();
-    _rv.inValidate();
-
-    if(_left_vertex_dist_threshold <= 0)
-    {
-        emit failedRansacVertexProcesssing();
-        return false;
-    }
-    if(_right_vertex_dist_threshold <= 0)
-    {
-        emit failedRansacVertexProcesssing();
-        return false;
-    }
-    if(!_ltsl.isValid() || !_rtsl.isValid())
-    {
-        emit failedRansacVertexProcesssing();
-        return false;
-    }
-
-
-    const int _seperationleftintdex = (int)_ltsl.getPoint2X();
-    const int _seperationrightindex = (int)_rtsl.getPoint1X();
-    int _lastvalidindex = -1;
-    int _currentindex;
-    float _distance;
-
-
-    //Find The Last Voting Ransac Member of Left TSL
-    _currentindex = (int)_ltsl.getPoint1X();
-    do
-    {
-        if(_skel_array[_currentindex] != -1)
-        {
-            _distance = _ltsl.getOrthogonalDistance(TBIPoint_Float((float)_currentindex, _skel_array[_currentindex]));
-            if(_distance <= _left_vertex_dist_threshold + 2)
-            {
-                _lastvalidindex = _currentindex;
-            }
-        }
-        ++_currentindex;
-    }while(_currentindex < _seperationleftintdex);
-    if(_lastvalidindex == -1)
-    {
-        emit failedRansacVertexProcesssing();
-        return false;
-    }
-    _lv.setX((float)_lastvalidindex);
-    _lv.setY(_skel_array[_lastvalidindex]);
-    _lv.validate();
-
-
-    //Find The Last Voting Ransac Member of Right TSL
-    _currentindex = (int)_rtsl.getPoint2X();
-    _lastvalidindex = -1;
-    do
-    {
-        if(_skel_array[_currentindex] != -1)
-        {
-            _distance = _rtsl.getOrthogonalDistance(TBIPoint_Float((float)_currentindex, _skel_array[_currentindex]));
-            if(_distance <= _right_vertex_dist_threshold + 2)
-            {
-                _lastvalidindex = _currentindex;
-            }
-        }
-
-        --_currentindex;
-    }while(_currentindex > _seperationrightindex);
-    if(_lastvalidindex == -1)
-    {
-        _lv.inValidate();
-        emit failedRansacVertexProcesssing();
-        return false;
-    }
-    _rv.setX((float)_lastvalidindex);
-    _rv.setY(_skel_array[_lastvalidindex]);
-    _rv.validate();
-    return true;
-}
+*/
 
 bool Max::setProjectedRansacLines(TBILine &_src_tsl_left, TBILine &_src_tsl_right, TBILine &_src_bwl_left, TBILine &_src_bwl_right,
                                   TBILine &_dst_tsl_left, TBILine &_dst_tsl_right, TBILine &_dst_bwl_left, TBILine &_dst_bwl_right)
@@ -1279,186 +1319,48 @@ void Max::recieveNewCVMat(const Mat &_mat)
     //Do OpenCV Proccesses
     cv::GaussianBlur(_raw_mat, _blurr_mat, Size(m_blur,m_blur), 0);
     cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
-    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
+
 
     cv::cvtColor(_raw_mat, _operation_mat, cv::COLOR_GRAY2BGR);
     blankProcessingArrays();
 
-    if(clusterProcessThresholdMat(_threshold_mat, _skel_mat, &m_total_image_intensity, m_max_image_intensity,
-                               m_min_image_intensity, m_min_cluster_size, m_max_cluster_size, m_max_clusterincol, m_flattened_scan_data))
+    if(clusterProcessThresholdMat(_threshold_mat, _pixelcolumn_mat, &m_total_image_intensity, m_max_image_intensity,
+                                  m_min_image_intensity, m_min_cluster_size, m_max_cluster_size, m_max_clusterincol, *m_scan_ds))
     {
-            cv::cvtColor(_skel_mat, _pixelcolumn_mat, cv::COLOR_GRAY2BGR);
-            cv::cvtColor(_skel_mat, _ransac_mat, cv::COLOR_GRAY2BGR);
-            if(buildFlattenDataFromBegining(m_flattened_scan_data, m_flattened_left_tsl_data, 150))
-            {
-                drawFlattenedImageDataToMat(_ransac_mat, m_flattened_left_tsl_data, CV_RGB(250,50,50));
-                if(doRansacLineProcessing(m_left_tsl, m_left_tsl_ransac, m_flattened_left_tsl_data))
-                {
-                        m_left_tsl.remakeLine(0, _raw_mat.cols);
-                        m_left_tsl.drawOnMat(_ransac_mat, CV_RGB(125,125,250), 1);
-                        if(buildFlattenDataFromEnd(m_flattened_scan_data, m_flattened_right_tsl_data, 150))
-                        {
-                            drawFlattenedImageDataToMat(_ransac_mat, m_flattened_right_tsl_data, CV_RGB(50,250,50));
-                            if(doRansacLineProcessing(m_right_tsl, m_right_tsl_ransac, m_flattened_right_tsl_data))
-                            {
-                                m_right_tsl.remakeLine(0, _raw_mat.cols);
-                                m_right_tsl.drawOnMat(_ransac_mat, CV_RGB(125,250,125), 1);
-                                //The Left and Right TSL are build and Flattened Data Produced.
+        m_scan_ds->drawToMat(_skel_mat);
+        cv::cvtColor(_skel_mat, _ransac_mat, cv::COLOR_GRAY2BGR);
+        //Build The Roughing TSL's
+        m_scan_ds->buildDataSetForLeftTSL(*m_roughing_left_tsl_ds, 250);
+        m_scan_ds->buildDataSetForRightTSL(*m_roughing_right_tsl_ds, 100);
+        m_roughing_left_tsl_ds->drawToMat(_splitmerge_mat, CV_RGB(0,255,0));
+        TBIRansac::doRansac(m_left_tsl, m_left_tsl_ransac, *m_roughing_left_tsl_ds);
+        TBIRansac::doRansac(m_right_tsl, m_right_tsl_ransac, *m_roughing_right_tsl_ds);
 
-                                //Now Start Using The Masking Techiques to Find the Well.
-                                copyFlattenedData(m_flattened_scan_data, m_flattened_left_bevel_wall_data);
-                                copyFlattenedData(m_flattened_scan_data, m_flattened_right_bevel_wall_data);
-                                removeInliersFromFlattenedData(m_flattened_left_bevel_wall_data, m_left_tsl, _raw_mat.rows, 5);
-                                removeInliersFromFlattenedData(m_flattened_right_bevel_wall_data, m_right_tsl, _raw_mat.rows, 5);
-                                if((m_flattened_left_bevel_wall_data.size() > 10) && (m_flattened_right_bevel_wall_data.size() > 10))
-                                {
-                                TBIPoint_Float _leftrootpnt(m_flattened_left_bevel_wall_data[m_flattened_left_bevel_wall_data.size()-1].getX(), m_left_tsl.getYatX(m_flattened_left_bevel_wall_data[m_flattened_left_bevel_wall_data.size()-1].getX()));
-                                TBIPoint_Float _rightrootpnt(m_flattened_right_bevel_wall_data[0].getX(), m_right_tsl.getYatX(m_flattened_right_bevel_wall_data[0].getX()));
-                                cv::drawMarker(_operation_mat, cv::Point((int)_leftrootpnt.getX(), (int)_leftrootpnt.getY()), CV_RGB(0,200,200), MARKER_DIAMOND, 20, 3);
-                                cv::drawMarker(_operation_mat, cv::Point((int)_rightrootpnt.getX(), (int)_rightrootpnt.getY()), CV_RGB(0,200,200), MARKER_DIAMOND, 20, 3);
-                                }
-
-
-
-                            }
-                        }
-                }
-
-            }
-    }
-
-    /*
-    //Image Flatten The Scan Data Vector
-    if(doImageFlattening(_threshold_mat, m_flattened_scan_data, &m_total_image_intensity, m_max_image_intensity, m_min_image_intensity))
-    {
-
-        cv::cvtColor(_raw_mat, _ransac_mat, cv::COLOR_GRAY2BGR);
-        //Build The Left TSL Flattened Vector From The Scan Vector
-        if(buildFlattenDataFromBegining(m_flattened_scan_data, m_flattened_left_tsl_data, 50))
+        //Draw Them If They Are Valid
+        if(m_left_tsl.isValid())
         {
-            //Draw The Flattened Left TSL Data To Ransac
-            drawFlattenedImageDataToMat(_ransac_mat, m_flattened_left_tsl_data,  CV_RGB(250,10,10));
-            //The TSL Flattend Vector Built Good. Do The Ransac and Draw it
-            if(doRansacLineProcessing(m_left_tsl, m_left_tsl_ransac,m_flattened_left_tsl_data))
+            m_roughing_left_tsl_ds->buildDataSetForInliers(*m_left_tsl_inliers_ds, m_left_tsl, 1.0);
+            m_left_tsl_inliers_ds->buildLeastSquareLine(m_left_tsl);
+            if(m_left_tsl.isValid())
             {
-                //The Left TSL Ransac Was Found Draw It
                 m_left_tsl.remakeLine(0, _raw_mat.cols);
-                m_left_tsl.drawOnMat(_ransac_mat, CV_RGB(125,125,250), 1);
-
-                //Start Working on the Right TSL
-                if(buildFlattenDataFromEnd(m_flattened_scan_data, m_flattened_right_tsl_data, 50))
-                {
-                    //The Right Side TSL was Found Draw it
-                    drawFlattenedImageDataToMat(_ransac_mat, m_flattened_right_tsl_data, CV_RGB(10,250,10));
-                    //Now Do the Right TSL Ransac
-                    if(doRansacLineProcessing(m_right_tsl, m_right_tsl_ransac, m_flattened_right_tsl_data))
-                    {
-                        //The Right TSL Was Found. Draw it
-                        m_right_tsl.remakeLine(0, _raw_mat.cols);
-                        m_right_tsl.drawOnMat(_ransac_mat, CV_RGB(125, 250, 150), 1);
-
-                        //Start Working on Bevel Walls
-                        copyFlattenedData(m_flattened_scan_data, m_flattened_bevel_wall_data);
-                        removeInliersFromFlattenedData(m_flattened_bevel_wall_data, m_left_tsl, _raw_mat.rows, 1);
-                        removeInliersFromFlattenedData(m_flattened_bevel_wall_data, m_right_tsl, _raw_mat.rows, 1);
-                        drawFlattenedImageDataToMat(_ransac_mat, m_flattened_bevel_wall_data, CV_RGB(10,10,250));
-                        //Do The Left BWL
-                        //Adjust Left BWL Ransac For Left TSL and Right BWL For Right TSL
-                        TBILinearRansac _adjusted_left_bwl_ransac;
-                        _adjusted_left_bwl_ransac.makeEqual(m_left_bwl_ransac);
-                        _adjusted_left_bwl_ransac.setIdealAngle(m_left_tsl.angleFromHorizontal() - m_left_bwl_ransac.getIdealAngle());
-                        TBILinearRansac _adjusted_right_bwl_ransac;
-                        _adjusted_right_bwl_ransac.makeEqual(m_right_bwl_ransac);
-                        _adjusted_right_bwl_ransac.setIdealAngle(m_right_tsl.angleFromHorizontal() - m_right_bwl_ransac.getIdealAngle());
-
-                        //Process the Left BWL Thru Flattened Data Refining
-                        if(doRansacLineProcessing(m_left_bwl, _adjusted_left_bwl_ransac, m_flattened_bevel_wall_data))
-                        {
-                            //Refine The Ransac For The Bevel Wall.
-                            buildFlattenDataFromInliers(m_flattened_bevel_wall_data, m_flattened_left_bwl_data, m_left_bwl, 10, 10);
-                            drawFlattenedImageDataToMat(_ransac_mat, m_flattened_left_bwl_data,  CV_RGB(250,10,10));
-                            //Do Ransac Again On Refined Flattened Data For Left BWL
-                            if(doRansacLineProcessing(m_left_bwl, _adjusted_left_bwl_ransac, m_flattened_left_bwl_data))
-                            {
-                                m_left_bwl.remakeLine(0, _raw_mat.cols);
-                                m_left_bwl.drawOnMat(_ransac_mat, CV_RGB(125,125,125), 1);
-
-                                //Process the Right BWL Thru Flattened Data Refining
-                                if(doRansacLineProcessing(m_right_bwl, _adjusted_right_bwl_ransac, m_flattened_bevel_wall_data))
-                                {
-                                    //Refine The Ransac For The Bevel Wall.
-                                    buildFlattenDataFromInliers(m_flattened_bevel_wall_data, m_flattened_right_bwl_data, m_right_bwl, 10, 10);
-                                    drawFlattenedImageDataToMat(_ransac_mat, m_flattened_right_bwl_data,  CV_RGB(10,250,10));
-                                    //Do Ransac Again On Refined Flattened Data For Left BWL
-                                    if(doRansacLineProcessing(m_right_bwl, _adjusted_right_bwl_ransac, m_flattened_right_bwl_data))
-                                    {
-                                        m_right_bwl.remakeLine(0, _raw_mat.cols);
-                                        m_right_bwl.drawOnMat(_ransac_mat, CV_RGB(125,125,125), 1);
-
-                                        //Trim Ransac Lines and OverView Tracking Points
-                                        TBIPoint_Float _intersectionpnt1;
-                                        TBIPoint_Float _intersectionpnt2;
-                                        TBIPoint_Float _intersectionpnt3;
-
-                                        if(m_left_tsl.findPointofIntersection(m_left_bwl, _intersectionpnt1))
-                                        {
-                                            if(m_left_bwl.findPointofIntersection(m_right_bwl, _intersectionpnt2))
-                                            {
-                                                if(m_right_bwl.findPointofIntersection(m_right_tsl, _intersectionpnt3))
-                                                {
-                                                    //Trim Lines
-                                                    m_left_tsl.remakeLine(0 , (int)_intersectionpnt1.getX());
-                                                    m_left_bwl.remakeLine(_intersectionpnt1.getX(), (int)_intersectionpnt2.getX());
-                                                    m_right_bwl.remakeLine((int)_intersectionpnt2.getX(), (int)_intersectionpnt3.getX());
-                                                    m_right_tsl.remakeLine((int)_intersectionpnt3.getX(), _raw_mat.cols);
-                                                    m_left_tsl.drawOnMat(_operation_mat, CV_RGB(100,255,100), 1);
-                                                    m_left_bwl.drawOnMat(_operation_mat, CV_RGB(100,255,100), 1);
-                                                    m_right_bwl.drawOnMat(_operation_mat, CV_RGB(100,255,100), 1);
-                                                    m_right_tsl.drawOnMat(_operation_mat, CV_RGB(100,255,100), 1);
-                                                    cv::drawMarker(_operation_mat, cv::Point((int)_intersectionpnt1.getX(), (int)_intersectionpnt1.getY()), CV_RGB(0,200,200), MARKER_DIAMOND, 20, 3);
-                                                    cv::drawMarker(_operation_mat, cv::Point((int)_intersectionpnt3.getX(), (int)_intersectionpnt3.getY()), CV_RGB(0,200,200), MARKER_DIAMOND, 20, 3);
-
-                                                }
-                                            }
-                                        }
-
-                                    }
-
-                                }
-                            }
-
-                        }
-
-
-                    }
-                }
-
+                m_left_tsl.drawOnMat(_ransac_mat, CV_RGB(0,255,0));
+            }
+        }
+        if(m_right_tsl.isValid())
+        {
+            m_roughing_right_tsl_ds->buildDataSetForInliers(*m_right_tsl_inliers_ds, m_right_tsl, 1.0);
+            m_right_tsl_inliers_ds->buildLeastSquareLine(m_right_tsl);
+            if(m_right_tsl.isValid())
+            {
+                m_right_tsl.remakeLine(0, _raw_mat.cols);
+                m_right_tsl.drawOnMat(_ransac_mat, CV_RGB(255, 0, 0));
             }
         }
 
+        //Start Masking The DataSets
+
     }
-
-
-*/
-
 
     if(m_emitextramats)
     {
@@ -1470,11 +1372,15 @@ void Max::recieveNewCVMat(const Mat &_mat)
         emit newRansacMatProcessed(_ransac_mat);
         emit newSplitMergeMatProcessed(_splitmerge_mat);
     }
+
     emit newOperationMatProcessed(_operation_mat);
 
     m_timeinloop = m_timer.elapsed();
+    qDebug() << "Time in Loop = " << m_timer.elapsed();
     emit timeInLoopChanged(m_timeinloop);
+    emit totalImageIntensityChanged(m_total_image_intensity);
     m_in_proccesing_loop = false;
+
     emit processingComplete(); //Must Be Last Signal Sent
 
 }
