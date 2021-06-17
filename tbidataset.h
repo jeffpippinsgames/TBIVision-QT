@@ -33,6 +33,7 @@ public:
     void eraseFromMat(cv::Mat &_dst);
     void buildDataSetForLeftTSL(TBIDataSet &_dst, unsigned int _uniquexvalues);
     void buildDataSetForRightTSL(TBIDataSet &_dst, unsigned int _uniquexvalues);
+    void buildDataSetForJoint(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold);
     void buildDataSetForInliers(TBIDataSet &_dst, const TBILine &_line, const float _distancethreshold);
     void buildLeastSquareLine(TBILine &_line);
 

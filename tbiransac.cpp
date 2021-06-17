@@ -35,7 +35,10 @@ bool TBIRansac::doRansac(TBILine &_line, const TBILinearRansac &_ransac, const T
     {
         //Form Line From 2 Random Points in Data Set
         _indexp1 = randomInt(0,_datasetsize-1);
-        do{_indexp2 = randomInt(0, _datasetsize-1);}while(_indexp1 == _indexp2);
+        do
+        {
+            _indexp2 = randomInt(0, _datasetsize-1);
+        }while(_indexp1 == _indexp2);
         TBILine _tstline(_dataset[_indexp1], _dataset[_indexp2]);
         //Make Sure Test Line is Valid
         if(_tstline.isValid())

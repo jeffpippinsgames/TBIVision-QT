@@ -152,6 +152,31 @@ void TBIDataSet::buildDataSetForRightTSL(TBIDataSet &_dst, unsigned int _uniquex
 
 }
 
+void TBIDataSet::buildDataSetForJoint(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold)
+{
+    _dst.clear();
+    if(m_dataset_size == 0) return;
+    if(!_lefttsl.isValid()) return;
+    if(!_righttsl.isValid()) return;
+
+    int _index = 0;
+    float _distanceleft;
+    float _distanceright;
+
+    do
+    {
+        _distanceleft = _lefttsl.distanceAbs(m_pnts[_index]);
+        _distanceright = _righttsl.distanceAbs(m_pnts[_index]);
+        if((_distanceleft > _inlierdistancethreshold) && (_distanceright > _inlierdistancethreshold))
+        {
+            _dst.insert(m_pnts[_index]);
+        }
+        ++_index;
+    }while(_index < m_dataset_size);
+}
+
+
+
 void TBIDataSet::buildDataSetForInliers(TBIDataSet &_dst, const TBILine &_line, const float _distancethreshold)
 {
     _dst.clear();

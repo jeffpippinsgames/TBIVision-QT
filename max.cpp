@@ -1330,9 +1330,10 @@ void Max::recieveNewCVMat(const Mat &_mat)
         m_scan_ds->drawToMat(_skel_mat);
         cv::cvtColor(_skel_mat, _ransac_mat, cv::COLOR_GRAY2BGR);
         //Build The Roughing TSL's
-        m_scan_ds->buildDataSetForLeftTSL(*m_roughing_left_tsl_ds, 250);
-        m_scan_ds->buildDataSetForRightTSL(*m_roughing_right_tsl_ds, 100);
+        m_scan_ds->buildDataSetForLeftTSL(*m_roughing_left_tsl_ds, 150);
+        m_scan_ds->buildDataSetForRightTSL(*m_roughing_right_tsl_ds, 150);
         m_roughing_left_tsl_ds->drawToMat(_splitmerge_mat, CV_RGB(0,255,0));
+        m_roughing_right_tsl_ds->drawToMat(_splitmerge_mat, CV_RGB(255, 0, 0));
         TBIRansac::doRansac(m_left_tsl, m_left_tsl_ransac, *m_roughing_left_tsl_ds);
         TBIRansac::doRansac(m_right_tsl, m_right_tsl_ransac, *m_roughing_right_tsl_ds);
 
@@ -1353,12 +1354,18 @@ void Max::recieveNewCVMat(const Mat &_mat)
             m_right_tsl_inliers_ds->buildLeastSquareLine(m_right_tsl);
             if(m_right_tsl.isValid())
             {
+
                 m_right_tsl.remakeLine(0, _raw_mat.cols);
                 m_right_tsl.drawOnMat(_ransac_mat, CV_RGB(255, 0, 0));
             }
         }
 
         //Start Masking The DataSets
+        if(m_left_tsl.isValid() && m_right_tsl.isValid())
+        {
+            m_scan_ds->buildDataSetForJoint(*m_joint_ds, m_right_tsl, m_left_tsl, 5.0);
+            m_joint_ds->drawToMat(_splitmerge_mat, CV_RGB(50,50,255));
+        }
 
     }
 
