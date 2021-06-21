@@ -1,10 +1,12 @@
 #ifndef TBIDATASET_H
 #define TBIDATASET_H
 
+#include "tbiconstants.h"
 #include "tbipoint_int.h"
 #include "tbiline.h"
 #include "opencv4/opencv2/core.hpp"
 #include "opencv4/opencv2/imgproc/imgproc.hpp"
+#include "tbidatadistributionset.h"
 
 
 
@@ -32,20 +34,28 @@ public:
     void drawToMat(cv::Mat &_dst, cv::Scalar _color);
     void eraseFromMat(cv::Mat &_dst);
     void buildDataSetForLeftTSL(TBIDataSet &_dst, unsigned int _uniquexvalues);
+    void buildDataSetForRoughingLeftTSL(TBIDataSet &_dst, int _breakindex);
     void buildDataSetForRightTSL(TBIDataSet &_dst, unsigned int _uniquexvalues);
+    void buildDataSetForRoughingRightTSL(TBIDataSet &_dst, int _startindex);
     void buildDataSetForJoint(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold);
     void buildDataSetForInliers(TBIDataSet &_dst, const TBILine &_line, const float _distancethreshold);
+    void buildSkeletalDataSet(TBIDataSet &_dst, const TBIDataDistributionSet &_srcdistro);
+    void buildDistributionSet(TBIDataDistributionSet &_distroset);
     void buildLeastSquareLine(TBILine &_line);
+    int getIndexofHighestY();
+    int getIndexofLowestX();
+    int getIndexofHighestX();
+    int getHighestX();
+    int getLowestX();
+    TBIPoint_Int getPoint(int _index){ return m_pnts[_index];}
 
-    const TBIPoint_Int& operator [] (std::size_t _index) const
+
+    TBIPoint_Int operator [] (std::size_t _index) const
     {
-        return m_pnts[_index];
+        TBIPoint_Int _pnt(m_pnts[_index].m_x, m_pnts[_index].m_y);
+        return _pnt;
     }
 
-    TBIPoint_Int& operator [] (std::size_t _index)
-    {
-        return m_pnts[_index];
-    }
 
     void operator = (TBIDataSet &_dataset)
     {
@@ -64,8 +74,8 @@ public:
 
 
 private:
-    static const int Mat_Max_Width = 728;
-    static const int Mat_Max_Height = 544;
+    static const int Mat_Max_Width = TBIConstants::Max_Camera_Width;
+    static const int Mat_Max_Height = TBIConstants::Max_Camera_Height;
     static const int Largest_DataSet_Size = Mat_Max_Width*Mat_Max_Height;
     TBIPoint_Int m_pnts[Largest_DataSet_Size];
     int m_dataset_size;

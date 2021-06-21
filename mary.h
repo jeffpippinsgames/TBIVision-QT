@@ -82,10 +82,6 @@ class Mary : public QObject
     Q_PROPERTY(float rn_right_bwl_distance_threshold READ getRightBWLDistanceThreshold WRITE setRightBWLDistanceThreshold NOTIFY rnRightBWLDistanceThresholdChanged)
     Q_PROPERTY(int rn_right_bwl_iterations READ getRightBWLIterations WRITE setRightBWLIterations NOTIFY rnRightBWLIterationsChanged)
 
-    //Split Merge Processing Properties-------------------------------------------------------------
-    Q_PROPERTY(float sm_split_distance READ getSplitDistance WRITE setSplitDistance NOTIFY smSplitDistanceChanged)
-    Q_PROPERTY(float sm_split_length READ getSplitLength WRITE setSplitLength NOTIFY smSplitLengthChanged)
-
 
     //GUI Properties Changed--------------------------------------------------------------------
     Q_PROPERTY(bool showdebuginfo READ getShowDebugInfo WRITE setShowDebugInfo NOTIFY showDebugInfoChanged)
@@ -249,9 +245,7 @@ signals:
     void signalRightBWLDistanceThreshold(float _distthreshold);
     void signalRightBWLIterations(int _iterations);
 
-    //Split Merge
-    void signalSplitDistance(float _distance);
-    void signalSplitLength(float _length);
+
 
     //Pylon Related Signals-------------------------------------------------------------------
     void pylonCameraMaxHeightChanged();

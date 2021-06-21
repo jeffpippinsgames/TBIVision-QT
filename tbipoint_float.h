@@ -2,6 +2,7 @@
 #define TBIPoint_Float_FLOAT_H
 
 #include "opencv4/opencv2/core.hpp"
+#include "opencv4/opencv2/imgproc/imgproc.hpp"
 
 class TBIPoint_Float
 {
@@ -16,6 +17,8 @@ public:
     TBIPoint_Float(const TBIPoint_Float &_pnt){m_x = _pnt.m_x; m_y = _pnt.m_y;}
 
     float distance(const TBIPoint_Float &_pnt);
+    cv::Point toCVPoint();
+
 
 
 

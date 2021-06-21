@@ -28,7 +28,11 @@ bool TBIRansac::doRansac(TBILine &_line, const TBILinearRansac &_ransac, const T
     float _distance;
     float _aoh;
 
-    TBILinearRansacVotingStructure _ransacresult;
+    int _actual_validlinestested=0;
+    int _highestvotecount = 0;
+    TBILine _resultingline(0,0,0,0);
+
+    //TBILinearRansacVotingStructure _ransacresult;
 
     _iteration = 0;
     do
@@ -50,6 +54,7 @@ bool TBIRansac::doRansac(TBILine &_line, const TBILinearRansac &_ransac, const T
                 //Reset the Point Index and the Vote Total
                 _pntindex = 0;
                 _votetotal = 0;
+                ++_actual_validlinestested;
                 //Do The Voting
                 do
                 {
@@ -64,23 +69,28 @@ bool TBIRansac::doRansac(TBILine &_line, const TBILinearRansac &_ransac, const T
                 if(_votetotal >= _min_votes)
                 {
                     //Set This Result As The Best Candidate if it has more votes then the last good result.
-                    if(_votetotal > _ransacresult.m_numvotes)
+                    if(_votetotal > _highestvotecount)
                     {
-                        _ransacresult.m_numvotes = _votetotal;
-                        _ransacresult.m_line = _tstline;
-                        _ransacresult.m_angletohorizontal = _aoh;
+                        _highestvotecount = _votetotal;
+                        _resultingline = _tstline;
                     }
                 }
             }
+            else
+            {
+                //qDebug() << "_aoh = " << _aoh << ":   Required aoh  " << _min_angle_from_horizon << "-" << _max_angle_from_horizon;
+            }
+
         }
         //Incriment The Next Iteration
+
         ++_iteration;
-    }while(_iteration > _iterations);
+    }while(_iteration < _iterations);
 
     //Determine if a Valid Result Was Found.
-    if(_ransacresult.m_line.isValid())
+    if(_resultingline.isValid())
     {
-        _line = _ransacresult.m_line;
+        _line = _resultingline;
     }
     else
     {

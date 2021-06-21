@@ -122,6 +122,21 @@ void TBIDataSet::buildDataSetForLeftTSL(TBIDataSet &_dst, unsigned int _uniquexv
 
 }
 
+void TBIDataSet::buildDataSetForRoughingLeftTSL(TBIDataSet &_dst, int _breakindex)
+{
+    _dst.clear();
+    if(m_dataset_size == 0) return;
+    if(_breakindex < 1) return;
+    if(_breakindex >=  m_dataset_size) return;
+
+    int _pntindex = 0;
+    do
+    {
+        _dst.insert(m_pnts[_pntindex]);
+        ++_pntindex;
+    }while(_pntindex < _breakindex);
+}
+
 void TBIDataSet::buildDataSetForRightTSL(TBIDataSet &_dst, unsigned int _uniquexvalues)
 {
     //Note DataSet For Right TSL is Backwards.
@@ -150,6 +165,21 @@ void TBIDataSet::buildDataSetForRightTSL(TBIDataSet &_dst, unsigned int _uniquex
         --_pntindex;
     }while((_pntindex >= 0) && (_uniquex <= _uniquexvalues));
 
+}
+
+void TBIDataSet::buildDataSetForRoughingRightTSL(TBIDataSet &_dst, int _startindex)
+{
+    _dst.clear();
+    if(m_dataset_size == 0) return;
+    if(_startindex >= m_dataset_size-1) return;
+    if((m_dataset_size-1-_startindex) < 0) return;
+
+    int _pntindex = _startindex;
+    do
+    {
+        _dst.insert(m_pnts[_pntindex]);
+        ++_pntindex;
+    }while(_pntindex < m_dataset_size);
 }
 
 void TBIDataSet::buildDataSetForJoint(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold)
@@ -197,6 +227,49 @@ void TBIDataSet::buildDataSetForInliers(TBIDataSet &_dst, const TBILine &_line, 
 
 }
 
+void TBIDataSet::buildSkeletalDataSet(TBIDataSet &_dst, const TBIDataDistributionSet &_srcdistro)
+{
+    _dst.clear();
+    if(m_dataset_size == 0) return;
+    int _srcindex = 0;
+
+    do
+    {
+        if(_srcdistro[m_pnts[_srcindex].m_x] == 1)
+        {
+            _dst.insert(m_pnts[_srcindex]);
+        }
+        ++_srcindex;
+    }while(_srcindex < m_dataset_size);
+
+
+}
+
+void TBIDataSet::buildDistributionSet(TBIDataDistributionSet &_distroset)
+{
+
+
+    //Clear The Distribution Set
+    _distroset.clear();
+    if(m_dataset_size == 0) return;
+
+
+
+    //There is At least 1 element.
+    //Set The initial Values
+    _distroset.incrementIndex(m_pnts[0].m_x);
+    if(m_dataset_size == 1) return;
+
+    //Start Incrementing the distrobution set.
+    int _index = 1;
+    do
+    {
+        _distroset.incrementIndex(m_pnts[_index].m_x);
+        ++_index;
+    }while(_index < m_dataset_size);
+
+}
+
 void TBIDataSet::buildLeastSquareLine(TBILine &_line)
 {
     _line.clear();
@@ -237,4 +310,109 @@ void TBIDataSet::buildLeastSquareLine(TBILine &_line)
     }
 
 
+}
+
+int TBIDataSet::getIndexofHighestY()
+{
+    if(m_dataset_size==0) return -1;
+
+    int _index=0;
+    int _highestyvalue=0;
+    int _highestyindex=-1;
+
+    do
+    {
+
+        if(m_pnts[_index].m_y > _highestyvalue)
+        {
+            _highestyvalue = m_pnts[_index].m_y;
+            _highestyindex = _index;
+        }
+        ++_index;
+    }while(_index < m_dataset_size);
+
+    return _highestyindex;
+
+}
+
+int TBIDataSet::getIndexofLowestX()
+{
+    if(m_dataset_size==0) return -1;
+
+    int _index=0;
+    int _lowestvalue=TBIConstants::Max_Camera_Width;
+    int _lowestindex=-1;
+
+    do
+    {
+
+        if(m_pnts[_index].m_x < _lowestvalue)
+        {
+            _lowestvalue = m_pnts[_index].m_x;
+            _lowestindex = _index;
+        }
+        ++_index;
+    }while(_index < m_dataset_size);
+
+    return _lowestindex;
+}
+
+int TBIDataSet::getIndexofHighestX()
+{
+    if(m_dataset_size==0) return -1;
+
+    int _index=0;
+    int _highestvalue=0;
+    int _highestindex=-1;
+
+    do
+    {
+
+        if(m_pnts[_index].m_x > _highestvalue)
+        {
+            _highestvalue = m_pnts[_index].m_x;
+            _highestindex = _index;
+        }
+        ++_index;
+    }while(_index < m_dataset_size);
+
+    return _highestindex;
+}
+
+int TBIDataSet::getHighestX()
+{
+    if(m_dataset_size==0) return -1;
+
+    int _index=0;
+    int _highestxvalue=-1;
+    do
+    {
+
+        if(m_pnts[_index].m_x > _highestxvalue)
+        {
+            _highestxvalue = m_pnts[_index].m_x;
+        }
+        ++_index;
+    }while(_index < m_dataset_size);
+
+    return _highestxvalue;
+}
+
+int TBIDataSet::getLowestX()
+{
+    if(m_dataset_size==0) return -1;
+
+    int _index=0;
+    int _lowestxvalue=TBIConstants::Max_Camera_Width;
+    do
+    {
+
+        if(m_pnts[_index].m_x < _lowestxvalue)
+        {
+            _lowestxvalue = m_pnts[_index].m_x;
+        }
+        ++_index;
+    }while(_index < m_dataset_size);
+
+    return _lowestxvalue;
 }

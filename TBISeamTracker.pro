@@ -16,6 +16,7 @@ SOURCES += \
         max.cpp \
         pixelclusterclass.cpp \
         pixelcolumnclass.cpp \
+        tbidatadistributionset.cpp \
         tbidataset.cpp \
         tbiline.cpp \
         tbilinearransac.cpp \
@@ -46,6 +47,8 @@ HEADERS += \
     pixelcolumnclass.h \
     pixelcolumnprocessreturn_t.h \
     pixelfundamental.h \
+    tbiconstants.h \
+    tbidatadistributionset.h \
     tbidataset.h \
     tbiline.h \
     tbilinearransac.h \

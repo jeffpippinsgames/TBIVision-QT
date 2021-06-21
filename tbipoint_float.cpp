@@ -9,6 +9,12 @@ float TBIPoint_Float::distance(const TBIPoint_Float &_pnt)
     return sqrtf(_dx*_dx + _dy*_dy);
 }
 
+cv::Point TBIPoint_Float::toCVPoint()
+{
+    cv::Point _cvpnt((int)m_x, (int)m_y);
+    return _cvpnt;
+}
+
 
 
 
