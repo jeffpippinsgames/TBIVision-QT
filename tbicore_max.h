@@ -165,6 +165,7 @@ private:
     //Public Slots----------------------------------------------------------
 public slots:
     void recieveNewCVMat(const cv::Mat& _mat_frame);
+    void processVGrooveTracking(const cv::Mat _mat_frame);
 
     void onBlurChange(int _blur);
     void onThresholdMinChange(int _min);

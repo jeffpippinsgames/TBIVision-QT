@@ -12,6 +12,8 @@ public:
     int size(){return m_size;}
     void clear();
     void incrementIndex(int _index){++m_data[_index]; if(m_size < (_index+1)) m_size = _index + 1;}
+    float standardDeviation();
+
 
     int operator []  (int _index) const
     {
