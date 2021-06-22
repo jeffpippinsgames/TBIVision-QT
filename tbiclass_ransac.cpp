@@ -1,4 +1,4 @@
-#include "tbiransac.h"
+#include "tbiclass_ransac.h"
 #include "random"
 
 TBIRansac::TBIRansac()
@@ -6,7 +6,7 @@ TBIRansac::TBIRansac()
 
 }
 
-bool TBIRansac::doRansac(TBILine &_line, const TBILinearRansac &_ransac, const TBIDataSet &_dataset)
+bool TBIRansac::doRansac(TBILine &_line, const TBIRansacParameter &_ransac, const TBIDataSet &_dataset)
 {
     _line.clear();
     const int _datasetsize = _dataset.size();
@@ -28,7 +28,11 @@ bool TBIRansac::doRansac(TBILine &_line, const TBILinearRansac &_ransac, const T
     float _distance;
     float _aoh;
 
-    TBILinearRansacVotingStructure _ransacresult;
+    int _actual_validlinestested=0;
+    int _highestvotecount = 0;
+    TBILine _resultingline(0,0,0,0);
+
+    //TBILinearRansacVotingStructure _ransacresult;
 
     _iteration = 0;
     do
@@ -50,6 +54,7 @@ bool TBIRansac::doRansac(TBILine &_line, const TBILinearRansac &_ransac, const T
                 //Reset the Point Index and the Vote Total
                 _pntindex = 0;
                 _votetotal = 0;
+                ++_actual_validlinestested;
                 //Do The Voting
                 do
                 {
@@ -64,23 +69,28 @@ bool TBIRansac::doRansac(TBILine &_line, const TBILinearRansac &_ransac, const T
                 if(_votetotal >= _min_votes)
                 {
                     //Set This Result As The Best Candidate if it has more votes then the last good result.
-                    if(_votetotal > _ransacresult.m_numvotes)
+                    if(_votetotal > _highestvotecount)
                     {
-                        _ransacresult.m_numvotes = _votetotal;
-                        _ransacresult.m_line = _tstline;
-                        _ransacresult.m_angletohorizontal = _aoh;
+                        _highestvotecount = _votetotal;
+                        _resultingline = _tstline;
                     }
                 }
             }
+            else
+            {
+                //qDebug() << "_aoh = " << _aoh << ":   Required aoh  " << _min_angle_from_horizon << "-" << _max_angle_from_horizon;
+            }
+
         }
         //Incriment The Next Iteration
+
         ++_iteration;
-    }while(_iteration > _iterations);
+    }while(_iteration < _iterations);
 
     //Determine if a Valid Result Was Found.
-    if(_ransacresult.m_line.isValid())
+    if(_resultingline.isValid())
     {
-        _line = _ransacresult.m_line;
+        _line = _resultingline;
     }
     else
     {
@@ -89,15 +99,12 @@ bool TBIRansac::doRansac(TBILine &_line, const TBILinearRansac &_ransac, const T
     return true;
 }
 
-//The Dummy Sets Are Used to Avoid Having to Allocate The Memory.
-bool TBIRansac::doRansacWithInliers(TBILine &_line, TBIDataSet &_inlierset, TBIDataSet &_dummyset1,
-                                    TBIDataSet &_dummyset2, const TBILinearRansac &_ransac,
-                                    const TBIDataSet &_dataset)
+bool TBIRansac::doRansac(TBILine &_line, const TBIRansacParameter &_ransac, const TBIDataSet &_dataset, const int _startdsindex, const int _enddsindex)
 {
     _line.clear();
-    _dummyset1.clear();
-    _dummyset2.clear();
     const int _datasetsize = _dataset.size();
+    if(_startdsindex >= _enddsindex) return false;
+    if(_enddsindex >= _dataset.size()) return false;
 
     if(_datasetsize < _ransac.getMinVotes()) return false;
     if(_datasetsize < 10) return false;
@@ -116,15 +123,21 @@ bool TBIRansac::doRansacWithInliers(TBILine &_line, TBIDataSet &_inlierset, TBID
     float _distance;
     float _aoh;
 
-    TBILinearRansacVotingStructure _ransacresult;
+    int _actual_validlinestested=0;
+    int _highestvotecount = 0;
+    TBILine _resultingline(0,0,0,0);
 
+    //TBILinearRansacVotingStructure _ransacresult;
 
     _iteration = 0;
     do
     {
         //Form Line From 2 Random Points in Data Set
-        _indexp1 = randomInt(0,_datasetsize-1);
-        do{_indexp2 = randomInt(0, _datasetsize-1);}while(_indexp1 == _indexp2);
+        _indexp1 = randomInt(_startdsindex,_enddsindex);
+        do
+        {
+            _indexp2 = randomInt(_startdsindex, _enddsindex);
+        }while(_indexp1 == _indexp2);
         TBILine _tstline(_dataset[_indexp1], _dataset[_indexp2]);
         //Make Sure Test Line is Valid
         if(_tstline.isValid())
@@ -136,7 +149,7 @@ bool TBIRansac::doRansacWithInliers(TBILine &_line, TBIDataSet &_inlierset, TBID
                 //Reset the Point Index and the Vote Total
                 _pntindex = 0;
                 _votetotal = 0;
-                _dummyset1.clear();
+                ++_actual_validlinestested;
                 //Do The Voting
                 do
                 {
@@ -144,8 +157,6 @@ bool TBIRansac::doRansacWithInliers(TBILine &_line, TBIDataSet &_inlierset, TBID
                     if((_distance <= _distancethreshold))
                     {
                         ++_votetotal;
-                        TBIPoint_Int __pnt(_dataset[_pntindex].m_x, _dataset[_pntindex].m_y);
-                        _dummyset1.insert(__pnt);
                     }
                     ++_pntindex;
                 }while(_pntindex < _datasetsize);
@@ -153,25 +164,28 @@ bool TBIRansac::doRansacWithInliers(TBILine &_line, TBIDataSet &_inlierset, TBID
                 if(_votetotal >= _min_votes)
                 {
                     //Set This Result As The Best Candidate if it has more votes then the last good result.
-                    if(_votetotal > _ransacresult.m_numvotes)
+                    if(_votetotal > _highestvotecount)
                     {
-                        _ransacresult.m_numvotes = _votetotal;
-                        _ransacresult.m_line = _tstline;
-                        _ransacresult.m_angletohorizontal = _aoh;
-                        _dummyset2 = _dummyset1;
+                        _highestvotecount = _votetotal;
+                        _resultingline = _tstline;
                     }
                 }
             }
+            else
+            {
+                //qDebug() << "_aoh = " << _aoh << ":   Required aoh  " << _min_angle_from_horizon << "-" << _max_angle_from_horizon;
+            }
+
         }
         //Incriment The Next Iteration
+
         ++_iteration;
-    }while(_iteration > _iterations);
+    }while(_iteration < _iterations);
 
     //Determine if a Valid Result Was Found.
-    if(_ransacresult.m_line.isValid())
+    if(_resultingline.isValid())
     {
-        _line = _ransacresult.m_line;
-        _inlierset = _dummyset2;
+        _line = _resultingline;
     }
     else
     {
@@ -179,6 +193,7 @@ bool TBIRansac::doRansacWithInliers(TBILine &_line, TBIDataSet &_inlierset, TBID
     }
     return true;
 }
+
 
 int TBIRansac::randomInt(int _min, int _max)
 {

@@ -1,8 +1,9 @@
-#ifndef TBIPOINT_INT_H
-#define TBIPOINT_INT_H
+#ifndef TBICLASS_POINTINT_H
+#define TBICLASS_POINTINT_H
 
 
-
+#include "opencv4/opencv2/core.hpp"
+#include "opencv4/opencv2/imgproc/imgproc.hpp"
 
 class TBIPoint_Int
 {
@@ -16,7 +17,7 @@ class TBIPoint_Int
     TBIPoint_Int(int _x, int _y){m_x=_x;m_y=_y;}
     TBIPoint_Int(const TBIPoint_Int &_pnt){m_x=_pnt.m_x; m_y = _pnt.m_y;}
     float distance(const TBIPoint_Int &_pnt);
-
+    cv::Point toCVPoint(){return cv::Point(m_x, m_y);}
 
 
     TBIPoint_Int operator + (const TBIPoint_Int &_pnt)
@@ -48,4 +49,4 @@ class TBIPoint_Int
 
 };
 
-#endif // TBIPOINT_INT_H
+#endif // TBICLASS_POINTINT_H

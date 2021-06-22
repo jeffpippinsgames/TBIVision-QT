@@ -1,4 +1,4 @@
-#include "gary.h"
+#include "tbicore_gary.h"
 #include <QDebug>
 
 

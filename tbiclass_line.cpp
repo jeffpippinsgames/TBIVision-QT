@@ -1,4 +1,4 @@
-#include "tbiline.h"
+#include "tbiclass_line.h"
 #include "math.h"
 
 

@@ -3,8 +3,8 @@ QML Import Type.
 import "tbi.vision.components" 1 0
  */
 
-#ifndef GARY_H
-#define GARY_H
+#ifndef TBICORE_GARY_H
+#define TBICORE_GARY_H
 
 #include <QObject>
 #include <QQuickItem>
@@ -310,4 +310,4 @@ public slots:
     void serialError(QSerialPort::SerialPortError _error);
 };
 
-#endif // GARY_H
+#endif // TBICORE_GARY_H

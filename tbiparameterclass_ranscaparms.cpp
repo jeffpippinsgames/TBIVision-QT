@@ -1,8 +1,8 @@
-#include "tbilinearransac.h"
+#include "tbiparameterclass_ranscaparms.h"
 
 
 
-TBILinearRansac::TBILinearRansac(QObject *parent)
+TBIRansacParameter::TBIRansacParameter(QObject *parent)
 {
     m_ideal_angle = 0;
     m_allowed_angle_variance = 0;
@@ -11,13 +11,8 @@ TBILinearRansac::TBILinearRansac(QObject *parent)
     m_iterations = 50;
 }
 
-bool TBILinearRansac::doRansacProcessingLinearLines(TBILine &_dstline, float *_skel_data, int _startindex, int _endindex)
-{
 
-    return true;
-}
-
-void TBILinearRansac::setIdealAngle(float _idealangle)
+void TBIRansacParameter::setIdealAngle(float _idealangle)
 {
     if((_idealangle >= -90.0) && (_idealangle <= 90.0))
     {
@@ -25,7 +20,7 @@ void TBILinearRansac::setIdealAngle(float _idealangle)
     }
 }
 
-void TBILinearRansac::setAllowedAngleVariance(float _allowedanglevariance)
+void TBIRansacParameter::setAllowedAngleVariance(float _allowedanglevariance)
 {
     if((_allowedanglevariance >= 0) && (_allowedanglevariance <=90))
     {
@@ -33,7 +28,7 @@ void TBILinearRansac::setAllowedAngleVariance(float _allowedanglevariance)
     }
 }
 
-void TBILinearRansac::setMinVotes(int _minvotes)
+void TBIRansacParameter::setMinVotes(int _minvotes)
 {
     if(_minvotes >= 1)
     {
@@ -41,7 +36,7 @@ void TBILinearRansac::setMinVotes(int _minvotes)
     }
 }
 
-void TBILinearRansac::setIterations(int _iterations)
+void TBIRansacParameter::setIterations(int _iterations)
 {
     if(_iterations >= 1)
     {
@@ -49,7 +44,7 @@ void TBILinearRansac::setIterations(int _iterations)
     }
 }
 
-void TBILinearRansac::setDistanceThreshold(float _distancethreshold)
+void TBIRansacParameter::setDistanceThreshold(float _distancethreshold)
 {
     if(_distancethreshold > 0)
     {
@@ -57,7 +52,7 @@ void TBILinearRansac::setDistanceThreshold(float _distancethreshold)
     }
 }
 
-void TBILinearRansac::makeEqual(TBILinearRansac &_ransac)
+void TBIRansacParameter::makeEqual(TBIRansacParameter &_ransac)
 {
     m_ideal_angle = _ransac.getIdealAngle();
     m_allowed_angle_variance = _ransac.getAllowedAngleVariance();

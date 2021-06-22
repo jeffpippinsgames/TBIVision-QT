@@ -35,12 +35,12 @@ Item {
     readonly property string thresholdstateframenotactive: "ThresholdStateFrameNotActive"
     readonly property string pixelcolumnstateframenotactive: "PixelColumnStateFrameNotActive"
     readonly property string pixelcolumnstateframeactive: "PixelColumnStateFrameActive"
-    readonly property string skeletalstateframenotactive: "SkeletalStateFrameNotActive"
-    readonly property string skeletalstateframeactive: "SkeletalStateFrameActive"
+    readonly property string inlierdatasetstateframenotactive: "inlierdatasetStateFrameNotActive"
+    readonly property string inlierdatasetstateframeactive: "inlierdatasetStateFrameActive"
     readonly property string ransacstateframenotactive: "RansacStateFrameNotActive" //Top Surface Lines
     readonly property string ransacstateframeactive: "RansacStateFrameActive" //Top Surface Lines
-    readonly property string splitmergestateframenotactive: "SplitMergeStateFrameNotActive" //Topography Lines
-    readonly property string splitmergestateframeactive: "SplitMergeStateFrameActive" //Topography Lines
+    readonly property string geoconstructionstateframenotactive: "geoconstructionStateFrameNotActive"
+    readonly property string geoconstructionstateframeactive: "geoconstructionStateFrameActive"
     readonly property string operationstateframenotactive: "OperationStateFrameNotActive" //Operation
     readonly property string operationstateframeactive: "OperationStateFrameActive" //Operation
 
@@ -49,10 +49,10 @@ Item {
     readonly property string rawframe: "1-Camera"
     readonly property string blurframe: "2-Blur"
     readonly property string thresholdframe: "3-Threshold"
-    readonly property string pixelcolumnframe: "4-PixelColumn"
-    readonly property string skeletalframe: "5-Skeletal"
-    readonly property string ransacframe: "6-Ransac"
-    readonly property string splitmergeframe: "7-SplitMerge"
+    readonly property string pixelcolumnframe: "4-Gausian Declustering"
+    readonly property string ransacframe: "5-Inlier Ransacs"
+    readonly property string inlierdatasetframe: "6-Inlier DataSets"
+    readonly property string geoconstructionframe: "7-Geo Constructions"
     readonly property string operationframe: "8-Operations"
 
     //For Rectangle Placements
@@ -139,9 +139,9 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: false}
             PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
@@ -151,9 +151,9 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
@@ -170,9 +170,9 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: false}
             PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -182,9 +182,9 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: true}
             //SetMainViewRect Display
@@ -200,9 +200,9 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: true;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: false}
             PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
@@ -212,9 +212,9 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
@@ -228,9 +228,9 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: true;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: false}
             PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -240,9 +240,9 @@ Item {
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: blursettingscontrollerId; focus: true}
             //SetMainViewRect Display
@@ -258,9 +258,9 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: true;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: false}
             PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
@@ -270,9 +270,9 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
@@ -286,9 +286,9 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: true;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: false}
             PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -298,9 +298,9 @@ Item {
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: true}
             //SetMainViewRect Display
@@ -316,9 +316,9 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: true;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: false}
             PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
@@ -328,9 +328,9 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
@@ -344,9 +344,9 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: true;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: false}
             PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -356,9 +356,9 @@ Item {
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: true}
             //SetMainViewRect Display
@@ -366,50 +366,50 @@ Item {
             //Set The Interior Control State
             PropertyChanges {target: pixelcolumnsettingsrectId; state: "MaxTII";}
         },
-        State //Skeletal Selected Frame Focused
+        State //inlierdataset Selected Frame Focused
         {
-            name: rootpageId.skeletalstateframeactive
+            name: rootpageId.inlierdatasetstateframeactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: true;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: true;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: false}
             PropertyChanges{ target: operationsettingsrectId; visible: false}
 
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
-            PropertyChanges{ target: skeletalborderrectId; border.color: rootpageId.nonfocuscolor}
+            PropertyChanges{ target: inlierdatasetborderrectId; border.color: rootpageId.nonfocuscolor}
             //SetController focus To FrameSele
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
-            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.skeletalframe}
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.inlierdatasetframe}
         },
-        State //Skeletal Selected and Focused
+        State //inlierdataset Selected and Focused
         {
-            name: rootpageId.skeletalstateframenotactive
+            name: rootpageId.inlierdatasetstateframenotactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: true;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: true;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: false}
             PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
-            PropertyChanges{ target: skeletalborderrectId; border.color: rootpageId.focuscolor}
+            PropertyChanges{ target: inlierdatasetborderrectId; border.color: rootpageId.focuscolor}
             //SetController focus To FrameSele
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: blursettingscontrollerId; focus: false}
@@ -417,13 +417,13 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: true}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: true}
             //SetMainViewRect Display
-            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.skeletalframe}
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.inlierdatasetframe}
             //Set The Interior Control State
-            PropertyChanges {target: skeletalsettingsrectId; state: "DiscState";}
+            PropertyChanges {target: inlierdatasetsettingsrectId; state: "DiscState";}
         },
         State //Ransac Selected Frame Focused
         {
@@ -433,9 +433,9 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: true;}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: false}
             PropertyChanges{ target: operationsettingsrectId; visible: false}
 
             //Set The Highlighted Rect
@@ -446,9 +446,9 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
@@ -462,9 +462,9 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: true;}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: false}
             PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -475,8 +475,8 @@ Item {
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: true}
             //SetMainViewRect Display
@@ -486,43 +486,43 @@ Item {
         },
         State //Split Merge Selected Frame Focused
         {
-            name: rootpageId.splitmergestateframeactive
+            name: rootpageId.geoconstructionstateframeactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: true}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: true}
             PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
-            PropertyChanges{ target: splitmergeborderrectId; border.color: rootpageId.nonfocuscolor}
+            PropertyChanges{ target: geoconstructionborderrectId; border.color: rootpageId.nonfocuscolor}
             //SetController focus To FrameSele
             PropertyChanges{target: blursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
-            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.splitmergeframe}
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.geoconstructionframe}
         },
         State //Split Merge Selected and Focused
         {
-            name: rootpageId.splitmergestateframenotactive
+            name: rootpageId.geoconstructionstateframenotactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: true}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: true}
             PropertyChanges{ target: operationsettingsrectId; visible: false}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
@@ -533,14 +533,14 @@ Item {
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: true}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: true}
             //SetMainViewRect Display
-            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.splitmergeframe}
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.geoconstructionframe}
             //Set The Interior Control State
-            PropertyChanges {target: splitmergesettingsrectId; state: "SplitDistance";}
+            PropertyChanges {target: geoconstructionsettingsrectId; state: "SplitDistance";}
         },
         State //Operation Selected Frame Focused
         {
@@ -550,9 +550,9 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false;}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: false}
             PropertyChanges{ target: operationsettingsrectId; visible: true}
             //Set The Highlighted Rect
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
@@ -562,9 +562,9 @@ Item {
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
@@ -579,9 +579,9 @@ Item {
             PropertyChanges{ target: blursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
-            PropertyChanges{ target: skeletalsettingsrectId; visible: false;}
+            PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
             PropertyChanges{ target: ransacsettingsrectId; visible: false}
-            PropertyChanges{ target: splitmergesettingsrectId; visible: false}
+            PropertyChanges{ target: geoconstructionsettingsrectId; visible: false}
             PropertyChanges{ target: operationsettingsrectId; visible: true}
 
             //Set The Highlighted Rect
@@ -593,9 +593,9 @@ Item {
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
-            PropertyChanges{target: skeletalcontrollerId; focus: false}
+            PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
             PropertyChanges{target: ransaccontrollerId; focus: false}
-            PropertyChanges{target: splitmergecontrollerId; focus: false}
+            PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: true}
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.operationframe}
@@ -768,14 +768,14 @@ Item {
                 case rootpageId.pixelcolumnframe:
                     rootpageId.state = rootpageId.pixelcolumnstateframenotactive;
                     break;
-                case rootpageId.skeletalframe:
-                    rootpageId.state = rootpageId.skeletalstateframenotactive;
+                case rootpageId.inlierdatasetframe:
+                    rootpageId.state = rootpageId.inlierdatasetstateframenotactive;
                     break;
                 case rootpageId.ransacframe:
                     rootpageId.state = rootpageId.ransacstateframenotactive;
                     break;
-                case rootpageId.splitmergeframe:
-                    rootpageId.state = rootpageId.splitmergestateframenotactive;
+                case rootpageId.geoconstructionframe:
+                    rootpageId.state = rootpageId.geoconstructionstateframenotactive;
                     break;
                 }
             }
@@ -873,14 +873,14 @@ Item {
                         case rootpageId.pixelcolumnframe:
                             Max.newPixelColumnMatProcessed.connect(delegateframeId.recieveCVMat);
                             break;
-                        case rootpageId.skeletalframe:
-                            Max.newSkeletalMatProcessed.connect(delegateframeId.recieveCVMat);
+                        case rootpageId.inlierdatasetframe:
+                            Max.newInlierDataSetMatProcessed.connect(delegateframeId.recieveCVMat);
                             break;
                         case rootpageId.ransacframe:
                             Max.newRansacMatProcessed.connect(delegateframeId.recieveCVMat);
                             break;
-                        case rootpageId.splitmergeframe:
-                            Max.newSplitMergeMatProcessed.connect(delegateframeId.recieveCVMat);
+                        case rootpageId.geoconstructionframe:
+                            Max.newGeoConstructionMatProcessed.connect(delegateframeId.recieveCVMat);
                             break;
                         case rootpageId.operationframe:
                             Max.newOperationMatProcessed.connect(delegateframeId.recieveCVMat);
@@ -923,11 +923,10 @@ Item {
                 modelId.append({"frame": rootpageId.blurframe});
                 modelId.append({"frame": rootpageId.thresholdframe});
                 modelId.append({"frame": rootpageId.pixelcolumnframe});
-                modelId.append({"frame": rootpageId.skeletalframe});
                 modelId.append({"frame": rootpageId.ransacframe});
-                modelId.append({"frame": rootpageId.splitmergeframe});
+                modelId.append({"frame": rootpageId.inlierdatasetframe});
+                modelId.append({"frame": rootpageId.geoconstructionframe});
                 modelId.append({"frame": rootpageId.operationframe});
-
             }
 
             onCurrentIndexChanged:
@@ -947,14 +946,14 @@ Item {
                 case rootpageId.pixelcolumnframe:
                     rootpageId.state = rootpageId.pixelcolumnstateframeactive;
                     break;
-                case rootpageId.skeletalframe:
-                    rootpageId.state = rootpageId.skeletalstateframeactive;
+                case rootpageId.inlierdatasetframe:
+                    rootpageId.state = rootpageId.inlierdatasetstateframeactive;
                     break;
                 case rootpageId.ransacframe:
                     rootpageId.state = rootpageId.ransacstateframeactive;
                     break;
-                case rootpageId.splitmergeframe:
-                    rootpageId.state = rootpageId.splitmergestateframeactive;
+                case rootpageId.geoconstructionframe:
+                    rootpageId.state = rootpageId.geoconstructionstateframeactive;
                     break;
                 case rootpageId.operationframe:
                     rootpageId.state = rootpageId.operationstateframeactive;
@@ -2077,7 +2076,7 @@ Item {
             font.family: fontId.name
             y: 10
             x:10
-            text: "Pixel Column Settings"
+            text: "Gausian Declustering Settings"
             font.pixelSize: 25
             color: rootpageId.textcolor
         }
@@ -2263,10 +2262,10 @@ Item {
 
     }
 
-    //Skeletal Settings Rectangle
+    //Inlier Data Settings Rectangle
     Rectangle
     {
-        id: skeletalsettingsrectId
+        id: inlierdatasetsettingsrectId
         visible: false
         width: rootpageId.settingsrectwidth
         height: rootpageId.settingsrectheight
@@ -2276,7 +2275,7 @@ Item {
 
         function grabFocus()
         {
-            skeletalcontrollerId.focus = true;
+            inlierdatasetcontrollerId.focus = true;
         }
 
         states:
@@ -2284,20 +2283,20 @@ Item {
             State
             {
                 name: "NonFocused"
-                PropertyChanges{target: skeletalborderrectId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: inlierdatasetborderrectId; border.color:rootpageId.nonfocuscolor;}
                 PropertyChanges{target: discontinuitysliderId; state: discontinuitysliderId.nothighlightedstate;}
             },
             State
             {
                 name: "DiscState"
-                PropertyChanges{target: skeletalborderrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: inlierdatasetborderrectId; border.color:rootpageId.focuscolor;}
                 PropertyChanges{target: discontinuitysliderId; state: discontinuitysliderId.highlightedstate;}
             }
         ]
 
         Rectangle
         {
-            anchors.fill: skeletalsettingsrectId
+            anchors.fill: inlierdatasetsettingsrectId
             color: "black"
             opacity: .8
             radius: 10
@@ -2305,7 +2304,7 @@ Item {
 
         Rectangle
         {
-            anchors.fill: skeletalsettingsrectId
+            anchors.fill: inlierdatasetsettingsrectId
             color: "darkred"
             opacity: .05
             radius: 10
@@ -2313,8 +2312,8 @@ Item {
 
         Rectangle
         {
-            id: skeletalborderrectId
-            anchors.fill: skeletalsettingsrectId
+            id: inlierdatasetborderrectId
+            anchors.fill: inlierdatasetsettingsrectId
             color: "transparent"
             border.color: rootpageId.nonfocuscolor
             border.width: rootpageId.rectborderwidths
@@ -2324,7 +2323,7 @@ Item {
         ControllerObject
         {
 
-            id:skeletalcontrollerId
+            id:inlierdatasetcontrollerId
             focus: false
 
             onFocusChanged:
@@ -2342,7 +2341,7 @@ Item {
 
             onGreenButtonPressed:
             {
-                switch(skeletalsettingsrectId.state)
+                switch(inlierdatasetsettingsrectId.state)
                 {
                 case "DiscState":
                     discontinuitysliderId.grabFocus();
@@ -2359,18 +2358,18 @@ Item {
             onUpButtonPressed:
             {
 
-                switch(skeletalsettingsrectId.state)
+                switch(inlierdatasetsettingsrectId.state)
                 {
                 case "DiscState":
-                    rootpageId.state = skeletalstateframeactive;
-                    skeletalsettingsrectId.state = "NonFocused";
+                    rootpageId.state = inlierdatasetstateframeactive;
+                    inlierdatasetsettingsrectId.state = "NonFocused";
                     break;
                 }
             }
 
             onDownButtonPressed:
             {
-                switch(skeletalsettingsrectId.state)
+                switch(inlierdatasetsettingsrectId.state)
                 {
 
                 }
@@ -2410,11 +2409,11 @@ Item {
         //Settings Text
         Text
         {
-            id: skeletaltextId
+            id: inlierdatasettextId
             font.family: fontId.name
             y: 10
             x:10
-            text: "Skeletal Settings"
+            text: "inlierdataset Settings"
             font.pixelSize: 25
             color: rootpageId.textcolor
         }
@@ -2443,7 +2442,7 @@ Item {
 
             onEndFocus:
             {
-                skeletalsettingsrectId.grabFocus();
+                inlierdatasetsettingsrectId.grabFocus();
                 discontinuitysliderId.state = discontinuitysliderId.highlightedstate;
             }
 
@@ -3537,7 +3536,7 @@ Item {
             font.family: fontId.name
             y: 10
             x:10
-            text: "Ransac Settings"
+            text: "Inlier Ransac Settings"
             font.pixelSize: 25
             color: rootpageId.textcolor
         }
@@ -4303,10 +4302,10 @@ Item {
 
     }
 
-    //Split Merge Settings Rectangle
+    //TBI DataSet Visualization Settings Rectangle
     Rectangle
     {
-        id: splitmergesettingsrectId
+        id: geoconstructionsettingsrectId
         visible: false
         width: rootpageId.settingsrectwidth
         height: rootpageId.settingsrectheight
@@ -4316,7 +4315,7 @@ Item {
 
         function grabFocus()
         {
-            splitmergecontrollerId.focus = true;
+            geoconstructioncontrollerId.focus = true;
         }
 
         states:
@@ -4324,21 +4323,21 @@ Item {
             State
             {
                 name: "NonFocused"
-                PropertyChanges{target: splitmergeborderrectId; border.color:rootpageId.nonfocuscolor;}
-                PropertyChanges{target: splitmergedistancetsliderId; state: splitmergedistancetsliderId.nothighlightedstate;}
+                PropertyChanges{target: geoconstructionborderrectId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: geoconstructiondistancetsliderId; state: geoconstructiondistancetsliderId.nothighlightedstate;}
             },
             State
             {
                 name: "SplitDistance"
-                PropertyChanges{target: splitmergeborderrectId; border.color:rootpageId.nonfocuscolor;}
-                PropertyChanges{target: splitmergedistancetsliderId; state: splitmergedistancetsliderId.highlightedstate;}
+                PropertyChanges{target: geoconstructionborderrectId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: geoconstructiondistancetsliderId; state: geoconstructiondistancetsliderId.highlightedstate;}
             }
         ]
 
         ControllerObject
         {
 
-            id:splitmergecontrollerId
+            id:geoconstructioncontrollerId
             focus: false
 
             onBlackButtonPressed:
@@ -4347,10 +4346,10 @@ Item {
 
             onGreenButtonPressed:
             {
-                switch(splitmergesettingsrectId.state)
+                switch(geoconstructionsettingsrectId.state)
                 {
                 case "SplitDistance":
-                    splitmergedistancetsliderId.grabFocus();
+                    geoconstructiondistancetsliderId.grabFocus();
                     break;
 
                 }
@@ -4363,8 +4362,8 @@ Item {
 
             onUpButtonPressed:
             {
-                rootpageId.state = rootpageId.splitmergestateframeactive;
-                splitmergesettingsrectId.state = "NonFocused";
+                rootpageId.state = rootpageId.geoconstructionstateframeactive;
+                geoconstructionsettingsrectId.state = "NonFocused";
             }
 
             onDownButtonPressed:
@@ -4405,7 +4404,7 @@ Item {
 
         Rectangle
         {
-            anchors.fill: splitmergesettingsrectId
+            anchors.fill: geoconstructionsettingsrectId
             color: "black"
             opacity: .8
             radius: 10
@@ -4413,7 +4412,7 @@ Item {
 
         Rectangle
         {
-            anchors.fill: splitmergesettingsrectId
+            anchors.fill: geoconstructionsettingsrectId
             color: "darkred"
             opacity: .05
             radius: 10
@@ -4421,8 +4420,8 @@ Item {
 
         Rectangle
         {
-            id: splitmergeborderrectId
-            anchors.fill: splitmergesettingsrectId
+            id: geoconstructionborderrectId
+            anchors.fill: geoconstructionsettingsrectId
             color: "transparent"
             border.color: rootpageId.nonfocuscolor
             border.width: rootpageId.rectborderwidths
@@ -4432,7 +4431,7 @@ Item {
         //Settings Text
         Text
         {
-            id: splitmergetextId
+            id: geoconstructiontextId
             font.family: fontId.name
             y: 10
             x:10
@@ -4444,7 +4443,7 @@ Item {
         //Distance Threshold Slider
         SliderSettingsObject
         {
-            id: splitmergedistancetsliderId
+            id: geoconstructiondistancetsliderId
             x:20
             y: 60
             messagetext: "Split Distance Threshold: " + Mary.sm_split_distance;
@@ -4458,18 +4457,18 @@ Item {
 
             Component.onCompleted:
             {
-                splitmergedistancetsliderId.value = Mary.sm_split_distance;
+                geoconstructiondistancetsliderId.value = Mary.sm_split_distance;
             }
 
             onEndFocus:
             {
-                splitmergesettingsrectId.grabFocus();
-                splitmergedistancetsliderId.state = splitmergedistancetsliderId.highlightedstate;
+                geoconstructionsettingsrectId.grabFocus();
+                geoconstructiondistancetsliderId.state = geoconstructiondistancetsliderId.highlightedstate;
             }
 
             onValueChanged:
             {
-                Mary.sm_split_distance = splitmergedistancetsliderId.value;
+                Mary.sm_split_distance = geoconstructiondistancetsliderId.value;
             }
         }
 
@@ -4646,14 +4645,14 @@ Item {
                 case rootpageId.pixelcolumnframe:
                     Max.newPixelColumnMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
                     break;
-                case rootpageId.skeletalframe:
-                    Max.newSkeletalMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
+                case rootpageId.inlierdatasetframe:
+                    Max.newInlierDataSetMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
                     break;
                 case rootpageId.ransacframe:
                     Max.newRansacMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
                     break;
-                case rootpageId.splitmergeframe:
-                    Max.newSplitMergeMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
+                case rootpageId.geoconstructionframe:
+                    Max.newGeoConstructionMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
                     break;
                 case rootpageId.operationframe:
                     Max.newOperationMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
@@ -4686,18 +4685,18 @@ Item {
                     Max.newPixelColumnMatProcessed.connect(mainviewdisplayId.recieveCVMat);
                     mainviewrect_privateId.attached_frame = rootpageId.pixelcolumnframe;
                     break;
-                case rootpageId.skeletalframe:
-                    Max.newSkeletalMatProcessed.connect(mainviewdisplayId.recieveCVMat);
-                    mainviewrect_privateId.attached_frame = rootpageId.skeletalframe;
+                case rootpageId.inlierdatasetframe:
+                    Max.newInlierDataSetMatProcessed.connect(mainviewdisplayId.recieveCVMat);
+                    mainviewrect_privateId.attached_frame = rootpageId.inlierdatasetframe;
                     break;
                 case rootpageId.ransacframe:
                     Max.newRansacMatProcessed.connect(mainviewdisplayId.recieveCVMat);
                     mainviewrect_privateId.attached_frame = rootpageId.ransacframe;
                     break;
-                case rootpageId.splitmergeframe:
-                    Max.newSplitMergeMatProcessed.connect(mainviewdisplayId.recieveCVMat);
-                    mainviewrect_privateId.attached_frame = rootpageId.splitmergeframe;
-                    console.log("Connecting Max.newSplitMergeMatProcessed");
+                case rootpageId.geoconstructionframe:
+                    Max.newGeoConstructionMatProcessed.connect(mainviewdisplayId.recieveCVMat);
+                    mainviewrect_privateId.attached_frame = rootpageId.geoconstructionframe;
+                    console.log("Connecting Max.newgeoconstructionMatProcessed");
                     break;
                 case rootpageId.operationframe:
                     Max.newOperationMatProcessed.connect(mainviewdisplayId.recieveCVMat);

@@ -1,4 +1,4 @@
-#include "mary.h"
+#include "tbicore_mary.h"
 #include <QDebug>
 #include <QDataStream>
 
@@ -140,8 +140,6 @@ void Mary::saveMaryToFile()
     _ds << m_right_bwl_min_votes;
     _ds << m_right_bwl_iterations;
     _ds << m_right_bwl_distance_threshold;
-    _ds << m_split_distance;
-    _ds << m_split_length;
     _ds.setVersion(QDataStream::Qt_5_12);
     _savefile.close();
     qDebug() << "Mary::saveMaryToFile() Settings Saved To " << _filepath;
@@ -202,8 +200,6 @@ void Mary::loadMaryFromFile()
     _ds >> m_right_bwl_min_votes;
     _ds >> m_right_bwl_iterations;
     _ds >> m_right_bwl_distance_threshold;
-    _ds >> m_split_distance;
-    _ds >> m_split_length;
     _savefile.close();
     qDebug("Mary::loadMaryFromFile() marydefualt.tbi Loaded.");
     broadcastQMLSignals();
@@ -751,38 +747,6 @@ void Mary::setRightBWLIterations(int _iterations)
 }
 
 /**************************************************************
-setSplitDistance
-Set Function
-Description:
-  Sets the Split Merge Distance Threshold
-**************************************************************/
-void Mary::setSplitDistance(float _distance)
-{
-    if(_distance > 0)
-    {
-        m_split_distance = _distance;
-        emit smSplitDistanceChanged();
-        emit signalSplitDistance(m_split_distance);
-    }
-}
-
-/**************************************************************
-setSplitLength
-Set Function
-Description:
-  Sets the Split Merge Line Length Threshold
-**************************************************************/
-void Mary::setSplitLength(float _length)
-{
-    if(_length > 0)
-    {
-        m_split_length = _length;
-        emit smSplitLengthChanged();
-        emit signalSplitLength(m_split_length);
-    }
-}
-
-/**************************************************************
 setShowDebugInfo(bool _value)
 Public
 Description:
@@ -902,8 +866,6 @@ void Mary::broadcastSingletonSignals()
     emit signalRightBWLDistanceThreshold(m_right_bwl_distance_threshold);
     emit signalRightBWLIterations(m_right_bwl_iterations);
 
-    emit signalSplitDistance(m_split_distance);
-    emit signalSplitLength(m_split_length);
 
 }
 

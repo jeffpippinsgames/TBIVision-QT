@@ -1,10 +1,10 @@
-#ifndef QMLTBIDISPLAY_H
-#define QMLTBIDISPLAY_H
+#ifndef TBIQML_DISPLAY_H
+#define TBIQML_DISPLAY_H
 
 #include <QObject>
 #include <QQuickItem>
 #include <QtQuick/QQuickPaintedItem>
-#include <toby.h>
+#include <tbicore_toby.h>
 #include <QPainter>
 #include "opencv4/opencv2/core.hpp"
 
@@ -36,4 +36,4 @@ public slots:
 
 
 };
-#endif // QMLTBIDISPLAY_H
+#endif // TBIQML_DISPLAY_H

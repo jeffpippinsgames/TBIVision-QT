@@ -1,5 +1,5 @@
-#ifndef MARY_H
-#define MARY_H
+#ifndef TBICORE_MARY_H
+#define TBICORE_MARY_H
 
 #include <QObject>
 #include <QQuickItem>
@@ -81,10 +81,6 @@ class Mary : public QObject
     Q_PROPERTY(int rn_right_bwl_votes READ getRightBWLMinVotes WRITE setRightBWLMinVotes NOTIFY rnRightBWLMinVotesChanged)
     Q_PROPERTY(float rn_right_bwl_distance_threshold READ getRightBWLDistanceThreshold WRITE setRightBWLDistanceThreshold NOTIFY rnRightBWLDistanceThresholdChanged)
     Q_PROPERTY(int rn_right_bwl_iterations READ getRightBWLIterations WRITE setRightBWLIterations NOTIFY rnRightBWLIterationsChanged)
-
-    //Split Merge Processing Properties-------------------------------------------------------------
-    Q_PROPERTY(float sm_split_distance READ getSplitDistance WRITE setSplitDistance NOTIFY smSplitDistanceChanged)
-    Q_PROPERTY(float sm_split_length READ getSplitLength WRITE setSplitLength NOTIFY smSplitLengthChanged)
 
 
     //GUI Properties Changed--------------------------------------------------------------------
@@ -249,9 +245,7 @@ signals:
     void signalRightBWLDistanceThreshold(float _distthreshold);
     void signalRightBWLIterations(int _iterations);
 
-    //Split Merge
-    void signalSplitDistance(float _distance);
-    void signalSplitLength(float _length);
+
 
     //Pylon Related Signals-------------------------------------------------------------------
     void pylonCameraMaxHeightChanged();
@@ -372,4 +366,4 @@ private:
 
 };
 
-#endif // MARY_H
+#endif // TBICORE_MARY_H

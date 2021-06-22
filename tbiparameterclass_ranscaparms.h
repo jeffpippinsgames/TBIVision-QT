@@ -1,5 +1,5 @@
-#ifndef TBILINEARRANSAC_H
-#define TBILINEARRANSAC_H
+#ifndef TBIPARAMETERCLASS_RANSCAPARMS_H
+#define TBIPARAMETERCLASS_RANSCAPARMS_H
 
 #include <QObject>
 #include <QImage>
@@ -11,22 +11,20 @@
 #include <QElapsedTimer>
 #include <QList>
 #include <vector>
-#include "pixelcolumnclass.h"
-#include "tbiline.h"
+#include "tbiclass_line.h"
 #include <QRandomGenerator>
 
 
 
-class TBILinearRansac : public QObject
+class TBIRansacParameter : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit TBILinearRansac(QObject *parent = nullptr);
+    explicit TBIRansacParameter(QObject *parent = nullptr);
 
 
     //Processing Functions
-    bool doRansacProcessingLinearLines(TBILine& _dstline, float *_skel_data, int _startindex, int _endindex);
 
     //get Functions
     Q_INVOKABLE float getIdealAngle() const {return m_ideal_angle;}
@@ -42,7 +40,9 @@ public:
     Q_INVOKABLE void setIterations(int _iterations);
     Q_INVOKABLE void setDistanceThreshold(float _distancethreshold);
 
-    void makeEqual(TBILinearRansac &_ransac);
+    void makeEqual(TBIRansacParameter &_ransac);
+
+
 
 private:
     float m_ideal_angle; //Ideal Angle From Horizontal
@@ -58,4 +58,4 @@ signals:
 
 };
 
-#endif // TBILINEARRANSAC_H
+#endif // TBIPARAMETERCLASS_RANSCAPARMS_H

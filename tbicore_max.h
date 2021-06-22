@@ -1,6 +1,7 @@
-#ifndef MAX_H
-#define MAX_H
+#ifndef TBICORE_MAX_H
+#define TBICORE_MAX_H
 
+#include "tbicore_constants.h"
 #include <QObject>
 #include <QImage>
 #include "opencv4/opencv2/core.hpp"
@@ -11,11 +12,14 @@
 #include <QElapsedTimer>
 #include <QList>
 #include <vector>
-#include "pixelcolumnclass.h"
-#include "tbiline.h"
+#include "tbiclass_line.h"
 #include <QRandomGenerator>
-#include "tbilinearransac.h"
-#include "tbidataset.h"
+#include "tbiparameterclass_ranscaparms.h"
+#include "tbiclass_dataset.h"
+#include "tbiclass_datadistributionset.h"
+#include "tbiparameterclass_gausiandecluster.h"
+#include "tbiparameterclass_imageintensity.h"
+
 
 using namespace cv;
 
@@ -43,7 +47,7 @@ Description:
     This ends the Use of the OpenCV Library.
  3. The Pixel Column Processing Routines are Applied.
     Total Image Intensity is Calculated Here.
- 4. The Skeletal Processing Routines are Applied.
+ 4. The inlierdataset Processing Routines are Applied.
     The Flattened Members are Updated Here.
     It is important that the flattened members be updated
     here as the future functions will use them to complete properly.
@@ -64,66 +68,8 @@ class Max : public QObject
     Q_PROPERTY(quint64 total_image_intensity READ getTotalImageIntensity NOTIFY totalImageIntensityChanged)
     Q_PROPERTY(bool emitExtraMats READ getEmitExtraMats WRITE setEmitExtraMats NOTIFY emitExtraMatsChanged)
 
-
-
 private:
-    void blankProcessingArrays();
 
-
-    //Scan Data Flattening Processing
-    /*
-    bool doImageFlattening(cv::Mat &_src, std::vector<TBIPoint_Float> &_data, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii);
-    void drawFlattenedImageDataToMat(cv::Mat &_dst, const std::vector<TBIPoint_Float> &_data);
-    void drawFlattenedImageDataToMat(cv::Mat &_dst, const std::vector<TBIPoint_Float> &_data, const cv::Scalar _color);
-
-    void copyFlattenedData(const std::vector<TBIPoint_Float> &_src, std::vector<TBIPoint_Float> &_dst);
-
-    void removeInliersFromFlattenedData(std::vector<TBIPoint_Float> &_dstdata, const TBILine &_line, const float _distance_threshold_top, const float _distance_threshold_bottom);
-    void buildFlattenDataFromInliers(const std::vector<TBIPoint_Float> &_srcdata, std::vector<TBIPoint_Float> &_dstdata, const TBILine &_line, const float _distance_threshold_top, const float _distance_threshold_bottom);
-    bool buildFlattenDataFromBegining(const std::vector<TBIPoint_Float> &_srcdata, std::vector<TBIPoint_Float> &_dstdata, const int _consequetiverows);
-    bool buildFlattenDataFromEnd(const std::vector<TBIPoint_Float> &_srcdata, std::vector<TBIPoint_Float> &_dstdata, const int _consequetiverows);
-
-
-    //Scan Data Ransac Processing
-
-    bool doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint_Float> &_vector);
-    bool doRansacLineProcessing(TBILine &_line, const TBILinearRansac &_ransac, const std::vector<TBIPoint_Float> &_vector, const int _startvectorindex, const int _endvectorindex);
-
-
-   //Pixel Column  and Cluster Processing
-    bool doPixelColumnProcessing(cv::Mat &_src, cv::Mat &_dst, PixelColumnClass* _pixel_column_array, quint64 *_tii,
-                                 quint64 _max_tii, quint64 _min_tii, int _min_cluster_size, int _max_cluster_size,
-                                 int _max_clusters_in_column);
-
-    bool clusterProcessThresholdMat(cv::Mat &_src, cv::Mat &_dst, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii, const int _min_cluster_size,
-                                    const int _max_cluster_size, const int _max_clusters_in_column, std::vector<TBIPoint_Float> &_scan_data_vector);
-*/
-bool clusterProcessThresholdMat(cv::Mat &_src, cv::Mat &_dst, quint64 *_tii, const quint64 _max_tii, const quint64 _min_tii, const int _min_cluster_size,
-                                    const int _max_cluster_size, const int _max_clusters_in_column, TBIDataSet &_scandataset);
-
-    //Skeleton Processing
-   // bool doSkeletonProcessing(cv::Mat &_dst, PixelColumnClass *_pixel_column_array, float *_skel_array, float _continuity_threshold);
-
-    //void deleteSkelPointsAbovePZL(TBILine &_lpzl, TBILine &_rpzl, float *_skel_array);
-
-
-    //Ransac Type Processing
-   // bool doRansacLineProcessing(cv::Mat &_dst, TBILine &_line, TBILinearRansac &_ransac, float* _skeletalarray, int _start_index, int _end_index, cv::Scalar _line_color);
-
-    //Split Merge Processing
-    bool doSplitMergeProcesssing(float *_skel_array, int _max_index, std::vector<TBILine> &_line_vectors,
-                                 float _min_distance_threshold);
-
-    bool setProjectedRansacLines(TBILine &_src_tsl_left, TBILine &_src_tsl_right,
-                                 TBILine &_src_bwl_left, TBILine &_src_swl_right,
-                                 TBILine &_dst_tsl_left, TBILine &_dst_tsl_right,
-                                 TBILine &_dst_bwl_left, TBILine &_dst_swl_right);
-
-    bool updateFlattenedMembers(cv::Mat &_src); //Almost All Other Functions Require this to be run first.
-
-
-    //Misc Functions
-    int randomInt(int _min, int _max);
 
 
 
@@ -141,8 +87,7 @@ public:
 private:
     //The Maximum Frame Size For The Camera
 
-    static const int Mat_Max_Width = 728;
-    static const int Mat_Max_Height = 544;
+
     bool m_in_proccesing_loop;
 
     //Elements For GUI Display----------------------------------------
@@ -154,12 +99,12 @@ private:
     int m_blur;
     int m_thresholdmin;
     int m_thresholdmax;
+
+    //Image Intensity Parameters
+    TBIImageIntensityParameters m_image_intensity_parameters;
     //Pixel Column Phase Processing Variables----------------------------
-    quint64 m_max_image_intensity;
-    quint64 m_min_image_intensity;
-    int m_min_cluster_size;
-    int m_max_cluster_size;
-    int m_max_clusterincol;
+    TBIGausianDeclusteringParameters m_gausian_decluster_parameters;
+
     //Geometric Construction Processing Variables----------------------
 
     //Flattening Phase Data Variables-----------------------------------
@@ -167,52 +112,55 @@ private:
     //You Must Call
     int m_flattened_rows;
     int m_flattened_cols;
-    int m_flattened_iohrv; //IndexOfHighestRowValue i.e index of the skeletal array with bottom pixel value
+    int m_flattened_iohrv; //IndexOfHighestRowValue i.e index of the inlierdataset array with bottom pixel value
     float m_flattened_hrv; //Highest Row Value
 
     //Pixel Column Phase Processing Variables--------------------------
     quint64 m_total_image_intensity;
-    //PixelColumnClass m_cluster_columns[Mat_Max_Width];
 
-    TBIDataSet *m_scan_ds;
-    TBIDataSet *m_roughing_left_tsl_ds;
-    TBIDataSet *m_roughing_right_tsl_ds;
-    TBIDataSet *m_left_tsl_inliers_ds;
-    TBIDataSet *m_right_tsl_inliers_ds;
+
+    //Data Sets and Distribution Sets-------------------------------------------------------------------------
+    TBIDataSet *m_gausian_decluster_ds;
+    TBIDataDistributionSet *m_gausian_decluster_distro;
+    TBIDataSet *m_left_ransac_tsg_ds;
+    TBIDataSet *m_left_inlier_tsg_ds;
+    TBIDataSet *m_right_ransac_tsg_ds;
+    TBIDataSet *m_right_inlier_tsg_ds;
+    TBIDataSet *m_left_ransac1_bwl_ds;
+    TBIDataSet *m_left_ransac2_bwl_ds;
+    TBIDataSet *m_left_inlier_bwl_ds;
+    TBIDataSet *m_right_ransac1_bwl_ds;
+    TBIDataSet *m_right_ransac2_bwl_ds;
+    TBIDataSet *m_right_inlier_bwl_ds;
     TBIDataSet *m_joint_ds;
+
+
+
     TBIDataSet *m_dummy_set1; //Used For Static Storage. So Other Functions Dont Have To Recreate Them in the Loops.
     TBIDataSet *m_dummy_set2; //Used For Static Storage. So Other Functions Dont Have To Recreate Them in the Loops.
 
-    //Skeletal Phase Data Variables-------------------------------------
-    //float m_skeletal_line_array[Mat_Max_Width];
+    //inlierdataset Phase Data Variables-------------------------------------
     int m_allowable_discontinuities;
 
     //Ransac. Left and Right Top Surface Lines and Bevel Wall Lines(Voting Algorythms)-------
-    TBILine m_left_tsl;
-    TBILinearRansac m_left_tsl_ransac;
-
-    TBILine m_right_tsl;
-    TBILinearRansac m_right_tsl_ransac;
-
-    TBILine m_left_bwl;
-    TBILinearRansac m_left_bwl_ransac;
-
-    TBILine m_right_bwl;
-    TBILinearRansac m_right_bwl_ransac;
-
-    //Linear Topography. (Split and Merge Algorythms)-------------------
-    std::vector<TBILine> m_topography_lines;
-    float m_sm_distance_threshold;
-    float m_sm_length_threshold;
-
-
+    TBILine m_ransac_left_tsl;
+    TBIRansacParameter m_left_tsl_ransac;
+    TBILine m_ransac_right_tsl;
+    TBIRansacParameter m_right_tsl_ransac;
+    TBILine m_ransac_left_bwl;
+    TBIRansacParameter m_left_bwl_ransac;
+    TBILine m_ransac_right_bwl;
+    TBIRansacParameter m_right_bwl_ransac;
     //Geometric Construction Phase Data Variables-----------------------
+    TBILine m_geo_left_tsl;
+    TBILine m_geo_right_tsl;
+    TBILine m_geo_left_bwl;
+    TBILine m_geo_right_bwl;
 
 
 
 
-
-//Public Slots----------------------------------------------------------
+    //Public Slots----------------------------------------------------------
 public slots:
     void recieveNewCVMat(const cv::Mat& _mat_frame);
 
@@ -252,10 +200,8 @@ public slots:
     void onRightBWLDistanceThreshold(float _distthreshold){m_right_bwl_ransac.setDistanceThreshold(_distthreshold);}
     void onRightBWLIterations(int _iterations){m_right_bwl_ransac.setIterations(_iterations);}
 
-    void onSplitDistance(float _distance){m_sm_distance_threshold = _distance;}
-    void onSplitLength(float _length){m_sm_length_threshold = _length;}
 
-//Signals----------------------------------------------------------------
+    //Signals----------------------------------------------------------------
 signals:
     //QML Signals--------------------------------------------------------
     void timeInLoopChanged(QString _timinloop);
@@ -268,9 +214,9 @@ signals:
     void newBlurMatProcessed(const cv::Mat& _blur_frame);
     void newThresholdMatProcessed(const cv::Mat& _threshold_frame);
     void newPixelColumnMatProcessed(const cv::Mat& _pixel_column_frame);
-    void newSkeletalMatProcessed(const cv::Mat& _skel_frame);
+    void newInlierDataSetMatProcessed(const cv::Mat& _inlierds_frame);
     void newRansacMatProcessed(const cv::Mat& _ransac_frame);
-    void newSplitMergeMatProcessed(const cv::Mat& _ransac_frame);
+    void newGeoConstructionMatProcessed(const cv::Mat& _ransac_frame);
     void newOperationMatProcessed(const cv::Mat &_operation_frame);
     //ProccessingComplete Signal-----------------------------------------
     void processingComplete();
@@ -278,13 +224,13 @@ signals:
     void failedTIICheck(); //Total Image Intensity
     void failedDiscontinuityCheck();
     void failedRansacCheck(); //Voting Lines
-    void failedSplitMergeCheck();
+    void failedDataSetCheck();
     void failedRansacVertexProcesssing();
     void failedFlattenImageData();
-    void failedSkeletonizeMat();
+    void failedInlierDSMat();
     void emitExtraMatsChanged();
 
 
 };
 
-#endif // MAX_H
+#endif // TBICORE_MAX_H

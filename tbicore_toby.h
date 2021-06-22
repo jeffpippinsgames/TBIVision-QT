@@ -1,5 +1,5 @@
-#ifndef TOBY_H
-#define TOBY_H
+#ifndef TBICORE_TOBY_H
+#define TBICORE_TOBY_H
 
 #include <QObject>
 #include <QQuickItem>
@@ -106,4 +106,4 @@ signals:
 };
 
 
-#endif // TOBY_H
+#endif // TBICORE_TOBY_H

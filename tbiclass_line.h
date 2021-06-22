@@ -1,8 +1,8 @@
-#ifndef TBILINE_H
-#define TBILINE_H
+#ifndef TBICLASS_LINE_H
+#define TBICLASS_LINE_H
 
-#include "tbipoint_float.h"
-#include "tbipoint_int.h"
+#include "tbiclass_pointfloat.h"
+#include "tbiclass_pointint.h"
 #include "opencv4/opencv2/core.hpp"
 #include "opencv4/opencv2/imgproc.hpp"
 
@@ -105,5 +105,5 @@ private:
     void updateValidLine();
 };
 
-#endif // TBILINE_H
+#endif // TBICLASS_LINE_H
 

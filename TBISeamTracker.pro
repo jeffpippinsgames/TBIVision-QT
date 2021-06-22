@@ -9,20 +9,21 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        QmlTBIDisplay.cpp \
-        gary.cpp \
         main.cpp \
-        mary.cpp \
-        max.cpp \
-        pixelclusterclass.cpp \
-        pixelcolumnclass.cpp \
-        tbidataset.cpp \
-        tbiline.cpp \
-        tbilinearransac.cpp \
-        tbipoint_float.cpp \
-        tbipoint_int.cpp \
-        tbiransac.cpp \
-        toby.cpp
+        tbiclass_datadistributionset.cpp \
+        tbiclass_dataset.cpp \
+        tbiclass_line.cpp \
+        tbiclass_pointfloat.cpp \
+        tbiclass_pointint.cpp \
+        tbiclass_ransac.cpp \
+        tbicore_gary.cpp \
+        tbicore_mary.cpp \
+        tbicore_max.cpp \
+        tbicore_toby.cpp \
+        tbiparameterclass_gausiandecluster.cpp \
+        tbiparameterclass_imageintensity.cpp \
+        tbiparameterclass_ranscaparms.cpp \
+        tbiqml_display.cpp
 
 RESOURCES += qml.qrc
 
@@ -38,22 +39,23 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    QmlTBIDisplay.h \
-    gary.h \
-    mary.h \
-    max.h \
-    pixelclusterclass.h \
-    pixelcolumnclass.h \
-    pixelcolumnprocessreturn_t.h \
-    pixelfundamental.h \
-    tbidataset.h \
-    tbiline.h \
-    tbilinearransac.h \
-    tbilinearransacvotingstructure.h \
-    tbipoint_float.h \
-    tbipoint_int.h \
-    tbiransac.h \
-    toby.h
+    tbiclass_datadistributionset.h \
+    tbiclass_dataset.h \
+    tbiclass_line.h \
+    tbiclass_pixelfundamental.h \
+    tbiclass_pointfloat.h \
+    tbiclass_pointint.h \
+    tbiclass_ransac.h \
+    tbicore_constants.h \
+    tbicore_gary.h \
+    tbicore_mary.h \
+    tbicore_max.h \
+    tbicore_toby.h \
+    tbiparameterclass_gausiandecluster.h \
+    tbiparameterclass_imageintensity.h \
+    tbiparameterclass_ransacvotingstruct.h \
+    tbiparameterclass_ranscaparms.h \
+    tbiqml_display.h
 
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonbase-6.2.0
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonutility-6.2.0

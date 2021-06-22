@@ -1,4 +1,4 @@
-#include "toby.h"
+#include "tbicore_toby.h"
 #include <QDebug>
 #include <QThread>
 #include <QDir>

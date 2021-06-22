@@ -1,4 +1,4 @@
-#include "tbipoint_int.h"
+#include "tbiclass_pointint.h"
 #include "math.h"
 
 float TBIPoint_Int::distance(const TBIPoint_Int &_pnt)

@@ -1,4 +1,4 @@
-#include "QmlTBIDisplay.h"
+#include "tbiqml_display.h"
 
 
 QmlTBIDisplay::QmlTBIDisplay(QObject *parent)
