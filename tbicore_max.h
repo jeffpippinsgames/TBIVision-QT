@@ -19,6 +19,7 @@
 #include "tbiclass_datadistributionset.h"
 #include "tbiparameterclass_gausiandecluster.h"
 #include "tbiparameterclass_imageintensity.h"
+#include "tbiclass_threepointtrackingmanager.h"
 
 
 using namespace cv;
@@ -157,7 +158,8 @@ private:
     TBILine m_geo_left_bwl;
     TBILine m_geo_right_bwl;
 
-
+    //Tracking Point Manager
+    TBIThreePointTrackingManager m_three_point_tracking_manager;
 
 
     //Public Slots----------------------------------------------------------

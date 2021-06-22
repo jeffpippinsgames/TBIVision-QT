@@ -16,6 +16,8 @@ SOURCES += \
         tbiclass_pointfloat.cpp \
         tbiclass_pointint.cpp \
         tbiclass_ransac.cpp \
+        tbiclass_threepointtrackingcontainer.cpp \
+        tbiclass_threepointtrackingmanager.cpp \
         tbicore_gary.cpp \
         tbicore_mary.cpp \
         tbicore_max.cpp \
@@ -46,6 +48,8 @@ HEADERS += \
     tbiclass_pointfloat.h \
     tbiclass_pointint.h \
     tbiclass_ransac.h \
+    tbiclass_threepointtrackingcontainer.h \
+    tbiclass_threepointtrackingmanager.h \
     tbicore_constants.h \
     tbicore_gary.h \
     tbicore_mary.h \

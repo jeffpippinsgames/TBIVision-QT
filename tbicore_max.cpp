@@ -8,6 +8,7 @@
 #include <random>
 #include "tbiclass_pointint.h"
 #include "tbiclass_ransac.h"
+#include "tbiclass_threepointtrackingcontainer.h"
 
 
 //Constructors and Destructor--------------------------------------------------------
@@ -212,11 +213,11 @@ void Max::recieveNewCVMat(const Mat &_mat)
                 if(m_ransac_right_tsl.isValid())
                 {
                     m_ransac_right_tsl.remakeLine(0, _raw_mat.cols);
-                    m_ransac_right_tsl.drawOnMat(_ransac_mat, CV_RGB(0,255,0));
+                    m_ransac_right_tsl.drawOnMat(_ransac_mat, CV_RGB(255,0,0));
                     //Build Inliers Set
                     if(m_gausian_decluster_ds->extractDataSetForInliers(*m_right_inlier_tsg_ds, m_ransac_right_tsl, 2.0, _breakindex, m_gausian_decluster_ds->size()-1) == TBIDataSetReturnType::Ok)
                     {
-                        m_right_inlier_tsg_ds->drawToMat(_inliers_mat, CV_RGB(125,255,125));
+                        m_right_inlier_tsg_ds->drawToMat(_inliers_mat, CV_RGB(255,125,125));
                     }
                     else
                     {
@@ -234,7 +235,7 @@ void Max::recieveNewCVMat(const Mat &_mat)
                 {
                     if(m_gausian_decluster_ds->extractDataSetForJoint(*m_joint_ds, m_ransac_left_tsl, m_ransac_right_tsl, 2.0) == TBIDataSetReturnType::Ok)
                     {
-                        m_joint_ds->drawToMat(_inliers_mat, CV_RGB(75,75,75));
+                        m_joint_ds->drawToMat(_inliers_mat, CV_RGB(50,50,50));
                     }
                     else
                     {
@@ -350,21 +351,20 @@ void Max::recieveNewCVMat(const Mat &_mat)
         }
 
         //Draw Tracking Point
-        if(m_geo_left_bwl.isValid() && m_geo_left_tsl.isValid() && m_geo_right_bwl.isValid() && m_geo_right_tsl.isValid())
+        TBIThreePointTrackingContainer _trackingpoint;
+        _trackingpoint.buildFrom4Lines(m_geo_left_tsl, m_geo_right_tsl, m_geo_left_bwl, m_geo_right_bwl);
+        if(_trackingpoint.isValid())
         {
-            TBIPoint_Float _pnt1;
-            TBIPoint_Float _pnt2;
-            TBIPoint_Float _pnt3;
-
-            m_geo_left_tsl.findPointofIntersection(m_geo_left_bwl, _pnt1);
-            m_geo_right_tsl.findPointofIntersection(m_geo_right_bwl, _pnt2);
-            m_geo_left_bwl.findPointofIntersection(m_geo_right_bwl, _pnt3);
-
-            cv::drawMarker(_operation_mat, _pnt1.toCVPoint(), CV_RGB(255,255,0), MARKER_CROSS, 15);
-            cv::drawMarker(_operation_mat, _pnt2.toCVPoint(), CV_RGB(255,255,0), MARKER_CROSS, 15);
-            cv::drawMarker(_operation_mat, _pnt3.toCVPoint(), CV_RGB(255,255,0), MARKER_CROSS, 15);
-
+            m_three_point_tracking_manager.insert(_trackingpoint);       
         }
+
+
+
+    }
+
+    if(m_three_point_tracking_manager.m_tracking_point.isValid())
+    {
+        m_three_point_tracking_manager.m_tracking_point.drawToMat(_operation_mat, CV_RGB(255,0,0));
     }
 
     //Emit Mat Signals If Turned On
