@@ -17,6 +17,7 @@ Description:
 Toby::Toby(QObject *parent) : QObject(parent)
 {
     //Grab The First Camera
+    m_framesgrabbed = 0;
     m_camera = nullptr;
     m_timer.start();
     m_camera_fps = "Error";
@@ -62,12 +63,31 @@ void Toby::OnImageGrabbed(CInstantCamera &camera, const CGrabResultPtr &ptrGrab)
     if(ptrGrab->GrabSucceeded())
     {
         m_timer.start();
-        cv::Mat _mat = cv::Mat(ptrGrab->GetHeight(), ptrGrab->GetWidth(), CV_8UC1, (uint8_t *) ptrGrab->GetBuffer());
+        if(m_framesgrabbed < 3)
+        {
+            m_grabbedmats[m_framesgrabbed] = cv::Mat(ptrGrab->GetHeight(), ptrGrab->GetWidth(), CV_8UC1, (uint8_t *) ptrGrab->GetBuffer()).clone();
+            ++m_framesgrabbed;
+        }
+        if(m_framesgrabbed == 3)
+        {
+            //cv::Mat _mat = cv::Mat(ptrGrab->GetHeight(), ptrGrab->GetWidth(), CV_8UC1, (uint8_t *) ptrGrab->GetBuffer());
+            cv::Mat _maskmat;
+            cv::Mat _bin1;
+            cv::Mat _bin2;
+            cv::threshold(m_grabbedmats[0], _bin1, 1, 255, cv::THRESH_BINARY);
+            cv::threshold(m_grabbedmats[1], _bin2, 1, 255, cv::THRESH_BINARY);
+            _maskmat.size = m_grabbedmats[0].size;
+            cv::bitwise_and(_bin1, _bin2, _maskmat);
+            cv::bitwise_and(m_grabbedmats[2], m_grabbedmats[2], _maskmat);
+            m_framesgrabbed = 0;
+            cv::Mat _mat = m_grabbedmats->clone();
+            emit newCVMatFrameGrabbed(_mat);
+        }
         emit cameraFPSChanged(m_camera_fps);
-        emit newCVMatFrameGrabbed(_mat);
         return;
     }
     emit cameraFPSChanged(m_camera_fps);
+
 
 }
 
@@ -148,7 +168,7 @@ bool Toby::SetDefaultCameraSettings()
         CEnumParameter(_nodemap, "PgiMode").SetValue("Off");
 
         //Acquisition Controls
-        CIntegerParameter(_nodemap, "AcquisitionFrameCount").SetValue(1); //Set to 1
+        CIntegerParameter(_nodemap, "AcquisitionFrameCount").SetValue(3); //Set to 1
         CEnumParameter(_nodemap, "TriggerMode").SetValue("On");
         CEnumParameter(_nodemap, "TriggerSource").SetValue("Software");
         CEnumParameter(_nodemap, "TriggerActivation").SetValue("RisingEdge");
@@ -158,8 +178,9 @@ bool Toby::SetDefaultCameraSettings()
         CEnumParameter(_nodemap, "ExposureTimeMode").SetValue("Standard");
         CFloatParameter(_nodemap, "ExposureTimeAbs").SetValue(3000.0);
         //CEnumParameter(_nodemap, "SensorShutterMode").SetValue("Global"); //Our Camera Does Not Have This Node.
-        CBooleanParameter(_nodemap, "AcquisitionFrameRateEnable").SetValue(false);
-        CFloatParameter(_nodemap, "AcquisitionFrameRateAbs").SetValue(100.0);
+        CEnumParameter(_nodemap, "AcquisitionMode").SetValue("SingleFrame");
+        CBooleanParameter(_nodemap, "AcquisitionFrameRateEnable").SetValue(true);
+        CFloatParameter(_nodemap, "AcquisitionFrameRateAbs").SetValue(290.0);
         CEnumParameter(_nodemap, "AcquisitionStatusSelector").SetValue("FrameTriggerWait");
         CBooleanParameter(_nodemap, "SyncFreeRunTimerEnable").SetValue(false);
         CIntegerParameter(_nodemap, "SyncFreeRunTimerStartTimeLow").SetValue(0); //Set to 0

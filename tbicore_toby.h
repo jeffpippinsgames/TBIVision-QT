@@ -78,6 +78,8 @@ private:
     CInstantCamera *m_camera;
     QElapsedTimer m_timer;
     QString m_camera_fps;
+    int m_framesgrabbed;
+    cv::Mat m_grabbedmats[3];
 
     //Methods
     virtual void OnImageGrabbed(Pylon::CInstantCamera& camera, const Pylon::CGrabResultPtr& ptrGrab); //Pylon Event Handler
