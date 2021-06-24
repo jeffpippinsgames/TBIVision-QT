@@ -40,7 +40,11 @@ Toby::~Toby()
     emit this->aboutToDestroy();
     if(m_camera != nullptr)
     {
-        if(m_camera->IsOpen()) m_camera->Close();
+        if(m_camera->IsOpen())
+        {
+            m_camera->DeregisterImageEventHandler(this);
+            m_camera->Close();
+        }
         m_camera->DestroyDevice();
     }
     qDebug() << "Toby::~Toby() Toby Object Destroyed.";
@@ -67,6 +71,8 @@ void Toby::OnImageGrabbed(CInstantCamera &camera, const CGrabResultPtr &ptrGrab)
         {
             m_grabbedmats[m_framesgrabbed] = cv::Mat(ptrGrab->GetHeight(), ptrGrab->GetWidth(), CV_8UC1, (uint8_t *) ptrGrab->GetBuffer()).clone();
             ++m_framesgrabbed;
+            triggerNextFrame();
+            return;
         }
         if(m_framesgrabbed == 3)
         {
@@ -126,11 +132,14 @@ Description:
  This Function Puts them all in one spot for ease of reading
  and Changing. It mirrors the Pylon Viewer App.
  **************************************************************/
-bool Toby::SetDefaultCameraSettings()
+bool Toby::SetCameraSettings()
 {
+    if(!m_camera) return false;
+    if(!m_camera->IsOpen()) return false;
+
     if(!isCameraInitialized())
     {
-        qDebug() << "Toby::SetDefaultConfiguration() called without a camera being initialized.";
+        qDebug() << "Toby::SetCameraSettings() called without a camera being initialized.";
         return false;
     }
 
@@ -167,21 +176,25 @@ bool Toby::SetDefaultCameraSettings()
         //Image Quality Control
         CEnumParameter(_nodemap, "PgiMode").SetValue("Off");
 
-        //Acquisition Controls
-        CIntegerParameter(_nodemap, "AcquisitionFrameCount").SetValue(3); //Set to 1
-        CEnumParameter(_nodemap, "TriggerMode").SetValue("On");
-        CEnumParameter(_nodemap, "TriggerSource").SetValue("Software");
-        CEnumParameter(_nodemap, "TriggerActivation").SetValue("RisingEdge");
-        //CFloatParameter(_nodemap, "TriggerDelay").SetValue(0.0); //Our Camera Does Not Have This Node.
+        //Exposure Control
         CEnumParameter(_nodemap, "ExposureMode").SetValue("Timed");
         CEnumParameter(_nodemap, "ExposureAuto").SetValue("Off");
         CEnumParameter(_nodemap, "ExposureTimeMode").SetValue("Standard");
-        CFloatParameter(_nodemap, "ExposureTimeAbs").SetValue(3000.0);
-        //CEnumParameter(_nodemap, "SensorShutterMode").SetValue("Global"); //Our Camera Does Not Have This Node.
+        CFloatParameter(_nodemap, "ExposureTimeAbs").SetValue(1000.0);
+
+        //Acquisition Controls
         CEnumParameter(_nodemap, "AcquisitionMode").SetValue("SingleFrame");
-        CBooleanParameter(_nodemap, "AcquisitionFrameRateEnable").SetValue(true);
-        CFloatParameter(_nodemap, "AcquisitionFrameRateAbs").SetValue(290.0);
         CEnumParameter(_nodemap, "AcquisitionStatusSelector").SetValue("FrameTriggerWait");
+        CIntegerParameter(_nodemap, "AcquisitionFrameCount").SetValue(1); //Set to 1
+        CBooleanParameter(_nodemap, "AcquisitionFrameRateEnable").SetValue(false);
+        CFloatParameter(_nodemap, "AcquisitionFrameRateAbs").SetValue(200);
+
+        //Trigger Controls
+        CEnumParameter(_nodemap, "TriggerMode").SetValue("On");
+        CEnumParameter(_nodemap, "TriggerSource").SetValue("Software");
+        CEnumParameter(_nodemap, "TriggerActivation").SetValue("RisingEdge");
+
+        //SyncFreeRun Controls
         CBooleanParameter(_nodemap, "SyncFreeRunTimerEnable").SetValue(false);
         CIntegerParameter(_nodemap, "SyncFreeRunTimerStartTimeLow").SetValue(0); //Set to 0
         CIntegerParameter(_nodemap, "SyncFreeRunTimerStartTimeHigh").SetValue(0); //Set to 0
@@ -209,13 +222,6 @@ void Toby::onChangeCameraAOI(int _width, int _height)
         qDebug() << "Toby::onChangeCameraAOI() called without camera being initialized.";
         return;
     }
-
-    if(isCameraOn())
-    {
-        qDebug() << "Toby::onChangeCameraAOI() called while camera is on.";
-        return;
-    }
-
     try
     {
         //Get Camera NodeMap
@@ -228,6 +234,8 @@ void Toby::onChangeCameraAOI(int _width, int _height)
         QString _error = e.GetDescription();
         qDebug() << "Toby:: Error in onChangeCameraGain: " + _error;
     }
+
+
 }
 
 /**************************************************************
@@ -396,18 +404,25 @@ bool Toby::initializeCamera()
         try
         {
             m_camera = new Pylon::CInstantCamera(Pylon::CTlFactory::GetInstance().CreateFirstDevice());
-            m_camera->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
+            // m_camera->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
             m_camera->Open();
-            m_camera->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
-            if(!SetDefaultCameraSettings())
+            m_camera->RegisterConfiguration(new Pylon::CAcquireContinuousConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
+
+             qDebug()<<"Toby::initializeCamera(): Camera Opened: ";
+             /*
+            if(!SetCameraSettings())
             {
+
                 qDebug() << "Toby::initializeCamera(): Error Setting Default Settings";
                 return false;
             }
             else
             {
-                qDebug() << "Toby::initializeCamera(): Default Settings Applied.";
+                m_camera->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
+                m_camera->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
+                qDebug() << "Toby::initializeCamera(): Camera Settings Applied and Image Event Handler Registered.";
             }
+            */
         }
         catch(const Pylon::GenericException e)
         {
@@ -415,7 +430,7 @@ bool Toby::initializeCamera()
             return false;
         }
         emit cameraInitialized();
-        qDebug()<<"Toby::initializeCamera(): Camera is Initialized: ";
+        qDebug()<<"Toby::initializeCamera(): Camera Initialization Complete: ";
         return true;
     }
     else
@@ -432,21 +447,22 @@ Description:
  **************************************************************/
 void Toby::startCamera()
 {
+
     if(!isCameraInitialized())
     {
         qDebug() << "Toby::startCamera() called without camera being initialized";
         return;
     }
 
-    if(isCameraOn())
+
+    if(m_camera->IsGrabbing())
     {
-        qDebug() << "Toby::startCamera() called with camera already running.";
+        qDebug() << "Toby::startCamera() called with camera already grabbing";
         return;
     }
-
     try
     {
-        m_camera->StartGrabbing(Pylon::GrabStrategy_LatestImages, Pylon::GrabLoop_ProvidedByInstantCamera);
+        m_camera->StartGrabbing(GrabStrategy_OneByOne, GrabLoop_ProvidedByUser);
         this->triggerNextFrame();
     }
     catch(const Pylon::GenericException e)
@@ -458,6 +474,7 @@ void Toby::startCamera()
     qDebug() << "Toby::startCamera(): Camera has been turned on.";
     emit cameraTurnedOn();
     emit emitProcessingCameraChanged();
+
 }
 
 /**************************************************************
@@ -468,6 +485,8 @@ Description:
  **************************************************************/
 void Toby::stopCamera()
 {
+
+
     if(!isCameraInitialized())
     {
         qDebug() << "Toby: turnOffCamera() called without the camera being initialized.";
@@ -480,6 +499,7 @@ void Toby::stopCamera()
         return;
     }
 
+
     while(m_camera->IsGrabbing())
     {
         m_camera->StopGrabbing();
@@ -487,6 +507,8 @@ void Toby::stopCamera()
     qDebug() << "Toby: turnOffCamera(). Camera has been turned off.";
     emit cameraTurnedOff();
     emit emitProcessingCameraChanged();
+
+
 }
 
 /**************************************************************
@@ -513,7 +535,7 @@ Description:
 bool Toby::isCameraOn()
 {
     if(!isCameraInitialized()) return false;
-    if(!m_camera->IsGrabbing()) return false;
+    if(!m_camera->IsOpen()) return false;
     return true;
 }
 
@@ -526,6 +548,7 @@ Description:
 void Toby::triggerNextFrame()
 {
 
+    m_camera_fps = QString("Camera FPS = " + QString::number(1000/m_timer.elapsed()));
     //Process the Still Image if the debug image is not null
     if(m_processsing_debug_image)
     {
@@ -536,24 +559,67 @@ void Toby::triggerNextFrame()
           emit newCVMatFrameGrabbed(m_still_debug_image.clone());
           return;
     }
+    else
+    {
+        //We Are Not Processing Still Images. Go On To Camera Processing
+        if(m_camera == nullptr)
+        {
+            qDebug() << "Toby: triggerCamera() called without camera being initialized";
+            return;
+        }
+        if(!m_camera->IsOpen())
+        {
+            qDebug() << "Toby: triggerCamera() called without camera being opened.";
+            return;
+        }
 
-    //If the m_still_debug_image is false then Trigger The Camera to Produce The Next Frame
-    if(!isCameraInitialized())
-    {
-        qDebug() << "Toby: triggerCamera() called without camera being initialized";
-        return;
-    }
-    if(!isCameraOn())
-    {
-        qDebug() << "Toby: triggerCamera() called without camera running.";
-        return;
-    }
-    if(m_camera->CanWaitForFrameTriggerReady())
-    {
-        m_camera->WaitForFrameTriggerReady(20);
-    }
-    m_camera->ExecuteSoftwareTrigger();
+        if(!m_camera->IsGrabbing())
+        {
+            qDebug() << "Toby: triggerCamera() called without camera grabbing.";
+            return;
+        }
 
+        //m_camera->StartGrabbing(3, GrabStrategy_LatestImageOnly, GrabLoop_ProvidedByUser);
+        CGrabResultPtr _ptrGrabResult;
+        while(m_framesgrabbed < 4)
+        {
+            m_camera->RetrieveResult(100, _ptrGrabResult);
+            if(_ptrGrabResult->GrabSucceeded())
+            {
+                if(m_framesgrabbed < 4)
+                {
+                    m_grabbedmats[m_framesgrabbed] = cv::Mat(_ptrGrabResult->GetHeight(), _ptrGrabResult->GetWidth(), CV_8UC1, (uint8_t *) _ptrGrabResult->GetBuffer()).clone();
+                    ++m_framesgrabbed;
+                }
+                if(m_framesgrabbed == 4)
+                {
+                    cv::Mat _maskmat;
+                    cv::Mat _bin1;
+                    cv::Mat _bin2;
+                    cv::Mat _bin3;
+                    cv::Mat _bin4;
+                    //cv::threshold(m_grabbedmats[0], _bin1, 1, 255, cv::THRESH_BINARY_INV);
+                    //cv::threshold(m_grabbedmats[1], _bin2, 1, 255, cv::THRESH_BINARY_INV);
+                    //cv::threshold(m_grabbedmats[2], _bin3, 1, 255, cv::THRESH_BINARY);
+                    cv::bitwise_and(m_grabbedmats[0], m_grabbedmats[1], _bin1);
+                    cv::bitwise_and(_bin1, m_grabbedmats[2], _bin2);
+                    cv::bitwise_and(_bin2, m_grabbedmats[3], _bin3);
+
+                    cv::Mat _mat;
+                    m_grabbedmats[2].copyTo(_mat, _maskmat);
+                    //emit newCVMatFrameGrabbed(m_grabbedmats[2]);
+                    emit newCVMatFrameGrabbed(_bin3);
+                    m_timer.start();
+                    emit cameraFPSChanged(m_camera_fps);
+                    m_framesgrabbed = 0;
+                    return;
+
+                }
+            }
+        }
+    }
+    m_timer.start();
+    emit cameraFPSChanged(m_camera_fps);
 }
 
 /**************************************************************

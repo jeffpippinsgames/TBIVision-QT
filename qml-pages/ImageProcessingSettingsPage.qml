@@ -4457,7 +4457,7 @@ Item {
 
             Component.onCompleted:
             {
-                geoconstructiondistancetsliderId.value = Mary.sm_split_distance;
+               // geoconstructiondistancetsliderId.value = Mary.sm_split_distance;
             }
 
             onEndFocus:
