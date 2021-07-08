@@ -158,7 +158,7 @@ class GaryCommands : public QObject
 {
 
     Q_OBJECT
-   public:
+public:
 
     GaryCommands() : QObject() {}
 
@@ -199,7 +199,9 @@ class GaryCommands : public QObject
                           TBI_CMD_SEND_KP_ZCONTROL = 0x23,
                           TBI_CMD_SEND_KD_ZCONTROL = 0x24,
                           TBI_CMD_SEND_KI_ZCONTROL = 0x25,
-                          TBI_CMD_TOGGLE_LASER_POWER = 0x26};
+                          TBI_CMD_TOGGLE_LASER_POWER = 0x26,
+                          TBI_CMD_MOVEXSTEPS = 0x27,
+                          TBI_CMD_MOVEZSTEPS = 0x28};
 
     Q_ENUMS(SerialCommand_t)
 
@@ -234,7 +236,7 @@ class Gary : public QObject
     Q_PROPERTY(float xPosition READ xPosition WRITE setXPosition NOTIFY xPositionChanged)
     //------------------------------------------------------------
 
-    public:
+public:
 
     //Public Constructors, Destructors and Init Methods-----------
     explicit Gary(QObject *parent = nullptr);
@@ -270,7 +272,7 @@ class Gary : public QObject
     Q_INVOKABLE void sendToggleLaserPower();
     //------------------------------------------------------------
 
-    private:
+private:
     //Private Data Members ----------------------------------------
     const quint16 m_teensy32_vendorID = 0x16C0;
     const quint16 m_teensy32_productID = 0x0483;
@@ -294,7 +296,7 @@ class Gary : public QObject
     //--------------------------------------------------------------
 
     //Signals-------------------------------------------------------
-    signals:
+signals:
     void aboutToDestroy();
     void completed();
     void motionStatusChanged();

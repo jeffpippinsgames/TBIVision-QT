@@ -341,7 +341,7 @@ void Max::processVGrooveTracking(const cv::Mat _mat)
 
 
     float _stddev = m_gausian_decluster_distro->standardDeviation();
-    qDebug() << "Gausian Decluster Distribution Standard Deviation = " << _stddev;
+    //qDebug() << "Gausian Decluster Distribution Standard Deviation = " << _stddev;
 
     //Geometric Construction For Joint Construction.
     if(_dataconstructionok)
@@ -382,7 +382,7 @@ void Max::processVGrooveTracking(const cv::Mat _mat)
 
         if(m_three_point_tracking_manager.m_tracking_point.isValid())
         {
-            m_three_point_tracking_manager.m_tracking_point.drawToMat(_operation_mat, CV_RGB(255,0,0));
+            m_three_point_tracking_manager.m_tracking_point.drawToMat(_operation_mat, CV_RGB(0,255,255));
         }
 
     }

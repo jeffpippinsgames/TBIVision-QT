@@ -194,7 +194,6 @@ bool TBIRansac::doRansac(TBILine &_line, const TBIRansacParameter &_ransac, cons
     return true;
 }
 
-
 int TBIRansac::randomInt(int _min, int _max)
 {
     //C++ 11 Random Number Engine. #include <random>
