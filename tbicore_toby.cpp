@@ -63,38 +63,14 @@ Description:
 void Toby::OnImageGrabbed(CInstantCamera &camera, const CGrabResultPtr &ptrGrab)
 {
     m_camera_fps = QString("Camera FPS = " + QString::number(1000/m_timer.elapsed()));
-
     if(ptrGrab->GrabSucceeded())
     {
         m_timer.start();
-        if(m_framesgrabbed < 3)
-        {
-            m_grabbedmats[m_framesgrabbed] = cv::Mat(ptrGrab->GetHeight(), ptrGrab->GetWidth(), CV_8UC1, (uint8_t *) ptrGrab->GetBuffer()).clone();
-            ++m_framesgrabbed;
-            triggerNextFrame();
-            return;
-        }
-        if(m_framesgrabbed == 3)
-        {
-            //cv::Mat _mat = cv::Mat(ptrGrab->GetHeight(), ptrGrab->GetWidth(), CV_8UC1, (uint8_t *) ptrGrab->GetBuffer());
-            cv::Mat _maskmat;
-            cv::Mat _bin1;
-            cv::Mat _bin2;
-            cv::threshold(m_grabbedmats[0], _bin1, 1, 255, cv::THRESH_BINARY);
-            cv::threshold(m_grabbedmats[1], _bin2, 1, 255, cv::THRESH_BINARY);
-            _maskmat.size = m_grabbedmats[0].size;
-            cv::bitwise_and(_bin1, _bin2, _maskmat);
-            cv::bitwise_and(m_grabbedmats[2], m_grabbedmats[2], _maskmat);
-            m_framesgrabbed = 0;
-            cv::Mat _mat = m_grabbedmats->clone();
-            emit newCVMatFrameGrabbed(_mat);
-        }
-        emit cameraFPSChanged(m_camera_fps);
-        return;
+        qDebug() << "!";
+        //cv::Mat _mat = cv::Mat(ptrGrab->GetHeight(), ptrGrab->GetWidth(), CV_8UC1, (uint8_t *) ptrGrab->GetBuffer()).clone();
+        //emit newCVMatFrameGrabbed(_mat);
     }
     emit cameraFPSChanged(m_camera_fps);
-
-
 }
 
 
@@ -182,23 +158,23 @@ bool Toby::SetCameraSettings()
         CEnumParameter(_nodemap, "ExposureTimeMode").SetValue("Standard");
         CFloatParameter(_nodemap, "ExposureTimeAbs").SetValue(1000.0);
 
-        //Acquisition Controls
-        CEnumParameter(_nodemap, "AcquisitionMode").SetValue("SingleFrame");
-        CEnumParameter(_nodemap, "AcquisitionStatusSelector").SetValue("FrameTriggerWait");
-        CIntegerParameter(_nodemap, "AcquisitionFrameCount").SetValue(1); //Set to 1
-        CBooleanParameter(_nodemap, "AcquisitionFrameRateEnable").SetValue(false);
-        CFloatParameter(_nodemap, "AcquisitionFrameRateAbs").SetValue(200);
-
-        //Trigger Controls
-        CEnumParameter(_nodemap, "TriggerMode").SetValue("On");
-        CEnumParameter(_nodemap, "TriggerSource").SetValue("Software");
-        CEnumParameter(_nodemap, "TriggerActivation").SetValue("RisingEdge");
-
         //SyncFreeRun Controls
         CBooleanParameter(_nodemap, "SyncFreeRunTimerEnable").SetValue(false);
         CIntegerParameter(_nodemap, "SyncFreeRunTimerStartTimeLow").SetValue(0); //Set to 0
         CIntegerParameter(_nodemap, "SyncFreeRunTimerStartTimeHigh").SetValue(0); //Set to 0
         CFloatParameter(_nodemap, "SyncFreeRunTimerTriggerRateAbs").SetValue(0.03);
+
+        //Acquisition Controls
+        CEnumParameter(_nodemap, "AcquisitionMode").SetValue("Continuous");
+        CEnumParameter(_nodemap, "AcquisitionStatusSelector").SetValue("FrameTriggerWait");
+        CIntegerParameter(_nodemap, "AcquisitionFrameCount").SetValue(1); //Set to 1
+        CBooleanParameter(_nodemap, "AcquisitionFrameRateEnable").SetValue(true);
+        CFloatParameter(_nodemap, "AcquisitionFrameRateAbs").SetValue(30);
+
+        //Trigger Controls
+        CEnumParameter(_nodemap, "TriggerMode").SetValue("Off");
+        CEnumParameter(_nodemap, "TriggerSource").SetValue("Software");
+        CEnumParameter(_nodemap, "TriggerActivation").SetValue("RisingEdge");
     }
     catch(const GenericException &e)
     {
@@ -338,19 +314,19 @@ void Toby::openStillImagetoProcess(QString _filename)
     //Convert. The Processing Pipeline requires a CV_8UC1 Mat
     switch(_newmat.type())
     {
-        case CV_8UC3:
-            cv::cvtColor(_newmat, m_still_debug_image, cv::COLOR_BGR2GRAY, 1);
-            m_processsing_debug_image = true;
-            emit emitProcessingStillImageChanged();
+    case CV_8UC3:
+        cv::cvtColor(_newmat, m_still_debug_image, cv::COLOR_BGR2GRAY, 1);
+        m_processsing_debug_image = true;
+        emit emitProcessingStillImageChanged();
         break;
-        case CV_8UC1:
-            m_still_debug_image = _newmat.clone();
-            m_processsing_debug_image = true;
-            emit emitProcessingStillImageChanged();
+    case CV_8UC1:
+        m_still_debug_image = _newmat.clone();
+        m_processsing_debug_image = true;
+        emit emitProcessingStillImageChanged();
         break;
-        default:
-            qDebug() << "Toby: openStillImagetoProcess() cannot process the image file " << _filename;
-            return;
+    default:
+        qDebug() << "Toby: openStillImagetoProcess() cannot process the image file " << _filename;
+        return;
         break;
 
     }
@@ -404,25 +380,13 @@ bool Toby::initializeCamera()
         try
         {
             m_camera = new Pylon::CInstantCamera(Pylon::CTlFactory::GetInstance().CreateFirstDevice());
-            // m_camera->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
             m_camera->Open();
-            m_camera->RegisterConfiguration(new Pylon::CAcquireContinuousConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
+            SetCameraSettings();
+            m_camera->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
+            //m_camera->RegisterConfiguration(new Pylon::CAcquireContinuousConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
+            //m_camera->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
 
-             qDebug()<<"Toby::initializeCamera(): Camera Opened: ";
-             /*
-            if(!SetCameraSettings())
-            {
-
-                qDebug() << "Toby::initializeCamera(): Error Setting Default Settings";
-                return false;
-            }
-            else
-            {
-                m_camera->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
-                m_camera->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
-                qDebug() << "Toby::initializeCamera(): Camera Settings Applied and Image Event Handler Registered.";
-            }
-            */
+            qDebug()<<"Toby::initializeCamera(): Camera Opened and Configured: ";
         }
         catch(const Pylon::GenericException e)
         {
@@ -436,7 +400,9 @@ bool Toby::initializeCamera()
     else
     {
         qDebug() << "Toby::initializeCamera() called without camera being initialized.";
+        return false;
     }
+    return true;
 }
 
 /**************************************************************
@@ -462,7 +428,7 @@ void Toby::startCamera()
     }
     try
     {
-        m_camera->StartGrabbing(GrabStrategy_OneByOne, GrabLoop_ProvidedByUser);
+        m_camera->StartGrabbing(GrabStrategy_LatestImageOnly, GrabLoop_ProvidedByInstantCamera);
         this->triggerNextFrame();
     }
     catch(const Pylon::GenericException e)
@@ -486,7 +452,6 @@ Description:
 void Toby::stopCamera()
 {
 
-
     if(!isCameraInitialized())
     {
         qDebug() << "Toby: turnOffCamera() called without the camera being initialized.";
@@ -507,8 +472,6 @@ void Toby::stopCamera()
     qDebug() << "Toby: turnOffCamera(). Camera has been turned off.";
     emit cameraTurnedOff();
     emit emitProcessingCameraChanged();
-
-
 }
 
 /**************************************************************
@@ -547,18 +510,18 @@ Description:
  **************************************************************/
 void Toby::triggerNextFrame()
 {
-
-    m_camera_fps = QString("Camera FPS = " + QString::number(1000/m_timer.elapsed()));
+    qDebug() << "Camera Software Trigger Tripped";
     //Process the Still Image if the debug image is not null
     if(m_processsing_debug_image)
     {
 
-          m_camera_fps = QString("Still Image FPS = " + QString::number(1000/m_timer.elapsed()));
-          m_timer.start();
-          emit cameraFPSChanged(m_camera_fps);
-          emit newCVMatFrameGrabbed(m_still_debug_image.clone());
-          return;
+        m_camera_fps = QString("Still Image FPS = " + QString::number(1000/m_timer.elapsed()));
+        m_timer.start();
+        emit cameraFPSChanged(m_camera_fps);
+        emit newCVMatFrameGrabbed(m_still_debug_image.clone());
+        return;
     }
+    //Process Camera Trigger.
     else
     {
         //We Are Not Processing Still Images. Go On To Camera Processing
@@ -572,54 +535,17 @@ void Toby::triggerNextFrame()
             qDebug() << "Toby: triggerCamera() called without camera being opened.";
             return;
         }
-
         if(!m_camera->IsGrabbing())
         {
-            qDebug() << "Toby: triggerCamera() called without camera grabbing.";
+            qDebug() << "Toby: triggerCamera() called while camera was not grabbing.";
             return;
         }
-
-        //m_camera->StartGrabbing(3, GrabStrategy_LatestImageOnly, GrabLoop_ProvidedByUser);
-        CGrabResultPtr _ptrGrabResult;
-        while(m_framesgrabbed < 4)
-        {
-            m_camera->RetrieveResult(100, _ptrGrabResult);
-            if(_ptrGrabResult->GrabSucceeded())
-            {
-                if(m_framesgrabbed < 4)
-                {
-                    m_grabbedmats[m_framesgrabbed] = cv::Mat(_ptrGrabResult->GetHeight(), _ptrGrabResult->GetWidth(), CV_8UC1, (uint8_t *) _ptrGrabResult->GetBuffer()).clone();
-                    ++m_framesgrabbed;
-                }
-                if(m_framesgrabbed == 4)
-                {
-                    cv::Mat _maskmat;
-                    cv::Mat _bin1;
-                    cv::Mat _bin2;
-                    cv::Mat _bin3;
-                    cv::Mat _bin4;
-                    //cv::threshold(m_grabbedmats[0], _bin1, 1, 255, cv::THRESH_BINARY_INV);
-                    //cv::threshold(m_grabbedmats[1], _bin2, 1, 255, cv::THRESH_BINARY_INV);
-                    //cv::threshold(m_grabbedmats[2], _bin3, 1, 255, cv::THRESH_BINARY);
-                    cv::bitwise_and(m_grabbedmats[0], m_grabbedmats[1], _bin1);
-                    cv::bitwise_and(_bin1, m_grabbedmats[2], _bin2);
-                    cv::bitwise_and(_bin2, m_grabbedmats[3], _bin3);
-
-                    cv::Mat _mat;
-                    m_grabbedmats[2].copyTo(_mat, _maskmat);
-                    //emit newCVMatFrameGrabbed(m_grabbedmats[2]);
-                    emit newCVMatFrameGrabbed(_bin3);
-                    m_timer.start();
-                    emit cameraFPSChanged(m_camera_fps);
-                    m_framesgrabbed = 0;
-                    return;
-
-                }
-            }
-        }
+       // if (m_camera->WaitForFrameTriggerReady( 1000, TimeoutHandling_ThrowException ))
+       // {
+            //m_camera->ExecuteSoftwareTrigger();
+           // qDebug() << "Camera Software Trigger Tripped";
+       // }
     }
-    m_timer.start();
-    emit cameraFPSChanged(m_camera_fps);
 }
 
 /**************************************************************

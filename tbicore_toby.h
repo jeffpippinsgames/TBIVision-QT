@@ -79,7 +79,9 @@ private:
     QElapsedTimer m_timer;
     QString m_camera_fps;
     int m_framesgrabbed;
-    cv::Mat m_grabbedmats[4];
+    static const int Camera_Frames_To_Average = 3;
+    cv::Mat m_grabbedmats[Camera_Frames_To_Average];
+
 
     //Methods
     virtual void OnImageGrabbed(Pylon::CInstantCamera& camera, const Pylon::CGrabResultPtr& ptrGrab); //Pylon Event Handler
