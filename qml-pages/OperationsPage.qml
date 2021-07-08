@@ -94,7 +94,8 @@ Item
 
         onGreenButtonPressed:
         {
-            keypadId.open();
+            //keypadId.open();
+
         }
 
         onRedButtonPressed:

@@ -326,6 +326,22 @@ Q_INVOKABLE void Gary::sendJogRight()
     sendSerialCommand(_cmd);
 }
 
+
+/**************************************************************
+autoMoveXAxis()
+Public, Q_INVOKABLE
+Description:
+  Public Method that sends the Move X steps command
+ **************************************************************/
+void Gary::autoMoveXAxis(qint32 _steps)
+{
+    QByteArray _cmd;
+    _cmd.append((char)GaryCommands::TBI_CMD_MOVEXSTEPS);
+    _cmd.append((char*)&_steps, sizeof (_steps));
+    sendSerialCommand(_cmd);
+
+}
+
 /**************************************************************
 sendToggleLaserPower()
 Public, Q_INVOKABLE
@@ -390,15 +406,24 @@ Description:
  **************************************************************/
 void Gary::readSerial()
 {
-    m_serial_port->re
+
+
     QByteArray _data = m_serial_port->readAll();
+    m_recieved_serial.append(_data);
+    if(m_recieved_serial[m_recieved_serial.size()-1] == '\n')
+    {
+        //qDebug() << "Gary: m_recieved_serial Complete.";
+        qDebug() << QString::fromStdString(m_recieved_serial.toStdString());
+        m_recieved_serial.clear();
+    }
+
     //You can use QTextCodec to convert the bytearray to a string:
     // (1015 is UTF-16, 1014 UTF-16LE, 1013 UTF-16BE, 106 UTF-8)
     //QString _datas = QTextCodec::codecForMib(1015)->toUnicode(_data);
     //QString _datas = QString::from
-    qDebug() << "Gary: readSerial() Fired";
+    //qDebug() << "Gary: readSerial() Fired";
    // qDebug() << _datas;
-    qDebug() << QString::fromStdString(_data.toStdString());
+   // qDebug() << QString::fromStdString(_data.toStdString());
 }
 //--------------------------------------------------------------
 

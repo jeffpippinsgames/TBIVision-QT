@@ -10,6 +10,7 @@ import "tbi.vision.components" 1 0
 #include <QQuickItem>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
+#include <QByteArray>
 
 /**************************************************************
 GaryHomingStatus
@@ -206,13 +207,15 @@ class Gary : public QObject
 {
     //QT Properties and Macros-------------------------------------
     Q_OBJECT //QOBJECT MACRO
-    Q_PROPERTY(GaryMotionStatus* motionStatus READ motionStatus WRITE setMotionStatus NOTIFY motionStatusChanged)
-    Q_PROPERTY(GaryControlMode* controlMode READ controlMode WRITE setControlMode NOTIFY controlModeChanged)
-    Q_PROPERTY(GaryHomingStatus* homingStatus READ homingStatus WRITE setHomingStatus NOTIFY homingStatusChanged)
-    Q_PROPERTY(GaryLimitSwitch* xLimitSwitch READ xLimitSwitch WRITE setXLimitSwitch NOTIFY xLimitSwitchChanged)
-    Q_PROPERTY(GaryLimitSwitch* zLimitSwitch READ zLimitSwitch WRITE setZLimitSwitch NOTIFY zLimitSwitchChanged)
-    Q_PROPERTY(int operationStatus READ getOperationStatus WRITE setOperationStatus NOTIFY operationStatusChanged)
-    Q_PROPERTY(float xPosition READ xPosition WRITE setXPosition NOTIFY xPositionChanged)
+    Q_PROPERTY(GaryMotionStatus* xMotionStatus READ getXMotionStatus WRITE setXMotionStatus NOTIFY xMotionStatusChanged)
+    Q_PROPERTY(GaryMotionStatus* zMotionStatus READ getZMotionStatus WRITE setYMotionStatus NOTIFY yMotionStatusChanged)
+    Q_PROPERTY(GaryControlMode* controlMode READ getControlMode WRITE setControlMode NOTIFY controlModeChanged)
+    Q_PROPERTY(GaryHomingStatus* homingStatus READ getHomingStatus WRITE setHomingStatus NOTIFY homingStatusChanged)
+    Q_PROPERTY(GaryLimitSwitch* xLimitSwitch READ getXLimitSwitch WRITE setXLimitSwitch NOTIFY xLimitSwitchChanged)
+    Q_PROPERTY(GaryLimitSwitch* zLimitSwitch READ getZLimitSwitch WRITE setZLimitSwitch NOTIFY zLimitSwitchChanged)
+    Q_PROPERTY(GaryOpererationStatus* operationStatus READ getOperationStatus WRITE setOperationStatus NOTIFY operationStatusChanged)
+    Q_PROPERTY(qint32 xPosition READ getXPosition WRITE setXPosition NOTIFY xPositionChanged)
+    Q_PROPERTY(qint32 zPosition READ getZPosition WRITE setZPosition NOTIFY zPositionChanged)
     //------------------------------------------------------------
 
 public:
@@ -229,8 +232,9 @@ public:
     void setHomingStatus(GaryHomingStatus*_hs);
     void setXLimitSwitch(GaryLimitSwitch *_ls);
     void setZLimitSwitch(GaryLimitSwitch *_ls);
-    void setOperationStatus(int _os);
-    void setXPosition(float _x_pos);
+    void setOperationStatus(GaryOperationStatus *_os);
+    void setXPosition(qint32 _x_pos);
+    void setZPosition(qint32 _z_pos);
     //------------------------------------------------------------
     //Property Read Methods
     GaryMotionStatus* motionStatus(){return m_motion_status;}
@@ -248,18 +252,21 @@ public:
     Q_INVOKABLE void sendJogDown();
     Q_INVOKABLE void sendJogLeft();
     Q_INVOKABLE void sendJogRight();
+
     Q_INVOKABLE void sendToggleLaserPower();
     //------------------------------------------------------------
 
 private:
     //Private Data Members ----------------------------------------
+    QByteArray m_recieved_serial;
     const quint16 m_teensy32_vendorID = 0x16C0;
     const quint16 m_teensy32_productID = 0x0483;
     const quint16 m_arduino_uno_vendorID = 0x2341;
     const quint16 m_arduino_uno_productID =0x0043;
     QSerialPortInfo *m_serial_info;
     QSerialPort *m_serial_port;
-    GaryMotionStatus *m_motion_status;
+    GaryMotionStatus *m_x_motion_status;
+    GaryMotionStatus *m_z_motion_status;
     GaryControlMode *m_control_mode;
     GaryHomingStatus *m_homing_status;
     GaryLimitSwitch *m_x_axis_limit;
@@ -290,8 +297,9 @@ signals:
 public slots:
     void serialError(QSerialPort::SerialPortError _error);
     void readSerial();
-    //void onAutoMoveX(int32_t _steps);
-    //void onAutoMoveZ(int32_t _steps);
+    void autoMoveXAxis(qint32 _steps);
+    void autoMoveZAxis(qint32 _steps);
+
 
 };
 

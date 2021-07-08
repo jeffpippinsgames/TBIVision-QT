@@ -20,6 +20,7 @@
 #include "tbiparameterclass_gausiandecluster.h"
 #include "tbiparameterclass_imageintensity.h"
 #include "tbiclass_threepointtrackingmanager.h"
+#include "tbicore_gary.h"
 
 
 using namespace cv;
@@ -68,6 +69,7 @@ class Max : public QObject
     Q_PROPERTY(QString timeinloop READ getTimeinLoop NOTIFY timeInLoopChanged)
     Q_PROPERTY(quint64 total_image_intensity READ getTotalImageIntensity NOTIFY totalImageIntensityChanged)
     Q_PROPERTY(bool emitExtraMats READ getEmitExtraMats WRITE setEmitExtraMats NOTIFY emitExtraMatsChanged)
+    Q_PROPERTY(GaryControlMode::ControlMode_t controlMode READ getControlMode NOTIFY onControlModeChanged)
 
 private:
 
@@ -82,13 +84,14 @@ public:
     ~Max();
     QString getTimeinLoop(){return m_timeinloop;}
     quint64 getTotalImageIntensity(){return m_total_image_intensity;}
+    GaryControlMode::ControlMode_t getControlMode(){return m_control_mode;}
     Q_INVOKABLE bool getEmitExtraMats(){return m_emitextramats;}
     void setEmitExtraMats(bool _flag){m_emitextramats = _flag; emit emitExtraMatsChanged();}
 
 private:
     //The Maximum Frame Size For The Camera
 
-
+    GaryControlMode::ControlMode_t m_control_mode;
     bool m_in_proccesing_loop;
 
     //Elements For GUI Display----------------------------------------
@@ -164,6 +167,7 @@ private:
 
     //Public Slots----------------------------------------------------------
 public slots:
+
     void recieveNewCVMat(const cv::Mat& _mat_frame);
     void processVGrooveTracking(const cv::Mat _mat_frame);
 
@@ -232,6 +236,9 @@ signals:
     void failedFlattenImageData();
     void failedInlierDSMat();
     void emitExtraMatsChanged();
+    void onControlModeChanged(GaryControlMode::ControlMode_t _controlmode);
+    void signalGaryToMoveXSteps(qint32 _steps);
+    void signalGaryToMoveZSteps(qint32 _steps);
 
 
 };
