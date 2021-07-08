@@ -25,7 +25,8 @@ class GaryHomingStatus: public QObject
     Q_OBJECT
 public:
     GaryHomingStatus() : QObject() {}
-    enum HomingStatus_t {TBI_HOMING_STATUS_HOMED = 0x01, TBI_HOMING_STATUS_NOT_HOMED = 0x02};
+    enum HomingStatus_t {TBI_HOMING_STATUS_HOMED = 0x01,
+                         TBI_HOMING_STATUS_NOT_HOMED = 0x02};
     Q_ENUMS(HomingStatus_t)
     static void declareQML()
     {
@@ -69,7 +70,8 @@ class GaryOperationStatus: public QObject
     Q_OBJECT
 public:
     GaryOperationStatus() : QObject() {}
-    enum OperationStatus_t {TBI_OPERATION_OK = 0x01, TBI_OPERATION_ERROR = 0x02};
+    enum OperationStatus_t {TBI_OPERATION_OK = 0x01,
+                            TBI_OPERATION_ERROR = 0x02};
     Q_ENUMS(OperationiStatus_t)
     static void declareQML()
     {
@@ -90,7 +92,8 @@ class GaryLimitSwitch: public QObject
     Q_OBJECT
 public:
     GaryLimitSwitch() : QObject() {}
-    enum LimitSwitchState_t {TBI_LIMIT_SWITCH_STATE_TRIPPED = 0x01, TBI_LIMIT_SWITCH_STATE_OK = 0x02};
+    enum LimitSwitchState_t {TBI_LIMIT_SWITCH_STATE_TRIPPED = 0x01,
+                             TBI_LIMIT_SWITCH_STATE_OK = 0x02};
     Q_ENUMS(LimitSwitchState_t)
     static void declareQML()
     {
@@ -111,7 +114,9 @@ class GaryControlMode: public QObject
     Q_OBJECT
 public:
     GaryControlMode() : QObject() {}
-    enum ControlMode_t {TBI_CONTROL_MODE_MANUAL_MODE = 0x01, TBI_CONTROL_MODE_PID_MODE = 0x02};
+    enum ControlMode_t {TBI_CONTROL_MODE_MANUAL_MODE = 0x01,
+                        TBI_CONTROL_MODE_FULLAUTO_MODE = 0x02,
+                        TBI_CONTROL_MODE_HEIGHTONLY = 0x03};
     Q_ENUMS(ControlMode_t)
     static void declareQML()
     {
@@ -135,10 +140,11 @@ class GaryMotionStatus: public QObject
 public:
     GaryMotionStatus() : QObject() {}
     enum MotionStatus_t {TBI_MOTION_STATUS_IDLE = 0x00,
-                         TBI_MOTION_STATUS_MOVING_PID = 0x01,
+                         TBI_MOTION_STATUS_MOVING = 0x01,
                          TBI_MOTION_STATUS_JOGGING = 0x02,
                          TBI_MOTION_STATUS_GENERAL_ERROR = 0x03,
-                         TBI_MOTION_STATUS_LIMIT_TRIPPED = 0x04};
+                         TBI_MOTION_STATUS_LIMIT_TRIPPED = 0x04,
+                         TBI_MOTIION_STATUS_HOMING = 0x05};
     Q_ENUMS(MotionStatus_t)
     static void declareQML()
     {
@@ -158,48 +164,23 @@ class GaryCommands : public QObject
 {
 
     Q_OBJECT
-   public:
+public:
 
     GaryCommands() : QObject() {}
 
     enum SerialCommand_t{ TBI_CMD_DELIMITER_CR = 0x0D,
                           TBI_CMD_DELMIITER_LF = 0x0A,
-                          TBI_CMD_SEND_WATCHDOG = 0x01,
-                          TBI_CMD_STOP_MOVEMENT = 0x02,
-                          TBI_CMD_JOG_UP = 0x03,
-                          TBI_CMD_JOG_DOWN = 0x04,
-                          TBI_CMD_JOG_LEFT = 0x05,
-                          TBI_CMD_JOG_RIGHT = 0x06,
-                          TBI_SET_X_ERROR = 0x07,
-                          TBI_SET_Z_ERROR = 0x08,
-                          TBI_CMD_SEND_X_ERROR = 0x09,
-                          TBI_CMD_SEND_Z_ERROR = 0x0B,
-                          TBI_CMD_SEND_X_LIMIT_TRIPPED = 0x0C,
-                          TBI_CMD_SEND_Z_LIMIT_TRIPPED = 0x0E,
-                          TBI_CMD_SEND_X_POSITIION = 0x0F,
-                          TBI_CMD_SEND_Z_POSITION = 0x10,
-                          TBI_CMD_SET_X_POSITION = 0x11,
-                          TBI_CMD_SET_Z_POSITION = 0x12,
-                          TBI_CMD_SEND_X_LIMIT_STATUS = 0x13,
-                          TBI_CMD_SEND_Z_LIMIT_STATUS = 0x14,
-                          TBI_CMD_SET_KP_XCONTROL = 0x15,
-                          TBI_CMD_SET_KD_XCONTROL = 0x16,
-                          TBI_CMD_SET_KI_XCONTROL = 0x17,
-                          TBI_CMD_SEND_KP_XCONTROL = 0x18,
-                          TBI_CMD_SEND_KD_XCONTROL = 0x19,
-                          TBI_CMD_SEND_KI_XCONTROL = 0x1A,
-                          TBI_CMD_PID_ON = 0x1B,
-                          TBI_CMD_PID_OFF = 0x1C,
-                          TBI_CMD_SEND_STATUS = 0x1D,
-                          TBI_CMD_HOME_X = 0x1E,
-                          TBI_CMD_HOME_Z = 0x1F,
-                          TBI_CMD_SET_KP_ZCONTROL = 0x20,
-                          TBI_CMD_SET_KD_ZCONTROL = 0x21,
-                          TBI_CMD_SET_KI_ZCONTROL = 0x22,
-                          TBI_CMD_SEND_KP_ZCONTROL = 0x23,
-                          TBI_CMD_SEND_KD_ZCONTROL = 0x24,
-                          TBI_CMD_SEND_KI_ZCONTROL = 0x25,
-                          TBI_CMD_TOGGLE_LASER_POWER = 0x26};
+                          TBI_CMD_STOP_MOVEMENT = 0x01,
+                          TBI_CMD_JOG_UP = 0x02,
+                          TBI_CMD_JOG_DOWN = 0x03,
+                          TBI_CMD_JOG_LEFT = 0x04,
+                          TBI_CMD_JOG_RIGHT = 0x05,
+                          TBI_CMD_SEND_STATUS = 0x06,
+                          TBI_CMD_HOME_X = 0x07,
+                          TBI_CMD_HOME_Z = 0x08,
+                          TBI_CMD_TOGGLE_LASER_POWER = 0x09,
+                          TBI_CMD_MOVEXSTEPS = 0x0B,
+                          TBI_CMD_MOVEZSTEPS = 0x0C};
 
     Q_ENUMS(SerialCommand_t)
 
@@ -234,7 +215,7 @@ class Gary : public QObject
     Q_PROPERTY(float xPosition READ xPosition WRITE setXPosition NOTIFY xPositionChanged)
     //------------------------------------------------------------
 
-    public:
+public:
 
     //Public Constructors, Destructors and Init Methods-----------
     explicit Gary(QObject *parent = nullptr);
@@ -270,7 +251,7 @@ class Gary : public QObject
     Q_INVOKABLE void sendToggleLaserPower();
     //------------------------------------------------------------
 
-    private:
+private:
     //Private Data Members ----------------------------------------
     const quint16 m_teensy32_vendorID = 0x16C0;
     const quint16 m_teensy32_productID = 0x0483;
@@ -294,7 +275,7 @@ class Gary : public QObject
     //--------------------------------------------------------------
 
     //Signals-------------------------------------------------------
-    signals:
+signals:
     void aboutToDestroy();
     void completed();
     void motionStatusChanged();
@@ -308,6 +289,10 @@ class Gary : public QObject
 
 public slots:
     void serialError(QSerialPort::SerialPortError _error);
+    void readSerial();
+    //void onAutoMoveX(int32_t _steps);
+    //void onAutoMoveZ(int32_t _steps);
+
 };
 
 #endif // TBICORE_GARY_H

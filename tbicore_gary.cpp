@@ -1,5 +1,6 @@
 #include "tbicore_gary.h"
 #include <QDebug>
+#include <QTextCodec>
 
 
 /**************************************************************
@@ -219,6 +220,7 @@ bool Gary::findOpenArduinoUno()
                    m_serial_port->setParity(QSerialPort::EvenParity);
                    m_serial_port->setDataBits(QSerialPort::Data8);
                    m_serial_port->setFlowControl(QSerialPort::NoFlowControl);
+                   QObject::connect(m_serial_port, SIGNAL(readyRead()), this, SLOT(readSerial()));
                    if(m_serial_port->open(QIODevice::ReadWrite))
                    {
                        qDebug() << "Gary::findOpenArduinoUno() Serial Port Opened.";
@@ -377,6 +379,26 @@ Description:
 void Gary::serialError(QSerialPort::SerialPortError _error)
 {
     setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
+}
+
+
+/**************************************************************
+readSerial()
+Slot
+Description:
+  Handles the readyRead signal from the Serial Port.
+ **************************************************************/
+void Gary::readSerial()
+{
+    m_serial_port->re
+    QByteArray _data = m_serial_port->readAll();
+    //You can use QTextCodec to convert the bytearray to a string:
+    // (1015 is UTF-16, 1014 UTF-16LE, 1013 UTF-16BE, 106 UTF-8)
+    //QString _datas = QTextCodec::codecForMib(1015)->toUnicode(_data);
+    //QString _datas = QString::from
+    qDebug() << "Gary: readSerial() Fired";
+   // qDebug() << _datas;
+    qDebug() << QString::fromStdString(_data.toStdString());
 }
 //--------------------------------------------------------------
 
