@@ -11,13 +11,14 @@ Description:
  **************************************************************/
 Gary::Gary(QObject *parent) : QObject(parent)
 {
-    m_motion_status = new GaryMotionStatus();
-    m_control_mode = new GaryControlMode();
-    m_x_axis_limit = new GaryLimitSwitch();
-    m_z_axis_limit = new GaryLimitSwitch();
-    setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
-    m_homing_status = new GaryHomingStatus();
-    m_x_position = 10.2345;
+    m_x_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_IDLE;
+    m_z_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_IDLE;
+    m_control_mode = GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE;
+    m_x_axis_limit = GaryLimitSwitch::TBI_LIMIT_SWITCH_STATE_OK;
+    m_z_axis_limit = GaryLimitSwitch::TBI_LIMIT_SWITCH_STATE_OK;
+    m_operation_status = GaryOperationStatus::TBI_OPERATION_OK;
+    m_homing_status = GaryHomingStatus::TBI_HOMING_STATUS_HOMED;
+    m_last_status_guid = 4294967295;
     //this->findOpenTeensy();
     this->findOpenArduinoUno();
     emit completed();
@@ -62,16 +63,31 @@ void Gary::declareQML()
 
 
 /**************************************************************
-setMotionStatus(GaryMotionStatus *_ms)
+setXMotionStatus(GaryMotionStatus *_ms)
 Public
 Description:
   Public set Property method.
  **************************************************************/
-void Gary::setMotionStatus(GaryMotionStatus *_ms)
+void Gary::setXMotionStatus(GaryMotionStatus::MotionStatus_t _ms_t)
 {
-
+    m_x_motion_status = _ms_t;
+    emit xMotionStatusChanged();
 }
 //--------------------------------------------------------------
+
+/**************************************************************
+setZMotionStatus(GaryMotionStatus *_ms)
+Public
+Description:
+  Public set Property method.
+ **************************************************************/
+void Gary::setZMotionStatus(GaryMotionStatus::MotionStatus_t _ms_t)
+{
+    m_z_motion_status = _ms_t;
+    emit zMotionStatusChanged();
+}
+//--------------------------------------------------------------
+
 
 
 /**************************************************************
@@ -80,9 +96,10 @@ Public
 Description:
   Public set Property method.
  **************************************************************/
-void Gary::setControlMode(GaryControlMode *_cm)
+void Gary::setControlMode(GaryControlMode::ControlMode_t _cm_t)
 {
-
+    m_control_mode = _cm_t;
+    emit controlModeChanged();
 }
 //--------------------------------------------------------------
 
@@ -93,9 +110,10 @@ Public
 Description:
   Public set Property method.
  **************************************************************/
-void Gary::setHomingStatus(GaryHomingStatus *_hs)
+void Gary::setHomingStatus(GaryHomingStatus::HomingStatus_t _hs_t)
 {
-
+    m_homing_status = _hs_t;
+    emit homingStatusChanged();
 }
 //--------------------------------------------------------------
 
@@ -106,12 +124,12 @@ Public
 Description:
   Public set Property method.
  **************************************************************/
-void Gary::setXLimitSwitch(GaryLimitSwitch *_ls)
+void Gary::setXLimitSwitch(GaryLimitSwitch::LimitSwitchState_t _ls_t)
 {
-
+    m_x_axis_limit = _ls_t;
+    emit xLimitSwitchChanged();
 }
 //--------------------------------------------------------------
-
 
 /**************************************************************
 setZLimitSwitch(GaryLimitSwitch *_ls)
@@ -119,9 +137,10 @@ Public
 Description:
   Public set Property method.
  **************************************************************/
-void Gary::setZLimitSwitch(GaryLimitSwitch *_ls)
+void Gary::setZLimitSwitch(GaryLimitSwitch::LimitSwitchState_t _ls_t)
 {
-
+    m_z_axis_limit = _ls_t;
+    emit zLimitSwitchChanged();
 }
 //--------------------------------------------------------------
 
@@ -132,17 +151,38 @@ Public
 Description:
   Public set Property method.
  **************************************************************/
-void Gary::setOperationStatus(int _os)
+void Gary::setOperationStatus(GaryOperationStatus::OperationStatus_t _os_t)
 {
-    m_operation_status = _os;
+    m_operation_status = _os_t;
     emit operationStatusChanged();
+}
+
+/**************************************************************
+setLaserStatus(GaryLaserStatus::LaserStatus_t _ls_t)
+Public
+Description:
+  Public set Property method.
+ **************************************************************/
+void Gary::setLaserStatus(GaryLaserStatus::LaserStatus_t _ls_t)
+{
+    m_laser_status = _ls_t;
+    emit laserStatusChanged();
+}
+
+
+
+void Gary::setXPosition(qint32 _x_pos)
+{
+    m_x_position = _x_pos;
+    emit xPositionChanged();
 }
 //--------------------------------------------------------------
 
 
-void Gary::setXPosition(float _x_pos)
+void Gary::setZPosition(qint32 _z_pos)
 {
-    m_x_position = _x_pos;
+    m_z_position = _z_pos;
+    emit zPositionChanged();
 }
 //--------------------------------------------------------------
 
@@ -215,7 +255,9 @@ bool Gary::findOpenArduinoUno()
                if(_serialinfo.productIdentifier() == m_arduino_uno_productID)
                {
                    m_serial_port = new QSerialPort(_serialinfo, this);
-                   m_serial_port->setBaudRate(QSerialPort::Baud115200);
+
+                   m_serial_port->setBaudRate(2000000);
+                   //m_serial_port->setBaudRate(QSerialPort::Baud115200);
                    m_serial_port->setStopBits(QSerialPort::OneStop);
                    m_serial_port->setParity(QSerialPort::EvenParity);
                    m_serial_port->setDataBits(QSerialPort::Data8);
@@ -270,9 +312,11 @@ Description:
  **************************************************************/
 Q_INVOKABLE void Gary::sendJogUp()
 {
+       if(m_z_motion_status != GaryMotionStatus::TBI_MOTION_STATUS_IDLE) return;
        QByteArray _cmd;
        _cmd.append(char(GaryCommands::TBI_CMD_JOG_UP));
-
+       m_z_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_JOGGING;
+       emit zMotionStatusChanged();
        sendSerialCommand(_cmd);
 }
 //--------------------------------------------------------------
@@ -287,9 +331,11 @@ Description:
  **************************************************************/
 Q_INVOKABLE void Gary::sendJogDown()
 {
+    if(m_z_motion_status != GaryMotionStatus::TBI_MOTION_STATUS_IDLE) return;
     QByteArray _cmd;
     _cmd.append(char(GaryCommands::TBI_CMD_JOG_DOWN));
-
+    m_z_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_JOGGING;
+    emit zMotionStatusChanged();
     sendSerialCommand(_cmd);
 }
 //--------------------------------------------------------------
@@ -304,9 +350,11 @@ Description:
  **************************************************************/
 Q_INVOKABLE void Gary::sendJogLeft()
 {
+    if(m_x_motion_status != GaryMotionStatus::TBI_MOTION_STATUS_IDLE) return;
     QByteArray _cmd;
     _cmd.append(char(GaryCommands::TBI_CMD_JOG_LEFT));
-
+    m_x_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_JOGGING;
+    emit xMotionStatusChanged();
     sendSerialCommand(_cmd);
 }
 //--------------------------------------------------------------
@@ -321,8 +369,11 @@ Description:
  **************************************************************/
 Q_INVOKABLE void Gary::sendJogRight()
 {
+    if(m_x_motion_status != GaryMotionStatus::TBI_MOTION_STATUS_IDLE) return;
     QByteArray _cmd;
     _cmd.append(char(GaryCommands::TBI_CMD_JOG_RIGHT));
+    m_x_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_JOGGING;
+    emit xMotionStatusChanged();
     sendSerialCommand(_cmd);
 }
 
@@ -335,11 +386,45 @@ Description:
  **************************************************************/
 void Gary::autoMoveXAxis(qint32 _steps)
 {
+    if(m_x_motion_status != GaryMotionStatus::TBI_MOTION_STATUS_IDLE) return;
     QByteArray _cmd;
     _cmd.append((char)GaryCommands::TBI_CMD_MOVEXSTEPS);
     _cmd.append((char*)&_steps, sizeof (_steps));
+    m_x_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_MOVING;
+    emit xMotionStatusChanged();
     sendSerialCommand(_cmd);
 
+}
+
+/**************************************************************
+autoMoveZAxis()
+Public, Q_INVOKABLE
+Description:
+  Public Method that sends the Move Z steps command
+ **************************************************************/
+void Gary::autoMoveZAxis(qint32 _steps)
+{
+    if(m_z_motion_status != GaryMotionStatus::TBI_MOTION_STATUS_IDLE) return;
+    QByteArray _cmd;
+    _cmd.append((char)GaryCommands::TBI_CMD_MOVEZSTEPS);
+    _cmd.append((char*)&_steps, sizeof (_steps));
+    m_z_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_MOVING;
+    emit zMotionStatusChanged();
+    sendSerialCommand(_cmd);
+}
+
+
+/**************************************************************
+autoMoveZAxis()
+Public, Q_INVOKABLE
+Description:
+  Public Method that sends the Move Z steps command
+ **************************************************************/
+void Gary::sendStatusPacket()
+{
+    QByteArray _cmd;
+    _cmd.append((char)GaryCommands::TBI_CMD_SEND_STATUS);
+    sendSerialCommand(_cmd);
 }
 
 /**************************************************************
@@ -383,6 +468,8 @@ void Gary::sendSerialCommand(QByteArray &_data)
         qDebug() << "Gary::sendSerialCommand() Error in sendSerialCommand: m_serial_port is not open";
     }
 }
+
+
 //--------------------------------------------------------------
 
 
@@ -410,10 +497,51 @@ void Gary::readSerial()
 
     QByteArray _data = m_serial_port->readAll();
     m_recieved_serial.append(_data);
-    if(m_recieved_serial[m_recieved_serial.size()-1] == '\n')
+
+    //The Controllers Status Packet is 19 Bytes Long.
+    //After 19 Bytes Have Transfered Process The Info.
+
+    /*
+    NOTE: The Only Thing The Controller Sends Back To The QT Application is a Status Packet.
+    Below is the Structure of the Status Packet
+
+    [Byte 0,1,2,3] - uint32_t Status GUID
+    [Byte 4] - The Controller Motion Status of X Axis. Of Type MotionStatus_t.
+    [Byte 5] - The Controller Motion Status of Z Axis. Of Type MotionStatus_t.
+    [Byte 6,7,8,9] X Position of Controller as int32_t.
+    [Byte 10,11,12,13] Z Position of Controller as int32_t.
+    [Byte 14] - The Controller Control Mode. Of Type ControlMode_t
+    [Byte 15] - The Controller X Axis Limit Switch State - Of Type LimitSwitchState_t
+    [Byte 16] - The Controller Z Axis Switch State - Of Type LimitSwitchState_t
+    [Byte 17] - The Controller Operation Status Condition. Of Type OperationStatus_t.
+    [Byte 18] - Laser Power Status. 0 - Off, 1 - On.
+
+
+    This mandates the TBI_CONTROL_STATUS_BUFFER_SIZE Including be 20 bytes.
+    */
+    if(m_recieved_serial.size() >= 19)
     {
-        //qDebug() << "Gary: m_recieved_serial Complete.";
-        qDebug() << QString::fromStdString(m_recieved_serial.toStdString());
+        char *_dataptr = _data.data();
+        m_last_status_guid = (quint32) *(&_dataptr[0]);
+        m_x_motion_status = (GaryMotionStatus::MotionStatus_t) _dataptr[4];
+        m_z_motion_status = (GaryMotionStatus::MotionStatus_t) _dataptr[5];
+        m_x_position = (qint32)*(&_dataptr[6]);
+        m_z_position = (qint32)*(&_dataptr[10]);
+        m_control_mode = (GaryControlMode::ControlMode_t) _dataptr[14];
+        m_x_axis_limit = (GaryLimitSwitch::LimitSwitchState_t) _dataptr[15];
+        m_z_axis_limit = (GaryLimitSwitch::LimitSwitchState_t) _dataptr[16];
+        m_operation_status = (GaryOperationStatus::OperationStatus_t) _dataptr[17];
+        m_laser_status = (GaryLaserStatus::LaserStatus_t) _dataptr[18];
+        emit xMotionStatusChanged();
+        emit zMotionStatusChanged();
+        emit xPositionChanged();
+        emit zPositionChanged();
+        emit controlModeChanged();
+        emit xLimitSwitchChanged();
+        emit zLimitSwitchChanged();
+        emit operationStatusChanged();
+        emit laserStatusChanged();
+        //Done Processing clear the data array
         m_recieved_serial.clear();
     }
 

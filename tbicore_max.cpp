@@ -15,7 +15,7 @@
 Max::Max(QObject *parent) : QObject(parent)
 {
 
-    m_control_mode = GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE;
+
     m_gausian_decluster_ds = new TBIDataSet();
     m_gausian_decluster_distro = new TBIDataDistributionSet();
     m_left_ransac_tsg_ds = new TBIDataSet();

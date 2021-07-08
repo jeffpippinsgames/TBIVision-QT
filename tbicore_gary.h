@@ -191,6 +191,31 @@ public:
     }
 };
 
+/**************************************************************
+GaryCommands
+Description:
+  A class to encapsulate the requirments for keeping track
+  of the serial command codes for the Microcontroller.
+ **************************************************************/
+class GaryLaserStatus : public QObject
+{
+
+    Q_OBJECT
+public:
+
+    GaryLaserStatus() : QObject() {}
+
+    enum LaserStatus_t{ TBI_LASER_STATUS_OFF = 0x00,
+                        TBI_LASER_STATUS_ON = 0x01};
+
+    Q_ENUMS(SerialCommand_t)
+
+    static void declareQML()
+    {
+        qmlRegisterType<GaryLaserStatus>("tbi.vision.components", 1, 0, "GaryLaserStatus");
+    }
+};
+
 
 /**************************************************************
 Gary
@@ -207,13 +232,15 @@ class Gary : public QObject
 {
     //QT Properties and Macros-------------------------------------
     Q_OBJECT //QOBJECT MACRO
-    Q_PROPERTY(GaryMotionStatus* xMotionStatus READ getXMotionStatus WRITE setXMotionStatus NOTIFY xMotionStatusChanged)
-    Q_PROPERTY(GaryMotionStatus* zMotionStatus READ getZMotionStatus WRITE setYMotionStatus NOTIFY yMotionStatusChanged)
-    Q_PROPERTY(GaryControlMode* controlMode READ getControlMode WRITE setControlMode NOTIFY controlModeChanged)
-    Q_PROPERTY(GaryHomingStatus* homingStatus READ getHomingStatus WRITE setHomingStatus NOTIFY homingStatusChanged)
-    Q_PROPERTY(GaryLimitSwitch* xLimitSwitch READ getXLimitSwitch WRITE setXLimitSwitch NOTIFY xLimitSwitchChanged)
-    Q_PROPERTY(GaryLimitSwitch* zLimitSwitch READ getZLimitSwitch WRITE setZLimitSwitch NOTIFY zLimitSwitchChanged)
-    Q_PROPERTY(GaryOpererationStatus* operationStatus READ getOperationStatus WRITE setOperationStatus NOTIFY operationStatusChanged)
+    Q_PROPERTY(GaryMotionStatus::MotionStatus_t xMotionStatus READ getXMotionStatus WRITE setXMotionStatus NOTIFY xMotionStatusChanged)
+    Q_PROPERTY(GaryMotionStatus::MotionStatus_t zMotionStatus READ getZMotionStatus WRITE setZMotionStatus NOTIFY zMotionStatusChanged)
+    Q_PROPERTY(GaryControlMode::ControlMode_t controlMode READ getControlMode WRITE setControlMode NOTIFY controlModeChanged)
+    Q_PROPERTY(GaryHomingStatus::HomingStatus_t homingStatus READ getHomingStatus WRITE setHomingStatus NOTIFY homingStatusChanged)
+    Q_PROPERTY(GaryLimitSwitch::LimitSwitchState_t xLimitSwitch READ getXLimitSwitch WRITE setXLimitSwitch NOTIFY xLimitSwitchChanged)
+    Q_PROPERTY(GaryLimitSwitch::LimitSwitchState_t zLimitSwitch READ getZLimitSwitch WRITE setZLimitSwitch NOTIFY zLimitSwitchChanged)
+    Q_PROPERTY(GaryOperationStatus::OperationStatus_t operationStatus READ getOperationStatus WRITE setOperationStatus NOTIFY operationStatusChanged)
+    Q_PROPERTY(GaryLaserStatus::LaserStatus_t laserStatus READ getLaserStatus WRITE setLaserStatus NOTIFY laserStatusChanged)
+
     Q_PROPERTY(qint32 xPosition READ getXPosition WRITE setXPosition NOTIFY xPositionChanged)
     Q_PROPERTY(qint32 zPosition READ getZPosition WRITE setZPosition NOTIFY zPositionChanged)
     //------------------------------------------------------------
@@ -224,26 +251,32 @@ public:
     explicit Gary(QObject *parent = nullptr);
     ~Gary();
     static void declareQML();
+
     //------------------------------------------------------------
 
     //PropertySetMethods
-    void setMotionStatus(GaryMotionStatus*_ms);
-    void setControlMode(GaryControlMode* _cm);
-    void setHomingStatus(GaryHomingStatus*_hs);
-    void setXLimitSwitch(GaryLimitSwitch *_ls);
-    void setZLimitSwitch(GaryLimitSwitch *_ls);
-    void setOperationStatus(GaryOperationStatus *_os);
+    void setXMotionStatus(GaryMotionStatus::MotionStatus_t _ms_t);
+    void setZMotionStatus(GaryMotionStatus::MotionStatus_t _ms_t);
+    void setControlMode(GaryControlMode::ControlMode_t _cm_t);
+    void setHomingStatus(GaryHomingStatus::HomingStatus_t _hs_t);
+    void setXLimitSwitch(GaryLimitSwitch::LimitSwitchState_t _ls_t);
+    void setZLimitSwitch(GaryLimitSwitch::LimitSwitchState_t _ls_t);
+    void setOperationStatus(GaryOperationStatus::OperationStatus_t _os_t);
+    void setLaserStatus(GaryLaserStatus::LaserStatus_t _ls_t);
     void setXPosition(qint32 _x_pos);
     void setZPosition(qint32 _z_pos);
     //------------------------------------------------------------
     //Property Read Methods
-    GaryMotionStatus* motionStatus(){return m_motion_status;}
-    GaryControlMode* controlMode(){return m_control_mode;}
-    GaryHomingStatus* homingStatus(){return m_homing_status;}
-    GaryLimitSwitch* xLimitSwitch(){return m_x_axis_limit;}
-    GaryLimitSwitch* zLimitSwitch(){return m_z_axis_limit;}
-    int getOperationStatus(){return m_operation_status;}
-    float xPosition(){return m_x_position;}
+    GaryMotionStatus::MotionStatus_t getXMotionStatus(){return m_x_motion_status;}
+    GaryMotionStatus::MotionStatus_t getZMotionStatus(){return m_z_motion_status;}
+    GaryControlMode::ControlMode_t getControlMode(){return m_control_mode;}
+    GaryHomingStatus::HomingStatus_t getHomingStatus(){return m_homing_status;}
+    GaryLimitSwitch::LimitSwitchState_t getXLimitSwitch(){return m_x_axis_limit;}
+    GaryLimitSwitch::LimitSwitchState_t getZLimitSwitch(){return m_z_axis_limit;}
+    GaryOperationStatus::OperationStatus_t getOperationStatus(){return m_operation_status;}
+    GaryLaserStatus::LaserStatus_t getLaserStatus(){return m_laser_status;}
+    qint32 getXPosition(){return m_x_position;}
+    qint32 getZPosition(){return m_z_position;}
     //------------------------------------------------------------
 
     //Public Send Command Methods----------------------------------------------
@@ -252,12 +285,14 @@ public:
     Q_INVOKABLE void sendJogDown();
     Q_INVOKABLE void sendJogLeft();
     Q_INVOKABLE void sendJogRight();
-
     Q_INVOKABLE void sendToggleLaserPower();
+    Q_INVOKABLE void autoMoveXAxis(qint32 _steps);
+    Q_INVOKABLE void autoMoveZAxis(qint32 _steps);
+    Q_INVOKABLE void sendStatusPacket();
     //------------------------------------------------------------
 
 private:
-    //Private Data Members ----------------------------------------
+    //Serial Port Variables
     QByteArray m_recieved_serial;
     const quint16 m_teensy32_vendorID = 0x16C0;
     const quint16 m_teensy32_productID = 0x0483;
@@ -265,14 +300,19 @@ private:
     const quint16 m_arduino_uno_productID =0x0043;
     QSerialPortInfo *m_serial_info;
     QSerialPort *m_serial_port;
-    GaryMotionStatus *m_x_motion_status;
-    GaryMotionStatus *m_z_motion_status;
-    GaryControlMode *m_control_mode;
-    GaryHomingStatus *m_homing_status;
-    GaryLimitSwitch *m_x_axis_limit;
-    GaryLimitSwitch *m_z_axis_limit;
-    int m_operation_status;
-    float m_x_position;
+
+    //Controller State Variables
+    GaryMotionStatus::MotionStatus_t m_x_motion_status;
+    GaryMotionStatus::MotionStatus_t m_z_motion_status;
+    GaryControlMode::ControlMode_t m_control_mode;
+    GaryHomingStatus::HomingStatus_t m_homing_status;
+    GaryLimitSwitch::LimitSwitchState_t m_x_axis_limit;
+    GaryLimitSwitch::LimitSwitchState_t m_z_axis_limit;
+    GaryOperationStatus::OperationStatus_t m_operation_status;
+    GaryLaserStatus::LaserStatus_t m_laser_status;
+    qint32 m_x_position;
+    qint32 m_z_position;
+    quint32 m_last_status_guid;
     //-------------------------------------------------------------
 
     //Private Methods----------------------------------------------
@@ -285,20 +325,22 @@ private:
 signals:
     void aboutToDestroy();
     void completed();
-    void motionStatusChanged();
+    void xMotionStatusChanged();
+    void zMotionStatusChanged();
     void controlModeChanged();
     void homingStatusChanged();
     void xLimitSwitchChanged();
     void zLimitSwitchChanged();
     void operationStatusChanged();
+    void laserStatusChanged();
     void xPositionChanged();
+    void zPositionChanged();
     //--------------------------------------------------------------
 
 public slots:
     void serialError(QSerialPort::SerialPortError _error);
     void readSerial();
-    void autoMoveXAxis(qint32 _steps);
-    void autoMoveZAxis(qint32 _steps);
+
 
 
 };

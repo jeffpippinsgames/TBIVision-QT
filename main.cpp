@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
     GaryControlMode::declareQML();
     GaryCommands::declareQML();
     GaryMotionStatus::declareQML();
+    GaryLaserStatus::declareQML();
     //Register The QmlTBIDisplay QML Type
     QmlTBIDisplay::declareQML();
 
@@ -54,6 +55,9 @@ int main(int argc, char *argv[])
     Toby _toby; //Basler Camera Singleton
     Max _max; //Seam Tracking Singleton
     Mary _mary; //Settings Singleton
+
+    //Singleton Hooks
+    _max.setGary(&_gary);
 
     //Connect The Singletons Signals and Slots---------------------
     //REMEMBER TO RESET THE SAVE FILE WHEN YOU ADD A MARY SIGNAL!!!
