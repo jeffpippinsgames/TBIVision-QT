@@ -468,7 +468,9 @@ TBIDataSetReturnType TBIDataSet::extractDataSetForRansacLeftTSL(TBIDataSet &_dst
     int _pntindex = 0;
     do
     {
+
         _dst.insert(m_pnts[_pntindex]);
+
         ++_pntindex;
     }while(_pntindex < _breakindex);
 
@@ -516,7 +518,10 @@ TBIDataSetReturnType TBIDataSet::extractDataSetForRansacRightTSL(TBIDataSet &_ds
     int _pntindex = _startindex;
     do
     {
+
         _dst.insert(m_pnts[_pntindex]);
+
+
         ++_pntindex;
     }while(_pntindex < m_dataset_size);
 
@@ -678,4 +683,26 @@ TBIDataSetReturnType TBIDataSet::extractLeastSquareLine(TBILine &_line)
     return TBIDataSetReturnType::Ok;
 
 }
+
+TBIDataSetReturnType TBIDataSet::extractFilteredGausianSet(TBIDataSet &_dst, int _breakindex)
+{
+    _dst.clear();
+    if(_breakindex >= m_dataset_size) return TBIDataSetReturnType::FailedPassedInDataSetWrongSize;
+    if(m_dataset_size < 2) return TBIDataSetReturnType::FailedPassedInDataSetWrongSize;
+
+    int _index = 0;
+
+    do
+    {
+        if(abs(m_pnts[_index].m_y - m_pnts[_breakindex].m_y) > 5)
+        {
+            _dst.insert(m_pnts[_index]);
+        }
+        ++_index;
+    }while(_index < m_dataset_size);
+
+    return TBIDataSetReturnType::Ok;
+}
+
+
 

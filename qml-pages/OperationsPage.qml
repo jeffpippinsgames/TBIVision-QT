@@ -95,7 +95,8 @@ Item
         onGreenButtonPressed:
         {
             //keypadId.open();
-            Gary.sendStatusPacket();
+            //Gary.sendStatusPacket();
+
         }
 
         onRedButtonPressed:

@@ -126,6 +126,7 @@ private:
 
     //Data Sets and Distribution Sets-------------------------------------------------------------------------
     TBIDataSet *m_gausian_decluster_ds;
+    TBIDataSet *m_filtered_gausian_decluster_ds;
     TBIDataDistributionSet *m_gausian_decluster_distro;
     TBIDataSet *m_left_ransac_tsg_ds;
     TBIDataSet *m_left_inlier_tsg_ds;

@@ -18,6 +18,7 @@ Max::Max(QObject *parent) : QObject(parent)
 
     m_gausian_decluster_ds = new TBIDataSet();
     m_gausian_decluster_distro = new TBIDataDistributionSet();
+    m_filtered_gausian_decluster_ds = new TBIDataSet();
     m_left_ransac_tsg_ds = new TBIDataSet();
     m_left_inlier_tsg_ds = new TBIDataSet();
     m_right_ransac_tsg_ds = new TBIDataSet();
@@ -81,6 +82,7 @@ Max::~Max()
 {
     delete m_gausian_decluster_ds;
     delete m_gausian_decluster_distro;
+    delete m_filtered_gausian_decluster_ds;
     delete m_left_ransac_tsg_ds;
     delete m_left_inlier_tsg_ds;
     delete m_right_ransac_tsg_ds;
@@ -200,20 +202,24 @@ void Max::processVGrooveTracking(const cv::Mat _mat)
         //Extract The Gausian Decluster DistrobutionSet
         if(m_gausian_decluster_ds->extractDistributionSet(*m_gausian_decluster_distro) == TBIDataSetReturnType::Ok)
         {
-            //Find The BreakIndex
+            //Find The BreakIndex of the First Cluster
+
             _breakindex = m_gausian_decluster_ds->getIndexofHighestY(*m_gausian_decluster_distro);
             if(_breakindex != -1) //A Good Break Index Was Found. Continue Construction
             {
                 cv::drawMarker(_ransac_mat, m_gausian_decluster_ds->getPoint(_breakindex).toCVPoint(), CV_RGB(255,125,125), MARKER_CROSS, 20);
+                m_gausian_decluster_ds->extractFilteredGausianSet(*m_filtered_gausian_decluster_ds, _breakindex);
+                _breakindex = m_filtered_gausian_decluster_ds->getIndexofHighestY();
+
 
                 //Left TSG Ransac and Inlier DataSet Construction
-                TBIRansac::doRansac(m_ransac_left_tsl, m_left_tsl_ransac, *m_gausian_decluster_ds, 0, _breakindex);
+                TBIRansac::doRansac(m_ransac_left_tsl, m_left_tsl_ransac, *m_filtered_gausian_decluster_ds, 0, _breakindex);
                 if(m_ransac_left_tsl.isValid())
                 {
                     m_ransac_left_tsl.remakeLine(0, _raw_mat.cols);
                     m_ransac_left_tsl.drawOnMat(_ransac_mat, CV_RGB(0,0,255));
                     //Build Inliers Set
-                    if(m_gausian_decluster_ds->extractDataSetForInliers(*m_left_inlier_tsg_ds, m_ransac_left_tsl, 2.0, 0, _breakindex) == TBIDataSetReturnType::Ok)
+                    if(m_filtered_gausian_decluster_ds->extractDataSetForInliers(*m_left_inlier_tsg_ds, m_ransac_left_tsl, 2.0, 0, _breakindex) == TBIDataSetReturnType::Ok)
                     {
                         m_left_inlier_tsg_ds->drawToMat(_inliers_mat, CV_RGB(125,125,255));
                     }
@@ -228,13 +234,13 @@ void Max::processVGrooveTracking(const cv::Mat _mat)
                 }
 
                 //Right TSG Ransac and Inlier DataSet Construction
-                TBIRansac::doRansac(m_ransac_right_tsl, m_right_tsl_ransac, *m_gausian_decluster_ds, _breakindex, m_gausian_decluster_ds->size()-1);
+                TBIRansac::doRansac(m_ransac_right_tsl, m_right_tsl_ransac, *m_filtered_gausian_decluster_ds, _breakindex, m_filtered_gausian_decluster_ds->size()-1);
                 if(m_ransac_right_tsl.isValid())
                 {
                     m_ransac_right_tsl.remakeLine(0, _raw_mat.cols);
                     m_ransac_right_tsl.drawOnMat(_ransac_mat, CV_RGB(255,0,0));
                     //Build Inliers Set
-                    if(m_gausian_decluster_ds->extractDataSetForInliers(*m_right_inlier_tsg_ds, m_ransac_right_tsl, 2.0, _breakindex, m_gausian_decluster_ds->size()-1) == TBIDataSetReturnType::Ok)
+                    if(m_filtered_gausian_decluster_ds->extractDataSetForInliers(*m_right_inlier_tsg_ds, m_ransac_right_tsl, 2.0, _breakindex, m_filtered_gausian_decluster_ds->size()-1) == TBIDataSetReturnType::Ok)
                     {
                         m_right_inlier_tsg_ds->drawToMat(_inliers_mat, CV_RGB(255,125,125));
                     }
@@ -251,7 +257,7 @@ void Max::processVGrooveTracking(const cv::Mat _mat)
                 //Build Joint DS For Reduced Processsing Overhead For BWL Ransacs
                 if(m_ransac_left_tsl.isValid() && m_ransac_right_tsl.isValid())
                 {
-                    if(m_gausian_decluster_ds->extractDataSetForJoint(*m_joint_ds, m_ransac_left_tsl, m_ransac_right_tsl, 5) == TBIDataSetReturnType::Ok)
+                    if(m_filtered_gausian_decluster_ds->extractDataSetForJoint(*m_joint_ds, m_ransac_left_tsl, m_ransac_right_tsl, 5) == TBIDataSetReturnType::Ok)
                     {
                         m_joint_ds->drawToMat(_inliers_mat, CV_RGB(50,50,50));
                     }

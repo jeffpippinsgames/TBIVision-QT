@@ -66,9 +66,8 @@ void Toby::OnImageGrabbed(CInstantCamera &camera, const CGrabResultPtr &ptrGrab)
     if(ptrGrab->GrabSucceeded())
     {
         m_timer.start();
-        qDebug() << "!";
-        //cv::Mat _mat = cv::Mat(ptrGrab->GetHeight(), ptrGrab->GetWidth(), CV_8UC1, (uint8_t *) ptrGrab->GetBuffer()).clone();
-        //emit newCVMatFrameGrabbed(_mat);
+        cv::Mat _mat = cv::Mat(ptrGrab->GetHeight(), ptrGrab->GetWidth(), CV_8UC1, (uint8_t *) ptrGrab->GetBuffer()).clone();
+        emit newCVMatFrameGrabbed(_mat);
     }
     emit cameraFPSChanged(m_camera_fps);
 }

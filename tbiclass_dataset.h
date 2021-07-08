@@ -77,6 +77,9 @@ public:
     TBIDataSetReturnType extractInlierDataSet(TBIDataSet &_dst, const TBIDataDistributionSet &_srcdistro);
     TBIDataSetReturnType extractDistributionSet(TBIDataDistributionSet &_distroset);
     TBIDataSetReturnType extractLeastSquareLine(TBILine &_line);
+    TBIDataSetReturnType extractFilteredGausianSet(TBIDataSet &_dst, int _breakindex);
+
+    //Filter Functions
 
     //Overloaded Operators
 
