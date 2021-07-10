@@ -117,7 +117,8 @@ public:
     GaryControlMode() : QObject() {}
     enum ControlMode_t {TBI_CONTROL_MODE_MANUAL_MODE = 0x01,
                         TBI_CONTROL_MODE_FULLAUTO_MODE = 0x02,
-                        TBI_CONTROL_MODE_HEIGHTONLY = 0x03};
+                        TBI_CONTROL_MODE_HEIGHTONLY = 0x03,
+                        TBI_CONTROL_MODE_MOTORCALIBRATION = 0x04};
     Q_ENUMS(ControlMode_t)
     static void declareQML()
     {
@@ -181,7 +182,10 @@ public:
                           TBI_CMD_HOME_Z = 0x08,
                           TBI_CMD_TOGGLE_LASER_POWER = 0x09,
                           TBI_CMD_MOVEXSTEPS = 0x0B,
-                          TBI_CMD_MOVEZSTEPS = 0x0C};
+                          TBI_CMD_MOVEZSTEPS = 0x0C,
+                          TBI_CMD_SETCONTROLMODE = 0x0E,
+                          TBI_CMD_SET_CALIBRATION_SPEED = 0x0F,
+                          TBI_CMD_SET_OPERATION_SPEED = 0x10};
 
     Q_ENUMS(SerialCommand_t)
 
@@ -289,7 +293,12 @@ public:
     Q_INVOKABLE void autoMoveXAxis(qint32 _steps);
     Q_INVOKABLE void autoMoveZAxis(qint32 _steps);
     Q_INVOKABLE void sendStatusPacket();
+    Q_INVOKABLE void setControllerToCalibrationSpeed();
+    Q_INVOKABLE void setControllerToOperationSpeed();
     //------------------------------------------------------------
+
+    //Debug Functions------------------------------------------------
+    Q_INVOKABLE void cycleControlModes();
 
 private:
     //Serial Port Variables

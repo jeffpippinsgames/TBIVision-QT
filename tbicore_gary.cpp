@@ -98,8 +98,10 @@ Description:
  **************************************************************/
 void Gary::setControlMode(GaryControlMode::ControlMode_t _cm_t)
 {
-    m_control_mode = _cm_t;
-    emit controlModeChanged();
+    QByteArray _cmd;
+    _cmd.append(GaryCommands::TBI_CMD_SETCONTROLMODE);
+    _cmd.append(_cm_t);
+    sendSerialCommand(_cmd);
 }
 //--------------------------------------------------------------
 
@@ -201,34 +203,34 @@ bool Gary::findOpenTeensy()
     //Poll Each Serial Port Look For The Teensy 3.2
     foreach(QSerialPortInfo _serialinfo, m_serial_info->availablePorts())
     {
-       if(_serialinfo.hasProductIdentifier() && _serialinfo.hasVendorIdentifier() )
-       {
-           if(_serialinfo.vendorIdentifier() == m_teensy32_vendorID)
-           {
-               if(_serialinfo.productIdentifier() == m_teensy32_productID)
-               {
-                   m_serial_port = new QSerialPort(_serialinfo, this);
-                   m_serial_port->setBaudRate(QSerialPort::Baud115200);
-                   m_serial_port->setStopBits(QSerialPort::OneStop);
-                   m_serial_port->setParity(QSerialPort::EvenParity);
-                   m_serial_port->setDataBits(QSerialPort::Data8);
-                   m_serial_port->setFlowControl(QSerialPort::NoFlowControl);
-                   if(m_serial_port->open(QIODevice::ReadWrite))
-                   {
-                       qDebug() << "Gary::findOpenTeensy() Serial Port Opened.";
-                       QObject::connect(m_serial_port, SIGNAL(errorOccured(QSerialPort::SerialPortError)), this, SLOT(serialError(QSerialPort::SerialPortError)));
-                       setOperationStatus(GaryOperationStatus::TBI_OPERATION_OK);
-                       return true;
-                   }
-                   else
-                   {
-                       qDebug() << "Gary::findOpenTeensy() Error Opening Serial Port";
-                       setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
-                       return false;
-                   }
-               }
-           }
-       }
+        if(_serialinfo.hasProductIdentifier() && _serialinfo.hasVendorIdentifier() )
+        {
+            if(_serialinfo.vendorIdentifier() == m_teensy32_vendorID)
+            {
+                if(_serialinfo.productIdentifier() == m_teensy32_productID)
+                {
+                    m_serial_port = new QSerialPort(_serialinfo, this);
+                    m_serial_port->setBaudRate(QSerialPort::Baud115200);
+                    m_serial_port->setStopBits(QSerialPort::OneStop);
+                    m_serial_port->setParity(QSerialPort::EvenParity);
+                    m_serial_port->setDataBits(QSerialPort::Data8);
+                    m_serial_port->setFlowControl(QSerialPort::NoFlowControl);
+                    if(m_serial_port->open(QIODevice::ReadWrite))
+                    {
+                        qDebug() << "Gary::findOpenTeensy() Serial Port Opened.";
+                        QObject::connect(m_serial_port, SIGNAL(errorOccured(QSerialPort::SerialPortError)), this, SLOT(serialError(QSerialPort::SerialPortError)));
+                        setOperationStatus(GaryOperationStatus::TBI_OPERATION_OK);
+                        return true;
+                    }
+                    else
+                    {
+                        qDebug() << "Gary::findOpenTeensy() Error Opening Serial Port";
+                        setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
+                        return false;
+                    }
+                }
+            }
+        }
     }
     qDebug() << "Gary::findOpenTeensy() Could Not Find Teensy 3.2 Serial Device.";
     return false;
@@ -248,36 +250,36 @@ bool Gary::findOpenArduinoUno()
     m_serial_info = new QSerialPortInfo();
     foreach(QSerialPortInfo _serialinfo, m_serial_info->availablePorts())
     {
-       if(_serialinfo.hasProductIdentifier() && _serialinfo.hasVendorIdentifier() )
-       {
-           if(_serialinfo.vendorIdentifier() == m_arduino_uno_vendorID)
-           {
-               if(_serialinfo.productIdentifier() == m_arduino_uno_productID)
-               {
-                   m_serial_port = new QSerialPort(_serialinfo, this);
+        if(_serialinfo.hasProductIdentifier() && _serialinfo.hasVendorIdentifier() )
+        {
+            if(_serialinfo.vendorIdentifier() == m_arduino_uno_vendorID)
+            {
+                if(_serialinfo.productIdentifier() == m_arduino_uno_productID)
+                {
+                    m_serial_port = new QSerialPort(_serialinfo, this);
 
-                   m_serial_port->setBaudRate(2000000);
-                   //m_serial_port->setBaudRate(QSerialPort::Baud115200);
-                   m_serial_port->setStopBits(QSerialPort::OneStop);
-                   m_serial_port->setParity(QSerialPort::EvenParity);
-                   m_serial_port->setDataBits(QSerialPort::Data8);
-                   m_serial_port->setFlowControl(QSerialPort::NoFlowControl);
-                   QObject::connect(m_serial_port, SIGNAL(readyRead()), this, SLOT(readSerial()));
-                   if(m_serial_port->open(QIODevice::ReadWrite))
-                   {
-                       qDebug() << "Gary::findOpenArduinoUno() Serial Port Opened.";
-                       setOperationStatus(GaryOperationStatus::TBI_OPERATION_OK);
-                       return true;
-                   }
-                   else
-                   {
-                       qDebug() << "Gary::findOpenArduinoUno() Error Opening Serial Port";
-                       setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
-                       return false;
-                   }
-               }
-           }
-       }
+                    m_serial_port->setBaudRate(2000000);
+                    //m_serial_port->setBaudRate(QSerialPort::Baud115200);
+                    m_serial_port->setStopBits(QSerialPort::OneStop);
+                    m_serial_port->setParity(QSerialPort::EvenParity);
+                    m_serial_port->setDataBits(QSerialPort::Data8);
+                    m_serial_port->setFlowControl(QSerialPort::NoFlowControl);
+                    QObject::connect(m_serial_port, SIGNAL(readyRead()), this, SLOT(readSerial()));
+                    if(m_serial_port->open(QIODevice::ReadWrite))
+                    {
+                        qDebug() << "Gary::findOpenArduinoUno() Serial Port Opened.";
+                        setOperationStatus(GaryOperationStatus::TBI_OPERATION_OK);
+                        return true;
+                    }
+                    else
+                    {
+                        qDebug() << "Gary::findOpenArduinoUno() Error Opening Serial Port";
+                        setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
+                        return false;
+                    }
+                }
+            }
+        }
     }
     qDebug() << "Gary::findOpenArduinoUno() Could Not Find Arduino Uno.";
     return false;
@@ -296,9 +298,9 @@ Description:
  **************************************************************/
 Q_INVOKABLE void Gary::sendStopMovement()
 {
-        QByteArray _cmd;
-        _cmd.append(char(GaryCommands::TBI_CMD_STOP_MOVEMENT));
-        sendSerialCommand(_cmd);
+    QByteArray _cmd;
+    _cmd.append(char(GaryCommands::TBI_CMD_STOP_MOVEMENT));
+    sendSerialCommand(_cmd);
 }
 //--------------------------------------------------------------
 
@@ -312,12 +314,12 @@ Description:
  **************************************************************/
 Q_INVOKABLE void Gary::sendJogUp()
 {
-       if(m_z_motion_status != GaryMotionStatus::TBI_MOTION_STATUS_IDLE) return;
-       QByteArray _cmd;
-       _cmd.append(char(GaryCommands::TBI_CMD_JOG_UP));
-       m_z_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_JOGGING;
-       emit zMotionStatusChanged();
-       sendSerialCommand(_cmd);
+    if(m_z_motion_status != GaryMotionStatus::TBI_MOTION_STATUS_IDLE) return;
+    QByteArray _cmd;
+    _cmd.append(char(GaryCommands::TBI_CMD_JOG_UP));
+    m_z_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_JOGGING;
+    emit zMotionStatusChanged();
+    sendSerialCommand(_cmd);
 }
 //--------------------------------------------------------------
 
@@ -427,6 +429,49 @@ void Gary::sendStatusPacket()
     sendSerialCommand(_cmd);
 }
 
+void Gary::setControllerToCalibrationSpeed()
+{
+    QByteArray _cmd;
+    _cmd.append((char)GaryCommands::TBI_CMD_SET_CALIBRATION_SPEED);
+    sendSerialCommand(_cmd);
+}
+
+void Gary::setControllerToOperationSpeed()
+{
+    QByteArray _cmd;
+    _cmd.append((char)GaryCommands::TBI_CMD_SET_OPERATION_SPEED);
+    sendSerialCommand(_cmd);
+}
+
+
+/**************************************************************
+cycleControlModes()
+Public, Q_INVOKABLE
+Description:
+  Debug Function For Cycling Thru Control Modes
+ **************************************************************/
+void Gary::cycleControlModes()
+{
+    QByteArray _cmd;
+    _cmd.append((char)GaryCommands::TBI_CMD_SETCONTROLMODE);
+    switch(m_control_mode)
+    {
+    case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
+        _cmd.append((char)GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY);
+        break;
+    case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
+        _cmd.append((char)GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE);
+        break;
+    case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
+        _cmd.append(GaryControlMode::TBI_CONTROL_MODE_MOTORCALIBRATION);
+        break;
+    case GaryControlMode::TBI_CONTROL_MODE_MOTORCALIBRATION:
+        _cmd.append((char)GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE);
+        break;
+    };
+    sendSerialCommand(_cmd);
+}
+
 /**************************************************************
 sendToggleLaserPower()
 Public, Q_INVOKABLE
@@ -459,7 +504,7 @@ void Gary::sendSerialCommand(QByteArray &_data)
     }
     if(m_serial_port->isOpen())
     {
-       _data.append(char(GaryCommands::TBI_CMD_DELMIITER_LF));
+        _data.append(char(GaryCommands::TBI_CMD_DELMIITER_LF));
         m_serial_port->write(_data);
         qDebug() << "Gary::sendSerialCommand() Sending Command to Controller: " << _data.toHex(',');
     }
@@ -532,6 +577,7 @@ void Gary::readSerial()
         m_z_axis_limit = (GaryLimitSwitch::LimitSwitchState_t) _dataptr[16];
         m_operation_status = (GaryOperationStatus::OperationStatus_t) _dataptr[17];
         m_laser_status = (GaryLaserStatus::LaserStatus_t) _dataptr[18];
+
         emit xMotionStatusChanged();
         emit zMotionStatusChanged();
         emit xPositionChanged();
@@ -550,8 +596,8 @@ void Gary::readSerial()
     //QString _datas = QTextCodec::codecForMib(1015)->toUnicode(_data);
     //QString _datas = QString::from
     //qDebug() << "Gary: readSerial() Fired";
-   // qDebug() << _datas;
-   // qDebug() << QString::fromStdString(_data.toStdString());
+    // qDebug() << _datas;
+    // qDebug() << QString::fromStdString(_data.toStdString());
 }
 //--------------------------------------------------------------
 

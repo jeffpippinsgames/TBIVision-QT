@@ -12,6 +12,107 @@
 
 
 //Constructors and Destructor--------------------------------------------------------
+void Max::processMotorCalibration(TBIThreePointTrackingContainer &_trackedpoint)
+{
+    switch(m_motor_cal_seq)
+    {
+    case Motor_Calibration_Sequence::NOT_CALIBRATING:
+        qDebug() << "MCM: Entering Motor_Calibration_Sequence::NOT_CALIBRATING Phase.";
+        m_gary->setControllerToCalibrationSpeed();
+        m_motor_cal_seq = Motor_Calibration_Sequence::GET_PNT_1;
+        m_motor_cal_pnt1.clear();
+        m_motor_cal_pnt2.clear();
+        break;
+    case Motor_Calibration_Sequence::GET_PNT_1:
+        qDebug() << "MCM: Entering Motor_Calibration_Sequence::GET_PNT_1 Phase.";
+        if(_trackedpoint.isValid())
+        {
+            m_motor_cal_pnt1 = _trackedpoint;
+            qDebug() << "Set Calibration Point 1: x=" << m_motor_cal_pnt1.getCentroid().m_x << " : y=" << m_motor_cal_pnt1.getCentroid().m_y;
+            m_motor_cal_seq = Motor_Calibration_Sequence::MOVE_FOR_PNT2;
+        }
+        break;
+    case Motor_Calibration_Sequence::MOVE_FOR_PNT2:
+        qDebug() << "MCM: Entering Motor_Calibration_Sequence::MOVE_FOR_PNT2 Phase.";
+        if((m_gary->getXMotionStatus() == GaryMotionStatus::TBI_MOTION_STATUS_IDLE) && (m_gary->getZMotionStatus() == GaryMotionStatus::TBI_MOTION_STATUS_IDLE))
+        {
+            qDebug() << "Sent Move to Arduino.";
+            m_gary->autoMoveXAxis(5000);
+            m_gary->autoMoveZAxis(5000);
+            m_gary->setXMotionStatus(GaryMotionStatus::TBI_MOTION_STATUS_MOVING);
+            m_gary->setZMotionStatus(GaryMotionStatus::TBI_MOTION_STATUS_MOVING);
+            m_motor_cal_seq = Motor_Calibration_Sequence::WAIT_FOR_MOTION_STATUS_IDLE;
+        }
+        else
+        {
+            m_gary->sendStatusPacket();
+        }
+        break;
+    case Motor_Calibration_Sequence::WAIT_FOR_MOTION_STATUS_IDLE:
+        qDebug() << "Motor_Calibration_Sequence::WAIT_FOR_MOTION_STATUS_IDLE";
+        if((m_gary->getXMotionStatus() == GaryMotionStatus::TBI_MOTION_STATUS_IDLE) && (m_gary->getZMotionStatus() == GaryMotionStatus::TBI_MOTION_STATUS_IDLE))
+        {
+            m_motor_cal_seq = Motor_Calibration_Sequence::GET_PNT_2;
+
+        }
+        else
+        {
+            m_gary->sendStatusPacket();
+        }
+
+        break;
+    case Motor_Calibration_Sequence::GET_PNT_2:
+        qDebug() << "MCM: Entering Motor_Calibration_Sequence::MOVE_FOR_PNT2 Phase.";
+        if(_trackedpoint.isValid())
+        {
+            m_motor_cal_pnt2 = _trackedpoint;
+            m_motor_cal_seq = Motor_Calibration_Sequence::SET_CALIBRATION_PARAMS;
+            m_gary->setControllerToOperationSpeed();
+            qDebug() << "Set Calibration Point 2: x=" << m_motor_cal_pnt2.getCentroid().m_x << " : y=" << m_motor_cal_pnt2.getCentroid().m_y;
+        }
+        break;
+    case Motor_Calibration_Sequence::SET_CALIBRATION_PARAMS:
+        qDebug() << "MCM: Motor_Calibration_Sequence::SET_CALIBRATION_PARAMS Phase.";
+        if(m_motor_cal_pnt1.isValid() && m_motor_cal_pnt2.isValid())
+        {
+            float _xspp = (float)5000 / (float)(m_motor_cal_pnt2.getCentroid().m_x - m_motor_cal_pnt1.getCentroid().m_x);
+            float _zspp = (float)5000 / (float)(m_motor_cal_pnt2.getCentroid().m_y - m_motor_cal_pnt1.getCentroid().m_y);
+            m_mary->setXAxisStepsPerPixel(abs(_xspp));
+            m_mary->setZAxisStepsPerPixel(abs(_zspp));
+            m_motor_cal_seq = Motor_Calibration_Sequence::MOVE_TO_PNT1;
+        }
+        else
+        {
+            qDebug() << "Max: processMotorCalibration() Error Calibrating Motors.";
+            m_gary->setControlMode(GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE);
+            m_motor_cal_seq = Motor_Calibration_Sequence::NOT_CALIBRATING;
+        }
+        break;
+    case Motor_Calibration_Sequence::MOVE_TO_PNT1:
+        m_gary->autoMoveXAxis(-5000);
+        m_gary->autoMoveZAxis(-5000);
+        m_gary->setXMotionStatus(GaryMotionStatus::TBI_MOTION_STATUS_MOVING);
+        m_gary->setZMotionStatus(GaryMotionStatus::TBI_MOTION_STATUS_MOVING);
+        m_motor_cal_seq = Motor_Calibration_Sequence::WAIT_FOR_MOTIONSTATUS_IDLE2;
+        break;
+    case Motor_Calibration_Sequence::WAIT_FOR_MOTIONSTATUS_IDLE2:
+        if((m_gary->getXMotionStatus() == GaryMotionStatus::TBI_MOTION_STATUS_IDLE) && (m_gary->getZMotionStatus() == GaryMotionStatus::TBI_MOTION_STATUS_IDLE))
+        {
+            m_motor_cal_seq = Motor_Calibration_Sequence::FINISH_CALIBRATION;
+        }
+        else
+        {
+            m_gary->sendStatusPacket();
+        }
+        break;
+    case Motor_Calibration_Sequence::FINISH_CALIBRATION:
+        m_motor_cal_seq = Motor_Calibration_Sequence::NOT_CALIBRATING;
+
+        m_gary->setControlMode(GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE);
+        break;
+    }
+}
+
 Max::Max(QObject *parent) : QObject(parent)
 {
 
@@ -73,7 +174,7 @@ Max::Max(QObject *parent) : QObject(parent)
     m_right_bwl_ransac.setIterations(50);
     m_right_bwl_ransac.setMinVotes(20);
 
-
+    m_motor_cal_seq = Motor_Calibration_Sequence::NOT_CALIBRATING;
 
     qDebug()<<"Max::Max() Max Object Created.";
 }
@@ -189,8 +290,8 @@ void Max::processVGrooveTracking(const cv::Mat _mat)
     cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
     cv::cvtColor(_raw_mat, _operation_mat, cv::COLOR_GRAY2BGR);
 
-
-    //Data Constuction Section-------------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------------------------------------
+    //Generate Tracking Points-------------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------------------------------------
 
     //Build Gausian Decluster DataSet
@@ -287,7 +388,7 @@ void Max::processVGrooveTracking(const cv::Mat _mat)
                     //Build Inliers Set
                     if(m_gausian_decluster_ds->extractDataSetForInliers(*m_left_inlier_bwl_ds, m_ransac_left_bwl, 5.0, 0, _breakindex) == TBIDataSetReturnType::Ok)
                     {
-                         m_left_inlier_bwl_ds->drawToMat(_inliers_mat, CV_RGB(175,175,255));
+                        m_left_inlier_bwl_ds->drawToMat(_inliers_mat, CV_RGB(175,175,255));
                     }
                     else
                     {
@@ -384,7 +485,7 @@ void Max::processVGrooveTracking(const cv::Mat _mat)
         _trackingpoint.buildFrom4Lines(m_geo_left_tsl, m_geo_right_tsl, m_geo_left_bwl, m_geo_right_bwl);
         if(_trackingpoint.isValid())
         {
-            m_three_point_tracking_manager.insert(_trackingpoint);       
+            m_three_point_tracking_manager.insert(_trackingpoint);
         }
 
         if(m_three_point_tracking_manager.m_tracking_point.isValid())
@@ -394,7 +495,26 @@ void Max::processVGrooveTracking(const cv::Mat _mat)
 
     }
 
+    //-------------------------------------------------------------------------------------------------------------------------------
+    //Generate Tracking Point Finished-----------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------------------------------------
 
+    switch(m_gary->getControlMode())
+    {
+    case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
+        //qDebug() << "Max: Main Loop - Manual Control Mode.";
+
+        break;
+    case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
+        //qDebug() << "Max: Main Loop - Full Auto Control Mode.";
+        break;
+    case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
+        //qDebug() << "Max: Main Loop - Height Only Control Mode.";
+        break;
+    case GaryControlMode::TBI_CONTROL_MODE_MOTORCALIBRATION:
+       processMotorCalibration(m_three_point_tracking_manager.m_tracking_point);
+        break;
+    }
 
     //Emit Mat Signals If Turned On
     if(m_emitextramats)

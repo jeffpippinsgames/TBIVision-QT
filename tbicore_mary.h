@@ -82,6 +82,9 @@ class Mary : public QObject
     Q_PROPERTY(float rn_right_bwl_distance_threshold READ getRightBWLDistanceThreshold WRITE setRightBWLDistanceThreshold NOTIFY rnRightBWLDistanceThresholdChanged)
     Q_PROPERTY(int rn_right_bwl_iterations READ getRightBWLIterations WRITE setRightBWLIterations NOTIFY rnRightBWLIterationsChanged)
 
+    Q_PROPERTY(float x_axis_steps_per_pixel READ getXAxisStepsPerPixel WRITE setXAxisStepsPerPixel NOTIFY xAxisStepsPerPixelChanged)
+    Q_PROPERTY(float z_axis_steps_per_pixel READ getZAxisStepsPerPixel WRITE setZAxisStepsPerPixel NOTIFY zAxisStepsPerPixelChanged)
+
 
     //GUI Properties Changed--------------------------------------------------------------------
     Q_PROPERTY(bool showdebuginfo READ getShowDebugInfo WRITE setShowDebugInfo NOTIFY showDebugInfoChanged)
@@ -98,6 +101,9 @@ public:
     Q_INVOKABLE void saveMaryToFile();
     Q_INVOKABLE void loadMaryFromFile();
 
+    //Motor Calibration Get Function-----------------------------------------------------------
+    Q_INVOKABLE float getXAxisStepsPerPixel(){return m_x_axis_steps_per_pixel;}
+    Q_INVOKABLE float getZAxisStepsPerPixel(){return m_z_axis_steps_per_pixel;}
     //Pylon Property Get Functions-------------------------------------------------------------
     Q_INVOKABLE int getCameraMaxHeight(){return m_pylon_maxcameraheight;}
     Q_INVOKABLE int getCameraMaxWidth(){return m_pylon_maxcamerawidth;}
@@ -150,6 +156,9 @@ public:
     //GUI Property Get Functions-------------------------------------------------------------
     Q_INVOKABLE bool getShowDebugInfo(){return m_gui_showdebuginfo;}
 
+    //Motor Calibration Set Functions--------------------------------------------------------
+    void setXAxisStepsPerPixel(float _spp);
+    void setZAxisStepsPerPixel(float _spp);
     //Pylon Property Set Functions-----------------------------------------------------------
     void setCameraAOIWidth(int _width);
     void setCameraAOIHeight(int _height);
@@ -246,6 +255,10 @@ signals:
     void signalRightBWLIterations(int _iterations);
 
 
+
+    //Motor Config Related Signals
+    void xAxisStepsPerPixelChanged();
+    void zAxisStepsPerPixelChanged();
 
     //Pylon Related Signals-------------------------------------------------------------------
     void pylonCameraMaxHeightChanged();
@@ -360,6 +373,10 @@ private:
 
     //GUI UI Settings and Stuff
     bool m_gui_showdebuginfo;
+
+    //Motor Steps per Pixels
+    float m_x_axis_steps_per_pixel;
+    float m_z_axis_steps_per_pixel;
 
 
 

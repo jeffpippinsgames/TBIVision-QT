@@ -600,7 +600,7 @@ Item {
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.operationframe}
             //Set The Interior Control State
-            PropertyChanges {target: operationsettingsrectId; state: "NonFocused";}
+            PropertyChanges {target: operationsettingsrectId; state: "MotorCalibration";}
         }
 
     ]
@@ -776,6 +776,9 @@ Item {
                     break;
                 case rootpageId.geoconstructionframe:
                     rootpageId.state = rootpageId.geoconstructionstateframenotactive;
+                    break;
+                case rootpageId.operationframe:
+                    rootpageId.state = rootpageId.operationstateframenotactive;
                     break;
                 }
             }
@@ -965,7 +968,7 @@ Item {
 
     //Camera Settings Rectangle-------------------------------------
     Rectangle
-    {
+        {
         id: camerasettingsrectId
         visible: false
         width: rootpageId.settingsrectwidth
@@ -4486,6 +4489,8 @@ Item {
         y: rootpageId.settingsrecty
         color: "transparent"
 
+
+
         function grabFocus()
         {
             operationcontrollerId.focus = true;
@@ -4498,6 +4503,13 @@ Item {
             {
                 name: "NonFocused"
                 PropertyChanges{target: operationborderrectId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: motorcalibrationselectionbuttonId; border.color:rootpageId.nonfocuscolor;}
+            },
+            State
+            {
+                name: "MotorCalibration"
+                PropertyChanges{target: operationborderrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: motorcalibrationselectionbuttonId; border.color:rootpageId.focuscolor;}
             }
         ]
         //OML Components------------------------------------------------
@@ -4513,6 +4525,12 @@ Item {
 
             onGreenButtonPressed:
             {
+                switch(operationsettingsrectId.state)
+                {
+                case "MotorCalibration":
+                    Gary.controlMode = GaryControlMode.TBI_CONTROL_MODE_MOTORCALIBRATION;
+                    break;
+                }
             }
 
             onRedButtonPressed:
@@ -4522,7 +4540,13 @@ Item {
 
             onUpButtonPressed:
             {
-
+                switch(operationsettingsrectId.state)
+                {
+                case "MotorCalibration":
+                    rootpageId.state = operationstateframeactive;
+                    operationsettingsrectId.state = "NonFocused";
+                    break;
+                }
             }
 
             onDownButtonPressed:
@@ -4597,6 +4621,55 @@ Item {
             x:10
             text: "Operational Settings"
             font.pixelSize: 25
+            color: rootpageId.textcolor
+        }
+
+        //Motor Calibration Button
+        Rectangle
+        {
+            id: motorcalibrationselectionbuttonId
+            x:20
+            y:100
+            width: 600
+            height: 75
+            color: "transparent"
+            border.width: rootpageId.rectborderwidths
+            border.color: rootpageId.nonfocuscolor
+
+            Text
+            {
+                id: motorcalibrationtextId
+                anchors.centerIn: motorcalibrationselectionbuttonId
+                font.family: fontId.name
+                font.pointSize: 20
+                height: motorcalibrationtextId.implicitHeight
+                width: motorcalibrationtextId.implicitWidth
+                text: "Perform Motor Calibration"
+                color: rootpageId.textcolor
+            }
+        }
+        Text
+        {
+            id: xstepsperpixeltextId
+            x:20
+            y: motorcalibrationselectionbuttonId.y + motorcalibrationselectionbuttonId.height + 20
+            font.family: fontId.name
+            font.pointSize: 20
+            height: motorcalibrationtextId.implicitHeight
+            width: motorcalibrationtextId.implicitWidth
+            text: "X Steps Per Pixel = " + Mary.x_axis_steps_per_pixel
+            color: rootpageId.textcolor
+        }
+        Text
+        {
+            id: zstepsperpixeltextId
+            x: 20
+            y: xstepsperpixeltextId.y + xstepsperpixeltextId.height + 20
+            font.family: fontId.name
+            font.pointSize: 20
+            height: motorcalibrationtextId.implicitHeight
+            width: motorcalibrationtextId.implicitWidth
+            text: "Z Steps Per Pixel = " + Mary.z_axis_steps_per_pixel
             color: rootpageId.textcolor
         }
 

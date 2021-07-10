@@ -81,6 +81,9 @@ void Mary::SetMaryDefaultValues()
     //---------------------------------------
     m_split_distance = 8.0;
     m_split_length = 10.0;
+    //---------------------------------------
+    m_x_axis_steps_per_pixel = 0.0f;
+    m_z_axis_steps_per_pixel = 0.0f;
 }
 
 /**************************************************************
@@ -140,6 +143,8 @@ void Mary::saveMaryToFile()
     _ds << m_right_bwl_min_votes;
     _ds << m_right_bwl_iterations;
     _ds << m_right_bwl_distance_threshold;
+    _ds << m_x_axis_steps_per_pixel;
+    _ds << m_z_axis_steps_per_pixel;
     _ds.setVersion(QDataStream::Qt_5_12);
     _savefile.close();
     qDebug() << "Mary::saveMaryToFile() Settings Saved To " << _filepath;
@@ -200,10 +205,42 @@ void Mary::loadMaryFromFile()
     _ds >> m_right_bwl_min_votes;
     _ds >> m_right_bwl_iterations;
     _ds >> m_right_bwl_distance_threshold;
+    _ds >> m_x_axis_steps_per_pixel;
+    _ds >> m_z_axis_steps_per_pixel;
     _savefile.close();
     qDebug("Mary::loadMaryFromFile() marydefualt.tbi Loaded.");
     broadcastQMLSignals();
     broadcastSingletonSignals();
+}
+
+/**************************************************************
+setXAxisStepsPerPixel(float _spp)
+Public
+Description:
+  Sets The X Axis Steps Per Pixel Setting
+**************************************************************/
+void Mary::setXAxisStepsPerPixel(float _spp)
+{
+    if(_spp > 0)
+    {
+        m_x_axis_steps_per_pixel = _spp;
+        emit xAxisStepsPerPixelChanged();
+    }
+}
+
+/**************************************************************
+setZAxisStepsPerPixel(float _spp)
+Public
+Description:
+  Sets The Z Axis Steps Per Pixel Setting
+**************************************************************/
+void Mary::setZAxisStepsPerPixel(float _spp)
+{
+    if(_spp > 0)
+    {
+        m_z_axis_steps_per_pixel = _spp;
+        emit zAxisStepsPerPixelChanged();
+    }
 }
 
 /**************************************************************
@@ -814,6 +851,9 @@ void Mary::broadcastQMLSignals()
 
     emit smSplitDistanceChanged();
     emit smSplitLengthChanged();
+
+    emit xAxisStepsPerPixelChanged();
+    emit zAxisStepsPerPixelChanged();
 
 
 }

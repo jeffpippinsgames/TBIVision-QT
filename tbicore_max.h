@@ -21,6 +21,7 @@
 #include "tbiparameterclass_imageintensity.h"
 #include "tbiclass_threepointtrackingmanager.h"
 #include "tbicore_gary.h"
+#include "tbicore_mary.h"
 
 
 using namespace cv;
@@ -35,6 +36,35 @@ Description:
    The seam tracking functionality is
   encapsulated inside Max.
  **************************************************************/
+
+/**************************************************************
+Motor_Calibration_Sequence_t
+Description:
+    A enumerated type used for determining the phase of auto
+    motor calibration.
+ **************************************************************/
+class Motor_Calibration_Sequence: public QObject
+{
+    Q_OBJECT
+public:
+    Motor_Calibration_Sequence() : QObject() {}
+
+    enum MotorCalibration_t {NOT_CALIBRATING = 0x01,
+                             GET_PNT_1 = 0x02,
+                             MOVE_FOR_PNT2 = 0x03,
+                             WAIT_FOR_MOTION_STATUS_IDLE = 0x04,
+                             GET_PNT_2 = 0x05,
+                             SET_CALIBRATION_PARAMS = 0x06,
+                             MOVE_TO_PNT1 = 0x07,
+                             WAIT_FOR_MOTIONSTATUS_IDLE2 = 0x08,
+                             FINISH_CALIBRATION = 0x09};
+    Q_ENUMS(MotorCalibration_t)
+    static void declareQML()
+    {
+        qmlRegisterType<Motor_Calibration_Sequence>("tbi.vision.components", 1, 0, "Motor_Calibration_Sequence");
+    }
+    MotorCalibration_t m_calibration_status;
+};
 
 
 /***************************************************************
@@ -72,7 +102,7 @@ class Max : public QObject
 
 
 private:
-
+    void processMotorCalibration(TBIThreePointTrackingContainer &_trackedpoint);
 
 
 
@@ -88,11 +118,13 @@ public:
     Q_INVOKABLE bool getEmitExtraMats(){return m_emitextramats;}
     void setEmitExtraMats(bool _flag){m_emitextramats = _flag; emit emitExtraMatsChanged();}
     void setGary(Gary *_gy){m_gary = _gy;}
+    void setMary(Mary *_my){m_mary = _my;}
 
 private:
     //The Maximum Frame Size For The Camera
 
     Gary *m_gary;
+    Mary *m_mary;
     bool m_in_proccesing_loop;
 
     //Elements For GUI Display----------------------------------------
@@ -165,6 +197,10 @@ private:
 
     //Tracking Point Manager
     TBIThreePointTrackingManager m_three_point_tracking_manager;
+    TBIThreePointTrackingContainer m_motor_cal_pnt1;
+    TBIThreePointTrackingContainer m_motor_cal_pnt2;
+    Motor_Calibration_Sequence::MotorCalibration_t m_motor_cal_seq;
+
 
 
     //Public Slots----------------------------------------------------------

@@ -17,6 +17,12 @@ public:
     void buildFrom4Lines(TBILine &_ltsl, TBILine &_rtsl, TBILine &_lbwl, TBILine &_rbwl);
     void drawToMat(cv::Mat &_dst, cv::Scalar _color);
     void updateCentroid();
+    TBIPoint_Int getCentroid(){return m_centroid;}
+    TBIPoint_Int getVertex1() {return m_vertex1;}
+    TBIPoint_Int getVertex2() {return m_vertex2;}
+    TBIPoint_Int getVertex3() {return m_vertex3;}
+
+
     void operator = (const TBIThreePointTrackingContainer &_tpc)
     {
 

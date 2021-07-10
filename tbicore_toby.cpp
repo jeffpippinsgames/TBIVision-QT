@@ -167,11 +167,11 @@ bool Toby::SetCameraSettings()
         CEnumParameter(_nodemap, "AcquisitionMode").SetValue("Continuous");
         CEnumParameter(_nodemap, "AcquisitionStatusSelector").SetValue("FrameTriggerWait");
         CIntegerParameter(_nodemap, "AcquisitionFrameCount").SetValue(1); //Set to 1
-        CBooleanParameter(_nodemap, "AcquisitionFrameRateEnable").SetValue(true);
+        CBooleanParameter(_nodemap, "AcquisitionFrameRateEnable").SetValue(false);
         CFloatParameter(_nodemap, "AcquisitionFrameRateAbs").SetValue(30);
 
         //Trigger Controls
-        CEnumParameter(_nodemap, "TriggerMode").SetValue("Off");
+        CEnumParameter(_nodemap, "TriggerMode").SetValue("On");
         CEnumParameter(_nodemap, "TriggerSource").SetValue("Software");
         CEnumParameter(_nodemap, "TriggerActivation").SetValue("RisingEdge");
     }
@@ -509,7 +509,6 @@ Description:
  **************************************************************/
 void Toby::triggerNextFrame()
 {
-    qDebug() << "Camera Software Trigger Tripped";
     //Process the Still Image if the debug image is not null
     if(m_processsing_debug_image)
     {
@@ -524,11 +523,7 @@ void Toby::triggerNextFrame()
     else
     {
         //We Are Not Processing Still Images. Go On To Camera Processing
-        if(m_camera == nullptr)
-        {
-            qDebug() << "Toby: triggerCamera() called without camera being initialized";
-            return;
-        }
+
         if(!m_camera->IsOpen())
         {
             qDebug() << "Toby: triggerCamera() called without camera being opened.";
@@ -539,11 +534,11 @@ void Toby::triggerNextFrame()
             qDebug() << "Toby: triggerCamera() called while camera was not grabbing.";
             return;
         }
-       // if (m_camera->WaitForFrameTriggerReady( 1000, TimeoutHandling_ThrowException ))
-       // {
-            //m_camera->ExecuteSoftwareTrigger();
-           // qDebug() << "Camera Software Trigger Tripped";
-       // }
+        if (m_camera->WaitForFrameTriggerReady( 1000, TimeoutHandling_ThrowException ))
+        {
+           m_camera->ExecuteSoftwareTrigger();
+            //qDebug() << "Camera Software Trigger Tripped";
+        }
     }
 }
 

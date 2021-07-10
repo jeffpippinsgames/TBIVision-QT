@@ -94,8 +94,6 @@ Item
 
         onGreenButtonPressed:
         {
-            //keypadId.open();
-            //Gary.sendStatusPacket();
 
         }
 
@@ -212,16 +210,7 @@ Item
 
         function garyChangedOperationStatus(status)
         {
-            switch(status)
-            {
-            case GaryOperationStatus.TBI_OPERATION_OK:
-                garystatusId.glowcolor = Qt.rgba(0,1,0,1);
-                garystatusId.messagetext = "Motion Controller O.K.";
-                break;
-            case GaryOperationStatus.TBI_OPERATION_ERROR:
-                garystatusId.glowcolor = Qt.rgba(1,0,0,1);
-                garystatusId.messagetext = "Error in Motion Controller";
-            }
+
         }
 
         Component.onCompleted:

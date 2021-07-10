@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
 
     //Singleton Hooks
     _max.setGary(&_gary);
+    _max.setMary(&_mary);
 
     //Connect The Singletons Signals and Slots---------------------
     //REMEMBER TO RESET THE SAVE FILE WHEN YOU ADD A MARY SIGNAL!!!
