@@ -17,8 +17,11 @@ Gary::Gary(QObject *parent) : QObject(parent)
     m_x_axis_limit = GaryLimitSwitch::TBI_LIMIT_SWITCH_STATE_OK;
     m_z_axis_limit = GaryLimitSwitch::TBI_LIMIT_SWITCH_STATE_OK;
     m_operation_status = GaryOperationStatus::TBI_OPERATION_OK;
-    m_homing_status = GaryHomingStatus::TBI_HOMING_STATUS_HOMED;
+    m_x_homing_status = GaryHomingStatus::TBI_HOMING_STATUS_HOMED;
+    m_z_homing_status = GaryHomingStatus::TBI_HOMING_STATUS_HOMED;
     m_last_status_guid = 4294967295;
+    m_last_status_guid_compared_by_gary = 4294967295;
+    m_motor_calib_cycle = GaryMotorCalibrationCycleStatus::TBI_MOTORCAL_OFF;
     //this->findOpenTeensy();
     this->findOpenArduinoUno();
     emit completed();
@@ -63,133 +66,6 @@ void Gary::declareQML()
 
 
 /**************************************************************
-setXMotionStatus(GaryMotionStatus *_ms)
-Public
-Description:
-  Public set Property method.
- **************************************************************/
-void Gary::setXMotionStatus(GaryMotionStatus::MotionStatus_t _ms_t)
-{
-    m_x_motion_status = _ms_t;
-    emit xMotionStatusChanged();
-}
-//--------------------------------------------------------------
-
-/**************************************************************
-setZMotionStatus(GaryMotionStatus *_ms)
-Public
-Description:
-  Public set Property method.
- **************************************************************/
-void Gary::setZMotionStatus(GaryMotionStatus::MotionStatus_t _ms_t)
-{
-    m_z_motion_status = _ms_t;
-    emit zMotionStatusChanged();
-}
-//--------------------------------------------------------------
-
-
-
-/**************************************************************
-setControlMode(GaryControlMode *_cm)
-Public
-Description:
-  Public set Property method.
- **************************************************************/
-void Gary::setControlMode(GaryControlMode::ControlMode_t _cm_t)
-{
-    QByteArray _cmd;
-    _cmd.append(GaryCommands::TBI_CMD_SETCONTROLMODE);
-    _cmd.append(_cm_t);
-    sendSerialCommand(_cmd);
-}
-//--------------------------------------------------------------
-
-
-/**************************************************************
-setHomingStatus(GaryHomingStatus *_hs)
-Public
-Description:
-  Public set Property method.
- **************************************************************/
-void Gary::setHomingStatus(GaryHomingStatus::HomingStatus_t _hs_t)
-{
-    m_homing_status = _hs_t;
-    emit homingStatusChanged();
-}
-//--------------------------------------------------------------
-
-
-/**************************************************************
-setXLimitSwitch(GaryLimitSwitch *_ls)
-Public
-Description:
-  Public set Property method.
- **************************************************************/
-void Gary::setXLimitSwitch(GaryLimitSwitch::LimitSwitchState_t _ls_t)
-{
-    m_x_axis_limit = _ls_t;
-    emit xLimitSwitchChanged();
-}
-//--------------------------------------------------------------
-
-/**************************************************************
-setZLimitSwitch(GaryLimitSwitch *_ls)
-Public
-Description:
-  Public set Property method.
- **************************************************************/
-void Gary::setZLimitSwitch(GaryLimitSwitch::LimitSwitchState_t _ls_t)
-{
-    m_z_axis_limit = _ls_t;
-    emit zLimitSwitchChanged();
-}
-//--------------------------------------------------------------
-
-
-/**************************************************************
-setOperationStatus(GaryOperationStatus *_os)
-Public
-Description:
-  Public set Property method.
- **************************************************************/
-void Gary::setOperationStatus(GaryOperationStatus::OperationStatus_t _os_t)
-{
-    m_operation_status = _os_t;
-    emit operationStatusChanged();
-}
-
-/**************************************************************
-setLaserStatus(GaryLaserStatus::LaserStatus_t _ls_t)
-Public
-Description:
-  Public set Property method.
- **************************************************************/
-void Gary::setLaserStatus(GaryLaserStatus::LaserStatus_t _ls_t)
-{
-    m_laser_status = _ls_t;
-    emit laserStatusChanged();
-}
-
-
-
-void Gary::setXPosition(qint32 _x_pos)
-{
-    m_x_position = _x_pos;
-    emit xPositionChanged();
-}
-//--------------------------------------------------------------
-
-
-void Gary::setZPosition(qint32 _z_pos)
-{
-    m_z_position = _z_pos;
-    emit zPositionChanged();
-}
-//--------------------------------------------------------------
-
-
-/**************************************************************
 findOpenTeensy()
 Public
 Description:
@@ -219,13 +95,11 @@ bool Gary::findOpenTeensy()
                     {
                         qDebug() << "Gary::findOpenTeensy() Serial Port Opened.";
                         QObject::connect(m_serial_port, SIGNAL(errorOccured(QSerialPort::SerialPortError)), this, SLOT(serialError(QSerialPort::SerialPortError)));
-                        setOperationStatus(GaryOperationStatus::TBI_OPERATION_OK);
                         return true;
                     }
                     else
                     {
                         qDebug() << "Gary::findOpenTeensy() Error Opening Serial Port";
-                        setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
                         return false;
                     }
                 }
@@ -268,13 +142,11 @@ bool Gary::findOpenArduinoUno()
                     if(m_serial_port->open(QIODevice::ReadWrite))
                     {
                         qDebug() << "Gary::findOpenArduinoUno() Serial Port Opened.";
-                        setOperationStatus(GaryOperationStatus::TBI_OPERATION_OK);
                         return true;
                     }
                     else
                     {
                         qDebug() << "Gary::findOpenArduinoUno() Error Opening Serial Port";
-                        setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
                         return false;
                     }
                 }
@@ -429,12 +301,14 @@ void Gary::sendStatusPacket()
     sendSerialCommand(_cmd);
 }
 
+
 void Gary::setControllerToCalibrationSpeed()
 {
     QByteArray _cmd;
     _cmd.append((char)GaryCommands::TBI_CMD_SET_CALIBRATION_SPEED);
     sendSerialCommand(_cmd);
 }
+
 
 void Gary::setControllerToOperationSpeed()
 {
@@ -463,14 +337,69 @@ void Gary::cycleControlModes()
         _cmd.append((char)GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE);
         break;
     case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
-        _cmd.append(GaryControlMode::TBI_CONTROL_MODE_MOTORCALIBRATION);
+        _cmd.append((char)GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE);
         break;
     case GaryControlMode::TBI_CONTROL_MODE_MOTORCALIBRATION:
-        _cmd.append((char)GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE);
+        return;
         break;
     };
     sendSerialCommand(_cmd);
 }
+
+void Gary::setControlModeToFullAuto()
+{
+    QByteArray _cmd;
+    _cmd.append((char)GaryCommands::TBI_CMD_SETCONTROLMODE);
+    _cmd.append((char)GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE);
+    sendSerialCommand(_cmd);
+}
+
+void Gary::setControlModeToHeightOnly()
+{
+    QByteArray _cmd;
+    _cmd.append((char)GaryCommands::TBI_CMD_SETCONTROLMODE);
+    _cmd.append((char)GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY);
+    sendSerialCommand(_cmd);
+}
+
+void Gary::setControlModeToManual()
+{
+    QByteArray _cmd;
+    _cmd.append((char)GaryCommands::TBI_CMD_SETCONTROLMODE);
+    _cmd.append((char)GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE);
+    sendSerialCommand(_cmd);
+}
+
+void Gary::setControlModeToMotorCalibration()
+{
+    QByteArray _cmd;
+    _cmd.append((char)GaryCommands::TBI_CMD_SETCONTROLMODE);
+    _cmd.append((char)GaryControlMode::TBI_CONTROL_MODE_MOTORCALIBRATION);
+    sendSerialCommand(_cmd);
+}
+
+void Gary::setControlMode(GaryControlMode::ControlMode_t _mode)
+{
+    QByteArray _cmd;
+    _cmd.append((char)GaryCommands::TBI_CMD_SETCONTROLMODE);
+    _cmd.append((char)_mode);
+    sendSerialCommand(_cmd);
+}
+
+bool Gary::isStatusGUIDDifferentFromLastCompare()
+{
+    if(m_last_status_guid == m_last_status_guid_compared_by_gary)
+    {
+        return false;
+    }
+    else
+    {
+        m_last_status_guid_compared_by_gary = m_last_status_guid;
+        return true;
+    }
+    return false;
+}
+
 
 /**************************************************************
 sendToggleLaserPower()
@@ -479,14 +408,13 @@ Description:
   Public Method that sends the Toggle Laser Power Signal to the
   Microcontroller
  **************************************************************/
-void Gary::sendToggleLaserPower()
+void Gary::toggleLaserPower()
 {
     QByteArray _cmd;
     _cmd.append(char(GaryCommands::TBI_CMD_TOGGLE_LASER_POWER));
     sendSerialCommand(_cmd);
 }
 //--------------------------------------------------------------
-
 
 /**************************************************************
 sendSerialCommand(QByteArray &_data)
@@ -502,11 +430,21 @@ void Gary::sendSerialCommand(QByteArray &_data)
         qDebug() << "Gary::sendSerialCommand() Error in sendSerialCommand: m_serial_port is null";
         return;
     }
+    if(_data.size() > TBIConstants::TBI_COMMAND_BUFFER_SIZE)
+    {
+        qDebug() << "Gary: sendSerialCommand() Error. _data is larger than allowed size.";
+        return;
+    }
     if(m_serial_port->isOpen())
     {
-        _data.append(char(GaryCommands::TBI_CMD_DELMIITER_LF));
+        //Make Sure the Data Array is TBI_COMMAND_BUFFER_SIZE in size.
+        //The Microcontroller an incomming packet to be this size.
+        while(_data.size() < TBIConstants::TBI_COMMAND_BUFFER_SIZE)
+        {
+            _data.append(char(0xFF));
+        }
         m_serial_port->write(_data);
-        qDebug() << "Gary::sendSerialCommand() Sending Command to Controller: " << _data.toHex(',');
+        //qDebug() << "Gary::sendSerialCommand() Sending Command to Controller: " << _data.toHex(',');
     }
     else
     {
@@ -514,21 +452,117 @@ void Gary::sendSerialCommand(QByteArray &_data)
     }
 }
 
-
-//--------------------------------------------------------------
-
-
-/**************************************************************
-serialError(QSerialPort::SerialPortError _error)
-Slot
-Description:
-  Handler for the QSerialPort::errorOccured Signal
- **************************************************************/
-void Gary::serialError(QSerialPort::SerialPortError _error)
+void Gary::printControlStatusVariables()
 {
-    setOperationStatus(GaryOperationStatus::TBI_OPERATION_ERROR);
-}
 
+    qDebug() << "";
+    qDebug() << "-------------------------------------------------------";
+    qDebug() << "Control Status Debug Information";
+    qDebug() << "m_last_status_guid = " << m_last_status_guid;
+    switch(m_x_motion_status)
+    {
+    case GaryMotionStatus::TBI_MOTION_STATUS_IDLE:
+        qDebug() << "m_x_motion_status = TBI_MOTION_STATUS_IDLE";
+        break;
+    case GaryMotionStatus::TBI_MOTION_STATUS_HOMING:
+        qDebug() << "m_x_motion_status = TBI_MOTIION_STATUS_HOMING";
+        break;
+    case GaryMotionStatus::TBI_MOTION_STATUS_GENERAL_ERROR:
+        qDebug() << "m_x_motion_status = TBI_MOTIION_STATUS_HOMING";
+        break;
+    case GaryMotionStatus::TBI_MOTION_STATUS_JOGGING:
+        qDebug() << "m_x_motion_status = TBI_MOTION_STATUS_JOGGING";
+        break;
+    case GaryMotionStatus::TBI_MOTION_STATUS_LIMIT_TRIPPED:
+        qDebug() << "m_x_motion_status = TBI_MOTION_STATUS_LIMIT_TRIPPED";
+        break;
+    case GaryMotionStatus::TBI_MOTION_STATUS_MOVING:
+        qDebug() << "m_x_motion_status = TBI_MOTION_STATUS_MOVING";
+        break;
+    }
+
+    switch(m_z_motion_status)
+    {
+    case GaryMotionStatus::TBI_MOTION_STATUS_IDLE:
+        qDebug() << "m_z_motion_status = TBI_MOTION_STATUS_IDLE";
+        break;
+    case GaryMotionStatus::TBI_MOTION_STATUS_HOMING:
+        qDebug() << "m_z_motion_status = TBI_MOTIION_STATUS_HOMING";
+        break;
+    case GaryMotionStatus::TBI_MOTION_STATUS_GENERAL_ERROR:
+        qDebug() << "m_z_motion_status = TBI_MOTIION_STATUS_HOMING";
+        break;
+    case GaryMotionStatus::TBI_MOTION_STATUS_JOGGING:
+        qDebug() << "m_z_motion_status = TBI_MOTION_STATUS_JOGGING";
+        break;
+    case GaryMotionStatus::TBI_MOTION_STATUS_LIMIT_TRIPPED:
+        qDebug() << "m_z_motion_status = TBI_MOTION_STATUS_LIMIT_TRIPPED";
+        break;
+    case GaryMotionStatus::TBI_MOTION_STATUS_MOVING:
+        qDebug() << "m_z_motion_status = TBI_MOTION_STATUS_MOVING";
+        break;
+    }
+
+    qDebug() << "m_x_position = " << m_x_position;
+    qDebug() << "m_z_position = " << m_z_position;
+
+    switch(m_control_mode)
+    {
+    case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
+        qDebug() << "m_control_mode = TBI_CONTROL_MODE_MANUAL_MODE";
+        break;
+    case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
+        qDebug() << "m_control_mode = TBI_CONTROL_MODE_FULLAUTO_MODE";
+        break;
+    case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
+        qDebug() << "m_control_mode = TBI_CONTROL_MODE_HEIGHTONLY";
+        break;
+    case GaryControlMode::TBI_CONTROL_MODE_MOTORCALIBRATION:
+        qDebug() << "m_control_mode = TBI_CONTROL_MODE_MOTORCALIBRATION";
+        break;
+    }
+
+    switch(m_x_axis_limit)
+    {
+    case GaryLimitSwitch::TBI_LIMIT_SWITCH_STATE_OK:
+        qDebug() << "m_x_axis_limit = TBI_LIMIT_SWITCH_STATE_OK";
+        break;
+    case GaryLimitSwitch::TBI_LIMIT_SWITCH_STATE_TRIPPED:
+        qDebug() << "m_x_axis_limit = TBI_LIMIT_SWITCH_STATE_TRIPPED";
+        break;
+    }
+
+    switch(m_z_axis_limit)
+    {
+    case GaryLimitSwitch::TBI_LIMIT_SWITCH_STATE_OK:
+        qDebug() << "m_z_axis_limit = TBI_LIMIT_SWITCH_STATE_OK";
+        break;
+    case GaryLimitSwitch::TBI_LIMIT_SWITCH_STATE_TRIPPED:
+        qDebug() << "m_z_axis_limit = TBI_LIMIT_SWITCH_STATE_TRIPPED";
+        break;
+    }
+
+    switch(m_operation_status)
+    {
+    case GaryOperationStatus::TBI_OPERATION_OK:
+        qDebug() << "m_operation_status = TBI_OPERATION_OK";
+        break;
+    case GaryOperationStatus::TBI_OPERATION_ERROR:
+        qDebug() << "m_operation_status = TBI_OPERATION_ERROR";
+        break;
+    }
+
+    switch(m_laser_status)
+    {
+    case GaryLaserStatus::TBI_LASER_STATUS_ON:
+        qDebug() << "m_laser_status = TBI_LASER_STATUS_ON";
+        break;
+    case GaryLaserStatus::TBI_LASER_STATUS_OFF:
+        qDebug() << "m_laser_status = TBI_LASER_STATUS_OFF";
+        break;
+    }
+    qDebug() << "-------------------------------------------------------";
+}
 
 /**************************************************************
 readSerial()
@@ -543,7 +577,7 @@ void Gary::readSerial()
     QByteArray _data = m_serial_port->readAll();
     m_recieved_serial.append(_data);
 
-    //The Controllers Status Packet is 19 Bytes Long.
+    //The Controllers Status Packet is 21 Bytes Long.
     //After 19 Bytes Have Transfered Process The Info.
 
     /*
@@ -562,21 +596,42 @@ void Gary::readSerial()
     [Byte 18] - Laser Power Status. 0 - Off, 1 - On.
 
 
-    This mandates the TBI_CONTROL_STATUS_BUFFER_SIZE Including be 20 bytes.
+    This mandates the TBI_CONTROL_STATUS_BUFFER_SIZE Including be 21 bytes.
     */
-    if(m_recieved_serial.size() >= 19)
+    if(m_recieved_serial.size() >= 21)
     {
-        char *_dataptr = _data.data();
-        m_last_status_guid = (quint32) *(&_dataptr[0]);
-        m_x_motion_status = (GaryMotionStatus::MotionStatus_t) _dataptr[4];
-        m_z_motion_status = (GaryMotionStatus::MotionStatus_t) _dataptr[5];
-        m_x_position = (qint32)*(&_dataptr[6]);
-        m_z_position = (qint32)*(&_dataptr[10]);
-        m_control_mode = (GaryControlMode::ControlMode_t) _dataptr[14];
-        m_x_axis_limit = (GaryLimitSwitch::LimitSwitchState_t) _dataptr[15];
-        m_z_axis_limit = (GaryLimitSwitch::LimitSwitchState_t) _dataptr[16];
-        m_operation_status = (GaryOperationStatus::OperationStatus_t) _dataptr[17];
-        m_laser_status = (GaryLaserStatus::LaserStatus_t) _dataptr[18];
+        //All of the typecasting is required.
+        m_last_status_guid = ((quint32)((quint8)m_recieved_serial[0] << 24)
+                + (quint32)((quint8)m_recieved_serial[1] << 16)
+                + (quint32)((quint8)m_recieved_serial[2] << 8)
+                + (quint32)((quint8)m_recieved_serial[3]));
+
+        m_x_motion_status = (GaryMotionStatus::MotionStatus_t) ((quint8)m_recieved_serial[4]);
+        m_z_motion_status = (GaryMotionStatus::MotionStatus_t) ((quint8)m_recieved_serial[5]);
+
+        m_x_position = ((qint32)((quint8)m_recieved_serial[6] << 24)
+                + (qint32)((quint8)m_recieved_serial[7] << 16)
+                + (qint32)((quint8)m_recieved_serial[8] << 8)
+                + (qint32)((quint8)m_recieved_serial[9]));
+
+        m_z_position = ((qint32)((quint8)m_recieved_serial[10] << 24)
+                + (qint32)((quint8)m_recieved_serial[11] << 16)
+                + (qint32)((quint8)m_recieved_serial[12] << 8)
+                + (qint32)((quint8)m_recieved_serial[13]));
+
+        m_control_mode = (GaryControlMode::ControlMode_t) ((quint8)m_recieved_serial[14]);
+
+        m_x_axis_limit = (GaryLimitSwitch::LimitSwitchState_t) ((quint8)m_recieved_serial[15]);
+        m_z_axis_limit = (GaryLimitSwitch::LimitSwitchState_t) ((quint8)m_recieved_serial[16]);
+
+        m_operation_status = (GaryOperationStatus::OperationStatus_t) ((quint8)m_recieved_serial[17]);
+
+        m_laser_status = (GaryLaserStatus::LaserStatus_t) ((quint8)m_recieved_serial[18]);
+
+        m_x_homing_status = (GaryHomingStatus::HomingStatus_t) ((quint8)m_recieved_serial[19]);
+        m_z_homing_status = (GaryHomingStatus::HomingStatus_t) ((quint8)m_recieved_serial[20]);
+
+        m_motor_calib_cycle = (GaryMotorCalibrationCycleStatus::MotorCalibration_Cycle_t) ((quint8)m_recieved_serial[21]);
 
         emit xMotionStatusChanged();
         emit zMotionStatusChanged();
@@ -587,17 +642,15 @@ void Gary::readSerial()
         emit zLimitSwitchChanged();
         emit operationStatusChanged();
         emit laserStatusChanged();
+        emit currentStatusGUIDChanged();
+        emit motorCalibrationCycleChanged();
+        emit xHomingStatusChanged();
+        emit zHomingStatusChanged();
         //Done Processing clear the data array
+        //printControlStatusVariables();
         m_recieved_serial.clear();
     }
 
-    //You can use QTextCodec to convert the bytearray to a string:
-    // (1015 is UTF-16, 1014 UTF-16LE, 1013 UTF-16BE, 106 UTF-8)
-    //QString _datas = QTextCodec::codecForMib(1015)->toUnicode(_data);
-    //QString _datas = QString::from
-    //qDebug() << "Gary: readSerial() Fired";
-    // qDebug() << _datas;
-    // qDebug() << QString::fromStdString(_data.toStdString());
 }
 //--------------------------------------------------------------
 

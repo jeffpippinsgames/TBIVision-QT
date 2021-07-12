@@ -6,8 +6,12 @@ class TBIConstants
 
 public:
 
-    static const int Max_Camera_Width = 728;
-    static const int Max_Camera_Height = 544;
+    static const int Max_Camera_Width = 800;
+    static const int Max_Camera_Height = 600;
+
+    static const int TBI_COMMAND_BUFFER_SIZE = 5;
+    static const int TBI_CONTROL_STATUS_BUFFER_SIZE = 22;
+
 };
 
 

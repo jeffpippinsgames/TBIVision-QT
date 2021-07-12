@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
     GaryCommands::declareQML();
     GaryMotionStatus::declareQML();
     GaryLaserStatus::declareQML();
+    GaryMotorCalibrationCycleStatus::declareQML();
     //Register The QmlTBIDisplay QML Type
     QmlTBIDisplay::declareQML();
 
@@ -62,11 +63,6 @@ int main(int argc, char *argv[])
 
     //Connect The Singletons Signals and Slots---------------------
     //REMEMBER TO RESET THE SAVE FILE WHEN YOU ADD A MARY SIGNAL!!!
-    //Max To Gary Signals
-    QObject::connect(&_max, SIGNAL(signalGaryToMoveXSteps(qint32 _steps)), &_gary, SLOT(autoMoveXAxis(qint32 _steps)));
-    QObject::connect(&_max, SIGNAL(signalGaryToMoveZSteps(qint32 _steps)), &_gary, SLOT(autoMoveZAxis(qint32 _steps)));
-    //Gary To Max
-
     //Toby To Max Signals
     QObject::connect(&_toby, SIGNAL(newCVMatFrameGrabbed(const cv::Mat&)), &_max, SLOT(recieveNewCVMat(const cv::Mat&)));
     //Mary To Toby Signals

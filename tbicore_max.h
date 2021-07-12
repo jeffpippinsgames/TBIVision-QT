@@ -172,8 +172,6 @@ private:
     TBIDataSet *m_right_inlier_bwl_ds;
     TBIDataSet *m_joint_ds;
 
-
-
     TBIDataSet *m_dummy_set1; //Used For Static Storage. So Other Functions Dont Have To Recreate Them in the Loops.
     TBIDataSet *m_dummy_set2; //Used For Static Storage. So Other Functions Dont Have To Recreate Them in the Loops.
 

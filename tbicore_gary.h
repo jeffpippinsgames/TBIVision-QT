@@ -11,6 +11,9 @@ import "tbi.vision.components" 1 0
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 #include <QByteArray>
+#include "tbicore_constants.h"
+
+
 
 /**************************************************************
 GaryHomingStatus
@@ -36,7 +39,6 @@ public:
     HomingStatus_t m_homing_status;
 };
 
-
 /**************************************************************
 GaryControlErrorCode
 Description:
@@ -59,7 +61,6 @@ public:
     }
 };
 
-
 /**************************************************************
 GaryOperationStatus
 Description:
@@ -81,7 +82,6 @@ public:
     OperationStatus_t m_operation_status;
 };
 
-
 /**************************************************************
 GaryLimitSwitch
 Description:
@@ -102,7 +102,6 @@ public:
     }
     LimitSwitchState_t m_limit_switch_state;
 };
-
 
 /**************************************************************
 GaryControlMode
@@ -128,7 +127,6 @@ public:
 
 };
 
-
 /**************************************************************
 GaryMotionStatus
 Description:
@@ -146,7 +144,7 @@ public:
                          TBI_MOTION_STATUS_JOGGING = 0x02,
                          TBI_MOTION_STATUS_GENERAL_ERROR = 0x03,
                          TBI_MOTION_STATUS_LIMIT_TRIPPED = 0x04,
-                         TBI_MOTIION_STATUS_HOMING = 0x05};
+                         TBI_MOTION_STATUS_HOMING = 0x05};
     Q_ENUMS(MotionStatus_t)
     static void declareQML()
     {
@@ -154,7 +152,6 @@ public:
     }
     MotionStatus_t m_motion_status;
 };
-
 
 /**************************************************************
 GaryCommands
@@ -220,6 +217,31 @@ public:
     }
 };
 
+/**************************************************************
+GaryMotorCalibrationCycleStatus
+Description:
+  A class to encapsulate the GaryMotorCalibrationCycleStatus
+ **************************************************************/
+class GaryMotorCalibrationCycleStatus : public QObject
+{
+
+    Q_OBJECT
+public:
+
+    GaryMotorCalibrationCycleStatus() : QObject() {}
+
+    enum MotorCalibration_Cycle_t{ TBI_MOTORCAL_OFF = 0x00,
+                                   TBI_MOTORCAL_GETPNT1PAUSE = 0x01,
+                                   TBI_MOTORCAL_MAKINGFIRSTMOVE = 0x02,
+                                   TBI_MOTORCAL_GETPNT2PAUSE = 0x03,
+                                   TBI_MOTORCAL_FINISHING = 0x04};
+    Q_ENUMS(MotorCalibration_Cycle_t)
+
+    static void declareQML()
+    {
+        qmlRegisterType<GaryMotorCalibrationCycleStatus>("tbi.vision.components", 1, 0, "GaryMotorCalibrationCycleStatus");
+    }
+};
 
 /**************************************************************
 Gary
@@ -235,18 +257,22 @@ Description:
 class Gary : public QObject
 {
     //QT Properties and Macros-------------------------------------
+    //The Controller Status Objects Are Set From the Microcontroller.
+    //They cannot be changed from the QML.
     Q_OBJECT //QOBJECT MACRO
-    Q_PROPERTY(GaryMotionStatus::MotionStatus_t xMotionStatus READ getXMotionStatus WRITE setXMotionStatus NOTIFY xMotionStatusChanged)
-    Q_PROPERTY(GaryMotionStatus::MotionStatus_t zMotionStatus READ getZMotionStatus WRITE setZMotionStatus NOTIFY zMotionStatusChanged)
-    Q_PROPERTY(GaryControlMode::ControlMode_t controlMode READ getControlMode WRITE setControlMode NOTIFY controlModeChanged)
-    Q_PROPERTY(GaryHomingStatus::HomingStatus_t homingStatus READ getHomingStatus WRITE setHomingStatus NOTIFY homingStatusChanged)
-    Q_PROPERTY(GaryLimitSwitch::LimitSwitchState_t xLimitSwitch READ getXLimitSwitch WRITE setXLimitSwitch NOTIFY xLimitSwitchChanged)
-    Q_PROPERTY(GaryLimitSwitch::LimitSwitchState_t zLimitSwitch READ getZLimitSwitch WRITE setZLimitSwitch NOTIFY zLimitSwitchChanged)
-    Q_PROPERTY(GaryOperationStatus::OperationStatus_t operationStatus READ getOperationStatus WRITE setOperationStatus NOTIFY operationStatusChanged)
-    Q_PROPERTY(GaryLaserStatus::LaserStatus_t laserStatus READ getLaserStatus WRITE setLaserStatus NOTIFY laserStatusChanged)
-
-    Q_PROPERTY(qint32 xPosition READ getXPosition WRITE setXPosition NOTIFY xPositionChanged)
-    Q_PROPERTY(qint32 zPosition READ getZPosition WRITE setZPosition NOTIFY zPositionChanged)
+    Q_PROPERTY(quint32 currentControlStatusGUID READ getcurrentControlStatusGUID NOTIFY currentStatusGUIDChanged)
+    Q_PROPERTY(GaryMotionStatus::MotionStatus_t xMotionStatus READ getXMotionStatus  NOTIFY xMotionStatusChanged)
+    Q_PROPERTY(GaryMotionStatus::MotionStatus_t zMotionStatus READ getZMotionStatus  NOTIFY zMotionStatusChanged)
+    Q_PROPERTY(GaryControlMode::ControlMode_t controlMode READ getControlMode  NOTIFY controlModeChanged)
+    Q_PROPERTY(GaryLimitSwitch::LimitSwitchState_t xLimitSwitch READ getXLimitSwitch  NOTIFY xLimitSwitchChanged)
+    Q_PROPERTY(GaryLimitSwitch::LimitSwitchState_t zLimitSwitch READ getZLimitSwitch  NOTIFY zLimitSwitchChanged)
+    Q_PROPERTY(GaryOperationStatus::OperationStatus_t operationStatus READ getOperationStatus  NOTIFY operationStatusChanged)
+    Q_PROPERTY(GaryLaserStatus::LaserStatus_t laserStatus READ getLaserStatus  NOTIFY laserStatusChanged)
+    Q_PROPERTY(GaryHomingStatus::HomingStatus_t xHomingStatus READ getXHomingStatus NOTIFY xHomingStatusChanged)
+    Q_PROPERTY(GaryHomingStatus::HomingStatus_t zHomingStatus READ getZHomingStatus  NOTIFY zHomingStatusChanged)
+    Q_PROPERTY(qint32 xPosition READ getXPosition NOTIFY xPositionChanged)
+    Q_PROPERTY(qint32 zPosition READ getZPosition NOTIFY zPositionChanged)
+    Q_PROPERTY(GaryMotorCalibrationCycleStatus::MotorCalibration_Cycle_t motorCalibrationCycle READ getMotorCalibrationCycle NOTIFY motorCalibrationCycleChanged)
     //------------------------------------------------------------
 
 public:
@@ -258,47 +284,44 @@ public:
 
     //------------------------------------------------------------
 
-    //PropertySetMethods
-    void setXMotionStatus(GaryMotionStatus::MotionStatus_t _ms_t);
-    void setZMotionStatus(GaryMotionStatus::MotionStatus_t _ms_t);
-    void setControlMode(GaryControlMode::ControlMode_t _cm_t);
-    void setHomingStatus(GaryHomingStatus::HomingStatus_t _hs_t);
-    void setXLimitSwitch(GaryLimitSwitch::LimitSwitchState_t _ls_t);
-    void setZLimitSwitch(GaryLimitSwitch::LimitSwitchState_t _ls_t);
-    void setOperationStatus(GaryOperationStatus::OperationStatus_t _os_t);
-    void setLaserStatus(GaryLaserStatus::LaserStatus_t _ls_t);
-    void setXPosition(qint32 _x_pos);
-    void setZPosition(qint32 _z_pos);
+
     //------------------------------------------------------------
     //Property Read Methods
+    quint32 getcurrentControlStatusGUID(){return m_last_status_guid;}
     GaryMotionStatus::MotionStatus_t getXMotionStatus(){return m_x_motion_status;}
     GaryMotionStatus::MotionStatus_t getZMotionStatus(){return m_z_motion_status;}
     GaryControlMode::ControlMode_t getControlMode(){return m_control_mode;}
-    GaryHomingStatus::HomingStatus_t getHomingStatus(){return m_homing_status;}
+    GaryHomingStatus::HomingStatus_t getXHomingStatus(){return m_x_homing_status;}
+    GaryHomingStatus::HomingStatus_t getZHomingStatus(){return m_z_homing_status;}
     GaryLimitSwitch::LimitSwitchState_t getXLimitSwitch(){return m_x_axis_limit;}
     GaryLimitSwitch::LimitSwitchState_t getZLimitSwitch(){return m_z_axis_limit;}
     GaryOperationStatus::OperationStatus_t getOperationStatus(){return m_operation_status;}
     GaryLaserStatus::LaserStatus_t getLaserStatus(){return m_laser_status;}
+    GaryMotorCalibrationCycleStatus::MotorCalibration_Cycle_t getMotorCalibrationCycle(){return m_motor_calib_cycle;}
     qint32 getXPosition(){return m_x_position;}
     qint32 getZPosition(){return m_z_position;}
     //------------------------------------------------------------
 
-    //Public Send Command Methods----------------------------------------------
+    //Public Methods to Control the MicroController
     Q_INVOKABLE void sendStopMovement();
     Q_INVOKABLE void sendJogUp();
     Q_INVOKABLE void sendJogDown();
     Q_INVOKABLE void sendJogLeft();
     Q_INVOKABLE void sendJogRight();
-    Q_INVOKABLE void sendToggleLaserPower();
+    Q_INVOKABLE void toggleLaserPower();
     Q_INVOKABLE void autoMoveXAxis(qint32 _steps);
     Q_INVOKABLE void autoMoveZAxis(qint32 _steps);
     Q_INVOKABLE void sendStatusPacket();
     Q_INVOKABLE void setControllerToCalibrationSpeed();
     Q_INVOKABLE void setControllerToOperationSpeed();
-    //------------------------------------------------------------
-
-    //Debug Functions------------------------------------------------
     Q_INVOKABLE void cycleControlModes();
+    Q_INVOKABLE void setControlModeToFullAuto();
+    Q_INVOKABLE void setControlModeToHeightOnly();
+    Q_INVOKABLE void setControlModeToManual();
+    Q_INVOKABLE void setControlModeToMotorCalibration();
+    Q_INVOKABLE void setControlMode(GaryControlMode::ControlMode_t _mode);
+    Q_INVOKABLE bool isStatusGUIDDifferentFromLastCompare();
+    //------------------------------------------------------------
 
 private:
     //Serial Port Variables
@@ -314,7 +337,8 @@ private:
     GaryMotionStatus::MotionStatus_t m_x_motion_status;
     GaryMotionStatus::MotionStatus_t m_z_motion_status;
     GaryControlMode::ControlMode_t m_control_mode;
-    GaryHomingStatus::HomingStatus_t m_homing_status;
+    GaryHomingStatus::HomingStatus_t m_x_homing_status;
+    GaryHomingStatus::HomingStatus_t m_z_homing_status;
     GaryLimitSwitch::LimitSwitchState_t m_x_axis_limit;
     GaryLimitSwitch::LimitSwitchState_t m_z_axis_limit;
     GaryOperationStatus::OperationStatus_t m_operation_status;
@@ -322,12 +346,15 @@ private:
     qint32 m_x_position;
     qint32 m_z_position;
     quint32 m_last_status_guid;
+    quint32 m_last_status_guid_compared_by_gary;
+    GaryMotorCalibrationCycleStatus::MotorCalibration_Cycle_t m_motor_calib_cycle;
     //-------------------------------------------------------------
 
     //Private Methods----------------------------------------------
     bool findOpenTeensy();
     bool findOpenArduinoUno();
     void sendSerialCommand(QByteArray &_data);
+    void printControlStatusVariables();
     //--------------------------------------------------------------
 
     //Signals-------------------------------------------------------
@@ -337,17 +364,19 @@ signals:
     void xMotionStatusChanged();
     void zMotionStatusChanged();
     void controlModeChanged();
-    void homingStatusChanged();
+    void xHomingStatusChanged();
+    void zHomingStatusChanged();
     void xLimitSwitchChanged();
     void zLimitSwitchChanged();
     void operationStatusChanged();
     void laserStatusChanged();
     void xPositionChanged();
     void zPositionChanged();
+    void currentStatusGUIDChanged();
+    void motorCalibrationCycleChanged();
     //--------------------------------------------------------------
 
 public slots:
-    void serialError(QSerialPort::SerialPortError _error);
     void readSerial();
 
 

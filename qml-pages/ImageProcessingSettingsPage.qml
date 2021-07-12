@@ -97,13 +97,15 @@ Item {
         //disconnect all connected signals
         Max.processingComplete.disconnect(rootpageId.triggerTobyNextFrame);
         mainviewrectId.disconnectSignal();
+        operationsettingsrectId.disconnectAllSignals();
 
         Max.emitExtraMats = false;
+
     }
 
     function triggerTobyNextFrame()
     {
-      imagegrabtimerId.restart();
+        imagegrabtimerId.restart();
     }
 
 
@@ -600,7 +602,7 @@ Item {
             //SetMainViewRect Display
             PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.operationframe}
             //Set The Interior Control State
-            PropertyChanges {target: operationsettingsrectId; state: "MotorCalibration";}
+            PropertyChanges {target: operationsettingsrectId; state: "ManualMotorControl";}
         }
 
     ]
@@ -968,7 +970,7 @@ Item {
 
     //Camera Settings Rectangle-------------------------------------
     Rectangle
-        {
+    {
         id: camerasettingsrectId
         visible: false
         width: rootpageId.settingsrectwidth
@@ -4460,7 +4462,7 @@ Item {
 
             Component.onCompleted:
             {
-               // geoconstructiondistancetsliderId.value = Mary.sm_split_distance;
+                // geoconstructiondistancetsliderId.value = Mary.sm_split_distance;
             }
 
             onEndFocus:
@@ -4489,26 +4491,42 @@ Item {
         y: rootpageId.settingsrecty
         color: "transparent"
 
-
-
         function grabFocus()
         {
             operationcontrollerId.focus = true;
         }
 
+        function disconnectAllSignals()
+        {
+            Gary.xMotionStatusChanged.disconnect(xmotionstatustextId.updateMsg);
+            Gary.zMotionStatusChanged.disconnect(zmotionstatustextId.updateMsg);
+            Gary.xLimitSwitchChanged.disconnect(xlimitstatetextId.updateMsg);
+            Gary.zLimitSwitchChanged.disconnect(zlimitstatetextId.updateMsg);
+            Gary.controlModeChanged.disconnect(controlmodetextId.updateMsg);
+            Gary.motorCalibrationCycleChanged.disconnect(calibcyclestatustextId.updateMsg);
+        }
 
         states:
-        [
+            [
             State
             {
                 name: "NonFocused"
                 PropertyChanges{target: operationborderrectId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: manualmotorcontrolbuttonId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: motorcalibrationselectionbuttonId; border.color:rootpageId.nonfocuscolor;}
+            },
+            State
+            {
+                name: "ManualMotorControl"
+                PropertyChanges{target: operationborderrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: manualmotorcontrolbuttonId; border.color:rootpageId.focuscolor;}
                 PropertyChanges{target: motorcalibrationselectionbuttonId; border.color:rootpageId.nonfocuscolor;}
             },
             State
             {
                 name: "MotorCalibration"
                 PropertyChanges{target: operationborderrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: manualmotorcontrolbuttonId; border.color:rootpageId.nonfocuscolor;}
                 PropertyChanges{target: motorcalibrationselectionbuttonId; border.color:rootpageId.focuscolor;}
             }
         ]
@@ -4521,14 +4539,19 @@ Item {
 
             onBlackButtonPressed:
             {
+
+
             }
 
             onGreenButtonPressed:
             {
                 switch(operationsettingsrectId.state)
                 {
+                case "ManualMotorControl":
+                    manualmotorcontrolbuttonId.grabFocus();
+                    break;
                 case "MotorCalibration":
-                    Gary.controlMode = GaryControlMode.TBI_CONTROL_MODE_MOTORCALIBRATION;
+                    Gary.setControlModeToMotorCalibration();
                     break;
                 }
             }
@@ -4542,16 +4565,24 @@ Item {
             {
                 switch(operationsettingsrectId.state)
                 {
-                case "MotorCalibration":
+                case "ManualMotorControl":
                     rootpageId.state = operationstateframeactive;
                     operationsettingsrectId.state = "NonFocused";
+                    break;
+                case "MotorCalibration":
+                    operationsettingsrectId.state = "ManualMotorControl";
                     break;
                 }
             }
 
             onDownButtonPressed:
             {
-
+                switch(operationsettingsrectId.state)
+                {
+                case "ManualMotorControl":
+                    operationsettingsrectId.state = "MotorCalibration";
+                    break;
+                }
             }
 
             onLeftButtonPressed:
@@ -4584,7 +4615,6 @@ Item {
 
             }
         }
-
 
         Rectangle
         {
@@ -4624,12 +4654,373 @@ Item {
             color: rootpageId.textcolor
         }
 
+        //------------------------------------------------------------------------
+        //Manual Motor Control Button
+        Rectangle
+        {
+            id: manualmotorcontrolbuttonId
+            x:20
+            y:75
+            width: 600
+            height: 75
+            color: "transparent"
+            border.width: rootpageId.rectborderwidths
+            border.color: rootpageId.nonfocuscolor
+
+            function grabFocus()
+            {
+                manualmotorcontrollerId.focus = true;
+            }
+
+            Rectangle
+            {
+                id: manualmotorcontrolhighlight
+                anchors.fill: manualmotorcontrolbuttonId
+                color: "green"
+                opacity: 0
+            }
+
+            ControllerObject
+            {
+                id: manualmotorcontrollerId
+                focus: false
+
+                onFocusChanged:
+                {
+                    if(manualmotorcontrollerId.focus)
+                    {
+                        manualmotorcontrolhighlight.opacity = .5;
+                    }
+                    else
+                    {
+                        manualmotorcontrolhighlight.opacity = 0;
+                    }
+                }
+
+                onBlackButtonPressed:
+                {
+                    operationsettingsrectId.grabFocus();
+                }
+
+                onGreenButtonPressed:
+                {
+                    operationsettingsrectId.grabFocus();
+                }
+
+                onRedButtonPressed:
+                {
+                    operationsettingsrectId.grabFocus();
+                }
+
+                onUpButtonPressed:
+                {
+                    Gary.sendJogUp();
+                }
+
+                onDownButtonPressed:
+                {
+                    Gary.sendJogDown();
+                }
+
+                onLeftButtonPressed:
+                {
+                    Gary.sendJogLeft();
+                }
+
+                onRightButtonPressed:
+                {
+                    Gary.sendJogRight();
+                }
+
+                onUpButtonReleased:
+                {
+                    Gary.sendStopMovement();
+                }
+
+                onDownButtonReleased:
+                {
+                    Gary.sendStopMovement();
+                }
+
+                onLeftButtonReleased:
+                {
+                    Gary.sendStopMovement();
+                }
+
+                onRightButtonReleased:
+                {
+                    Gary.sendStopMovement();
+                }
+
+            }
+
+            Text
+            {
+                id: manualmotorcontroltextId
+                anchors.centerIn: manualmotorcontrolbuttonId
+                font.family: fontId.name
+                font.pointSize: 20
+                height: manualmotorcontroltextId.implicitHeight
+                width: manualmotorcontroltextId.implicitWidth
+                text: "Control Motors"
+                color: rootpageId.textcolor
+            }
+        }
+
+        //Controller Status
+        Text
+        {
+            id: laststatusguidtextId
+            x: 20
+            y: manualmotorcontrolbuttonId.y + manualmotorcontrolbuttonId.height + 1
+            font.family: fontId.name
+            font.pointSize: 15
+            height: laststatusguidtextId.implicitHeight
+            width: laststatusguidtextId.implicitWidth
+            text: "Last Controller Status GUID = " + Gary.currentControlStatusGUID;
+            color: rootpageId.textcolor
+        }
+
+        //X Motion Status
+        Text
+        {
+            id: xmotionstatustextId
+            x: 20
+            y: laststatusguidtextId.y + laststatusguidtextId.height + 1
+            font.family: fontId.name
+            font.pointSize: 15
+            height: xmotionstatustextId.implicitHeight
+            width: xmotionstatustextId.implicitWidth
+            text: "X Axis Motion Status = " + _msg;
+            color: rootpageId.textcolor
+
+            property string _msg: ""
+
+            Component.onCompleted:
+            {
+                Gary.xMotionStatusChanged.connect(xmotionstatustextId.updateMsg);
+            }
+
+            function updateMsg()
+            {
+                switch(Gary.xMotionStatus)
+                {
+                case GaryMotionStatus.TBI_MOTION_STATUS_IDLE:
+                    _msg = "TBI_MOTION_STATUS_IDLE";
+                    break;
+                case GaryMotionStatus.TBI_MOTIION_STATUS_HOMING:
+                    _msg = "TBI_MOTION_STATUS_HOMING";
+                    break;
+                case GaryMotionStatus.TBI_MOTION_STATUS_JOGGING:
+                    _msg = "TBI_MOTION_STATUS_JOGGING";
+                    break;
+                case GaryMotionStatus.TBI_MOTION_STATUS_GENERAL_ERROR:
+                    _msg = "TBI_MOTION_STATUS_GENERAL_ERROR";
+                    break;
+                case GaryMotionStatus.TBI_MOTION_STATUS_LIMIT_TRIPPED:
+                    _msg = "TBI_MOTION_STATUS_LIMIT_TRIPPED";
+                    break;
+                case GaryMotionStatus.TBI_MOTION_STATUS_MOVING:
+                    _msg = "TBI_MOTION_STATUS_MOVING";
+                    break;
+                }
+            }
+        }
+
+        //Z Motion Status
+        Text
+        {
+            id: zmotionstatustextId
+            x: 20
+            y: xmotionstatustextId.y + xmotionstatustextId.height + 1
+            font.family: fontId.name
+            font.pointSize: 15
+            height: zmotionstatustextId.implicitHeight
+            width: zmotionstatustextId.implicitWidth
+            text: "Z Axis Motion Status = " + _msg;
+            color: rootpageId.textcolor
+
+            property string _msg: ""
+
+            Component.onCompleted:
+            {
+                Gary.zMotionStatusChanged.connect(zmotionstatustextId.updateMsg);
+            }
+
+            function updateMsg()
+            {
+                switch(Gary.zMotionStatus)
+                {
+                case GaryMotionStatus.TBI_MOTION_STATUS_IDLE:
+                    _msg = "TBI_MOTION_STATUS_IDLE";
+                    break;
+                case GaryMotionStatus.TBI_MOTIION_STATUS_HOMING:
+                    _msg = "TBI_MOTION_STATUS_HOMING";
+                    break;
+                case GaryMotionStatus.TBI_MOTION_STATUS_JOGGING:
+                    _msg = "TBI_MOTION_STATUS_JOGGING";
+                    break;
+                case GaryMotionStatus.TBI_MOTION_STATUS_GENERAL_ERROR:
+                    _msg = "TBI_MOTION_STATUS_GENERAL_ERROR";
+                    break;
+                case GaryMotionStatus.TBI_MOTION_STATUS_LIMIT_TRIPPED:
+                    _msg = "TBI_MOTION_STATUS_LIMIT_TRIPPED";
+                    break;
+                case GaryMotionStatus.TBI_MOTION_STATUS_MOVING:
+                    _msg = "TBI_MOTION_STATUS_MOVING";
+                    break;
+                }
+            }
+        }
+
+        //X Position
+        Text
+        {
+            id: xpositiontextId
+            x: 20
+            y: zmotionstatustextId.y + zmotionstatustextId.height + 1
+            font.family: fontId.name
+            font.pointSize: 15
+            height: xpositiontextId.implicitHeight
+            width: xpositiontextId.implicitWidth
+            text: "X Position = " + Gary.xPosition;
+            color: rootpageId.textcolor
+        }
+
+        //Z Position
+        Text
+        {
+            id: zpositiontextId
+            x: 20
+            y: xpositiontextId.y + xpositiontextId.height + 1
+            font.family: fontId.name
+            font.pointSize: 15
+            height: zpositiontextId.implicitHeight
+            width: zpositiontextId.implicitWidth
+            text: "Z Position = " + Gary.zPosition;
+            color: rootpageId.textcolor
+        }
+
+        //X Limit Switch state:
+        Text
+        {
+            id: xlimitstatetextId
+            x: 20
+            y: zpositiontextId.y + zpositiontextId.height + 1
+            font.family: fontId.name
+            font.pointSize: 15
+            height: xlimitstatetextId.implicitHeight
+            width: xlimitstatetextId.implicitWidth
+            text: "X Limit State = " + _msg;
+            color: rootpageId.textcolor
+
+            property string _msg: ""
+
+            Component.onCompleted:
+            {
+                Gary.xLimitSwitchChanged.connect(xlimitstatetextId.updateMsg);
+            }
+
+            function updateMsg()
+            {
+                switch(Gary.xLimitSwitch)
+                {
+                case GaryLimitSwitch.TBI_LIMIT_SWITCH_STATE_OK:
+                    _msg = "Ok";
+                    break;
+                case GaryLimitSwitch.TBI_LIMIT_SWITCH_STATE_TRIPPED:
+                    _msg = "Tripped";
+                    break;
+                }
+            }
+
+        }
+        //Z Limit Switch state:
+        Text
+        {
+            id: zlimitstatetextId
+            x: 20
+            y: xlimitstatetextId.y + xlimitstatetextId.height + 1
+            font.family: fontId.name
+            font.pointSize: 15
+            height: zlimitstatetextId.implicitHeight
+            width: zlimitstatetextId.implicitWidth
+            text: "Z Limit State = " + _msg;
+            color: rootpageId.textcolor
+
+            property string _msg: ""
+
+            Component.onCompleted:
+            {
+                Gary.zLimitSwitchChanged.connect(zlimitstatetextId.updateMsg);
+            }
+
+            function updateMsg()
+            {
+                switch(Gary.zLimitSwitch)
+                {
+                case GaryLimitSwitch.TBI_LIMIT_SWITCH_STATE_OK:
+                    _msg = "Ok";
+                    break;
+                case GaryLimitSwitch.TBI_LIMIT_SWITCH_STATE_TRIPPED:
+                    _msg = "Tripped";
+                    break;
+                }
+            }
+
+        }
+        //Control mode
+        Text
+        {
+            id: controlmodetextId
+            x: 20
+            y: zlimitstatetextId.y + zlimitstatetextId.height + 1
+            font.family: fontId.name
+            font.pointSize: 15
+            height: controlmodetextId.implicitHeight
+            width: controlmodetextId.implicitWidth
+            text: "Control Mode = " + _msg;
+            color: rootpageId.textcolor
+
+            property string _msg: ""
+
+            Component.onCompleted:
+            {
+                Gary.controlModeChanged.connect(controlmodetextId.updateMsg);
+            }
+
+
+            function updateMsg()
+            {
+                switch(Gary.controlMode)
+                {
+                case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                    _msg = "TBI_CONTROL_MODE_MANUAL_MODE";
+                    break;
+                case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                    _msg = "TBI_CONTROL_MODE_FULLAUTO_MODE";
+                    break;
+                case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                    _msg = "TBI_CONTROL_MODE_HEIGHTONLY";
+                    break;
+                case GaryControlMode.TBI_CONTROL_MODE_MOTORCALIBRATION:
+                    _msg = "TBI_CONTROL_MODE_MOTORCALIBRATION";
+                    break;
+                }
+            }
+
+
+        }
+
+
+
+        //-----------------------------------------------------------
         //Motor Calibration Button
         Rectangle
         {
             id: motorcalibrationselectionbuttonId
             x:20
-            y:100
+            y:controlmodetextId.y + controlmodetextId.height + 10
             width: 600
             height: 75
             color: "transparent"
@@ -4650,13 +5041,56 @@ Item {
         }
         Text
         {
+            id: calibcyclestatustextId
+            x:20
+            y: motorcalibrationselectionbuttonId.y + motorcalibrationselectionbuttonId.height + 1
+            font.family: fontId.name
+            font.pointSize: 15
+            height: calibcyclestatustextId.implicitHeight
+            width: calibcyclestatustextId.implicitWidth
+            text: "Current Calibration Cycle = " + _msg
+            color: rootpageId.textcolor
+
+            property string _msg: ""
+
+            Component.onCompleted:
+            {
+                Gary.motorCalibrationCycleChanged.connect(calibcyclestatustextId.updateMsg);
+            }
+
+            function updateMsg()
+            {
+                switch(Gary.motorCalibrationCycle)
+                {
+                    case GaryMotorCalibrationCycleStatus.TBI_MOTORCAL_OFF:
+                        _msg = "Calibration Not Running"
+                    break;
+                    case GaryMotorCalibrationCycleStatus.TBI_MOTORCAL_GETPNT1PAUSE:
+                        _msg = "Aquiring Point 1";
+                    break;
+                    case GaryMotorCalibrationCycleStatus.TBI_MOTORCAL_MAKINGFIRSTMOVE:
+                        _msg = "Making First Move";
+                        break;
+                    case GaryMotorCalibrationCycleStatus.TBI_MOTORCAL_GETPNT2PAUSE:
+                        _msg = "Aquiring Point 2";
+                        break;
+                    case GaryMotorCalibrationCycleStatus.TBI_MOTORCAL_FINISHING:
+                        _msg = "Finishing Calibration.";
+                        break;
+                }
+            }
+
+        }
+
+        Text
+        {
             id: xstepsperpixeltextId
             x:20
-            y: motorcalibrationselectionbuttonId.y + motorcalibrationselectionbuttonId.height + 20
+            y: calibcyclestatustextId.y + calibcyclestatustextId.height + 1
             font.family: fontId.name
-            font.pointSize: 20
-            height: motorcalibrationtextId.implicitHeight
-            width: motorcalibrationtextId.implicitWidth
+            font.pointSize: 15
+            height: xstepsperpixeltextId.implicitHeight
+            width: xstepsperpixeltextId.implicitWidth
             text: "X Steps Per Pixel = " + Mary.x_axis_steps_per_pixel
             color: rootpageId.textcolor
         }
@@ -4664,16 +5098,14 @@ Item {
         {
             id: zstepsperpixeltextId
             x: 20
-            y: xstepsperpixeltextId.y + xstepsperpixeltextId.height + 20
+            y: xstepsperpixeltextId.y + xstepsperpixeltextId.height + 1
             font.family: fontId.name
-            font.pointSize: 20
-            height: motorcalibrationtextId.implicitHeight
-            width: motorcalibrationtextId.implicitWidth
+            font.pointSize: 15
+            height: zstepsperpixeltextId.implicitHeight
+            width: zstepsperpixeltextId.implicitWidth
             text: "Z Steps Per Pixel = " + Mary.z_axis_steps_per_pixel
             color: rootpageId.textcolor
         }
-
-
     }
 
     //Main View Rectangle-------------------------------------------
