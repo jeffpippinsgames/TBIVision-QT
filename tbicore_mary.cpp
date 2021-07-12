@@ -84,6 +84,8 @@ void Mary::SetMaryDefaultValues()
     //---------------------------------------
     m_x_axis_steps_per_pixel = 0.0f;
     m_z_axis_steps_per_pixel = 0.0f;
+
+    m_track_to_point = TBIThreePointTrackingContainer(1,1,2,2,3,3);
 }
 
 /**************************************************************
@@ -145,6 +147,12 @@ void Mary::saveMaryToFile()
     _ds << m_right_bwl_distance_threshold;
     _ds << m_x_axis_steps_per_pixel;
     _ds << m_z_axis_steps_per_pixel;
+    _ds << m_track_to_point.getVertex1().m_x;
+    _ds << m_track_to_point.getVertex1().m_y;
+    _ds << m_track_to_point.getVertex2().m_x;
+    _ds << m_track_to_point.getVertex2().m_y;
+    _ds << m_track_to_point.getVertex3().m_x;
+    _ds << m_track_to_point.getVertex3().m_y;
     _ds.setVersion(QDataStream::Qt_5_12);
     _savefile.close();
     qDebug() << "Mary::saveMaryToFile() Settings Saved To " << _filepath;
@@ -207,10 +215,29 @@ void Mary::loadMaryFromFile()
     _ds >> m_right_bwl_distance_threshold;
     _ds >> m_x_axis_steps_per_pixel;
     _ds >> m_z_axis_steps_per_pixel;
+    int _v1x, _v1y, _v2x, _v2y, _v3x, _v3y;
+    _ds >> _v1x;
+    _ds >> _v1y;
+    _ds >> _v2x;
+    _ds >> _v2y;
+    _ds >> _v3x;
+    _ds >> _v3y;
+    m_track_to_point = TBIThreePointTrackingContainer(_v1x, _v1y, _v2x, _v2y, _v3x, _v3y);
     _savefile.close();
     qDebug("Mary::loadMaryFromFile() marydefualt.tbi Loaded.");
+    qDebug() << "Testing" << _v1x << _v2x << _v3x;
     broadcastQMLSignals();
     broadcastSingletonSignals();
+}
+
+TBIThreePointTrackingContainer Mary::getTrackToPoint()
+{
+    return m_track_to_point;
+}
+
+void Mary::setTrackToPoint(TBIThreePointTrackingContainer &_tp)
+{
+    m_track_to_point = _tp;
 }
 
 /**************************************************************

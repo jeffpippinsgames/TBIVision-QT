@@ -11,6 +11,7 @@ class TBIThreePointTrackingContainer
 public:
     TBIThreePointTrackingContainer();
     TBIThreePointTrackingContainer(TBIThreePointTrackingContainer &_tpc);
+    TBIThreePointTrackingContainer(int _v1x, int _v1y, int _v2x, int _v2y, int _v3x, int _v3y);
     void clear();
     bool isValid(){return m_isvalid;}
     void validate(){m_isvalid = true;}

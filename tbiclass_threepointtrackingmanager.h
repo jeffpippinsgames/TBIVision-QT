@@ -17,7 +17,7 @@ public:
 private:
     void updateAverage();
 
-    static const int TrackingListSize = 4;
+    static const int TrackingListSize = 1;
     TBIThreePointTrackingContainer m_trackingpoints[TrackingListSize];
 
     int m_current_index;

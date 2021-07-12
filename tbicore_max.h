@@ -43,29 +43,6 @@ Description:
     A enumerated type used for determining the phase of auto
     motor calibration.
  **************************************************************/
-class Motor_Calibration_Sequence: public QObject
-{
-    Q_OBJECT
-public:
-    Motor_Calibration_Sequence() : QObject() {}
-
-    enum MotorCalibration_t {NOT_CALIBRATING = 0x01,
-                             GET_PNT_1 = 0x02,
-                             MOVE_FOR_PNT2 = 0x03,
-                             WAIT_FOR_MOTION_STATUS_IDLE = 0x04,
-                             GET_PNT_2 = 0x05,
-                             SET_CALIBRATION_PARAMS = 0x06,
-                             MOVE_TO_PNT1 = 0x07,
-                             WAIT_FOR_MOTIONSTATUS_IDLE2 = 0x08,
-                             FINISH_CALIBRATION = 0x09};
-    Q_ENUMS(MotorCalibration_t)
-    static void declareQML()
-    {
-        qmlRegisterType<Motor_Calibration_Sequence>("tbi.vision.components", 1, 0, "Motor_Calibration_Sequence");
-    }
-    MotorCalibration_t m_calibration_status;
-};
-
 
 /***************************************************************
  A Note on the Processing Sequence
@@ -119,6 +96,11 @@ public:
     void setEmitExtraMats(bool _flag){m_emitextramats = _flag; emit emitExtraMatsChanged();}
     void setGary(Gary *_gy){m_gary = _gy;}
     void setMary(Mary *_my){m_mary = _my;}
+    void resetMotorCalControlVariables(){m_motor_cal_got_pnt1=false; m_motor_cal_got_pnt2=false;}
+    Q_INVOKABLE void haveGaryStartMotorCalibration(){m_mary->setXAxisStepsPerPixel(10.0); m_mary->setZAxisStepsPerPixel(10.0); resetMotorCalControlVariables(); m_gary->setControlModeToMotorCalibration();}
+    Q_INVOKABLE void fullAutoControlModeVGroove();
+    Q_INVOKABLE void manualControlModeVGroove();
+    Q_INVOKABLE void setMaryTrackToPoint();
 
 private:
     //The Maximum Frame Size For The Camera
@@ -197,7 +179,10 @@ private:
     TBIThreePointTrackingManager m_three_point_tracking_manager;
     TBIThreePointTrackingContainer m_motor_cal_pnt1;
     TBIThreePointTrackingContainer m_motor_cal_pnt2;
-    Motor_Calibration_Sequence::MotorCalibration_t m_motor_cal_seq;
+    GaryMotorCalibrationCycleStatus::MotorCalibration_Cycle_t m_motor_cal_seq;
+    bool m_motor_cal_got_pnt1;
+    bool m_motor_cal_got_pnt2;
+    TBIThreePointTrackingContainer m_track_to_point;
 
 
 

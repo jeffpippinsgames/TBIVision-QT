@@ -15,6 +15,7 @@ import "tbi.vision.components" 1 0
 
 
 
+
 /**************************************************************
 GaryHomingStatus
 Description:
@@ -182,7 +183,9 @@ public:
                           TBI_CMD_MOVEZSTEPS = 0x0C,
                           TBI_CMD_SETCONTROLMODE = 0x0E,
                           TBI_CMD_SET_CALIBRATION_SPEED = 0x0F,
-                          TBI_CMD_SET_OPERATION_SPEED = 0x10};
+                          TBI_CMD_SET_OPERATION_SPEED = 0x10,
+                          TBI_CMD_DO_MOTOR_CALIBRATION = 0x11,
+                          TBI_CMD_CONTINUE_MOTOR_CALIBRATION = 0x12};
 
     Q_ENUMS(SerialCommand_t)
 
@@ -321,6 +324,8 @@ public:
     Q_INVOKABLE void setControlModeToMotorCalibration();
     Q_INVOKABLE void setControlMode(GaryControlMode::ControlMode_t _mode);
     Q_INVOKABLE bool isStatusGUIDDifferentFromLastCompare();
+    Q_INVOKABLE void sendProceedNextMotorPhase();
+    Q_INVOKABLE void startMotorCalibration(qint32 _steps);
     //------------------------------------------------------------
 
 private:

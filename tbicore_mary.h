@@ -9,6 +9,7 @@
 #include "opencv4/opencv2/core.hpp"
 #include "opencv4/opencv2/imgproc/imgproc.hpp"
 #include <QFile>
+#include "tbiclass_threepointtrackingcontainer.h"
 
 /*
  A Note About Settings File Layout:
@@ -152,6 +153,9 @@ public:
     //SplitMerge Processing Get Functions
     Q_INVOKABLE float getSplitDistance(){return m_split_distance;}
     Q_INVOKABLE float getSplitLength(){return m_split_length;}
+
+    TBIThreePointTrackingContainer getTrackToPoint();
+    void setTrackToPoint(TBIThreePointTrackingContainer &_tp);
 
     //GUI Property Get Functions-------------------------------------------------------------
     Q_INVOKABLE bool getShowDebugInfo(){return m_gui_showdebuginfo;}
@@ -307,7 +311,7 @@ signals:
 
     void smSplitDistanceChanged();
     void smSplitLengthChanged();
-    //GUI Related Signals---------------------------------------------------------------------
+    //GUI Related Signals--------------------------
     void showDebugInfoChanged();
 
 public slots:
@@ -378,8 +382,8 @@ private:
     float m_x_axis_steps_per_pixel;
     float m_z_axis_steps_per_pixel;
 
-
-
+    //Track To Point
+    TBIThreePointTrackingContainer m_track_to_point;
 
 };
 

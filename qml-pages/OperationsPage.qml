@@ -88,18 +88,31 @@ Item
 
         onBlackButtonPressed:
         {
-            cleanupForDestruction();
-            destroyPage(pagesId.mainmenupage);
+            switch(Gary.controlMode)
+            {
+            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                Max.manualControlModeVGroove();
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                cleanupForDestruction();
+                destroyPage(pagesId.mainmenupage);
+                break;
+            }
         }
 
         onGreenButtonPressed:
         {
-
+            switch(Gary.controlMode)
+            {
+            case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                Max.fullAutoControlModeVGroove();
+                break;
+            }
         }
 
         onRedButtonPressed:
         {
-
+            Max.manualControlModeVGroove();
         }
 
         onUpButtonPressed:

@@ -400,6 +400,26 @@ bool Gary::isStatusGUIDDifferentFromLastCompare()
     return false;
 }
 
+void Gary::sendProceedNextMotorPhase()
+{
+    QByteArray _cmd;
+    _cmd.append((char)GaryCommands::TBI_CMD_CONTINUE_MOTOR_CALIBRATION);
+    qDebug() << "Sent GaryCommands::TBI_CMD_CONTINUE_MOTOR_CALIBRATION";
+    sendSerialCommand(_cmd);
+}
+
+void Gary::startMotorCalibration(qint32 _steps)
+{
+    QByteArray _cmd;
+    _cmd.append((char)GaryCommands::TBI_CMD_CONTINUE_MOTOR_CALIBRATION);
+    _cmd.append((char)((quint8)((_steps & 0xFF000000) >> 24)));
+    _cmd.append((char)((quint8)((_steps & 0x00FF0000) >> 16)));
+    _cmd.append((char)((quint8)((_steps & 0x0000FF00) >> 8)));
+    _cmd.append((char)((quint8)(_steps & 0x000000FF)));
+    sendSerialCommand(_cmd);
+}
+
+
 
 /**************************************************************
 sendToggleLaserPower()

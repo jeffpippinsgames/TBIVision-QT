@@ -14,7 +14,39 @@
 //Constructors and Destructor--------------------------------------------------------
 void Max::processMotorCalibration(TBIThreePointTrackingContainer &_trackedpoint)
 {
+    switch(m_gary->getMotorCalibrationCycle())
+    {
+    case GaryMotorCalibrationCycleStatus::TBI_MOTORCAL_OFF:
+        break;
+    case GaryMotorCalibrationCycleStatus::TBI_MOTORCAL_GETPNT1PAUSE:
+        if(!m_motor_cal_got_pnt1)
+        {
+            m_motor_cal_pnt1 = _trackedpoint;
+            m_gary->sendProceedNextMotorPhase();
+            m_motor_cal_got_pnt1 = true;
+            qDebug() << "Vertex1.my = " << _trackedpoint.getVertex1().m_y;
+        }
+        break;
+    case GaryMotorCalibrationCycleStatus::TBI_MOTORCAL_MAKINGFIRSTMOVE:
+        break;
+    case GaryMotorCalibrationCycleStatus::TBI_MOTORCAL_GETPNT2PAUSE:
+        if(!m_motor_cal_got_pnt2)
+        {
+            m_motor_cal_pnt2 = _trackedpoint;
+            qint32 _xspp = m_motor_cal_pnt1.getVertex1().m_x - m_motor_cal_pnt2.getVertex1().m_x;
+            qint32 _zspp = m_motor_cal_pnt1.getVertex1().m_y - m_motor_cal_pnt2.getVertex1().m_y;
+            qDebug() << "Vertex2.my = " << _trackedpoint.getVertex1().m_y;
+            qDebug() << "Delta X = " << _xspp;
+            qDebug() << "Delta Z = " << _zspp;
+            m_mary->setXAxisStepsPerPixel(abs(10000.0/(float)_xspp));
+            m_mary->setZAxisStepsPerPixel(abs(10000.0/(float)_zspp));
+            m_gary->sendProceedNextMotorPhase();
+            m_motor_cal_got_pnt2 = true;
+            qDebug() << "Max: processMotorCalibration() - Finishing Motor Calibration Sequence";
+        }
+        break;
 
+    }
 }
 
 Max::Max(QObject *parent) : QObject(parent)
@@ -78,7 +110,7 @@ Max::Max(QObject *parent) : QObject(parent)
     m_right_bwl_ransac.setIterations(50);
     m_right_bwl_ransac.setMinVotes(20);
 
-    m_motor_cal_seq = Motor_Calibration_Sequence::NOT_CALIBRATING;
+    m_motor_cal_seq = GaryMotorCalibrationCycleStatus::TBI_MOTORCAL_OFF;
 
     qDebug()<<"Max::Max() Max Object Created.";
 }
@@ -105,6 +137,22 @@ Max::~Max()
     qDebug()<<"Max::~Max() Max Object Destroyed";
 }
 
+void Max::fullAutoControlModeVGroove()
+{
+    m_track_to_point = m_three_point_tracking_manager.m_tracking_point;
+    //m_track_to_point = m_mary->getTrackToPoint();
+    m_gary->setControlModeToFullAuto();
+}
+
+void Max::manualControlModeVGroove()
+{
+    m_gary->setControlModeToManual();
+}
+
+void Max::setMaryTrackToPoint()
+{
+    m_mary->setTrackToPoint(m_three_point_tracking_manager.m_tracking_point);
+}
 
 
 //The Recieve New CV::Mat Method
@@ -351,11 +399,7 @@ void Max::processVGrooveTracking(const cv::Mat _mat)
 
     }
 
-
-    float _stddev = m_gausian_decluster_distro->standardDeviation();
-    //qDebug() << "Gausian Decluster Distribution Standard Deviation = " << _stddev;
-
-    //Geometric Construction For Joint Construction.
+    //Geometric Construction and Tracking Point Creation For Joint Construction.
     if(_dataconstructionok)
     {
         m_left_inlier_tsg_ds->extractLeastSquareLine(m_geo_left_tsl);
@@ -390,35 +434,55 @@ void Max::processVGrooveTracking(const cv::Mat _mat)
         if(_trackingpoint.isValid())
         {
             m_three_point_tracking_manager.insert(_trackingpoint);
-        }
-
-        if(m_three_point_tracking_manager.m_tracking_point.isValid())
-        {
             m_three_point_tracking_manager.m_tracking_point.drawToMat(_operation_mat, CV_RGB(0,255,255));
         }
+        else
+        {
+            _dataconstructionok = false;
+        }
 
     }
 
-    //-------------------------------------------------------------------------------------------------------------------------------
-    //Generate Tracking Point Finished-----------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------------------------------------
 
-    switch(m_gary->getControlMode())
+    //Resond To Control Mode
+    if(_dataconstructionok)
     {
-    case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
-        //qDebug() << "Max: Main Loop - Manual Control Mode.";
+        switch(m_gary->getControlMode())
+        {
+        case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
+            //qDebug() << "Max: Main Loop - Manual Control Mode.";
 
-        break;
-    case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
-        //qDebug() << "Max: Main Loop - Full Auto Control Mode.";
-        break;
-    case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
-        //qDebug() << "Max: Main Loop - Height Only Control Mode.";
-        break;
-    case GaryControlMode::TBI_CONTROL_MODE_MOTORCALIBRATION:
-       processMotorCalibration(m_three_point_tracking_manager.m_tracking_point);
-        break;
+            break;
+        case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
+            //qDebug() << "Max: Main Loop - Full Auto Control Mode.";
+            //Draw Track To Point To Screen
+            m_track_to_point.drawToMat(_operation_mat, CV_RGB(0,0,255));
+            //a positive _xsteps means move right
+            //a negaite _xsteps means mode left
+            if(m_gary->getXMotionStatus() == GaryMotionStatus::TBI_MOTION_STATUS_IDLE)
+            {
+                qint32 _dx = m_track_to_point.getVertex1().m_x - m_three_point_tracking_manager.m_tracking_point.getVertex1().m_x;
+                qint32 _xsteps = _dx * m_mary->getXAxisStepsPerPixel();
+                if(abs(_xsteps) > 2) m_gary->autoMoveXAxis(_xsteps);
+            }
+            //a negative _zsteps moves down
+            //a positive _zsteps moves up
+            if(m_gary->getZMotionStatus() == GaryMotionStatus::TBI_MOTION_STATUS_IDLE)
+            {
+                qint32 _dz =  m_track_to_point.getVertex1().m_y - m_three_point_tracking_manager.m_tracking_point.getVertex1().m_y;
+                qint32 _zsteps = _dz * m_mary->getZAxisStepsPerPixel();
+                if(abs(_zsteps) > 2) m_gary->autoMoveZAxis(_zsteps);
+            }
+            break;
+        case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
+            //qDebug() << "Max: Main Loop - Height Only Control Mode.";
+            break;
+        case GaryControlMode::TBI_CONTROL_MODE_MOTORCALIBRATION:
+            processMotorCalibration(m_three_point_tracking_manager.m_tracking_point);
+            break;
+        }
     }
+
 
     //Emit Mat Signals If Turned On
     if(m_emitextramats)

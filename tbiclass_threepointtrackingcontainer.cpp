@@ -18,6 +18,18 @@ TBIThreePointTrackingContainer::TBIThreePointTrackingContainer(TBIThreePointTrac
     m_centroid.m_y = _tpc.m_centroid.m_y;
 }
 
+TBIThreePointTrackingContainer::TBIThreePointTrackingContainer(int _v1x, int _v1y, int _v2x, int _v2y, int _v3x, int _v3y)
+{
+    m_vertex1.m_x = _v1x;
+    m_vertex1.m_y = _v1y;
+    m_vertex2.m_x = _v2x;
+    m_vertex2.m_y = _v2y;
+    m_vertex3.m_x = _v3x;
+    m_vertex3.m_y = _v3y;
+    m_isvalid = true;
+    updateCentroid();
+}
+
 void TBIThreePointTrackingContainer::clear()
 {
     m_vertex1.m_x = 0;

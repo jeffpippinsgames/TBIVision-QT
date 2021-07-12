@@ -78,7 +78,7 @@ Item {
                 quitdialogId.grabFocus();
                 break;
             case "Toggle Laser Power":
-                Gary.sendToggleLaserPower();
+                Gary.toggleLaserPower();
                 rootpageId.cleanupForDestruction();
                 rootpageId.destroyPage(pagesId.operationspage);
                 break;

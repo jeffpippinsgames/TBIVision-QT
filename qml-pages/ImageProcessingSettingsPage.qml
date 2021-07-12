@@ -4514,6 +4514,7 @@ Item {
                 PropertyChanges{target: operationborderrectId; border.color:rootpageId.nonfocuscolor;}
                 PropertyChanges{target: manualmotorcontrolbuttonId; border.color:rootpageId.nonfocuscolor;}
                 PropertyChanges{target: motorcalibrationselectionbuttonId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: recordtracktobuttonId; border.color:rootpageId.nonfocuscolor;}
             },
             State
             {
@@ -4521,6 +4522,7 @@ Item {
                 PropertyChanges{target: operationborderrectId; border.color:rootpageId.focuscolor;}
                 PropertyChanges{target: manualmotorcontrolbuttonId; border.color:rootpageId.focuscolor;}
                 PropertyChanges{target: motorcalibrationselectionbuttonId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: recordtracktobuttonId; border.color:rootpageId.nonfocuscolor;}
             },
             State
             {
@@ -4528,6 +4530,16 @@ Item {
                 PropertyChanges{target: operationborderrectId; border.color:rootpageId.focuscolor;}
                 PropertyChanges{target: manualmotorcontrolbuttonId; border.color:rootpageId.nonfocuscolor;}
                 PropertyChanges{target: motorcalibrationselectionbuttonId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: recordtracktobuttonId; border.color:rootpageId.nonfocuscolor;}
+            },
+            State
+            {
+                name: "RecordTrackTo"
+                PropertyChanges{target: operationborderrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: manualmotorcontrolbuttonId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: motorcalibrationselectionbuttonId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: recordtracktobuttonId; border.color:rootpageId.focuscolor;}
+
             }
         ]
         //OML Components------------------------------------------------
@@ -4551,8 +4563,11 @@ Item {
                     manualmotorcontrolbuttonId.grabFocus();
                     break;
                 case "MotorCalibration":
-                    Gary.setControlModeToMotorCalibration();
+                    Max.haveGaryStartMotorCalibration();
                     break;
+                case "RecordTrackTo":
+                    Max.setMaryTrackToPoint();
+                break;
                 }
             }
 
@@ -4572,6 +4587,11 @@ Item {
                 case "MotorCalibration":
                     operationsettingsrectId.state = "ManualMotorControl";
                     break;
+                case "RecordTrackTo":
+                    operationsettingsrectId.state = "MotorCalibration";
+                break;
+
+
                 }
             }
 
@@ -4582,6 +4602,10 @@ Item {
                 case "ManualMotorControl":
                     operationsettingsrectId.state = "MotorCalibration";
                     break;
+                case "MotorCalibration":
+                    operationsettingsrectId.state = "RecordTrackTo";
+                    break;
+
                 }
             }
 
@@ -5106,6 +5130,32 @@ Item {
             text: "Z Steps Per Pixel = " + Mary.z_axis_steps_per_pixel
             color: rootpageId.textcolor
         }
+
+        //Record Track To Point
+        Rectangle
+        {
+            id: recordtracktobuttonId
+            x:20
+            y:zstepsperpixeltextId.y + zstepsperpixeltextId.height + 20
+            width: 600
+            height: 75
+            color: "transparent"
+            border.width: rootpageId.rectborderwidths
+            border.color: rootpageId.nonfocuscolor
+
+            Text
+            {
+                id: recordtracktotextId
+                anchors.centerIn: recordtracktobuttonId
+                font.family: fontId.name
+                font.pointSize: 20
+                height: recordtracktotextId.implicitHeight
+                width: recordtracktotextId.implicitWidth
+                text: "Set Track To Point"
+                color: rootpageId.textcolor
+            }
+        }
+
     }
 
     //Main View Rectangle-------------------------------------------
