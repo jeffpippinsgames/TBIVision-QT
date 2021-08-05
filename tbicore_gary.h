@@ -12,6 +12,7 @@ import "tbi.vision.components" 1 0
 #include <QtSerialPort/QSerialPortInfo>
 #include <QByteArray>
 #include "tbicore_constants.h"
+#include <QTimer>
 
 
 
@@ -247,6 +248,35 @@ public:
 };
 
 /**************************************************************
+GaryControllerStatus
+Description:
+  A class to encapsulate the GaryControllerStatus
+ **************************************************************/
+class GaryControllerStatus : public QObject
+{
+
+    Q_OBJECT
+public:
+
+    GaryControllerStatus() : QObject() {}
+
+    enum ControllerStatus_t{TBI_CONTROL_NONE = 0x00,
+                            TBI_CONTROL_JOYUP = 0x01,
+                            TBI_CONTROL_JOYDOWN = 0x02,
+                            TBI_CONTROL_JOYLEFT = 0x03,
+                            TBI_CONTROL_JOYRIGHT = 0x04,
+                            TBI_CONTROL_GREENBTN = 0x05,
+                            TBI_CONTROL_REDBTN = 0x06,
+                            TBI_CONTROL_BLACKBTN = 0x07};
+    Q_ENUMS(ControllerStatus_t)
+
+    static void declareQML()
+    {
+        qmlRegisterType<GaryControllerStatus>("tbi.vision.components", 1, 0, "GaryControllerStatus");
+    }
+};
+
+/**************************************************************
 Gary
 
 Gary is the Guy Who Moves The Slides.
@@ -348,6 +378,11 @@ private:
     GaryLimitSwitch::LimitSwitchState_t m_z_axis_limit;
     GaryOperationStatus::OperationStatus_t m_operation_status;
     GaryLaserStatus::LaserStatus_t m_laser_status;
+    GaryControllerStatus::ControllerStatus_t m_controller_status;
+    QTimer m_controller_autorepeatdelay_timer;
+    QTimer m_controller_autorepeat_timer;
+    bool m_controller_event_fired;
+
     qint32 m_x_position;
     qint32 m_z_position;
     quint32 m_last_status_guid;
@@ -360,6 +395,9 @@ private:
     bool findOpenArduinoUno();
     void sendSerialCommand(QByteArray &_data);
     void printControlStatusVariables();
+    void processControllerInput();
+    void onControllerAutoRepeatDelayTimer();
+    void onControllerAutoRepeatTimer();
     //--------------------------------------------------------------
 
     //Signals-------------------------------------------------------

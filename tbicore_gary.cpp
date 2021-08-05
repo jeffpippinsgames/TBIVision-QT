@@ -22,6 +22,7 @@ Gary::Gary(QObject *parent) : QObject(parent)
     m_last_status_guid = 4294967295;
     m_last_status_guid_compared_by_gary = 4294967295;
     m_motor_calib_cycle = GaryMotorCalibrationCycleStatus::TBI_MOTORCAL_OFF;
+    m_controller_status = GaryControllerStatus::TBI_CONTROL_NONE;
     //this->findOpenTeensy();
     this->findOpenArduinoUno();
     emit completed();
@@ -584,6 +585,35 @@ void Gary::printControlStatusVariables()
     qDebug() << "-------------------------------------------------------";
 }
 
+
+/**************************************************************
+processControllerInput()
+Slot
+Description:
+  Function to process in Joystick input from the microcontroller
+ **************************************************************/
+void Gary::processControllerInput()
+{
+    if(m_controller_status == GaryControllerStatus::TBI_CONTROL_NONE)
+    {
+        m_controller_autorepeat_timer.stop();
+        m_controller_autorepeatdelay_timer.stop();
+        m_controller_event_fired = false;
+        m_controller_status = GaryControllerStatus::TBI_CONTROL_NONE;
+        return;
+    }
+
+    if(m_controller_event_fired) return;
+
+    switch(m_controller_status)
+    {
+        case GaryControllerStatus::TBI_CONTROL_NONE:
+        break;
+    case GaryControllerStatus::
+
+    }
+}
+
 /**************************************************************
 readSerial()
 Slot
@@ -597,28 +627,9 @@ void Gary::readSerial()
     QByteArray _data = m_serial_port->readAll();
     m_recieved_serial.append(_data);
 
-    //The Controllers Status Packet is 21 Bytes Long.
-    //After 19 Bytes Have Transfered Process The Info.
+    //See the Aruino Sketch For the Status Buffer Structure
 
-    /*
-    NOTE: The Only Thing The Controller Sends Back To The QT Application is a Status Packet.
-    Below is the Structure of the Status Packet
-
-    [Byte 0,1,2,3] - uint32_t Status GUID
-    [Byte 4] - The Controller Motion Status of X Axis. Of Type MotionStatus_t.
-    [Byte 5] - The Controller Motion Status of Z Axis. Of Type MotionStatus_t.
-    [Byte 6,7,8,9] X Position of Controller as int32_t.
-    [Byte 10,11,12,13] Z Position of Controller as int32_t.
-    [Byte 14] - The Controller Control Mode. Of Type ControlMode_t
-    [Byte 15] - The Controller X Axis Limit Switch State - Of Type LimitSwitchState_t
-    [Byte 16] - The Controller Z Axis Switch State - Of Type LimitSwitchState_t
-    [Byte 17] - The Controller Operation Status Condition. Of Type OperationStatus_t.
-    [Byte 18] - Laser Power Status. 0 - Off, 1 - On.
-
-
-    This mandates the TBI_CONTROL_STATUS_BUFFER_SIZE Including be 21 bytes.
-    */
-    if(m_recieved_serial.size() >= 21)
+    if(m_recieved_serial.size() >= 22)
     {
         //All of the typecasting is required.
         m_last_status_guid = ((quint32)((quint8)m_recieved_serial[0] << 24)
@@ -653,6 +664,8 @@ void Gary::readSerial()
 
         m_motor_calib_cycle = (GaryMotorCalibrationCycleStatus::MotorCalibration_Cycle_t) ((quint8)m_recieved_serial[21]);
 
+        m_controller_status = (GaryControllerStatus::ControllerStatus_t) ((quint8)m_recieved_serial[22]);
+
         emit xMotionStatusChanged();
         emit zMotionStatusChanged();
         emit xPositionChanged();
@@ -666,6 +679,7 @@ void Gary::readSerial()
         emit motorCalibrationCycleChanged();
         emit xHomingStatusChanged();
         emit zHomingStatusChanged();
+        processControllerInput();
         //Done Processing clear the data array
         //printControlStatusVariables();
         m_recieved_serial.clear();

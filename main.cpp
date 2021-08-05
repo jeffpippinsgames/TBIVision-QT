@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
     GaryMotionStatus::declareQML();
     GaryLaserStatus::declareQML();
     GaryMotorCalibrationCycleStatus::declareQML();
+    GaryControllerStatus::declareQML();
     //Register The QmlTBIDisplay QML Type
     QmlTBIDisplay::declareQML();
 

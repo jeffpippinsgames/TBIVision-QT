@@ -22,7 +22,7 @@ FocusScope {
     property bool downpressed : false
     property bool leftpressed : false
     property bool rightpressed : false
-    property bool stickpressed: false;
+    property bool stickpressed: false
 
     property bool useAutoRepeatonSticks: false
     property bool useAutoRepeatonButtons: false
