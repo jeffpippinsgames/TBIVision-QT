@@ -186,7 +186,8 @@ public:
                           TBI_CMD_SET_CALIBRATION_SPEED = 0x0F,
                           TBI_CMD_SET_OPERATION_SPEED = 0x10,
                           TBI_CMD_DO_MOTOR_CALIBRATION = 0x11,
-                          TBI_CMD_CONTINUE_MOTOR_CALIBRATION = 0x12};
+                          TBI_CMD_CONTINUE_MOTOR_CALIBRATION = 0x12,
+                          TBI_CMD_KEEP_ALIVE = 0x13};
 
     Q_ENUMS(SerialCommand_t)
 
@@ -273,6 +274,49 @@ public:
     static void declareQML()
     {
         qmlRegisterType<GaryControllerStatus>("tbi.vision.components", 1, 0, "GaryControllerStatus");
+    }
+};
+
+/**************************************************************
+GaryControllerQMLSignals
+Description:
+  A class to encapsulate the GaryControllerStatus
+ **************************************************************/
+class GaryControllerQMLSignals : public QObject
+{
+    Q_OBJECT
+public:
+    GaryControllerQMLSignals() : QObject() {}
+
+    enum ControllerQMLSignal_t{TBI_CONTROLLER_JOYUP_PRESSED = 0x00,
+                               TBI_CONTROLLER_JOYUP_RELEASED = 0x01,
+                               TBI_CONTROLLER_JOYDOWN_PRESSED = 0x02,
+                               TBI_CONTROLLER_JOYDOWN_RELEASED = 0x03,
+                               TBI_CONTROLLER_JOYLEFT_PRESSED = 0x04,
+                               TBI_CONTROLLER_JOYLEFT_RELEASED = 0x05,
+                               TBI_CONTROLLER_JOYRIGHT_PRESSED = 0x06,
+                               TBI_CONTROLLER_JOYRIGHT_RELEASED = 0x07,
+                               TBI_CONTROLLER_GREENBTN_PRESSED = 0x08,
+                               TBI_CONTROLLER_GREENBTN_RELEASED = 0x09,
+                               TBI_CONTROLLER_REDBTN_PRESSED = 0x0A,
+                               TBI_CONTROLLER_REDBTN_RELEASED = 0x0B,
+                               TBI_CONTROLLER_BLACKBTN_PRESSED = 0x0C,
+                               TBI_CONTROLLER_BLACKBTN_RELEASED = 0x0D};
+
+    Q_ENUMS(ControllerQMLSignal_t)
+
+    Q_PROPERTY(ControllerQMLSignal_t controlevent READ getControlSignal)
+    Q_PROPERTY(bool autorepeat READ getAutoRepeat)
+
+    ControllerQMLSignal_t getControlSignal(){return m_controller_event;}
+    bool getAutoRepeat(){return m_is_autorepeat;}
+
+    ControllerQMLSignal_t m_controller_event;
+    bool m_is_autorepeat;
+
+    static void declareQML()
+    {
+        qmlRegisterType<GaryControllerQMLSignals>("tbi.vision.components", 1, 0, "GaryControllerQMLSignals");
     }
 };
 
@@ -379,9 +423,12 @@ private:
     GaryOperationStatus::OperationStatus_t m_operation_status;
     GaryLaserStatus::LaserStatus_t m_laser_status;
     GaryControllerStatus::ControllerStatus_t m_controller_status;
-    QTimer m_controller_autorepeatdelay_timer;
-    QTimer m_controller_autorepeat_timer;
+    QTimer *m_controller_autorepeatdelay_timer;
+    QTimer *m_controller_autorepeat_timer;
     bool m_controller_event_fired;
+
+    //Keep Alive Variables
+    QTimer *m_keep_alive_timer;
 
     qint32 m_x_position;
     qint32 m_z_position;
@@ -396,8 +443,9 @@ private:
     void sendSerialCommand(QByteArray &_data);
     void printControlStatusVariables();
     void processControllerInput();
-    void onControllerAutoRepeatDelayTimer();
-    void onControllerAutoRepeatTimer();
+
+
+
     //--------------------------------------------------------------
 
     //Signals-------------------------------------------------------
@@ -417,10 +465,14 @@ signals:
     void zPositionChanged();
     void currentStatusGUIDChanged();
     void motorCalibrationCycleChanged();
+    void garyControllerFired(GaryControllerQMLSignals &event);
     //--------------------------------------------------------------
 
 public slots:
     void readSerial();
+    void onControllerRepeatDelayTimer();
+    void onControllerRepeatTimer();
+    void onKeepAliveTimer();
 
 
 
