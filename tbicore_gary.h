@@ -177,7 +177,7 @@ public:
                           TBI_CMD_JOG_DOWN = 0x03,
                           TBI_CMD_JOG_LEFT = 0x04,
                           TBI_CMD_JOG_RIGHT = 0x05,
-                          TBI_CMD_SEND_STATUS = 0x06,
+                          TBI_CMD_ACKNOWLEDGE_STATUS_PACKET = 0x06,
                           TBI_CMD_HOME_X = 0x07,
                           TBI_CMD_HOME_Z = 0x08,
                           TBI_CMD_TOGGLE_LASER_POWER = 0x09,
@@ -389,7 +389,7 @@ public:
     Q_INVOKABLE void toggleLaserPower();
     Q_INVOKABLE void autoMoveXAxis(qint32 _steps);
     Q_INVOKABLE void autoMoveZAxis(qint32 _steps);
-    Q_INVOKABLE void sendStatusPacket();
+    Q_INVOKABLE void acknowledgeStatusPacket();
     Q_INVOKABLE void setControllerToCalibrationSpeed();
     Q_INVOKABLE void setControllerToOperationSpeed();
     Q_INVOKABLE void cycleControlModes();
@@ -431,7 +431,7 @@ private:
     bool m_controller_event_fired;
 
     //Keep Alive Variables
-    QTimer *m_keep_alive_timer;
+    QTimer *m_microcontroller_heartbeat_timer;
 
     qint32 m_x_position;
     qint32 m_z_position;

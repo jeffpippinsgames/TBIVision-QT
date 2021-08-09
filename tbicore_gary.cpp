@@ -29,14 +29,10 @@ Gary::Gary(QObject *parent) : QObject(parent)
     m_controller_autorepeatdelay_timer->setInterval(500);
     connect(m_controller_autorepeatdelay_timer, SIGNAL(timeout()), this, SLOT(onControllerRepeatDelayTimer()));
     connect(m_controller_autorepeat_timer, SIGNAL(timeout()), this, SLOT(onControllerRepeatTimer()));
-    m_keep_alive_timer = new QTimer(this);
-    m_keep_alive_timer->setInterval(100);
-    connect(m_keep_alive_timer, SIGNAL(timeout()), this, SLOT(onKeepAliveTimer()));
-
-
-    //this->findOpenTeensy();
+    m_microcontroller_heartbeat_timer = new QTimer(this);
+    m_microcontroller_heartbeat_timer->setInterval(100);
+    connect(m_microcontroller_heartbeat_timer, SIGNAL(timeout()), this, SLOT(onKeepAliveTimer()));
     this->findOpenArduinoUno();
-    sendStatusPacket();
     emit completed();
     qDebug() << "Gary::Gary() Object Created.";
 }
@@ -154,7 +150,8 @@ bool Gary::findOpenArduinoUno()
                     QObject::connect(m_serial_port, SIGNAL(readyRead()), this, SLOT(readSerial()));
                     if(m_serial_port->open(QIODevice::ReadWrite))
                     {
-                        m_keep_alive_timer->start();
+                        m_microcontroller_heartbeat_timer->start();
+                        acknowledgeStatusPacket();
                         qDebug() << "Gary::findOpenArduinoUno() Serial Port Opened.";
                         return true;
                     }
@@ -308,10 +305,10 @@ Public, Q_INVOKABLE
 Description:
   Public Method that sends the Move Z steps command
  **************************************************************/
-void Gary::sendStatusPacket()
+void Gary::acknowledgeStatusPacket()
 {
     QByteArray _cmd;
-    _cmd.append((char)GaryCommands::TBI_CMD_SEND_STATUS);
+    _cmd.append(uint(GaryCommands::TBI_CMD_ACKNOWLEDGE_STATUS_PACKET));
     sendSerialCommand(_cmd);
 }
 
@@ -433,8 +430,6 @@ void Gary::startMotorCalibration(qint32 _steps)
     sendSerialCommand(_cmd);
 }
 
-
-
 /**************************************************************
 sendToggleLaserPower()
 Public, Q_INVOKABLE
@@ -475,10 +470,14 @@ void Gary::sendSerialCommand(QByteArray &_data)
         //The Microcontroller an incomming packet to be this size.
         while(_data.size() < TBIConstants::TBI_COMMAND_BUFFER_SIZE)
         {
-            _data.append(char(0xFF));
+            _data.append(uint(255));
         }
         m_serial_port->write(_data);
-        //qDebug() << "Gary::sendSerialCommand() Sending Command to Controller: " << _data.toHex(',');
+        if(_data[0].operator!=(uint(GaryCommands::TBI_CMD_KEEP_ALIVE)))
+        {
+            //qDebug() << "Gary::sendSerialCommand() Sending Command to Controller: " << _data.toHex(',');
+        }
+
     }
     else
     {
@@ -845,7 +844,8 @@ Description:
  **************************************************************/
 void Gary::readSerial()
 {
-
+    //The Microcontroller Will send 23 Byte Packets.
+    //It Will Not Send Another One Until the Packet Has Been Acknowledged.
 
     QByteArray _data = m_serial_port->readAll();
     m_recieved_serial.append(_data);
@@ -888,6 +888,8 @@ void Gary::readSerial()
         m_motor_calib_cycle = (GaryMotorCalibrationCycleStatus::MotorCalibration_Cycle_t) ((quint8)m_recieved_serial[21]);
 
         m_controller_status = (GaryControllerStatus::ControllerStatus_t) ((quint8)m_recieved_serial[22]);
+        //qDebug() << "Controller Status: " << m_controller_status;
+        //qDebug() << "m_recieved_serial=" << m_recieved_serial.toHex(',');
         m_recieved_serial.clear();
         emit xMotionStatusChanged();
         emit zMotionStatusChanged();
@@ -903,9 +905,7 @@ void Gary::readSerial()
         emit xHomingStatusChanged();
         emit zHomingStatusChanged();
         processControllerInput();
-        sendStatusPacket();
-        qDebug() << "Processed Packet.";
-
+        acknowledgeStatusPacket();
     }
 
 }

@@ -69,7 +69,7 @@ FocusScope {
     {
 
 
-        console.log("controlsignal: " + controlsignal + " - autorepeat: " + autorepeat);
+        //console.log("controlsignal: " + controlsignal + " - autorepeat: " + autorepeat);
         switch(controlsignal)
         {
         case GaryControllerQMLSignals.TBI_CONTROLLER_GREENBTN_PRESSED:
@@ -79,7 +79,7 @@ FocusScope {
             }
             greenpressed = true;
             greenButtonPressed();
-            console.log("Green Button Pressed");
+            //console.log("Green Button Pressed");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_REDBTN_PRESSED:
             if(!useAutoRepeatonButtons)
@@ -88,7 +88,7 @@ FocusScope {
             }
             redpressed = true;
             redButtonPressed();
-            console.log("Red Button Pressed");
+            //console.log("Red Button Pressed");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_BLACKBTN_PRESSED:
             if(!useAutoRepeatonButtons)
@@ -97,17 +97,16 @@ FocusScope {
             }
             blackpressed = true;
             blackButtonPressed();
-            console.log("Black Button Pressed");
+            //console.log("Black Button Pressed");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_JOYUP_PRESSED:
-            console.log("TBI_CONTROLLER_JOYUP_PRESSED");
             if(!useAutoRepeatonButtons)
             {
                 if(autorepeat) return;
             }
             uppressed = true;
             upButtonPressed();
-            console.log("Joystick Up Pressed");
+            //console.log("Joystick Up Pressed");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_JOYDOWN_PRESSED:
             if(!useAutoRepeatonButtons)
@@ -116,7 +115,7 @@ FocusScope {
             }
             downpressed = true;
             downButtonPressed();
-            console.log("Joystick Down Pressed");
+            //console.log("Joystick Down Pressed");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_JOYLEFT_PRESSED:
             if(!useAutoRepeatonButtons)
@@ -125,7 +124,7 @@ FocusScope {
             }
             leftpressed = true;
             leftButtonPressed();
-            console.log("Joystick Left Pressed");
+            //console.log("Joystick Left Pressed");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_JOYRIGHT_PRESSED:
             if(!useAutoRepeatonButtons)
@@ -134,43 +133,43 @@ FocusScope {
             }
             rightpressed = true;
             rightButtonPressed();
-            console.log("Joystick Right Pressed");
+            //console.log("Joystick Right Pressed");
             break;
         //--------------------------------------
         case GaryControllerQMLSignals.TBI_CONTROLLER_GREENBTN_RELEASED:
             greenpressed = false;
             greenButtonReleased();
-            console.log("Green Button Released");
+            //console.log("Green Button Released");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_REDBTN_RELEASED:
             redpressed = false;
             redButtonReleased();
-            console.log("Red Button Released");
+            //console.log("Red Button Released");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_BLACKBTN_RELEASED:
             blackpressed = false;
             blackButtonReleased();
-            console.log("Black Button Released");
+            //console.log("Black Button Released");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_JOYUP_RELEASED:
             uppressed = false;
             upButtonReleased();
-            console.log("Joystick Up Released");
+            //console.log("Joystick Up Released");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_JOYDOWN_RELEASED:
             downpressed = false;
             downButtonReleased();
-            console.log("Joystick Down Released");
+            //console.log("Joystick Down Released");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_JOYLEFT_RELEASED:
             leftpressed = false;
             leftButtonReleased();
-            console.log("Joystick Left Released");
+            //console.log("Joystick Left Released");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_JOYRIGHT_RELEASED:
             rightpressed = false;
             rightButtonReleased();
-            console.log("Joystick Right Released");
+            //console.log("Joystick Right Released");
             break;
 
 
