@@ -36,6 +36,7 @@ Gary::Gary(QObject *parent) : QObject(parent)
 
     //this->findOpenTeensy();
     this->findOpenArduinoUno();
+    sendStatusPacket();
     emit completed();
     qDebug() << "Gary::Gary() Object Created.";
 }
@@ -153,6 +154,7 @@ bool Gary::findOpenArduinoUno()
                     QObject::connect(m_serial_port, SIGNAL(readyRead()), this, SLOT(readSerial()));
                     if(m_serial_port->open(QIODevice::ReadWrite))
                     {
+                        m_keep_alive_timer->start();
                         qDebug() << "Gary::findOpenArduinoUno() Serial Port Opened.";
                         return true;
                     }
@@ -605,55 +607,6 @@ Description:
  **************************************************************/
 void Gary::processControllerInput()
 {
-    //No Control Inputed. Reset All appropriate variables
-    if(m_controller_status == GaryControllerStatus::TBI_CONTROL_NONE)
-    {
-        //Stop the autorepeat timers
-        m_controller_autorepeat_timer->stop();
-        m_controller_autorepeatdelay_timer->stop();
-        m_controller_event_fired = false;
-        //Fire The Release Event if needed
-        GaryControllerQMLSignals _gcq;
-        _gcq.m_is_autorepeat = false;
-        switch(m_controller_status)
-        {
-            case GaryControllerStatus::TBI_CONTROL_NONE:
-            break;
-        case GaryControllerStatus::TBI_CONTROL_JOYUP:
-            _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYUP_RELEASED;
-            emit garyControllerFired(_gcq);
-            break;
-        case GaryControllerStatus::TBI_CONTROL_JOYDOWN:
-            _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYDOWN_RELEASED;
-            emit garyControllerFired(_gcq);
-            break;
-        case GaryControllerStatus::TBI_CONTROL_JOYLEFT:
-            _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYLEFT_RELEASED;
-            emit garyControllerFired(_gcq);
-            break;
-        case GaryControllerStatus::TBI_CONTROL_JOYRIGHT:
-            _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYRIGHT_RELEASED;
-            emit garyControllerFired(_gcq);
-            break;
-        case GaryControllerStatus::TBI_CONTROL_GREENBTN:
-            _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_GREENBTN_RELEASED;
-            emit garyControllerFired(_gcq);
-            break;
-        case GaryControllerStatus::TBI_CONTROL_REDBTN:
-            _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_REDBTN_RELEASED;
-            emit garyControllerFired(_gcq);
-            break;
-        case GaryControllerStatus::TBI_CONTROL_BLACKBTN:
-            _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_BLACKBTN_RELEASED;
-            emit garyControllerFired(_gcq);
-            break;
-        }
-        m_controller_status = GaryControllerStatus::TBI_CONTROL_NONE;
-        return;
-    }
-
-    //Return out if the controller event has already latched.
-    if(m_controller_event_fired) return;
 
     //A New Control Event has Happened Set the appropriate controller variables
     //Start The Autodelay timer
@@ -661,103 +614,176 @@ void Gary::processControllerInput()
     _gcs.m_is_autorepeat = false;
     switch(m_controller_status)
     {
-        case GaryControllerStatus::TBI_CONTROL_NONE: //It should never hit here.
-            break;
-        case GaryControllerStatus::TBI_CONTROL_JOYUP:
+    case GaryControllerStatus::TBI_CONTROL_NONE: //It should never hit here.
+        //Stop the autorepeat timers
+        m_controller_autorepeat_timer->stop();
+        m_controller_autorepeatdelay_timer->stop();
+
+        //Fire The Release Event if needed
+        if(m_controller_event_fired == true)
+        {
+            GaryControllerQMLSignals _gcs;
+            _gcs.m_is_autorepeat = false;
+            m_controller_event_fired = false;
+            switch(m_last_controller_status)
+            {
+            case GaryControllerStatus::TBI_CONTROL_NONE:
+                break;
+            case GaryControllerStatus::TBI_CONTROL_JOYUP:
+                _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYUP_RELEASED;
+                emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
+                break;
+            case GaryControllerStatus::TBI_CONTROL_JOYDOWN:
+                _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYDOWN_RELEASED;
+                emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
+                break;
+            case GaryControllerStatus::TBI_CONTROL_JOYLEFT:
+                _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYLEFT_RELEASED;
+                emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
+                break;
+            case GaryControllerStatus::TBI_CONTROL_JOYRIGHT:
+                _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYRIGHT_RELEASED;
+                emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
+                break;
+            case GaryControllerStatus::TBI_CONTROL_GREENBTN:
+                _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_GREENBTN_RELEASED;
+                emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
+                break;
+            case GaryControllerStatus::TBI_CONTROL_REDBTN:
+                _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_REDBTN_RELEASED;
+                emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
+                break;
+            case GaryControllerStatus::TBI_CONTROL_BLACKBTN:
+                _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_BLACKBTN_RELEASED;
+                emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
+                break;
+            }
+            m_last_controller_status = GaryControllerStatus::TBI_CONTROL_NONE;
+        }
+        break;
+    case GaryControllerStatus::TBI_CONTROL_JOYUP:
+        if(!m_controller_event_fired)
+        {
             m_controller_autorepeatdelay_timer->start();
             m_controller_event_fired = true;
             m_controller_status = GaryControllerStatus::TBI_CONTROL_JOYUP;
             _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYUP_PRESSED;
-            emit garyControllerFired(_gcs);
+            emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
             m_controller_autorepeatdelay_timer->start();
-            break;
-        case GaryControllerStatus::TBI_CONTROL_JOYDOWN:
+            m_last_controller_status = m_controller_status;
+        }
+        break;
+    case GaryControllerStatus::TBI_CONTROL_JOYDOWN:
+        if(!m_controller_event_fired)
+        {
             m_controller_autorepeatdelay_timer->start();
             m_controller_event_fired = true;
             m_controller_status = GaryControllerStatus::TBI_CONTROL_JOYDOWN;
             _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYDOWN_PRESSED;
-            emit garyControllerFired(_gcs);
+            emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
+            m_last_controller_status = m_controller_status;
             m_controller_autorepeatdelay_timer->start();
-            break;
-        case GaryControllerStatus::TBI_CONTROL_JOYRIGHT:
+        }
+        break;
+    case GaryControllerStatus::TBI_CONTROL_JOYRIGHT:
+        if(!m_controller_event_fired)
+        {
             m_controller_autorepeatdelay_timer->start();
             m_controller_event_fired = true;
             m_controller_status = GaryControllerStatus::TBI_CONTROL_JOYRIGHT;
             _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYRIGHT_PRESSED;
-            emit garyControllerFired(_gcs);
+            emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
+            m_last_controller_status = m_controller_status;
             m_controller_autorepeatdelay_timer->start();
-            break;
-        case GaryControllerStatus::TBI_CONTROL_JOYLEFT:
+        }
+        break;
+    case GaryControllerStatus::TBI_CONTROL_JOYLEFT:
+        if(!m_controller_event_fired)
+        {
             m_controller_autorepeatdelay_timer->start();
             m_controller_event_fired = true;
             m_controller_status = GaryControllerStatus::TBI_CONTROL_JOYLEFT;
             _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYLEFT_PRESSED;
-            emit garyControllerFired(_gcs);
+            emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
+            m_last_controller_status = m_controller_status;
             m_controller_autorepeatdelay_timer->start();
-            break;
-        case GaryControllerStatus::TBI_CONTROL_GREENBTN:
+        }
+        break;
+    case GaryControllerStatus::TBI_CONTROL_GREENBTN:
+        if(!m_controller_event_fired)
+        {
             m_controller_autorepeatdelay_timer->start();
             m_controller_event_fired = true;
             m_controller_status = GaryControllerStatus::TBI_CONTROL_GREENBTN;
             _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_GREENBTN_PRESSED;
-            emit garyControllerFired(_gcs);
+            emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
+            m_last_controller_status = m_controller_status;
             m_controller_autorepeatdelay_timer->start();
-            break;
-        case GaryControllerStatus::TBI_CONTROL_REDBTN:
+        }
+        break;
+    case GaryControllerStatus::TBI_CONTROL_REDBTN:
+        if(!m_controller_event_fired)
+        {
             m_controller_autorepeatdelay_timer->start();
             m_controller_event_fired = true;
             m_controller_status = GaryControllerStatus::TBI_CONTROL_REDBTN;
             _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_REDBTN_PRESSED;
-            emit garyControllerFired(_gcs);
+            emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
+            m_last_controller_status = m_controller_status;
             m_controller_autorepeatdelay_timer->start();
-            break;
-        case GaryControllerStatus::TBI_CONTROL_BLACKBTN:
+        }
+        break;
+    case GaryControllerStatus::TBI_CONTROL_BLACKBTN:
+        if(!m_controller_event_fired)
+        {
             m_controller_autorepeatdelay_timer->start();
             m_controller_event_fired = true;
             m_controller_status = GaryControllerStatus::TBI_CONTROL_BLACKBTN;
             _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_BLACKBTN_PRESSED;
-            emit garyControllerFired(_gcs);
+            emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
+            m_last_controller_status = m_controller_status;
             m_controller_autorepeatdelay_timer->start();
-            break;
+        }
+        break;
     }
 }
 
 void Gary::onControllerRepeatDelayTimer()
 {
     m_controller_autorepeatdelay_timer->stop();
-    GaryControllerQMLSignals _gcq;
-    _gcq.m_is_autorepeat = true;
+    GaryControllerQMLSignals _gcs;
+    _gcs.m_is_autorepeat = true;
     switch(m_controller_status)
     {
-        case GaryControllerStatus::TBI_CONTROL_NONE:
+    case GaryControllerStatus::TBI_CONTROL_NONE:
         break;
     case GaryControllerStatus::TBI_CONTROL_JOYUP:
-        _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYUP_RELEASED;
-        emit garyControllerFired(_gcq);
+        _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYUP_RELEASED;
+        emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
         break;
     case GaryControllerStatus::TBI_CONTROL_JOYDOWN:
-        _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYDOWN_RELEASED;
-        emit garyControllerFired(_gcq);
+        _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYDOWN_RELEASED;
+        emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
         break;
     case GaryControllerStatus::TBI_CONTROL_JOYLEFT:
-        _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYLEFT_RELEASED;
-        emit garyControllerFired(_gcq);
+        _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYLEFT_RELEASED;
+        emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
         break;
     case GaryControllerStatus::TBI_CONTROL_JOYRIGHT:
-        _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYRIGHT_RELEASED;
-        emit garyControllerFired(_gcq);
+        _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYRIGHT_RELEASED;
+        emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
         break;
     case GaryControllerStatus::TBI_CONTROL_GREENBTN:
-        _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_GREENBTN_RELEASED;
-        emit garyControllerFired(_gcq);
+        _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_GREENBTN_RELEASED;
+        emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
         break;
     case GaryControllerStatus::TBI_CONTROL_REDBTN:
-        _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_REDBTN_RELEASED;
-        emit garyControllerFired(_gcq);
+        _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_REDBTN_RELEASED;
+        emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
         break;
     case GaryControllerStatus::TBI_CONTROL_BLACKBTN:
-        _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_BLACKBTN_RELEASED;
-        emit garyControllerFired(_gcq);
+        _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_BLACKBTN_RELEASED;
+        emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
         break;
     }
     m_controller_autorepeat_timer->start();
@@ -765,39 +791,39 @@ void Gary::onControllerRepeatDelayTimer()
 
 void Gary::onControllerRepeatTimer()
 {
-    GaryControllerQMLSignals _gcq;
-    _gcq.m_is_autorepeat = true;
+    GaryControllerQMLSignals _gcs;
+    _gcs.m_is_autorepeat = true;
     switch(m_controller_status)
     {
-        case GaryControllerStatus::TBI_CONTROL_NONE:
+    case GaryControllerStatus::TBI_CONTROL_NONE:
         break;
     case GaryControllerStatus::TBI_CONTROL_JOYUP:
-        _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYUP_RELEASED;
-        emit garyControllerFired(_gcq);
+        _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYUP_RELEASED;
+        emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
         break;
     case GaryControllerStatus::TBI_CONTROL_JOYDOWN:
-        _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYDOWN_RELEASED;
-        emit garyControllerFired(_gcq);
+        _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYDOWN_RELEASED;
+        emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
         break;
     case GaryControllerStatus::TBI_CONTROL_JOYLEFT:
-        _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYLEFT_RELEASED;
-        emit garyControllerFired(_gcq);
+        _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYLEFT_RELEASED;
+        emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
         break;
     case GaryControllerStatus::TBI_CONTROL_JOYRIGHT:
-        _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYRIGHT_RELEASED;
-        emit garyControllerFired(_gcq);
+        _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_JOYRIGHT_RELEASED;
+        emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
         break;
     case GaryControllerStatus::TBI_CONTROL_GREENBTN:
-        _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_GREENBTN_RELEASED;
-        emit garyControllerFired(_gcq);
+        _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_GREENBTN_RELEASED;
+        emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
         break;
     case GaryControllerStatus::TBI_CONTROL_REDBTN:
-        _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_REDBTN_RELEASED;
-        emit garyControllerFired(_gcq);
+        _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_REDBTN_RELEASED;
+        emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
         break;
     case GaryControllerStatus::TBI_CONTROL_BLACKBTN:
-        _gcq.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_BLACKBTN_RELEASED;
-        emit garyControllerFired(_gcq);
+        _gcs.m_controller_event = GaryControllerQMLSignals::TBI_CONTROLLER_BLACKBTN_RELEASED;
+        emit garyControllerFired(_gcs.m_controller_event, _gcs.m_is_autorepeat);
         break;
     }
 }
@@ -826,7 +852,7 @@ void Gary::readSerial()
 
     //See the Aruino Sketch For the Status Buffer Structure
 
-    if(m_recieved_serial.size() >= 22)
+    if(m_recieved_serial.size() == 23)
     {
         //All of the typecasting is required.
         m_last_status_guid = ((quint32)((quint8)m_recieved_serial[0] << 24)
@@ -862,7 +888,7 @@ void Gary::readSerial()
         m_motor_calib_cycle = (GaryMotorCalibrationCycleStatus::MotorCalibration_Cycle_t) ((quint8)m_recieved_serial[21]);
 
         m_controller_status = (GaryControllerStatus::ControllerStatus_t) ((quint8)m_recieved_serial[22]);
-
+        m_recieved_serial.clear();
         emit xMotionStatusChanged();
         emit zMotionStatusChanged();
         emit xPositionChanged();
@@ -877,7 +903,9 @@ void Gary::readSerial()
         emit xHomingStatusChanged();
         emit zHomingStatusChanged();
         processControllerInput();
-        m_recieved_serial.clear();
+        sendStatusPacket();
+        qDebug() << "Processed Packet.";
+
     }
 
 }

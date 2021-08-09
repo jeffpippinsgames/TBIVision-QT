@@ -84,7 +84,9 @@ Item
     {
 
         id:controllerId
-        focus: true
+        useAutoRepeatonSticks: false;
+        useAutoRepeatonButtons: false;
+        //focus: true
 
         onBlackButtonPressed:
         {

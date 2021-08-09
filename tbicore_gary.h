@@ -13,6 +13,7 @@ import "tbi.vision.components" 1 0
 #include <QByteArray>
 #include "tbicore_constants.h"
 #include <QTimer>
+#include <QVariant>
 
 
 
@@ -400,6 +401,7 @@ public:
     Q_INVOKABLE bool isStatusGUIDDifferentFromLastCompare();
     Q_INVOKABLE void sendProceedNextMotorPhase();
     Q_INVOKABLE void startMotorCalibration(qint32 _steps);
+
     //------------------------------------------------------------
 
 private:
@@ -423,6 +425,7 @@ private:
     GaryOperationStatus::OperationStatus_t m_operation_status;
     GaryLaserStatus::LaserStatus_t m_laser_status;
     GaryControllerStatus::ControllerStatus_t m_controller_status;
+    GaryControllerStatus::ControllerStatus_t m_last_controller_status;
     QTimer *m_controller_autorepeatdelay_timer;
     QTimer *m_controller_autorepeat_timer;
     bool m_controller_event_fired;
@@ -465,7 +468,7 @@ signals:
     void zPositionChanged();
     void currentStatusGUIDChanged();
     void motorCalibrationCycleChanged();
-    void garyControllerFired(GaryControllerQMLSignals &event);
+    void garyControllerFired(QVariant controlsignal, QVariant autorepeat);
     //--------------------------------------------------------------
 
 public slots:
