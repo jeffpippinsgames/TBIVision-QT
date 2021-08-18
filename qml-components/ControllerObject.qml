@@ -69,7 +69,7 @@ FocusScope {
     {
 
 
-        //console.log("controlsignal: " + controlsignal + " - autorepeat: " + autorepeat);
+        console.log("controlsignal: " + controlsignal + " - autorepeat: " + autorepeat);
         switch(controlsignal)
         {
         case GaryControllerQMLSignals.TBI_CONTROLLER_GREENBTN_PRESSED:
@@ -100,7 +100,7 @@ FocusScope {
             //console.log("Black Button Pressed");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_JOYUP_PRESSED:
-            if(!useAutoRepeatonButtons)
+            if(!useAutoRepeatonSticks)
             {
                 if(autorepeat) return;
             }
@@ -109,7 +109,7 @@ FocusScope {
             //console.log("Joystick Up Pressed");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_JOYDOWN_PRESSED:
-            if(!useAutoRepeatonButtons)
+            if(!useAutoRepeatonSticks)
             {
                 if(autorepeat) return;
             }
@@ -118,7 +118,7 @@ FocusScope {
             //console.log("Joystick Down Pressed");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_JOYLEFT_PRESSED:
-            if(!useAutoRepeatonButtons)
+            if(!useAutoRepeatonSticks)
             {
                 if(autorepeat) return;
             }
@@ -127,7 +127,7 @@ FocusScope {
             //console.log("Joystick Left Pressed");
             break;
         case GaryControllerQMLSignals.TBI_CONTROLLER_JOYRIGHT_PRESSED:
-            if(!useAutoRepeatonButtons)
+            if(!useAutoRepeatonSticks)
             {
                 if(autorepeat) return;
             }
