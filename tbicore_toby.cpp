@@ -62,6 +62,7 @@ Description:
  **************************************************************/
 void Toby::OnImageGrabbed(CInstantCamera &camera, const CGrabResultPtr &ptrGrab)
 {
+
     m_camera_fps = QString("Camera FPS = " + QString::number(1000/m_timer.elapsed()));
     if(ptrGrab->GrabSucceeded())
     {
@@ -120,18 +121,18 @@ bool Toby::SetCameraSettings()
 
     try
     {
+
         //Get Camera NodeMap
         GenApi::INodeMap& _nodemap = m_camera->GetNodeMap();
         //Analog Controls
         CEnumParameter(_nodemap, "GainAuto").SetValue("Off");
         CEnumParameter(_nodemap, "GainSelector").SetValue("All");
-        CIntegerParameter(_nodemap, "GainRaw").SetValue(0); //Range 0 to 360
+        CIntegerParameter(_nodemap, "GainRaw").SetValue(136); //Range 0 to 360 for aca720; Range 136 to 542 for aca800
         CEnumParameter(_nodemap, "BlackLevelSelector").SetValue("All");
-        CIntegerParameter(_nodemap, "BlackLevelRaw").SetValue(0); //Range 0 to 511
+        CIntegerParameter(_nodemap, "BlackLevelRaw").SetValue(0); //Range 0 to 511 for aca720; Range 0 to 255 for aca800
         CBooleanParameter(_nodemap, "GammaEnable").SetValue(false);
         CEnumParameter(_nodemap, "GammaSelector").SetValue("User");
         CFloatParameter(_nodemap, "Gamma").SetValue(0.0);
-        CIntegerParameter(_nodemap, "DigitalShift").SetValue(0); //Range 0 to 4
 
         //Image Format Controls
         CEnumParameter(_nodemap, "PixelFormat").SetValue("Mono8");
@@ -139,8 +140,8 @@ bool Toby::SetCameraSettings()
         CBooleanParameter(_nodemap, "ReverseY").SetValue(false);
 
         //AOI Controls
-        CIntegerParameter(_nodemap, "Width").SetValue(720); //Range 0 to 728
-        CIntegerParameter(_nodemap, "Height").SetValue(540); //Range 0 to 544
+        CIntegerParameter(_nodemap, "Width").SetValue(800); //Range 0 to 728 For aca720; Range 0 to 816 for aca800
+        CIntegerParameter(_nodemap, "Height").SetValue(600); //Range 0 to 544 for aca720; Range 0 to 616 for aca800
         CBooleanParameter(_nodemap, "CenterX").SetValue(true);
         CBooleanParameter(_nodemap, "CenterY").SetValue(true);
         CIntegerParameter(_nodemap, "BinningHorizontal").SetValue(1); //Set To 1
@@ -154,13 +155,13 @@ bool Toby::SetCameraSettings()
         //Exposure Control
         CEnumParameter(_nodemap, "ExposureMode").SetValue("Timed");
         CEnumParameter(_nodemap, "ExposureAuto").SetValue("Off");
-        CEnumParameter(_nodemap, "ExposureTimeMode").SetValue("Standard");
+        //CEnumParameter(_nodemap, "ExposureTimeMode").SetValue("Standard"); //The aca800 has only 1 Mode "timed.
         CFloatParameter(_nodemap, "ExposureTimeAbs").SetValue(1000.0);
 
         //SyncFreeRun Controls
         CBooleanParameter(_nodemap, "SyncFreeRunTimerEnable").SetValue(false);
-        CIntegerParameter(_nodemap, "SyncFreeRunTimerStartTimeLow").SetValue(0); //Set to 0
-        CIntegerParameter(_nodemap, "SyncFreeRunTimerStartTimeHigh").SetValue(0); //Set to 0
+        CIntegerParameter(_nodemap, "SyncFreeRunTimerStartTimeLow").SetValue(0); //Set to 0 Not Available for aca800
+        CIntegerParameter(_nodemap, "SyncFreeRunTimerStartTimeHigh").SetValue(0); //Set to 0 Not Available for aca800
         CFloatParameter(_nodemap, "SyncFreeRunTimerTriggerRateAbs").SetValue(0.03);
 
         //Acquisition Controls
@@ -178,9 +179,11 @@ bool Toby::SetCameraSettings()
     catch(const GenericException &e)
     {
         QString _error = e.GetDescription();
-        qDebug() << "Toby:: Error in SetDefaultCameraSettings(): " + _error;
+        qDebug() << "Toby:: Error in SetCameraSettings(): " + _error;
         return false;
     }
+
+    qDebug() << "Toby:: SetCameraSettings() finished. Camera Settings Have Been Set.";
     return true;
 }
 
@@ -192,6 +195,7 @@ Description:
  **************************************************************/
 void Toby::onChangeCameraAOI(int _width, int _height)
 {
+    /*
     if(!isCameraInitialized())
     {
         qDebug() << "Toby::onChangeCameraAOI() called without camera being initialized.";
@@ -210,7 +214,7 @@ void Toby::onChangeCameraAOI(int _width, int _height)
         qDebug() << "Toby:: Error in onChangeCameraGain: " + _error;
     }
 
-
+*/
 }
 
 /**************************************************************
@@ -221,6 +225,7 @@ Description:
  **************************************************************/
 void Toby::onChangeCameraExposure(double _exposure)
 {
+    /*
     if(!isCameraInitialized())
     {
         qDebug() << "Toby::onChangeCameraExposure() called without camera being initialized.";
@@ -238,7 +243,7 @@ void Toby::onChangeCameraExposure(double _exposure)
         QString _error = e.GetDescription();
         qDebug() << "Toby:: Error in onChangeCameraExposure: " + _error;
     }
-
+*/
 }
 
 /**************************************************************
@@ -249,6 +254,8 @@ Description:
  **************************************************************/
 void Toby::onChangeCameraGain(int _gain)
 {
+    /*
+
     if(!isCameraInitialized())
     {
         qDebug() << "Toby::onChangeCameraGain() called without camera being initialized.";
@@ -258,15 +265,16 @@ void Toby::onChangeCameraGain(int _gain)
     try
     {
         //Get Camera NodeMap
-        GenApi::INodeMap& _nodemap = m_camera->GetNodeMap();
-        CIntegerParameter(_nodemap, "GainRaw").SetValue(_gain); //Range 0 to 360
+        //GenApi::INodeMap& _nodemap = m_camera->GetNodeMap();
+//        /CIntegerParameter(_nodemap, "GainRaw").SetValue(_gain); //Range 0 to 360
+        //CIntegerParameter(_nodemap, "GainRaw").SetValue(136);
     }
     catch(const GenericException &e)
     {
-        QString _error = e.GetDescription();
-        qDebug() << "Toby:: Error in onChangeCameraGain: " + _error;
+        //QString _error = e.GetDescription();
+        //qDebug() << "Toby:: Error in onChangeCameraGain: " + _error;
     }
-
+*/
 }
 
 
@@ -412,7 +420,7 @@ Description:
  **************************************************************/
 void Toby::startCamera()
 {
-
+    qDebug() << "startCamera() Called";
     if(!isCameraInitialized())
     {
         qDebug() << "Toby::startCamera() called without camera being initialized";
@@ -432,7 +440,7 @@ void Toby::startCamera()
     }
     catch(const Pylon::GenericException e)
     {
-        qDebug() << "Toby::startCamera(): Pylon Error: " << e.GetDescription();
+        qDebug() << "Toby::startCamera(): Pylon Error: FFFF" << e.GetDescription();
         m_camera = nullptr;
         return;
     }
@@ -509,6 +517,7 @@ Description:
  **************************************************************/
 void Toby::triggerNextFrame()
 {
+
     //Process the Still Image if the debug image is not null
     if(m_processsing_debug_image)
     {
@@ -536,6 +545,7 @@ void Toby::triggerNextFrame()
         }
         if (m_camera->WaitForFrameTriggerReady( 1000, TimeoutHandling_ThrowException ))
         {
+
            m_camera->ExecuteSoftwareTrigger();
             //qDebug() << "Camera Software Trigger Tripped";
         }
