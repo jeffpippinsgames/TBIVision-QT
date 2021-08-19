@@ -65,7 +65,6 @@ Item
     }
 
     //OML Components
-
     Timer
     {
         id: imagegrabtimerId
@@ -181,6 +180,36 @@ Item
         opacity: .7
     }
 
+    //Background Rectangle For QmlTBIDisplay
+    Rectangle
+    {
+        id: viewbackgroundrectId
+        width:1920-5
+        height:1080-5
+        x:50
+        y: 100
+        color: "black"
+        border.color: Qt.rgba(1,1,1,.1)
+        border.width: 5
+        anchors.centerIn: parent
+
+
+        QmlTBIDisplay
+        {
+            id: operationviewId
+            width: viewbackgroundrectId.width-5
+            height:viewbackgroundrectId.height-5
+            anchors.centerIn: viewbackgroundrectId
+
+            Component.onCompleted:
+            {
+                operationviewId.scaleToWidth = operationviewId.width;
+                Max.newOperationMatProcessed.connect(operationviewId.recieveCVMat);
+            }
+        }
+
+    }
+
     //Time in Loop Text
     Text
     {
@@ -189,7 +218,7 @@ Item
         focus: false
         font.family: fontId.name
         text: Max.timeinloop
-        font.pointSize: 15
+        font.pointSize: 20
         width: timeinlooptextId.implicitWidth
         height: timeinlooptextId.implicitHeight
         x: 30
@@ -213,27 +242,6 @@ Item
         color: Qt.rgba(1,1,.95,1)
     }
 
-    //Gary Notification Icon
-    IconInfoStatusObject
-    {
-        id:garystatusId
-        imagesource: "qrc:/Icons/microcontroller(white).png"
-        width:150
-        height:150
-        x:mainpageID.width-garystatusId.width-50
-        y:50
-
-        function garyChangedOperationStatus(status)
-        {
-
-        }
-
-        Component.onCompleted:
-        {
-            Gary.operationStatusChanged.connect(garystatusId.garyChangedOperationStatus);
-        }
-    }
-
     //Control Key Display
     ControllerKeyObject
     {
@@ -242,57 +250,6 @@ Item
         greenbuttonmessage: "Activate"
         blackbuttonmessage: "Menu"
         buttonspacing: 150
-    }
-
-    //Testing Keypad Object
-    KeypadObject
-    {
-        id: keypadId
-        displayedmessage: "Enter a Value"
-        displayedvalue: "23.22"
-        onAboutToOpen:
-        {
-            controllerId.focus=false;
-            keypadId.focus=true;
-        }
-        onAboutToClose:
-        {
-            keypadId.focus=false;
-            controllerId.focus=true;
-        }
-        onReturnedvalueChanged:
-        {
-            console.log("Keypad Returned: " + returnedvalue);
-        }
-    }
-
-    //Background Rectangle For QmlTBIDisplay
-    Rectangle
-    {
-        id: viewbackgroundrectId
-        width:1034
-        height:770
-        x:50
-        y: 100
-        color: "black"
-        border.color: Qt.rgba(1,1,1,.1)
-        border.width: 5
-
-
-        QmlTBIDisplay
-        {
-            id: operationviewId
-            width: 1024
-            height:450
-            anchors.centerIn: viewbackgroundrectId
-
-            Component.onCompleted:
-            {
-                operationviewId.scaleToWidth = operationviewId.width;
-                Max.newOperationMatProcessed.connect(operationviewId.recieveCVMat);
-            }
-        }
-
     }
 
 }

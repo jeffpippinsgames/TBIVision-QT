@@ -3,10 +3,6 @@
 #include <QThread>
 #include <QDir>
 
-
-
-
-
 //Constructors and Deconstructors
 /**************************************************************
 Toby()
@@ -50,9 +46,6 @@ Toby::~Toby()
     qDebug() << "Toby::~Toby() Toby Object Destroyed.";
 }
 
-
-
-
 //Pylon Overloaded onImageGrabbed Method
 /**************************************************************
 OnImageGrabbed(CInstantCamera &camera, const CGrabResultPtr &ptrGrab)
@@ -73,10 +66,6 @@ void Toby::OnImageGrabbed(CInstantCamera &camera, const CGrabResultPtr &ptrGrab)
     emit cameraFPSChanged(m_camera_fps);
 }
 
-
-
-
-
 //Get Methods
 /**************************************************************
 getCameraInfo()
@@ -96,9 +85,6 @@ QString Toby::getCameraInfo()
     return QString("Current Camera: " + _model);
 }
 
-
-
-
 //Camera Settings Related Slots
 /**************************************************************
 CameraSettings()
@@ -108,7 +94,7 @@ Description:
  This Function Puts them all in one spot for ease of reading
  and Changing. It mirrors the Pylon Viewer App.
  **************************************************************/
-bool Toby::SetCameraSettings()
+bool Toby::SetCameraSettingsacA800()
 {
     if(!m_camera) return false;
     if(!m_camera->IsOpen()) return false;
@@ -179,11 +165,90 @@ bool Toby::SetCameraSettings()
     catch(const GenericException &e)
     {
         QString _error = e.GetDescription();
-        qDebug() << "Toby:: Error in SetCameraSettings(): " + _error;
+        qDebug() << "Toby:: Error in SetCameraSettingsacA800(): " + _error;
         return false;
     }
 
-    qDebug() << "Toby:: SetCameraSettings() finished. Camera Settings Have Been Set.";
+    qDebug() << "Toby:: SetCameraSettingsacA800() finished. Camera Settings Have Been Set.";
+    return true;
+}
+
+bool Toby::SetCameraSettingsacA720()
+{
+    if(!m_camera) return false;
+    if(!m_camera->IsOpen()) return false;
+
+    if(!isCameraInitialized())
+    {
+        qDebug() << "Toby::SetCameraSettings() called without a camera being initialized.";
+        return false;
+    }
+
+    try
+    {
+
+        //Get Camera NodeMap
+        GenApi::INodeMap& _nodemap = m_camera->GetNodeMap();
+        //Analog Controls
+        CEnumParameter(_nodemap, "GainAuto").SetValue("Off");
+        CEnumParameter(_nodemap, "GainSelector").SetValue("All");
+        CIntegerParameter(_nodemap, "GainRaw").SetValue(0); //Range 0 to 360 for aca720; Range 136 to 542 for aca800
+        CEnumParameter(_nodemap, "BlackLevelSelector").SetValue("All");
+        CIntegerParameter(_nodemap, "BlackLevelRaw").SetValue(0); //Range 0 to 511 for aca720; Range 0 to 255 for aca800
+        CBooleanParameter(_nodemap, "GammaEnable").SetValue(false);
+        CEnumParameter(_nodemap, "GammaSelector").SetValue("User");
+        CFloatParameter(_nodemap, "Gamma").SetValue(0.0);
+
+        //Image Format Controls
+        CEnumParameter(_nodemap, "PixelFormat").SetValue("Mono8");
+        CBooleanParameter(_nodemap, "ReverseX").SetValue(false);
+        CBooleanParameter(_nodemap, "ReverseY").SetValue(false);
+
+        //AOI Controls
+        CIntegerParameter(_nodemap, "Width").SetValue(720); //Range 0 to 728 For aca720; Range 0 to 816 for aca800
+        CIntegerParameter(_nodemap, "Height").SetValue(544); //Range 0 to 544 for aca720; Range 0 to 616 for aca800
+        CBooleanParameter(_nodemap, "CenterX").SetValue(true);
+        CBooleanParameter(_nodemap, "CenterY").SetValue(true);
+        CIntegerParameter(_nodemap, "BinningHorizontal").SetValue(1); //Set To 1
+        CIntegerParameter(_nodemap, "BinningVertical").SetValue(1); //Set to 1
+        CEnumParameter(_nodemap, "BinningHorizontalMode").SetValue("Average");
+        CEnumParameter(_nodemap, "BinningVerticalMode").SetValue("Average");
+
+        //Image Quality Control
+        CEnumParameter(_nodemap, "PgiMode").SetValue("Off");
+
+        //Exposure Control
+        CEnumParameter(_nodemap, "ExposureMode").SetValue("Timed");
+        CEnumParameter(_nodemap, "ExposureAuto").SetValue("Off");
+        //CEnumParameter(_nodemap, "ExposureTimeMode").SetValue("Standard"); //The aca800 has only 1 Mode "timed.
+        CFloatParameter(_nodemap, "ExposureTimeAbs").SetValue(1000.0);
+
+        //SyncFreeRun Controls
+        CBooleanParameter(_nodemap, "SyncFreeRunTimerEnable").SetValue(false);
+        CIntegerParameter(_nodemap, "SyncFreeRunTimerStartTimeLow").SetValue(0); //Set to 0 Not Available for aca800
+        CIntegerParameter(_nodemap, "SyncFreeRunTimerStartTimeHigh").SetValue(0); //Set to 0 Not Available for aca800
+        CFloatParameter(_nodemap, "SyncFreeRunTimerTriggerRateAbs").SetValue(0.03);
+
+        //Acquisition Controls
+        CEnumParameter(_nodemap, "AcquisitionMode").SetValue("Continuous");
+        CEnumParameter(_nodemap, "AcquisitionStatusSelector").SetValue("FrameTriggerWait");
+        CIntegerParameter(_nodemap, "AcquisitionFrameCount").SetValue(1); //Set to 1
+        CBooleanParameter(_nodemap, "AcquisitionFrameRateEnable").SetValue(false);
+        CFloatParameter(_nodemap, "AcquisitionFrameRateAbs").SetValue(30);
+
+        //Trigger Controls
+        CEnumParameter(_nodemap, "TriggerMode").SetValue("On");
+        CEnumParameter(_nodemap, "TriggerSource").SetValue("Software");
+        CEnumParameter(_nodemap, "TriggerActivation").SetValue("RisingEdge");
+    }
+    catch(const GenericException &e)
+    {
+        QString _error = e.GetDescription();
+        qDebug() << "Toby:: Error in SetCameraSettingsacA720(): " + _error;
+        return false;
+    }
+
+    qDebug() << "Toby:: SetCameraSettingsacA720() finished. Camera Settings Have Been Set.";
     return true;
 }
 
@@ -225,7 +290,7 @@ Description:
  **************************************************************/
 void Toby::onChangeCameraExposure(double _exposure)
 {
-    /*
+
     if(!isCameraInitialized())
     {
         qDebug() << "Toby::onChangeCameraExposure() called without camera being initialized.";
@@ -243,7 +308,7 @@ void Toby::onChangeCameraExposure(double _exposure)
         QString _error = e.GetDescription();
         qDebug() << "Toby:: Error in onChangeCameraExposure: " + _error;
     }
-*/
+
 }
 
 /**************************************************************
@@ -276,8 +341,6 @@ void Toby::onChangeCameraGain(int _gain)
     }
 */
 }
-
-
 
 //Still Image Processing Functions
 void Toby::openStillImagetoProcess(QString _filename)
@@ -388,7 +451,19 @@ bool Toby::initializeCamera()
         {
             m_camera = new Pylon::CInstantCamera(Pylon::CTlFactory::GetInstance().CreateFirstDevice());
             m_camera->Open();
-            SetCameraSettings();
+            CDeviceInfo _deviceinfo = m_camera->GetDeviceInfo();
+            QString _model = QString(_deviceinfo.GetFriendlyName().c_str());
+            qDebug() << _model << " has been opened.";
+            if(_model.contains("acA800", Qt::CaseInsensitive))
+            {
+                SetCameraSettingsacA800();
+                qDebug() << "Settings Have Been Applied to the Basler acA800-200gm GigE Camera.";
+            }
+            if(_model.contains("acA720", Qt::CaseInsensitive))
+            {
+                SetCameraSettingsacA720();
+                qDebug() << "Settings Have Been Applied to the Basler acA720-280gm GigE Camera.";
+            }
             m_camera->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
             //m_camera->RegisterConfiguration(new Pylon::CAcquireContinuousConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
             //m_camera->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);

@@ -85,7 +85,8 @@ private:
 
     //Methods
     virtual void OnImageGrabbed(Pylon::CInstantCamera& camera, const Pylon::CGrabResultPtr& ptrGrab); //Pylon Event Handler
-    bool SetCameraSettings();
+    bool SetCameraSettingsacA800();
+    bool SetCameraSettingsacA720();
 
 public slots:
     //Camera Settings Slots

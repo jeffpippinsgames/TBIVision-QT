@@ -131,18 +131,17 @@ bool Gary::findOpenArduinoUno()
 {
     m_serial_port = nullptr;
     m_serial_info = new QSerialPortInfo();
+
     foreach(QSerialPortInfo _serialinfo, m_serial_info->availablePorts())
     {
         if(_serialinfo.hasProductIdentifier() && _serialinfo.hasVendorIdentifier() )
         {
-            if(_serialinfo.vendorIdentifier() == m_arduino_uno_vendorID)
+            if((_serialinfo.vendorIdentifier() == m_arduino_uno_vendorID) || (_serialinfo.hasVendorIdentifier() == m_ftdi_FT232_UART_vendorID))
             {
-                if(_serialinfo.productIdentifier() == m_arduino_uno_productID)
+                if((_serialinfo.productIdentifier() == m_arduino_uno_productID) || (_serialinfo.hasProductIdentifier() == m_ftdi_FT232_UART_productID))
                 {
                     m_serial_port = new QSerialPort(_serialinfo, this);
-
                     m_serial_port->setBaudRate(2000000);
-                    //m_serial_port->setBaudRate(QSerialPort::Baud115200);
                     m_serial_port->setStopBits(QSerialPort::OneStop);
                     m_serial_port->setParity(QSerialPort::EvenParity);
                     m_serial_port->setDataBits(QSerialPort::Data8);
@@ -166,7 +165,6 @@ bool Gary::findOpenArduinoUno()
     }
     qDebug() << "Gary::findOpenArduinoUno() Could Not Find Arduino Uno.";
     return false;
-
 }
 //--------------------------------------------------------------
 
@@ -835,8 +833,6 @@ void Gary::onKeepAliveTimer()
     sendSerialCommand(_cmd);
 }
 
-
-
 /**************************************************************
 readSerial()
 Slot
@@ -850,7 +846,6 @@ void Gary::readSerial()
 
     QByteArray _data = m_serial_port->readAll();
     m_recieved_serial.append(_data);
-
     //See the Aruino Sketch For the Status Buffer Structure
 
     if(m_recieved_serial.size() == 23)

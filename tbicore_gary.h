@@ -411,6 +411,9 @@ private:
     const quint16 m_teensy32_productID = 0x0483;
     const quint16 m_arduino_uno_vendorID = 0x2341;
     const quint16 m_arduino_uno_productID =0x0043;
+    const quint16 m_ftdi_FT232_UART_vendorID = 0x0403;
+    const quint16 m_ftdi_FT232_UART_productID = 0x6001;
+
     QSerialPortInfo *m_serial_info;
     QSerialPort *m_serial_port;
 
