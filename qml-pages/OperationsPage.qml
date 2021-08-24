@@ -184,21 +184,21 @@ Item
     Rectangle
     {
         id: viewbackgroundrectId
-        width:1920-5
-        height:1080-5
-        x:50
-        y: 100
+        width:1440+20
+        height:1080
+        x:0
+        y: 0
         color: "black"
         border.color: Qt.rgba(1,1,1,.1)
         border.width: 5
-        anchors.centerIn: parent
+        //anchors.centerIn: parent
 
 
         QmlTBIDisplay
         {
             id: operationviewId
-            width: viewbackgroundrectId.width-5
-            height:viewbackgroundrectId.height-5
+            width: viewbackgroundrectId.width-20
+            height:viewbackgroundrectId.height
             anchors.centerIn: viewbackgroundrectId
 
             Component.onCompleted:
