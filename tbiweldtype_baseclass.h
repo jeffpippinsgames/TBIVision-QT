@@ -13,6 +13,8 @@ class tbiweldtype_baseclass : public QObject
 public:
     explicit tbiweldtype_baseclass(QObject *parent = nullptr);
     void doDeGausianClustering(const cv::Mat _incommingmat);
+
+
 private:
 
         TBIDataSet *m_gausian_decluster_ds;
