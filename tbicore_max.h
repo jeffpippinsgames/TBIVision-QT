@@ -80,6 +80,7 @@ class Max : public QObject
 
 private:
     void processMotorCalibration(TBIThreePointTrackingContainer &_trackedpoint);
+    void processMotorCalibration(TBIPoint_Int &_trackedpoint);
 
 
 
@@ -183,6 +184,11 @@ private:
     bool m_motor_cal_got_pnt1;
     bool m_motor_cal_got_pnt2;
     TBIThreePointTrackingContainer m_track_to_point;
+    //Butt Seams
+    TBIPoint_Int m_bs_tracked_point;
+    TBIPoint_Int m_bs_track_to_point;
+    TBIPoint_Int m_bs_motor_cal_pnt1;
+    TBIPoint_Int m_bs_motor_cal_pnt2;
 
 
 
@@ -191,6 +197,7 @@ public slots:
 
     void recieveNewCVMat(const cv::Mat& _mat_frame);
     void processVGrooveTracking(const cv::Mat _mat_frame);
+    void processButtJointTracking(const cv::Mat _mat_frame);
 
     void onBlurChange(int _blur);
     void onThresholdMinChange(int _min);

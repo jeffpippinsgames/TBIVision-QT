@@ -49,6 +49,38 @@ void Max::processMotorCalibration(TBIThreePointTrackingContainer &_trackedpoint)
     }
 }
 
+void Max::processMotorCalibration(TBIPoint_Int &_trackedpoint)
+{
+    switch(m_gary->getMotorCalibrationCycle())
+    {
+    case GaryMotorCalibrationCycleStatus::TBI_MOTORCAL_OFF:
+        break;
+    case GaryMotorCalibrationCycleStatus::TBI_MOTORCAL_GETPNT1PAUSE:
+        if(!m_motor_cal_got_pnt1)
+        {
+            m_bs_motor_cal_pnt1 = _trackedpoint;
+            m_gary->sendProceedNextMotorPhase();
+            m_motor_cal_got_pnt1 = true;
+        }
+        break;
+    case GaryMotorCalibrationCycleStatus::TBI_MOTORCAL_MAKINGFIRSTMOVE:
+        break;
+    case GaryMotorCalibrationCycleStatus::TBI_MOTORCAL_GETPNT2PAUSE:
+        if(!m_motor_cal_got_pnt2)
+        {
+            m_bs_motor_cal_pnt2 = _trackedpoint;
+            qint32 _xspp = m_bs_motor_cal_pnt1.m_x - m_bs_motor_cal_pnt2.m_x;
+            qint32 _zspp = m_bs_motor_cal_pnt1.m_y - m_bs_motor_cal_pnt2.m_y;
+            m_mary->setXAxisStepsPerPixel(abs(10000.0/(float)_xspp));
+            m_mary->setZAxisStepsPerPixel(abs(10000.0/(float)_zspp));
+            m_gary->sendProceedNextMotorPhase();
+            m_motor_cal_got_pnt2 = true;
+        }
+        break;
+
+    }
+}
+
 Max::Max(QObject *parent) : QObject(parent)
 {
 
@@ -140,6 +172,7 @@ Max::~Max()
 void Max::fullAutoControlModeVGroove()
 {
     m_track_to_point = m_three_point_tracking_manager.m_tracking_point;
+    m_bs_track_to_point = m_bs_tracked_point;
     //m_track_to_point = m_mary->getTrackToPoint();
     m_gary->setControlModeToFullAuto();
 }
@@ -476,6 +509,7 @@ void Max::processVGrooveTracking(const cv::Mat _mat)
             break;
         case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
             //qDebug() << "Max: Main Loop - Height Only Control Mode.";
+
             break;
         case GaryControlMode::TBI_CONTROL_MODE_MOTORCALIBRATION:
             processMotorCalibration(m_three_point_tracking_manager.m_tracking_point);
@@ -502,6 +536,174 @@ void Max::processVGrooveTracking(const cv::Mat _mat)
 
 
 }
+
+void Max::processButtJointTracking(const Mat _mat)
+{
+
+    if(_mat.channels() != 1)
+    {
+        qDebug()<<"Max::processButtJointTracking did not recieve a single Channel Mat";
+        m_timeinloop = QString("Time in Loop: " + QString::number(m_timer.elapsed()) + " ms.-Camera FPS = " + QString::number(1000/m_timer.elapsed()));
+        emit timeInLoopChanged(m_timeinloop);
+        emit processingComplete(); //Must Be Last Signal Sent
+        return;
+    }
+    if(!_mat.isContinuous())
+    {
+        qDebug()<<"Max::processButtJointTracking did not recieve a continuous Mat";
+        m_timeinloop = QString("Time in Loop: " + QString::number(m_timer.elapsed()) + " ms.-Camera FPS = " + QString::number(1000/m_timer.elapsed()));
+        emit timeInLoopChanged(m_timeinloop);
+        emit processingComplete(); //Must Be Last Signal Sent
+        return;
+    }
+
+    //clear Ransac
+    //The Butt Joint Operates in Height Only
+    bool _dataconstructionok = true;
+    m_ransac_left_tsl.clear();
+
+    //Declare Mats
+    cv::Mat _raw_mat = _mat.clone();
+    cv::Mat _blurr_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC1);
+    cv::Mat _threshold_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC1);
+    cv::Mat _gausiandecluster_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC1);
+    cv::Mat _ransac_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3);
+    cv::Mat _inliers_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3); //Mats From Here Out are Color.
+    cv::Mat _geometricconstruction_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3);
+    cv::Mat _operation_mat = cv::Mat::zeros(_raw_mat.rows, _raw_mat.cols, CV_8UC3);
+
+    //Declare DataSet Construction Variables
+    TBILine _ts_inlierline;
+
+    //Do OpenCV Proccesses
+    cv::GaussianBlur(_raw_mat, _blurr_mat, Size(m_blur,m_blur), 0);
+    cv::threshold(_blurr_mat, _threshold_mat, m_thresholdmin, m_thresholdmax, THRESH_TOZERO);
+    cv::cvtColor(_raw_mat, _operation_mat, cv::COLOR_GRAY2BGR);
+
+    //Geometric Construction Section
+    if(m_gausian_decluster_ds->buildGausianClusterDataSet(_threshold_mat, m_gausian_decluster_parameters) == TBIDataSetReturnType::Ok)
+    {
+        m_gausian_decluster_ds->drawToMat(_gausiandecluster_mat);
+        cv::cvtColor(_gausiandecluster_mat, _ransac_mat, COLOR_GRAY2BGR);
+
+        //Left TSG Ransac and Inlier DataSet Construction
+        TBIRansac::doRansac(m_ransac_left_tsl, m_left_tsl_ransac, *m_gausian_decluster_ds);
+        if(m_ransac_left_tsl.isValid())
+        {
+            m_ransac_left_tsl.remakeLine(0, _raw_mat.cols);
+            m_ransac_left_tsl.drawOnMat(_ransac_mat, CV_RGB(0,0,255));
+            //Build Inliers Set
+            if(m_gausian_decluster_ds->extractDataSetForInliers(*m_left_inlier_tsg_ds, m_ransac_left_tsl, 1.0, 0, m_gausian_decluster_ds->size()-1) == TBIDataSetReturnType::Ok)
+            {
+                m_left_inlier_tsg_ds->drawToMat(_inliers_mat, CV_RGB(125,125,255));
+                m_left_inlier_tsg_ds->extractLeastSquareLine(m_geo_left_tsl);
+                if(m_geo_left_tsl.isValid())
+                {
+                    m_geo_left_tsl.remakeLine(0, _raw_mat.cols);
+                    m_geo_left_tsl.drawOnMat(_geometricconstruction_mat, CV_RGB(0,255,0));
+                }
+                else
+                {
+                    _dataconstructionok = false;
+                }
+
+            }
+            else
+            {
+                _dataconstructionok = false;
+            }
+
+        }
+        else
+        {
+           _dataconstructionok = false;
+        }
+
+    }
+    else
+    {
+        _dataconstructionok = false;
+    }
+
+    //Validate The Geometric Construction
+    if(_dataconstructionok)
+    {
+        if(m_gausian_decluster_distro->standardDeviation() > 1.0) _dataconstructionok = false;
+    }
+
+    //Tracking Geometry Creation.
+    if(_dataconstructionok)
+    {
+        m_geo_left_tsl.drawOnMat(_operation_mat, CV_RGB(0,255,0));
+        //Draw Tracking Point
+        TBIPoint_Int _trackingpoint;
+        m_bs_tracked_point = m_geo_left_tsl.getMidPointofLine();
+        if(_trackingpoint.valid)
+        {
+            cv::drawMarker(_operation_mat, _trackingpoint.toCVPoint(), CV_RGB(125,255,125), cv::MARKER_CROSS, 15, 1, cv::LINE_AA);
+
+        }
+        else
+        {
+            _dataconstructionok = false;
+        }
+
+    }
+
+
+    //Resond To Control Mode
+    if(_dataconstructionok)
+    {
+        switch(m_gary->getControlMode())
+        {
+        case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
+            //qDebug() << "Max: Main Loop - Manual Control Mode.";
+
+            break;
+        case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
+            //qDebug() << "Max: Main Loop - Full Auto Control Mode.";
+            //Draw Butt Seam Track To Point To Screen
+            cv::drawMarker(_operation_mat, m_bs_track_to_point.toCVPoint(), CV_RGB(0,0,255), cv::MARKER_CROSS, 15, 1, cv::LINE_AA);
+            //a positive _xsteps means move right
+            //a negaite _xsteps means mode left
+            //a negative _zsteps moves down
+            //a positive _zsteps moves up
+            if(m_gary->getZMotionStatus() == GaryMotionStatus::TBI_MOTION_STATUS_IDLE)
+            {
+                qint32 _dz =  m_bs_track_to_point.m_y - m_bs_tracked_point.m_y;
+                qint32 _zsteps = _dz * m_mary->getZAxisStepsPerPixel();
+                if(abs(_zsteps) > 2) m_gary->autoMoveZAxis(_zsteps);
+            }
+            break;
+        case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
+            //qDebug() << "Max: Main Loop - Height Only Control Mode.";
+
+            break;
+        case GaryControlMode::TBI_CONTROL_MODE_MOTORCALIBRATION:
+            processMotorCalibration(m_bs_tracked_point);
+            break;
+        }
+    }
+
+
+    //Emit Mat Signals If Turned On
+    if(m_emitextramats)
+    {
+        emit newRawMatProcessed(_raw_mat);
+        emit newBlurMatProcessed(_blurr_mat);
+        emit newThresholdMatProcessed(_threshold_mat);
+        emit newPixelColumnMatProcessed(_gausiandecluster_mat);
+        emit newInlierDataSetMatProcessed(_inliers_mat);
+        emit newRansacMatProcessed(_ransac_mat);
+        emit newGeoConstructionMatProcessed(_geometricconstruction_mat);
+    }
+
+    //Emit The New Operations Screen Mat
+    emit newOperationMatProcessed(_operation_mat);
+
+
+}
+
 
 // Slot Handling Methods To Update Settings-------------------------------------------
 void Max::onBlurChange(int _blur)

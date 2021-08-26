@@ -11,11 +11,12 @@ class TBIPoint_Int
 
     int m_x;
     int m_y;
+    bool valid;
 
 
-    TBIPoint_Int(){m_x = 0, m_y = 0;}
-    TBIPoint_Int(int _x, int _y){m_x=_x;m_y=_y;}
-    TBIPoint_Int(const TBIPoint_Int &_pnt){m_x=_pnt.m_x; m_y = _pnt.m_y;}
+    TBIPoint_Int(){m_x = 0, m_y = 0; valid = true;}
+    TBIPoint_Int(int _x, int _y){m_x=_x;m_y=_y;valid=true;}
+    TBIPoint_Int(const TBIPoint_Int &_pnt){m_x=_pnt.m_x; m_y = _pnt.m_y;valid=true;}
     float distance(const TBIPoint_Int &_pnt);
     cv::Point toCVPoint(){return cv::Point(m_x, m_y);}
 
@@ -37,6 +38,7 @@ class TBIPoint_Int
     {
         m_x=_pnt.m_x;
         m_y=_pnt.m_y;
+        valid=_pnt.valid;
     }
 
     bool operator == (const TBIPoint_Int &_pnt)

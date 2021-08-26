@@ -89,6 +89,7 @@ Item
 
         onBlackButtonPressed:
         {
+
             switch(Gary.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
@@ -99,16 +100,19 @@ Item
                 destroyPage(pagesId.mainmenupage);
                 break;
             }
+
         }
 
         onGreenButtonPressed:
         {
+
             switch(Gary.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                 Max.fullAutoControlModeVGroove();
                 break;
             }
+
         }
 
         onRedButtonPressed:
@@ -118,12 +122,13 @@ Item
 
         onUpButtonPressed:
         {
-            Gary.sendJogUp();
+            if(Gary.controlMode == GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE) Gary.sendJogUp();
         }
 
         onDownButtonPressed:
         {
-            Gary.sendJogDown();
+            if(Gary.controlMode == GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE) Gary.sendJogDown();
+
         }
 
         onLeftButtonPressed:

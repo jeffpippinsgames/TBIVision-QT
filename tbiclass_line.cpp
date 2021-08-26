@@ -42,6 +42,20 @@ TBIPoint_Float TBILine::getVector() const
     return(TBIPoint_Float((m_point2.m_x - m_point1.m_x),(m_point2.m_y - m_point2.m_y)));
 }
 
+TBIPoint_Int TBILine::getMidPointofLine()
+{
+    TBIPoint_Int _pnt;
+    if(!this->isValid())
+    {
+        _pnt.valid = false;
+        return _pnt;
+    }
+    _pnt.m_x = (m_point1.m_x + m_point2.m_x)/2;
+    _pnt.m_y = (m_point1.m_y + m_point2.m_y) /2;
+    _pnt.valid = true;
+    return _pnt;
+}
+
 
 //Set Functions------------------------------------------------------------------
 void TBILine::setPoint1(TBIPoint_Float _pnt)
