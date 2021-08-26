@@ -19,10 +19,10 @@ Item
 
     readonly property string pagename: "Operations Page"
 
-    //property string fontsource: "qrc:/Fonts/Blueprint BoldItalic.ttf"
-    //property string fontsource: "qrc:/Fonts/EurostileBold.ttf"
-    //property string fontsource: "qrc:/Fonts/Measurements.ttf"
-    //property string fontsource: "qrc:/Fonts/Typo Draft Demo.otf"
+    //property string fontsource2: "qrc:/Fonts/Blueprint BoldItalic.ttf"
+    //property string fontsource2: "qrc:/Fonts/EurostileBold.ttf"
+    //property string fontsource2: "qrc:/Fonts/Measurements.ttf"
+    property string fontsource2: "qrc:/Fonts/Typo Draft Demo.otf"
     property string fontsource: "qrc:/Fonts/PermanentMarker-Regular.ttf"
 
     //Misc Functions-------------------------
@@ -40,6 +40,7 @@ Item
         //Disconnect All Signals
         Max.newOperationMatProcessed.disconnect(operationviewId.recieveCVMat);
         Max.processingComplete.disconnect(mainpageID.triggerTobyNextFrame);
+        Gary.controlModeChanged.disconnect(controlmodeselectedtextId.setControlModeText);
     }
 
     function triggerTobyNextFrame()
@@ -176,6 +177,13 @@ Item
         source: fontsource
     }
 
+    //Font for UI
+    FontLoader
+    {
+        id: font2Id
+        source: fontsource2
+    }
+
     //Background Image
     Image
     {
@@ -215,20 +223,74 @@ Item
 
     }
 
-    //Time in Loop Text
-    Text
+    Rectangle
     {
-        id: timeinlooptextId
-        visible: Mary.showdebuginfo
-        focus: false
-        font.family: fontId.name
-        text: Max.timeinloop
-        font.pointSize: 20
-        width: timeinlooptextId.implicitWidth
-        height: timeinlooptextId.implicitHeight
-        x: 30
-        y: 10
-        color: Qt.rgba(1,1,.95,1)
+        id: controlmoderectId
+        color: Qt.rgba(0,0,0,.8)
+        radius: 10
+        border.width: 3
+        border.color: Qt.rgba(.8, .8, .0, .7)
+        x:viewbackgroundrectId.width+5
+        y:10
+        width: 450
+        height: 100
+
+        Text
+        {
+            id: controlmodetextId
+            focus: false
+            font.family: font2Id.name
+            text: "Selected Control Mode"
+            font.pointSize: 20
+            width: controlmodetextId.implicitWidth
+            height: controlmodetextId.implicitHeight
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: 5
+            color: Qt.rgba(.7,.2,.2,1)
+        }
+
+        Text
+        {
+            id: controlmodeselectedtextId
+            focus: false
+            font.family: font2Id.name
+            text: "Manual"
+            font.pointSize: 30
+            width: controlmodeselectedtextId.implicitWidth
+            height: controlmodeselectedtextId.implicitHeight
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: controlmodetextId.y + controlmodetextId.height+5
+            color: Qt.rgba(.2,.8,.2,1)
+
+            function setControlModeText()
+            {
+                switch(Gary.controlMode)
+                {
+                case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                    controlmodeselectedtextId.text = "Manual";
+                    controlmodeselectedtextId.color = Qt.rgba(.8,0,.0,1);
+                    break;
+                case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                    controlmodeselectedtextId.text = "Full";
+                    controlmodeselectedtextId.color = Qt.rgba(0,.8,0,1);
+                    break;
+                case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                    controlmodeselectedtextId.text = "Height";
+                    controlmodeselectedtextId.color = Qt.rgba(.8,.8,0,1);
+                    break;
+                case GaryControlMode.TBI_CONTROL_MODE_MOTORCALIBRATION:
+                    controlmodeselectedtextId.text = "Calibration";
+                    controlmodeselectedtextId.color = Qt.rgba(0,0,.8,1);
+                    break;
+                }
+            }
+
+            Component.onCompleted:
+            {
+                controlmodeselectedtextId.setControlModeText();
+                Gary.controlModeChanged.connect(controlmodeselectedtextId.setControlModeText);
+            }
+        }
     }
 
     //Camera FPS Text
@@ -242,9 +304,25 @@ Item
         font.pointSize: 15
         width: camerafpstextId.implicitWidth
         height: camerafpstextId.implicitHeight
-        x: 300
+        x: 10
         y: 10
-        color: Qt.rgba(1,1,.95,1)
+        color: Qt.rgba(1,.1,.1,1)
+    }
+
+    //Time in Loop Text
+    Text
+    {
+        id: timeinlooptextId
+        visible: Mary.showdebuginfo
+        focus: false
+        font.family: fontId.name
+        text: Max.timeinloop
+        font.pointSize: 20
+        width: timeinlooptextId.implicitWidth
+        height: timeinlooptextId.implicitHeight
+        x: camerafpstextId.width+30
+        y: 10
+        color: Qt.rgba(1,.1,.1,1)
     }
 
     //Control Key Display

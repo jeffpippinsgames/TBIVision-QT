@@ -69,7 +69,7 @@ FocusScope {
     {
 
 
-        console.log("controlsignal: " + controlsignal + " - autorepeat: " + autorepeat);
+        //console.log("controlsignal: " + controlsignal + " - autorepeat: " + autorepeat);
         switch(controlsignal)
         {
         case GaryControllerQMLSignals.TBI_CONTROLLER_GREENBTN_PRESSED:

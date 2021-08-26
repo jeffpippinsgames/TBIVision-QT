@@ -25,7 +25,11 @@ SOURCES += \
         tbiparameterclass_gausiandecluster.cpp \
         tbiparameterclass_imageintensity.cpp \
         tbiparameterclass_ranscaparms.cpp \
-        tbiqml_display.cpp
+        tbiqml_display.cpp \
+        tbiweldtype_baseclass.cpp \
+        tbiweldtype_buttjoint.cpp \
+        tbiweldtype_enumerator.cpp \
+        tbiweldtype_vgroove.cpp
 
 RESOURCES += qml.qrc
 
@@ -59,7 +63,11 @@ HEADERS += \
     tbiparameterclass_imageintensity.h \
     tbiparameterclass_ransacvotingstruct.h \
     tbiparameterclass_ranscaparms.h \
-    tbiqml_display.h
+    tbiqml_display.h \
+    tbiweldtype_baseclass.h \
+    tbiweldtype_buttjoint.h \
+    tbiweldtype_enumerator.h \
+    tbiweldtype_vgroove.h
 
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonbase-6.2.0
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonutility-6.2.0
