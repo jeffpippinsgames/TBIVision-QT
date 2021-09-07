@@ -225,7 +225,6 @@ void Mary::loadMaryFromFile()
     m_track_to_point = TBIThreePointTrackingContainer(_v1x, _v1y, _v2x, _v2y, _v3x, _v3y);
     _savefile.close();
     qDebug("Mary::loadMaryFromFile() marydefualt.tbi Loaded.");
-    qDebug() << "Testing" << _v1x << _v2x << _v3x;
     broadcastQMLSignals();
     broadcastSingletonSignals();
 }

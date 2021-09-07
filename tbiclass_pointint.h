@@ -19,6 +19,9 @@ class TBIPoint_Int
     TBIPoint_Int(const TBIPoint_Int &_pnt){m_x=_pnt.m_x; m_y = _pnt.m_y;valid=true;}
     float distance(const TBIPoint_Int &_pnt);
     cv::Point toCVPoint(){return cv::Point(m_x, m_y);}
+    void invalidatePoint(){valid = false;}
+    bool isValid(){return valid;}
+    void validatePoint(){valid = true;}
 
 
     TBIPoint_Int operator + (const TBIPoint_Int &_pnt)

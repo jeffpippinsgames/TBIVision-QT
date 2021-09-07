@@ -13,6 +13,7 @@ SOURCES += \
         tbiclass_datadistributionset.cpp \
         tbiclass_dataset.cpp \
         tbiclass_line.cpp \
+        tbiclass_opencvmatcontainer.cpp \
         tbiclass_pointfloat.cpp \
         tbiclass_pointint.cpp \
         tbiclass_ransac.cpp \
@@ -49,6 +50,7 @@ HEADERS += \
     tbiclass_datadistributionset.h \
     tbiclass_dataset.h \
     tbiclass_line.h \
+    tbiclass_opencvmatcontainer.h \
     tbiclass_pixelfundamental.h \
     tbiclass_pointfloat.h \
     tbiclass_pointint.h \

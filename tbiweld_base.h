@@ -9,6 +9,8 @@
 #include "tbiclass_dataset.h"
 #include "tbiweld_pipelineprocessingreturntype.h"
 #include "tbiparameterclass_gausiandecluster.h"
+#include "tbiclass_opencvmatcontainer.h"
+
 
 
 class TBIWeld_Base : public QObject
@@ -19,19 +21,24 @@ public:
     explicit TBIWeld_Base(QObject *parent = nullptr);
     ~TBIWeld_Base();
 
+    //PipeLine Methods
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doDeGausianClustering(TBIClass_OpenCVMatContainer &_mats);
+
     //Set Methods
     void setGausianDeclusterParameters(TBIGausianDeclusteringParameters &_gausian_decluster_param);
 
     //Utility Methods
-    int getVGrooveBreakIndex();
-    void drawVGrooveBreakPointIndex(cv::Mat &_ransacmat, int _breakindex);
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t getGausianDeClusterSubSet(TBIDataSet &_dst, int _startindex, int _endindex);
     int getGausianDeclusterDataSetMaxIndex() {return m_gausian_decluster_ds->size()-1;}
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t getGausianDeClusterSubSet(TBIDataSet &_dst, int _startindex, int _endindex);
 
+    //Vgroove Specific Methods
+    void drawVGrooveBreakPointIndex(TBIClass_OpenCVMatContainer &_mats, int _breakindex);
+    int getVGrooveBreakIndex();
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t extractVGrooveJointDataSet(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold);
 
 private:
         //Private Seam Tracking Methods
-        TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doDeGausianClustering(cv::Mat &_rawmat, cv::Mat &_blurmat, cv::Mat &_thresholdmat, cv::Mat &_declustermat);
+
 
         //Datasets
         TBIDataSet *m_gausian_decluster_ds;

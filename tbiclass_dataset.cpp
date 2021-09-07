@@ -561,6 +561,31 @@ TBIDataSetReturnType TBIDataSet::extractDataSetForJoint(TBIDataSet &_dst, const 
     return TBIDataSetReturnType::Ok;
 }
 
+TBIDataSetReturnType TBIDataSet::extractVGrooveJointDataSet(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold)
+{
+    _dst.clear();
+    if(m_dataset_size == 0) return TBIDataSetReturnType::FailedPassedInDataSetWrongSize;
+    if(!_lefttsl.isValid()) return TBIDataSetReturnType::FailedPassedInParameterMakesNoSense;
+    if(!_righttsl.isValid()) return TBIDataSetReturnType::FailedPassedInParameterMakesNoSense;
+
+    int _index = 0;
+    float _distanceleft;
+    float _distanceright;
+
+    do
+    {
+        _distanceleft = _lefttsl.distanceAbs(m_pnts[_index]);
+        _distanceright = _righttsl.distanceAbs(m_pnts[_index]);
+        if((_distanceleft > _inlierdistancethreshold) && (_distanceright > _inlierdistancethreshold))
+        {
+            _dst.insert(m_pnts[_index]);
+        }
+        ++_index;
+    }while(_index < m_dataset_size);
+
+    return TBIDataSetReturnType::Ok;
+}
+
 TBIDataSetReturnType TBIDataSet::extractDataSetForInliers(TBIDataSet &_dst, const TBILine &_line, const float _distancethreshold)
 {
     _dst.clear();
@@ -724,7 +749,7 @@ TBIDataSetReturnType TBIDataSet::extractDataSubSet(TBIDataSet &_dst, int _starti
     {
         _dst.insert(m_pnts[_index]);
         ++_index;
-    }while((_index <= _endindex);
+    }while(_index <= _endindex);
     return TBIDataSetReturnType::Ok;
 }
 

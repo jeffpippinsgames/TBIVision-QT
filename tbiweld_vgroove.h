@@ -23,9 +23,8 @@ public:
 
 private:
 
-
     //Private Seam Tracking Methods
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructInlierRansacs(cv::Mat &_ransacmat);
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructInlierRansacs(cv::Mat &_ransacmat, cv::Mat &_gausiandeclustermat);
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doBuildInlierDataSets();
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructGeometricEntities();
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doFindValidTrackingPoints();
@@ -35,10 +34,8 @@ private:
     int calcZMotion();
 
     //Misc Helper Methods
-    void adjustBWLRansacParametersToTSLRansacLines();
-    void clearInlierDataSets();
+    void clearDataSets();
     void clearRansacLines();
-    void clearRansacParameters();
     void clearGeometricEntities();
     void clearTrackingPoints();
 
@@ -49,6 +46,7 @@ private:
     TBIDataSet *m_right_inlier_bwl_ds;
     TBIDataSet *m_gausiandecluster_leftside_ds;
     TBIDataSet *m_gausiandecluster_rightside_ds;
+    TBIDataSet *m_joint_ds;
 
     //Dummy Data Sets
     TBIDataSet *m_dummy_set1; //Used For Static Storage. So Other Functions Dont Have To Recreate Them in the Loops.
@@ -61,16 +59,16 @@ private:
     TBILine m_right_bwl_ransac_line;
 
     //Ransac Parameters
-    TBIRansacParameter m_left_tsl_ransac_settings;
-    TBIRansacParameter m_left_bwl_ransac_settings;
-    TBIRansacParameter m_right_tsl_ransac_settings;
-    TBIRansacParameter m_right_bwl_ransac_settings;
+    TBIRansacParameter m_left_tsl_ransac_params;
+    TBIRansacParameter m_left_bwl_ransac_params;
+    TBIRansacParameter m_right_tsl_ransac_params;
+    TBIRansacParameter m_right_bwl_ransac_params;
 
     //Geometric Entities
     TBILine m_left_tsl_geo_line;
     TBILine m_left_bwl_geo_line;
-    TBILine m_right_tsl_line;
-    TBILine m_right_bwl_line;
+    TBILine m_right_tsl_geo_line;
+    TBILine m_right_bwl_geo_line;
 
     //Tracking Point
     TBIPoint_Int m_left_tracking_point;

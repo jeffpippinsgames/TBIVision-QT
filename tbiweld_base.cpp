@@ -23,10 +23,12 @@ int TBIWeld_Base::getVGrooveBreakIndex()
     return m_gausian_decluster_ds->getIndexofHighestY(*m_gausian_decluster_distro);
 }
 
-void TBIWeld_Base::drawVGrooveBreakPointIndex(cv::Mat &_ransacmat, int _breakindex)
+void TBIWeld_Base::drawVGrooveBreakPointIndex(TBIClass_OpenCVMatContainer &_mats, int _breakindex)
 {
-    cv::drawMarker(_ransacmat, m_gausian_decluster_ds->getPoint(_breakindex).toCVPoint(), CV_RGB(255,125,125), cv::MARKER_CROSS, 20);
+    cv::drawMarker(_mats.m_ransac, m_gausian_decluster_ds->getPoint(_breakindex).toCVPoint(), CV_RGB(255,125,125), cv::MARKER_CROSS, 20);
 }
+
+
 
 TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::getGausianDeClusterSubSet(TBIDataSet &_dst, int _startindex, int _endindex)
 {
@@ -42,18 +44,31 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::getGaus
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
 }
 
+TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::extractVGrooveJointDataSet(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold)
+{
+    TBIDataSetReturnType _result;
+    _result = m_gausian_decluster_ds->extractVGrooveJointDataSet(_dst, _lefttsl, _righttsl, _inlierdistancethreshold);
+    if(_result != TBIDataSetReturnType::Ok)
+    {
+        _dst.clear();
+        qDebug("TBIWeld_Base::extractVGrooveJointDataSet() Failed To Extract V Groove Joint DataSet.");
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTVGROOVEJOINTDATASET;
+    }
+    return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
+}
+
 
 //The Mats Must Be Clear and Ready To Use.
-TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGausianClustering(cv::Mat &_rawmat, cv::Mat &_blurmat, cv::Mat &_thresholdmat, cv::Mat &_declustermat)
+TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGausianClustering(TBIClass_OpenCVMatContainer &_mats)
 {
 
     //Make Sure Mats Are Ok.
-    if(_rawmat.channels() != 1)
+    if(_mats.m_raw.channels() != 1)
     {
         qDebug()<<"TBIWeld_Base::doDeGausianClustering() did not recieve a single Channel Mat";
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_RAWMATCHANNELNOTEQUALTOONE;
     }
-    if(!_rawmat.isContinuous())
+    if(!_mats.m_raw.isContinuous())
     {
         qDebug()<<"TBIWeld_Base::doDeGausianClustering() did not recieve a continuous Mat";
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_RAWMATCHANNELNOTCONTINOUS;
@@ -65,11 +80,11 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGau
     m_filtered_gausian_decluster_ds->clear();
 
     //Do OpenCV Proccesses
-    cv::GaussianBlur(_rawmat, _blurmat, cv::Size(m_gausiandecluster_settings.m_blur_value, m_gausiandecluster_settings.m_blur_value), 0);
-    cv::threshold(_blurmat, _thresholdmat, m_gausiandecluster_settings.m_threshold_min_value, m_gausiandecluster_settings.m_threshold_max_value, cv::THRESH_TOZERO);
+    cv::GaussianBlur(_mats.m_raw, _mats.m_blurr, cv::Size(m_gausiandecluster_settings.m_blur_value, m_gausiandecluster_settings.m_blur_value), 0);
+    cv::threshold(_mats.m_blurr, _mats.m_threshold, m_gausiandecluster_settings.m_threshold_min_value, m_gausiandecluster_settings.m_threshold_max_value, cv::THRESH_TOZERO);
 
     //build DeCluster Data Set and Respond to failures.
-    TBIDataSetReturnType _retresult = m_gausian_decluster_ds->buildGausianClusterDataSet(_thresholdmat, m_gausiandecluster_settings);
+    TBIDataSetReturnType _retresult = m_gausian_decluster_ds->buildGausianClusterDataSet(_mats.m_threshold, m_gausiandecluster_settings);
     switch(_retresult)
     {
         case TBIDataSetReturnType::FailedTotalImageIntensityTooHigh:
@@ -85,7 +100,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGau
     }
 
     //Draw Decluster Set to Mat
-    m_gausian_decluster_ds->drawToMat(_declustermat);
+    m_gausian_decluster_ds->drawToMat(_mats.m_gausiandecluster);
 
     //Build Decluster Distrobution Set
     _retresult = m_gausian_decluster_ds->extractDistributionSet(*m_gausian_decluster_distro);

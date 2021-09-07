@@ -72,6 +72,7 @@ public:
     TBIDataSetReturnType extractDataSetForRansacLeftTSL(TBIDataSet &_dst, int _breakindex);
     TBIDataSetReturnType extractDataSetForRansacRightTSL(TBIDataSet &_dst, int _startindex);
     TBIDataSetReturnType extractDataSetForJoint(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold);
+    TBIDataSetReturnType extractVGrooveJointDataSet(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold);
     TBIDataSetReturnType extractDataSetForInliers(TBIDataSet &_dst, const TBILine &_line, const float _distancethreshold);
     TBIDataSetReturnType extractDataSetForInliers(TBIDataSet &_dst, const TBILine &_ransacline, const float _distancethreshold, const int _start_index, const int _end_index);
     TBIDataSetReturnType extractInlierDataSet(TBIDataSet &_dst, const TBIDataDistributionSet &_srcdistro);
