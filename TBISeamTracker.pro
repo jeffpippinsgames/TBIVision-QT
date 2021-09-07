@@ -26,10 +26,11 @@ SOURCES += \
         tbiparameterclass_imageintensity.cpp \
         tbiparameterclass_ranscaparms.cpp \
         tbiqml_display.cpp \
-        tbiweldtype_baseclass.cpp \
-        tbiweldtype_buttjoint.cpp \
-        tbiweldtype_enumerator.cpp \
-        tbiweldtype_vgroove.cpp
+        tbiweld_base.cpp \
+        tbiweld_buttjoint.cpp \
+        tbiweld_enumerator.cpp \
+        tbiweld_pipelineprocessingreturntype.cpp \
+        tbiweld_vgroove.cpp
 
 RESOURCES += qml.qrc
 
@@ -64,10 +65,11 @@ HEADERS += \
     tbiparameterclass_ransacvotingstruct.h \
     tbiparameterclass_ranscaparms.h \
     tbiqml_display.h \
-    tbiweldtype_baseclass.h \
-    tbiweldtype_buttjoint.h \
-    tbiweldtype_enumerator.h \
-    tbiweldtype_vgroove.h
+    tbiweld_base.h \
+    tbiweld_buttjoint.h \
+    tbiweld_enumerator.h \
+    tbiweld_pipelineprocessingreturntype.h \
+    tbiweld_vgroove.h
 
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonbase-6.2.0
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonutility-6.2.0

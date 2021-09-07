@@ -1,5 +1,5 @@
-#ifndef TBIWELDTYPE_ENUMERATOR_H
-#define TBIWELDTYPE_ENUMERATOR_H
+#ifndef TBIWELD_ENUMERATOR_H
+#define TBIWELD_ENUMERATOR_H
 
 #include <QObject>
 #include <QQuickItem>
@@ -26,4 +26,4 @@ signals:
 
 };
 
-#endif // TBIWELDTYPE_ENUMERATOR_H
+#endif // TBIWELD_ENUMERATOR_H

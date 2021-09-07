@@ -8,6 +8,8 @@
 #include "tbicore_mary.h"
 #include "tbiqml_display.h"
 #include "opencv4/opencv2/core.hpp"
+#include "tbiweld_enumerator.h"
+#include "tbiweld_pipelineprocessingreturntype.h"
 //#include "tbilinearransac.h"
 
 using namespace Pylon;
@@ -48,6 +50,10 @@ int main(int argc, char *argv[])
     GaryControllerQMLSignals::declareQML();
     //Register The QmlTBIDisplay QML Type
     QmlTBIDisplay::declareQML();
+    //Register TBI Weld Types
+    TBIWeldType_Enumerator::declareQML();
+    TBIWeld_ProcessingPipeLineReturnType::declareQML();
+
 
 
     //The QML Application engine----------------------------------

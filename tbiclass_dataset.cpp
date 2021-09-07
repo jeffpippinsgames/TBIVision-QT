@@ -222,10 +222,12 @@ int TBIDataSet::getLowestX()
     return _lowestxvalue;
 }
 
-TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdmat, const TBIGausianDeclusteringParameters &_declusterparameter)
+TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdmat, TBIGausianDeclusteringParameters &_declusterparameter)
 {
 
     this->clear();
+    _declusterparameter.clearTotalImageIntensity();
+
     if(_thresholdmat.type() != CV_8UC1)
     {
         return TBIDataSetReturnType::FailedFunctionPassedInWrongMatType;
@@ -256,6 +258,11 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
     {
         _dataindex = (_y * _max_x) + _x;
         _intensity = _data[_dataindex];
+
+        //Process Total Image Intensity
+        _declusterparameter.addToTotalImageIntensity(_intensity);
+        if(_declusterparameter.totalImageIntensityToHigh()) return TBIDataSetReturnType::FailedTotalImageIntensityTooHigh;
+
         //---------------------------------
 
         //Add Pixel to the Array According to a Gausian Distrobution
@@ -408,6 +415,7 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
         }
     }while(_x < _max_x);
 
+    if(_declusterparameter.totalImageInstenisyToLow()) return TBIDataSetReturnType::FailedTotalImageIntensityTooLow;
     this->m_dataset_type = TBIDataSetType::GausianDeclusterType;
     return TBIDataSetReturnType::Ok;
 
@@ -701,6 +709,22 @@ TBIDataSetReturnType TBIDataSet::extractFilteredGausianSet(TBIDataSet &_dst, int
         ++_index;
     }while(_index < m_dataset_size);
 
+    return TBIDataSetReturnType::Ok;
+}
+
+TBIDataSetReturnType TBIDataSet::extractDataSubSet(TBIDataSet &_dst, int _startindex, int _endindex)
+{
+    _dst.clear();
+    if(_endindex >= m_dataset_size) return TBIDataSetReturnType::FailedPassedInParameterMakesNoSense;
+    if(_startindex > _endindex) return TBIDataSetReturnType::FailedPassedInParameterMakesNoSense;
+    if(m_dataset_size < 2) return TBIDataSetReturnType::FailedPassedInDataSetWrongSize;
+
+    int _index = _startindex;
+    do
+    {
+        _dst.insert(m_pnts[_index]);
+        ++_index;
+    }while((_index <= _endindex);
     return TBIDataSetReturnType::Ok;
 }
 

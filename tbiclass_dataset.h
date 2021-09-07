@@ -19,7 +19,7 @@ enum class TBIDataSetType {NoType, LeftTSLForRansacType, RightTSLForRansacType, 
                            LeftTSLInlierType, RightTSLForInlierType, LeftBWLForInlierType, RightBWLForInlierType, GausianDeclusterType};
 
 enum class TBIDataSetReturnType {Ok, FailedFunctionPassedInWrongDataSetType, FailedFunctionProducedInvalidResult, FailedWrongDataSetTypeForFunction,
-                                FailedFunctionPassedInWrongMatType, FailedPassedInDataSetWrongSize, FailedPassedInParameterMakesNoSense};
+                                FailedFunctionPassedInWrongMatType, FailedPassedInDataSetWrongSize, FailedPassedInParameterMakesNoSense, FailedTotalImageIntensityTooHigh, FailedTotalImageIntensityTooLow};
 
 class TBIDataSet
 {
@@ -53,7 +53,7 @@ public:
     //Build Methods
     //Build Methods Create New Dataset types from the Source Dataset.
     //For Gausian Clustering
-    TBIDataSetReturnType buildGausianClusterDataSet(cv::Mat &_thresholdmat, const TBIGausianDeclusteringParameters &_declusterparameter);
+    TBIDataSetReturnType buildGausianClusterDataSet(cv::Mat &_thresholdmat, TBIGausianDeclusteringParameters &_declusterparameter);
     //For The TSL Ransac SubSets
     TBIDataSetReturnType buildLeftTSLRansacDataSet(const TBIDataSet & _gausiansrcds, const int _endingsrcindex);
     TBIDataSetReturnType buildRightTSLRansacDataSet(const TBIDataSet & _gausiansrcds, const int _startingsrcindex);
@@ -78,6 +78,7 @@ public:
     TBIDataSetReturnType extractDistributionSet(TBIDataDistributionSet &_distroset);
     TBIDataSetReturnType extractLeastSquareLine(TBILine &_line);
     TBIDataSetReturnType extractFilteredGausianSet(TBIDataSet &_dst, int _breakindex);
+    TBIDataSetReturnType extractDataSubSet(TBIDataSet &_dst, int _startindex, int _endindex);
 
     //Filter Functions
 
