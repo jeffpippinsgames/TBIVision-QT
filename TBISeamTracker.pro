@@ -31,7 +31,8 @@ SOURCES += \
         tbiweld_buttjoint.cpp \
         tbiweld_enumerator.cpp \
         tbiweld_pipelineprocessingreturntype.cpp \
-        tbiweld_vgroove.cpp
+        tbiweld_vgroove.cpp \
+        tbiweld_vgroovetrackingcontainer.cpp
 
 RESOURCES += qml.qrc
 
@@ -71,7 +72,8 @@ HEADERS += \
     tbiweld_buttjoint.h \
     tbiweld_enumerator.h \
     tbiweld_pipelineprocessingreturntype.h \
-    tbiweld_vgroove.h
+    tbiweld_vgroove.h \
+    tbiweld_vgroovetrackingcontainer.h
 
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonbase-6.2.0
 unix:!macx: LIBS += -L$$PWD/../../../../../opt/pylon/lib/ -lpylonutility-6.2.0

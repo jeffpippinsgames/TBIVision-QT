@@ -10,6 +10,8 @@ TBIWeld_VGroove::TBIWeld_VGroove()
     m_gausiandecluster_leftside_ds = new TBIDataSet();
     m_gausiandecluster_rightside_ds = new TBIDataSet();
     m_joint_ds = new TBIDataSet();
+    m_left_joint_ds = new TBIDataSet();
+    m_right_joint_ds = new TBIDataSet();
     m_dummy_set1 = new TBIDataSet();
     m_dummy_set2 = new TBIDataSet();
     this->setDefautValues();
@@ -23,6 +25,8 @@ TBIWeld_VGroove::~TBIWeld_VGroove()
     delete m_right_inlier_bwl_ds;
     delete m_gausiandecluster_leftside_ds;
     delete m_gausiandecluster_rightside_ds;
+    delete m_left_joint_ds;
+    delete m_right_joint_ds;
     delete m_joint_ds;
     delete m_dummy_set1;
     delete m_dummy_set2;
@@ -39,14 +43,13 @@ void TBIWeld_VGroove::setRootQMLContextProperties(QQmlApplicationEngine &_engine
 
 TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::processPipeline(TBIClass_OpenCVMatContainer &_mats)
 {
+
     this->clearDataSets();
     this->clearRansacLines();
     this->clearGeometricEntities();
     this->clearTrackingPoints();
 
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result;
-
-    //Set the Raw Frame to the Operations Frame
 
     //Stage 1 Build Gausian DeCluster DataSet.
     _result = this->doDeGausianClustering(_mats);
@@ -63,8 +66,18 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::proc
     }
 
     //Stage 2b Build Inlier DataSets
+    _result = this->doBuildInlierDataSets(_mats);
+    if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
+    {
+        return _result;
+    }
 
     //Stage3 Build Geometric Entities
+    _result = this->doConstructGeometricEntities(_mats);
+    if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
+    {
+        return _result;
+    }
 
     //Stage4 Find Tracking Points.
 
@@ -119,7 +132,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     this->drawVGrooveBreakPointIndex(_mats, m_break_index);
     //-----------------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------
-    //Build the Left Side Gausian Distro Set
+    //Build The Left Side Gausian DeCluster Set
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result;
     _result = this->getGausianDeClusterSubSet(*m_gausiandecluster_leftside_ds, 0, m_break_index);
     if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
@@ -127,7 +140,9 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
         qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Could Not Build Left Gausian Decluster Data SubSet.");
         return _result;
     }
-    //Build Right Side DeCluser SubSet
+    //-----------------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
+    //Build The Right Side DeCluser SubSet
     _result = this->getGausianDeClusterSubSet(*m_gausiandecluster_rightside_ds, m_break_index, this->getGausianDeclusterDataSetMaxIndex());
     if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
     {
@@ -144,7 +159,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     }
     //Draw The Left TSL Ransac
     m_left_tsl_ransac_line.remakeLine(0, _mats.m_ransac.cols);
-    m_left_tsl_ransac_line.drawOnMat(_mats.m_ransac, CV_RGB(0,0,255));
+    m_left_tsl_ransac_line.drawOnMat(_mats.m_ransac, m_left_tsl_cv_color);
     //-----------------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------
     //Build The Right TSL Ransac Line
@@ -155,7 +170,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     }
     //Draw The Right TSL Ransac
     m_right_tsl_ransac_line.remakeLine(0, _mats.m_ransac.cols);
-    m_right_tsl_ransac_line.drawOnMat(_mats.m_ransac, CV_RGB(255,255,0));
+    m_right_tsl_ransac_line.drawOnMat(_mats.m_ransac, m_right_tsl_cv_color);
     //-----------------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------
     //Build Joint DataSet to Make Finding the BWL Ransacs Easier
@@ -165,6 +180,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
         qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Could Not Build VGroove Joint DataSet.");
         return _result;
     }
+
     //-----------------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------
     //Adjust the BWL Ransac Params So That The Angle to Horizon is Adjusted To The Top Surface Lines
@@ -184,7 +200,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     }
     //Draw Ransac to Mat
     m_left_bwl_ransac_line.remakeLine(0, _mats.m_ransac.cols);
-    m_left_bwl_ransac_line.drawOnMat(_mats.m_ransac, CV_RGB(0,255,0));
+    m_left_bwl_ransac_line.drawOnMat(_mats.m_ransac, m_left_bwl_cv_color);
     //-----------------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------
     //Find Right BWL Ransac Line
@@ -195,7 +211,119 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     }
     //Draw Ransac to Mat
     m_right_bwl_ransac_line.remakeLine(0, _mats.m_ransac.cols);
-    m_right_bwl_ransac_line.drawOnMat(_mats.m_ransac, CV_RGB(0,255,255));
+    m_right_bwl_ransac_line.drawOnMat(_mats.m_ransac, m_right_bwl_cv_color);
+
+    return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
+}
+
+TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doBuildInlierDataSets(TBIClass_OpenCVMatContainer &_mats)
+{
+    TBIDataSetReturnType _datasetresult;
+
+    //-----------------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
+    //Build Left TSL DataSet.
+    _datasetresult = m_gausiandecluster_leftside_ds->extractDataSetForInliers(*m_left_inlier_tsl_ds, m_left_tsl_ransac_line, 2.0);
+    if(_datasetresult != TBIDataSetReturnType::Ok)
+    {
+        qDebug("TBIWeld_VGroove::doBuildInlierDataSets() Failed To Extract Left TSL Inlier Data Set.");
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTLEFTTSLINLIERDATASET;
+    }
+    //Draw Data Set into Inlier Mat
+    m_left_inlier_tsl_ds->drawToMat(_mats.m_inliers, m_left_tsl_cv_color);
+
+    //-----------------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
+    //Build Right TSL DataSet
+    _datasetresult = m_gausiandecluster_rightside_ds->extractDataSetForInliers(*m_right_inlier_tsl_ds, m_right_tsl_ransac_line, 2.0);
+    if(_datasetresult != TBIDataSetReturnType::Ok)
+    {
+        qDebug("TBIWeld_VGroove::doBuildInlierDataSets() Failed To Extract Right TSL Inlier Data Set.");
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTRIGHTTSLINLIERDATASET;
+    }
+    //Draw Data Set into Inlier Mat
+    m_right_inlier_tsl_ds->drawToMat(_mats.m_inliers, m_right_tsl_cv_color);
+
+    //-----------------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
+    //Build Left BWL DataSet.
+    _datasetresult = m_joint_ds->extractDataSetForInliers(*m_left_inlier_bwl_ds, m_left_bwl_ransac_line, 2.0);
+    if(_datasetresult != TBIDataSetReturnType::Ok)
+    {
+        qDebug("TBIWeld_VGroove::doBuildInlierDataSets() Failed To Extract Left BWL Inlier Data Set.");
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTLEFTBWLINLIERDATASET;
+    }
+    //Draw Data Set into Inlier Mat
+    m_left_inlier_bwl_ds->drawToMat(_mats.m_inliers, m_left_bwl_cv_color);
+
+    //-----------------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
+    //Build Right BWL DataSet
+    _datasetresult = m_joint_ds->extractDataSetForInliers(*m_right_inlier_bwl_ds, m_right_bwl_ransac_line, 2.0);
+    if(_datasetresult != TBIDataSetReturnType::Ok)
+    {
+        qDebug("TBIWeld_VGroove::doBuildInlierDataSets() Failed To Extract Right BWL Inlier Data Set.");
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTRIGHTBWLINLIERDATASET;
+    }
+    //Draw Data Set into Inlier Mat
+    m_right_inlier_bwl_ds->drawToMat(_mats.m_inliers, m_right_bwl_cv_color);
+
+
+    return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
+}
+
+TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doConstructGeometricEntities(TBIClass_OpenCVMatContainer &_mats)
+{
+    TBIDataSetReturnType _datasetresult;
+
+    //-----------------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
+    //Build Left TSL Geometric Entity
+    _datasetresult = m_left_inlier_tsl_ds->extractLeastSquareLine(m_left_tsl_geo_line);
+    if(_datasetresult != TBIDataSetReturnType::Ok)
+    {
+        qDebug("TBIWeld_VGroove::doConstructGeometricEntities() Failed To Build Left TSL Geometric Entity.");
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOBUILDLEFTTSLGEOMETRICENTITY;
+    }
+    //Draw Geometric Entity
+    m_left_tsl_geo_line.drawOnMat(_mats.m_geometricconstruction, m_left_tsl_cv_color);
+
+    //-----------------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
+    //Build Right TSL Geometric Entity
+    _datasetresult = m_right_inlier_tsl_ds->extractLeastSquareLine(m_right_tsl_geo_line);
+    if(_datasetresult != TBIDataSetReturnType::Ok)
+    {
+        qDebug("TBIWeld_VGroove::doConstructGeometricEntities() Failed To Build Right TSL Geometric Entity.");
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOBUILDRIGHTTSLGEOMETRICENTITY;
+    }
+    //Draw Geometric Entity
+    m_right_tsl_geo_line.drawOnMat(_mats.m_geometricconstruction, m_right_tsl_cv_color);
+
+    //-----------------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
+    //Build Left BWL Geometric Entity
+    _datasetresult = m_left_inlier_bwl_ds->extractLeastSquareLine(m_left_bwl_geo_line);
+    if(_datasetresult != TBIDataSetReturnType::Ok)
+    {
+        qDebug("TBIWeld_VGroove::doConstructGeometricEntities() Failed To Build Left BWL Geometric Entity.");
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOBUILDLEFTBWLGEOMETRICENTITY;
+    }
+    //Draw Geometric Entity
+    m_left_bwl_geo_line.drawOnMat(_mats.m_geometricconstruction, m_left_bwl_cv_color);
+
+    //-----------------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------------------------
+    //Build Right BWL Geometric Entity
+    _datasetresult = m_right_inlier_bwl_ds->extractLeastSquareLine(m_right_bwl_geo_line);
+    if(_datasetresult != TBIDataSetReturnType::Ok)
+    {
+        qDebug("TBIWeld_VGroove::doConstructGeometricEntities() Failed To Build Right BWL Geometric Entity.");
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOBUILDRIGHTBWLGEOMETRICENTITY;
+    }
+    //Draw Geometric Entity
+    m_right_bwl_geo_line.drawOnMat(_mats.m_geometricconstruction, m_right_bwl_cv_color);
+
 
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
 }
@@ -209,6 +337,8 @@ void TBIWeld_VGroove::clearDataSets()
     m_gausiandecluster_leftside_ds->clear();
     m_gausiandecluster_rightside_ds->clear();
     m_joint_ds->clear();
+    m_left_joint_ds->clear();
+    m_right_joint_ds->clear();
     m_dummy_set1->clear();
     m_dummy_set2->clear();
 }

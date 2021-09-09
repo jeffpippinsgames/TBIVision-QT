@@ -32,10 +32,16 @@ public slots:
 
 private:
 
+    //Color Constants
+    const cv::Scalar m_left_tsl_cv_color = CV_RGB(0,0,255);
+    const cv::Scalar m_left_bwl_cv_color = CV_RGB(125,125,255);
+    const cv::Scalar m_right_tsl_cv_color = CV_RGB(255,0,0);
+    const cv::Scalar m_right_bwl_cv_color = CV_RGB(255,125,125);
+
     //Private Seam Tracking Methods
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructInlierRansacs(TBIClass_OpenCVMatContainer &_mats);
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doBuildInlierDataSets();
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructGeometricEntities();
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doBuildInlierDataSets(TBIClass_OpenCVMatContainer &_mats);
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructGeometricEntities(TBIClass_OpenCVMatContainer &_mats);
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doFindValidTrackingPoints();
 
     //Clearing Methods
@@ -52,6 +58,8 @@ private:
     TBIDataSet *m_gausiandecluster_leftside_ds;
     TBIDataSet *m_gausiandecluster_rightside_ds;
     TBIDataSet *m_joint_ds;
+    TBIDataSet *m_left_joint_ds;
+    TBIDataSet *m_right_joint_ds;
 
     //Dummy Data Sets
     TBIDataSet *m_dummy_set1; //Used For Static Storage. So Other Functions Dont Have To Recreate Them in the Loops.
