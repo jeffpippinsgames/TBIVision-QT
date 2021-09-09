@@ -10,6 +10,7 @@
 #include "tbiweld_pipelineprocessingreturntype.h"
 #include "tbiparameterclass_gausiandecluster.h"
 #include "tbiclass_opencvmatcontainer.h"
+#include <QDataStream>
 
 
 
@@ -35,11 +36,12 @@ public:
     void drawVGrooveBreakPointIndex(TBIClass_OpenCVMatContainer &_mats, int _breakindex);
     int getVGrooveBreakIndex();
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t extractVGrooveJointDataSet(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold);
+    TBIGausianDeclusteringParameters* getGausianDeclusterParametersPointer(){return &m_gausiandecluster_params;}
+    void setGausianDeClusterParamDefaultValues(){m_gausiandecluster_params.setDefautValues();}
+    void saveGausianDeClusterParamsToFile(QDataStream &_filedatastream);
+    void loadGausianDeClusterParamsFromFile(QDataStream &_filedatastream);
 
 private:
-        //Private Seam Tracking Methods
-
-
         //Datasets
         TBIDataSet *m_gausian_decluster_ds;
         TBIDataSet *m_filtered_gausian_decluster_ds;
@@ -48,7 +50,7 @@ private:
         TBIDataDistributionSet *m_gausian_decluster_distro;
 
         //GausianDeclustering Settings
-        TBIGausianDeclusteringParameters m_gausiandecluster_settings;
+        TBIGausianDeclusteringParameters m_gausiandecluster_params;
 signals:
 
 };

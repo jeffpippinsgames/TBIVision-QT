@@ -297,7 +297,7 @@ Item
     Text
     {
         id: camerafpstextId
-        visible: Mary.showdebuginfo
+        visible: true
         focus: false
         font.family: fontId.name
         text: Toby.camera_fps
@@ -313,11 +313,11 @@ Item
     Text
     {
         id: timeinlooptextId
-        visible: Mary.showdebuginfo
+        visible: true
         focus: false
         font.family: fontId.name
         text: Max.timeinloop
-        font.pointSize: 20
+        font.pointSize: 15
         width: timeinlooptextId.implicitWidth
         height: timeinlooptextId.implicitHeight
         x: camerafpstextId.width+30

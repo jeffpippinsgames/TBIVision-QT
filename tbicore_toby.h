@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QQuickItem>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <pylon/PylonIncludes.h>
 #include <pylon/BaslerUniversalInstantCamera.h>
 #include <QImage>
@@ -12,6 +14,7 @@
 #include <QString>
 #include <QElapsedTimer>
 #include <QStringList>
+#include "tbiparameterclass_pyloncameraparams.h"
 
 
 using namespace Pylon;
@@ -59,6 +62,7 @@ public:
     Q_INVOKABLE QString getCurrentApplicationPath(){return qApp->applicationDirPath();}
     bool getProcessingStillImage(){return m_processsing_debug_image;}
     bool getProcessingCamera(){return m_camera->IsGrabbing();}
+    void setRootQMLContextProperties(QQmlApplicationEngine &_engine);
 
 
     //Property Get Methods
@@ -66,6 +70,10 @@ public:
     Q_INVOKABLE void setCameraAOIToMax();
     QString getCameraFPS(){return m_camera_fps;}
 
+    //Save File Methods
+    void setDefautValues();
+    void saveToFile(QDataStream &_filedatastream);
+    void loadFromFile(QDataStream &_filedatastream);
 
 private:
     //Still Image Data Member
@@ -73,6 +81,7 @@ private:
     QStringList m_still_file_names;
     bool m_processsing_debug_image;
 
+    TBIPylonCameraParamers m_camera_params;
 
     //Pylon Members
     CInstantCamera *m_camera;
@@ -90,16 +99,15 @@ private:
 
 public slots:
     //Camera Settings Slots
-    void onChangeCameraAOI(int _width, int _height);
-    void onChangeCameraExposure(double _exposure);
-    void onChangeCameraGain(int _gain);
+    void onChangeCameraAOI();
+    void onChangeCameraExposure();
+    void onChangeCameraGain();
 
 
 signals:
     void emitProcessingStillImageChanged();
     void emitProcessingCameraChanged();
     void onStillImageFileModelChanged();
-    void signalMaryForCameraSettings();
     void newQImageFrameGrabbed(const QImage &qimageframe);
     void newCVMatFrameGrabbed(const cv::Mat &matframe);
     void aboutToDestroy();

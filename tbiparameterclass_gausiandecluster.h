@@ -4,31 +4,89 @@
 #include "tbicore_constants.h"
 #include <cstdint>
 #include <QObject>
+#include <QDataStream>
 
 
-class TBIGausianDeclusteringParameters
+class TBIGausianDeclusteringParameters: public QObject
 {
+
+    Q_OBJECT
+
+    Q_PROPERTY(int maxClusterSize WRITE setMaxClusterSize READ getMaxClusterSize NOTIFY maxClusterSizeChanged)
+    Q_PROPERTY(int minClusterSize WRITE setMinClusterSize READ getMinClusterSize NOTIFY minClusterSizeChanged)
+    Q_PROPERTY(int maxClustersInColumn WRITE setMaxClustersInColumn READ getMaxClustersInColumn NOTIFY maxClustersInColumnChanged)
+    Q_PROPERTY(int blurValue WRITE setBlurValue READ getBlurValue NOTIFY blurValueChanged)
+    Q_PROPERTY(int minThresholdValue WRITE setMinThresholdValue READ getMinThresholdValue NOTIFY minThresholdValueChanged)
+    Q_PROPERTY(int maxThresholdValue WRITE setMaxThresholdValue READ getMaxThresholdValue NOTIFY maxThresholdValueChanged)
+    Q_PROPERTY(float declusterDistrobutionStandardDeviation WRITE setDeclusterDeviation READ getDeclusterDeviation NOTIFY deClusterDeviationChanged)
+    Q_PROPERTY(quint64 maxImageIntensity WRITE setMaxImageIntensity READ getMaxImageIntensity NOTIFY maxImageIntensityChanged)
+    Q_PROPERTY(quint64 minImageIntensity WRITE setMinImageIntensity READ getMinImageIntensity NOTIFY minImageIntensityChanged)
+    Q_PROPERTY(quint64 totalImageIntensity WRITE setTotalImageIntensity READ getTotalImageIntensity NOTIFY totalImageIntensityChanged)
+
 public:
-    TBIGausianDeclusteringParameters();
-    int m_max_cluster_size;
-    int m_min_cluster_size;
-    int m_max_clusters_in_col;
-    int m_blur_value;
-    int m_threshold_min_value;
-    int m_threshold_max_value;
-    float m_max_decluster_distro_deviation;
 
-    quint64 m_max_image_intensity;
-    quint64 m_min_image_intensity;
-    quint64 m_total_image_intensity;
+    explicit TBIGausianDeclusteringParameters(QObject *parent = nullptr);
 
+    //Set Methods
+    void setMaxClusterSize(int _size);
+    void setMinClusterSize(int _size);
+    void setMaxClustersInColumn(int _value);
+    void setBlurValue(int _value);
+    void setMinThresholdValue(int _value);
+    void setMaxThresholdValue(int _value);
+    void setDeclusterDeviation(float _value);
+    void setMaxImageIntensity(quint64 _value);
+    void setMinImageIntensity(quint64 _value);
+    void setTotalImageIntensity(quint64 _value);
+
+    //Get Methods
+    int getMaxClusterSize(){return m_max_cluster_size;}
+    int getMinClusterSize(){return m_min_cluster_size;}
+    int getMaxClustersInColumn(){return m_max_clusters_in_col;}
+    int getBlurValue(){return m_blur_value;}
+    int getMinThresholdValue(){return m_threshold_min_value;}
+    int getMaxThresholdValue(){return m_threshold_max_value;}
+    float getDeclusterDeviation(){return m_max_decluster_distro_deviation;}
+    quint64 getMaxImageIntensity(){return m_max_image_intensity;}
+    quint64 getMinImageIntensity(){return m_min_image_intensity;}
+    quint64 getTotalImageIntensity(){return m_total_image_intensity;}
+
+    //Utility Methods
     bool totalImageIntensityToHigh();
     bool totalImageInstenisyToLow();
     void clearTotalImageIntensity();
     void addToTotalImageIntensity(int _value);
 
+    //Save File Methods
+    void setDefautValues();
+    void saveToFile(QDataStream &_filedatastream);
+    void loadFromFile(QDataStream &_filedatastream);
+
+signals:
+   void maxClusterSizeChanged();
+   void minClusterSizeChanged();
+   void maxClustersInColumnChanged();
+   void blurValueChanged();
+   void minThresholdValueChanged();
+   void maxThresholdValueChanged();
+   void deClusterDeviationChanged();
+   void maxImageIntensityChanged();
+   void minImageIntensityChanged();
+   void totalImageIntensityChanged();
+
 private:
 
+   int m_max_cluster_size;
+   int m_min_cluster_size;
+   int m_max_clusters_in_col;
+   int m_blur_value;
+   int m_threshold_min_value;
+   int m_threshold_max_value;
+   float m_max_decluster_distro_deviation;
+
+   quint64 m_max_image_intensity;
+   quint64 m_min_image_intensity;
+   quint64 m_total_image_intensity;
 
 };
 

@@ -31,8 +31,8 @@ Window {
         case pagesId.mainmenupage:
             component = Qt.createComponent("/qml-pages/MainMenuPage.qml");
             break;
-        case pagesId.pipelinesettingspage:
-            component = Qt.createComponent("/qml-pages/ImageProcessingSettingsPage.qml");
+        case pagesId.vgroovepipelinesettingspage:
+            component = Qt.createComponent("/qml-pages/VGrooveImageProcessingSettingsPage.qml");
             break;
         }
 
@@ -58,7 +58,6 @@ Window {
     function destroyPage(_transition_page)
     {
         console.log(page.pagename + " is Being Destroyed.")
-        //page.destroyPage.disconnect(destroyPage);
         page.destroy();
         page = null;
         openPage(_transition_page);
@@ -81,6 +80,5 @@ Window {
     Component.onCompleted:
     {
         openPage(pagesId.operationspage);
-        //openPage(pagesId.pipelinesettingspage);
     }
 }

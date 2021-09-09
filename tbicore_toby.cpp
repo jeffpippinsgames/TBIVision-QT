@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QThread>
 #include <QDir>
+#include "tbicore_constants.h"
 
 //Constructors and Deconstructors
 /**************************************************************
@@ -19,10 +20,13 @@ Toby::Toby(QObject *parent) : QObject(parent)
     m_camera_fps = "Error";
     m_processsing_debug_image = false;
     emit cameraFPSChanged(m_camera_fps);
+    QObject::connect(&m_camera_params, SIGNAL(aoiWidthChanged()), this, SLOT(onChangeCameraAOI()));
+    QObject::connect(&m_camera_params, SIGNAL(aoiHeightChanged()), this, SLOT(onChangeCameraAOI()));
+    QObject::connect(&m_camera_params, SIGNAL(exposureChanged()), this, SLOT(onChangeCameraExposure()));
+    QObject::connect(&m_camera_params, SIGNAL(gainChanged()), this, SLOT(onChangeCameraGain()));
+    this->setDefautValues();
     initializeCamera();
     qDebug() << "Toby::Toby() Toby Object Created.";
-
-
 }
 
 /**************************************************************
@@ -258,7 +262,7 @@ Slot
 Description:
   Signal Handler For Changing the Camera AOI
  **************************************************************/
-void Toby::onChangeCameraAOI(int _width, int _height)
+void Toby::onChangeCameraAOI()
 {
     /*
     if(!isCameraInitialized())
@@ -288,7 +292,7 @@ Slot
 Description:
   Signal Handler For Changing the Camera Exposure
  **************************************************************/
-void Toby::onChangeCameraExposure(double _exposure)
+void Toby::onChangeCameraExposure()
 {
 
     if(!isCameraInitialized())
@@ -301,7 +305,7 @@ void Toby::onChangeCameraExposure(double _exposure)
     {
         //Get Camera NodeMap
         GenApi::INodeMap& _nodemap = m_camera->GetNodeMap();
-        CFloatParameter(_nodemap, "ExposureTimeAbs").SetValue((float)_exposure);
+        CFloatParameter(_nodemap, "ExposureTimeAbs").SetValue(m_camera_params.getExposure());
     }
     catch(const GenericException &e)
     {
@@ -317,7 +321,7 @@ Slot
 Description:
   Signal Handler For Changing the Camera Gain
  **************************************************************/
-void Toby::onChangeCameraGain(int _gain)
+void Toby::onChangeCameraGain()
 {
     /*
 
@@ -433,7 +437,10 @@ void Toby::updateStillImageFileList()
     emit onStillImageFileModelChanged();
 }
 
-
+void Toby::setRootQMLContextProperties(QQmlApplicationEngine &_engine)
+{
+    _engine.rootContext()->setContextProperty("PylonCameraParameters", &m_camera_params);
+}
 
 //Camera Control and Interation Methods
 /**************************************************************
@@ -452,14 +459,14 @@ bool Toby::initializeCamera()
             m_camera = new Pylon::CInstantCamera(Pylon::CTlFactory::GetInstance().CreateFirstDevice());
             m_camera->Open();
             CDeviceInfo _deviceinfo = m_camera->GetDeviceInfo();
-            QString _model = QString(_deviceinfo.GetFriendlyName().c_str());
-            qDebug() << _model << " has been opened.";
-            if(_model.contains("acA800", Qt::CaseInsensitive))
+            m_camera_params.setCameraName(QString(_deviceinfo.GetFriendlyName().c_str()));
+            qDebug() << m_camera_params.getCameraName() << " has been opened.";
+            if(m_camera_params.getCameraName().contains("acA800", Qt::CaseInsensitive))
             {
                 SetCameraSettingsacA800();
                 qDebug() << "Settings Have Been Applied to the Basler acA800-200gm GigE Camera.";
             }
-            if(_model.contains("acA720", Qt::CaseInsensitive))
+            if(m_camera_params.getCameraName().contains("acA720", Qt::CaseInsensitive))
             {
                 SetCameraSettingsacA720();
                 qDebug() << "Settings Have Been Applied to the Basler acA720-280gm GigE Camera.";
@@ -467,7 +474,6 @@ bool Toby::initializeCamera()
             m_camera->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
             //m_camera->RegisterConfiguration(new Pylon::CAcquireContinuousConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
             //m_camera->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
-
             qDebug()<<"Toby::initializeCamera(): Camera Opened and Configured: ";
         }
         catch(const Pylon::GenericException e)
@@ -635,5 +641,21 @@ Description:
  **************************************************************/
 void Toby::setCameraAOIToMax()
 {
-    onChangeCameraAOI(720, 540);
+    m_camera_params.setAOIHeight(TBIConstants::Max_Camera_Height);
+    m_camera_params.setAOIWidth(TBIConstants::Max_Camera_Width);
+}
+
+void Toby::setDefautValues()
+{
+    m_camera_params.setDefautValues();
+}
+
+void Toby::saveToFile(QDataStream &_filedatastream)
+{
+    m_camera_params.saveToFile(_filedatastream);
+}
+
+void Toby::loadFromFile(QDataStream &_filedatastream)
+{
+    m_camera_params.loadFromFile(_filedatastream);
 }

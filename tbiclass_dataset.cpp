@@ -240,6 +240,7 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
     int _x = 0;
     int _y = 0;
     int _intensity;
+    quint64 _tii = 0;
 
     TBIPixelFundamental _pixels[_max_y];
     int _pixelarraysize=0;
@@ -260,8 +261,8 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
         _intensity = _data[_dataindex];
 
         //Process Total Image Intensity
-        _declusterparameter.addToTotalImageIntensity(_intensity);
-        if(_declusterparameter.totalImageIntensityToHigh()) return TBIDataSetReturnType::FailedTotalImageIntensityTooHigh;
+        _tii += _intensity;
+
 
         //---------------------------------
 
@@ -318,7 +319,7 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
             {
                 //Find The Centroid By Weighted Average
                 //And Record In The DataSet
-                if((_pixelarraysize >= _declusterparameter.m_min_cluster_size) && (_pixelarraysize <= _declusterparameter.m_max_cluster_size))
+                if((_pixelarraysize >= _declusterparameter.getMinClusterSize()) && (_pixelarraysize <= _declusterparameter.getMaxClusterSize()))
                 {
                     float _weight_sum = 0.0;
                     float _weight_data_product_sum = 0.0;
@@ -377,7 +378,7 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
             {
                 //Find The Centroid By Weighted Average
                 //And Record In The DataSet
-                if((_pixelarraysize >= _declusterparameter.m_min_cluster_size) && (_pixelarraysize <= _declusterparameter.m_max_cluster_size))
+                if((_pixelarraysize >= _declusterparameter.getMinClusterSize()) && (_pixelarraysize <= _declusterparameter.getMaxClusterSize()))
                 {
                     float _weight_sum = 0.0;
                     float _weight_data_product_sum = 0.0;
@@ -414,6 +415,9 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
             ++_x;
         }
     }while(_x < _max_x);
+
+    _declusterparameter.setTotalImageIntensity(_tii);
+    if(_declusterparameter.totalImageIntensityToHigh()) return TBIDataSetReturnType::FailedTotalImageIntensityTooHigh;
 
     if(_declusterparameter.totalImageInstenisyToLow()) return TBIDataSetReturnType::FailedTotalImageIntensityTooLow;
     this->m_dataset_type = TBIDataSetType::GausianDeclusterType;

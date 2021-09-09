@@ -7,7 +7,9 @@
 class TBIClass_OpenCVMatContainer
 {
 public:
-    TBIClass_OpenCVMatContainer(cv::Mat &_source);
+    TBIClass_OpenCVMatContainer();
+    void initMats(const cv::Mat &_srcmat);
+
     cv::Mat m_raw;
     cv::Mat m_blurr;
     cv::Mat m_threshold;

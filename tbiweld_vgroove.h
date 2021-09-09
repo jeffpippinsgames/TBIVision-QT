@@ -4,6 +4,9 @@
 #include "tbiweld_base.h"
 #include "tbiclass_line.h"
 #include "tbiparameterclass_ranscaparms.h"
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QDataStream>
 
 class TBIWeld_VGroove : public TBIWeld_Base
 {
@@ -12,28 +15,30 @@ public:
     TBIWeld_VGroove();
     ~TBIWeld_VGroove();
 
-
     void setRansacLineParameters(TBIRansacParameter &_left_tsl_param, TBIRansacParameter &_left_bwl_param,
                                  TBIRansacParameter &_right_tsl_param, TBIRansacParameter &_right_bwl_param);
 
 
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doSeamTracking(cv::Mat &_rawmat, cv::Mat &_blurmat, cv::Mat &_thresholdmat,
-                                                                              cv::Mat &_gausiandeclustermat, cv::Mat &_ransacmat, cv::Mat &_inliersmat,
-                                                                              cv::Mat &_geometricconstructionmat, cv::Mat &_operationsmat);
+    void setRootQMLContextProperties(QQmlApplicationEngine &engine);
+
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t processPipeline(TBIClass_OpenCVMatContainer &_mats);
+
+    //Save File Methods
+    void setDefautValues();
+    void saveToFile(QDataStream &_filedatastream);
+    void loadFromFile(QDataStream &_filedatastream);
+
+public slots:
 
 private:
 
     //Private Seam Tracking Methods
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructInlierRansacs(cv::Mat &_ransacmat, cv::Mat &_gausiandeclustermat);
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructInlierRansacs(TBIClass_OpenCVMatContainer &_mats);
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doBuildInlierDataSets();
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructGeometricEntities();
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doFindValidTrackingPoints();
 
-    //Motion Commands
-    int calcXMotion();
-    int calcZMotion();
-
-    //Misc Helper Methods
+    //Clearing Methods
     void clearDataSets();
     void clearRansacLines();
     void clearGeometricEntities();

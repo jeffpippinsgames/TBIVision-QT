@@ -1,19 +1,71 @@
 #include "tbiparameterclass_gausiandecluster.h"
+#include <QDebug>
 
 
 
-TBIGausianDeclusteringParameters::TBIGausianDeclusteringParameters()
+TBIGausianDeclusteringParameters::TBIGausianDeclusteringParameters(QObject *parent)
 {
-    m_max_clusters_in_col = 0;
-    m_min_cluster_size = 0;
-    m_max_clusters_in_col = 0;
-    m_blur_value = 1;
-    m_threshold_min_value = 5;
-    m_threshold_max_value = 15;
-    m_min_image_intensity = 1;
-    m_max_image_intensity = 2000000;
-    m_total_image_intensity = 0;
-    m_max_decluster_distro_deviation = 15.0;
+    this->setDefautValues();
+}
+
+void TBIGausianDeclusteringParameters::setMaxClusterSize(int _size)
+{
+    m_max_cluster_size = _size;
+    emit maxClusterSizeChanged();
+}
+
+void TBIGausianDeclusteringParameters::setMinClusterSize(int _size)
+{
+    m_min_cluster_size = _size;
+    emit minClusterSizeChanged();
+}
+
+void TBIGausianDeclusteringParameters::setMaxClustersInColumn(int _value)
+{
+    m_max_clusters_in_col = _value;
+    emit maxClustersInColumnChanged();
+}
+
+void TBIGausianDeclusteringParameters::setBlurValue(int _value)
+{
+    m_blur_value = _value;
+    emit blurValueChanged();
+}
+
+void TBIGausianDeclusteringParameters::setMinThresholdValue(int _value)
+{
+    m_threshold_min_value = _value;
+    emit minThresholdValueChanged();
+}
+
+void TBIGausianDeclusteringParameters::setMaxThresholdValue(int _value)
+{
+    m_threshold_max_value = _value;
+    emit maxThresholdValueChanged();
+}
+
+void TBIGausianDeclusteringParameters::setDeclusterDeviation(float _value)
+{
+    m_max_decluster_distro_deviation = _value;
+    emit deClusterDeviationChanged();
+}
+
+void TBIGausianDeclusteringParameters::setMaxImageIntensity(quint64 _value)
+{
+    m_max_image_intensity = _value;
+    emit maxImageIntensityChanged();
+}
+
+void TBIGausianDeclusteringParameters::setMinImageIntensity(quint64 _value)
+{
+    m_min_image_intensity = _value;
+    emit minImageIntensityChanged();
+}
+
+void TBIGausianDeclusteringParameters::setTotalImageIntensity(quint64 _value)
+{
+    m_total_image_intensity = _value;
+    emit totalImageIntensityChanged();
 }
 
 bool TBIGausianDeclusteringParameters::totalImageIntensityToHigh()
@@ -30,12 +82,63 @@ bool TBIGausianDeclusteringParameters::totalImageInstenisyToLow()
 
 void TBIGausianDeclusteringParameters::clearTotalImageIntensity()
 {
-    m_total_image_intensity = 0;
+    this->setTotalImageIntensity(0);
 }
 
 void TBIGausianDeclusteringParameters::addToTotalImageIntensity(int _value)
 {
-    m_total_image_intensity += _value;
+    this->setTotalImageIntensity(m_total_image_intensity + _value);
+}
+
+void TBIGausianDeclusteringParameters::setDefautValues()
+{
+    this->setMaxClustersInColumn(2);
+    this->setMinClusterSize(1);
+    this->setMaxClusterSize(75);
+    this->setBlurValue(3);
+    this->setMinThresholdValue(100);
+    this->setMaxThresholdValue(255);
+    this->setMinImageIntensity(1);
+    this->setMaxImageIntensity(2000000);
+    this->setTotalImageIntensity(0);
+    this->setDeclusterDeviation(15.0);
+}
+
+void TBIGausianDeclusteringParameters::saveToFile(QDataStream &_filedatastream)
+{
+
+    _filedatastream << m_min_cluster_size;
+    _filedatastream << m_max_cluster_size;
+    _filedatastream << m_max_clusters_in_col;
+    _filedatastream << m_blur_value;
+    _filedatastream << m_threshold_min_value;
+    _filedatastream << m_threshold_max_value;
+    _filedatastream << m_max_decluster_distro_deviation;
+    _filedatastream << m_max_image_intensity;
+    _filedatastream << m_min_image_intensity;
+
+}
+
+void TBIGausianDeclusteringParameters::loadFromFile(QDataStream &_filedatastream)
+{
+    _filedatastream >> m_min_cluster_size;
+    _filedatastream >> m_max_cluster_size;
+    _filedatastream >> m_max_clusters_in_col;
+    _filedatastream >> m_blur_value;
+    _filedatastream >> m_threshold_min_value;
+    _filedatastream >> m_threshold_max_value;
+    _filedatastream >> m_max_decluster_distro_deviation;
+    _filedatastream >> m_max_image_intensity;
+    _filedatastream >> m_min_image_intensity;
+    emit minClusterSizeChanged();
+    emit maxClusterSizeChanged();
+    emit maxClustersInColumnChanged();
+    emit blurValueChanged();
+    emit minThresholdValueChanged();
+    emit maxThresholdValueChanged();
+    emit deClusterDeviationChanged();
+    emit maxImageIntensityChanged();
+    emit minImageIntensityChanged();
 }
 
 

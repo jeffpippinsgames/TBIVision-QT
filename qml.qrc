@@ -70,7 +70,7 @@
         <file>qml-pages/PageTemplate.qml</file>
         <file>qml-components/IconInfoStatusObject.qml</file>
         <file>Icons/microcontroller(white).png</file>
-        <file>qml-pages/ImageProcessingSettingsPage.qml</file>
+        <file>qml-pages/VGrooveImageProcessingSettingsPage.qml</file>
         <file>qml-components/SliderSettingsObject.qml</file>
         <file>qml-components/PagesDescriptionObject.qml</file>
         <file>qml-components/empty_qml.qml</file>

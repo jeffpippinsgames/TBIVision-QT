@@ -1,9 +1,14 @@
 #include "tbiclass_opencvmatcontainer.h"
 
 
-TBIClass_OpenCVMatContainer::TBIClass_OpenCVMatContainer(cv::Mat &_source)
+TBIClass_OpenCVMatContainer::TBIClass_OpenCVMatContainer()
 {
-    m_raw = _source.clone();
+
+}
+
+void TBIClass_OpenCVMatContainer::initMats(const cv::Mat &_srcmat)
+{
+    m_raw = _srcmat.clone();
     m_blurr = cv::Mat::zeros(m_raw.rows, m_raw.cols, CV_8UC1);
     m_threshold = cv::Mat::zeros(m_raw.rows, m_raw.cols, CV_8UC1);
     m_gausiandecluster = cv::Mat::zeros(m_raw.rows, m_raw.cols, CV_8UC1);

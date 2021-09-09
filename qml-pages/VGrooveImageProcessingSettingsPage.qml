@@ -90,9 +90,7 @@ Item {
         Toby.closeStillImagetoProcess();
 
         //Save Mary and Update Singletons
-        Mary.saveMaryToFile();
-        Mary.broadcastSingletonSignals();
-
+        Mary.saveSettingsToDefaultFile();
 
         //disconnect all connected signals
         Max.processingComplete.disconnect(rootpageId.triggerTobyNextFrame);
@@ -117,12 +115,7 @@ Item {
         Max.processingComplete.connect(rootpageId.triggerTobyNextFrame);
 
         //Set The State of the Root Component
-        rootpageId.state = rootpageId.camerastateframeactive;
-
-
-        //Load Mary Settings and Update QML and Singletons
-        Mary.loadMaryFromFile();
-
+        rootpageId.state = rootpageId.camerastateframeactive;      
 
         //Setup and Start Camera
         Toby.setCameraAOIToMax();
@@ -988,7 +981,7 @@ Item {
         {
             if(camerasettingsrectId.visible)
             {
-                cameradeviceinfotextId.text = Toby.getCameraInfo();
+                cameradeviceinfotextId.text = PylonCameraParameters.cameraName;
             }
             else
             {
@@ -1211,7 +1204,7 @@ Item {
             x:10
             font.pixelSize: 20
             color: rootpageId.textcolor
-            text: Toby.getCameraInfo()
+            text: PylonCameraParameters.cameraName
         }
 
         //Camera AOI Adjustment Button
@@ -1283,22 +1276,23 @@ Item {
 
                 onUpButtonPressed:
                 {
-                    Mary.pylon_aoiheight = Mary.pylon_aoiheight + 20
+                    PylonCameraParameters.aoiHeight += 20;
+
                 }
 
                 onDownButtonPressed:
                 {
-                    Mary.pylon_aoiheight = Mary.pylon_aoiheight - 20
+                    PylonCameraParameters.aoiHeight -= 20;
                 }
 
                 onLeftButtonPressed:
                 {
-                    Mary.pylon_aoiwidth = Mary.pylon_aoiwidth + 20
+                    PylonCameraParameters.aoiWidth += 20;
                 }
 
                 onRightButtonPressed:
                 {
-                    Mary.pylon_aoiwidth = Mary.pylon_aoiwidth - 20
+                    PylonCameraParameters.aoiWidth -= 20;
                 }
 
                 onUpButtonReleased:
@@ -1332,7 +1326,7 @@ Item {
             controlname: "CameraExposureSlider"
             x:20
             y:195
-            messagetext: "Exposure: " + Mary.pylon_exposure + " micro sec.";
+            messagetext: "Exposure: " + PylonCameraParameters.exposure + " micro sec.";
             valuefrom: 30
             valueto: 10000
             stepsize: 10
@@ -1343,7 +1337,7 @@ Item {
 
             Component.onCompleted:
             {
-                exposuresliderId.value = Mary.getCameraExposure();
+                exposuresliderId.value = PylonCameraParameters.exposure;
             }
 
             onEndFocus:
@@ -1354,7 +1348,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.pylon_exposure = exposuresliderId.value;
+                PylonCameraParameters.exposure = exposuresliderId.value;
             }
         }
 
@@ -1365,7 +1359,7 @@ Item {
             controlname: "CameraGainSlider"
             x:20
             y:exposuresliderId.y+exposuresliderId.height+20
-            messagetext: "Gain: " + Mary.pylon_gain
+            messagetext: "Gain: " + PylonCameraParameters.gain
             valuefrom: 0
             valueto: 360
             stepsize: 1
@@ -1376,7 +1370,7 @@ Item {
 
             Component.onCompleted:
             {
-                gainsliderId.value = Mary.getCameraGain();
+                gainsliderId.value = PylonCameraParameters.gain;
             }
 
             onEndFocus:
@@ -1387,7 +1381,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.pylon_gain =  gainsliderId.value;
+                PylonCameraParameters.gain =  gainsliderId.value;
             }
         }
 
@@ -1415,7 +1409,6 @@ Item {
                 color: rootpageId.textcolor
             }
         }
-
     }
 
     //Blur Settings Rectangle---------------------------------------
@@ -1572,7 +1565,7 @@ Item {
             controlname: "BlurSliderControl"
             x:20
             y:60
-            messagetext: "Blur: " + Mary.cv_blur;
+            messagetext: "Blur: " + VGrooveGausianDistroParameters.blurValue;
             valuefrom: 1
             valueto: 49
             stepsize: 2
@@ -1581,7 +1574,7 @@ Item {
 
             Component.onCompleted:
             {
-                blursliderId.value = Mary.getCVBlurValue();
+                blursliderId.value = VGrooveGausianDistroParameters.blurValue;
             }
 
             onEndFocus:
@@ -1592,7 +1585,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.cv_blur = blursliderId.value;
+                VGrooveGausianDistroParameters.blurValue = blursliderId.value;
             }
 
 
@@ -1782,9 +1775,9 @@ Item {
             controlname: "MinThresholdSlider"
             x:20
             y:60
-            messagetext: "Threshold Min: " + Mary.cv_thresholdmin;
+            messagetext: "Threshold Min: " + VGrooveGausianDistroParameters.minThresholdValue;
             valuefrom: 0
-            valueto: Mary.cv_thresholdmax-1
+            valueto: VGrooveGausianDistroParameters.maxThresholdValue-1
             stepsize: 1
             majorstepsize: 5
             controlstickautorepeat: true
@@ -1792,7 +1785,7 @@ Item {
 
             Component.onCompleted:
             {
-                thresholdminsliderId.value = Mary.getCVThresholdMinValue();
+                thresholdminsliderId.value = VGrooveGausianDistroParameters.minThresholdValue;
             }
 
             onEndFocus:
@@ -1803,7 +1796,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.cv_thresholdmin = thresholdminsliderId.value;
+                VGrooveGausianDistroParameters.minThresholdValue = thresholdminsliderId.value;
             }
         }
 
@@ -1814,8 +1807,8 @@ Item {
             id: thresholdmaxsliderId
             x:20
             y:thresholdminsliderId.y+thresholdminsliderId.height+20
-            messagetext: "Threshold Max: " + Mary.cv_thresholdmax
-            valuefrom: Mary.cv_thresholdmin + 1
+            messagetext: "Threshold Max: " + VGrooveGausianDistroParameters.maxThresholdValue
+            valuefrom: VGrooveGausianDistroParameters.minThresholdValue + 1
             valueto: 255
             stepsize: 1
             majorstepsize: 5
@@ -1824,7 +1817,7 @@ Item {
 
             Component.onCompleted:
             {
-                thresholdmaxsliderId.value = Mary.getCVThresholdMaxValue();
+                thresholdmaxsliderId.value = VGrooveGausianDistroParameters.maxThresholdValue;
             }
 
             onEndFocus:
@@ -1835,7 +1828,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.cv_thresholdmax = thresholdmaxsliderId.value;
+                VGrooveGausianDistroParameters.maxThresholdValue = thresholdmaxsliderId.value;
             }
 
         }
@@ -2097,7 +2090,7 @@ Item {
             x: 10
             font.pixelSize: 20
             color: rootpageId.textcolor
-            text: "Total Image Intensity: " + Max.total_image_intensity
+            text: "Total Image Intensity: " + VGrooveGausianDistroParameters.totalImageIntensity
         }
 
         //Max TTI Slider
@@ -2106,8 +2099,8 @@ Item {
             id: maxtiisliderId
             x: 20
             y: pixelcolumn_ttitextId.y + pixelcolumn_ttitextId.height + 20
-            messagetext: "Max Image Intensity: " + Mary.pc_max_tii
-            valuefrom: Mary.pc_min_tii + 1
+            messagetext: "Max Image Intensity: " + VGrooveGausianDistroParameters.maxImageIntensity
+            valuefrom: VGrooveGausianDistroParameters.minImageIntensity + 1
             valueto: 15000000
             stepsize: 1
             majorstepsize: 50000
@@ -2116,7 +2109,7 @@ Item {
 
             Component.onCompleted:
             {
-                maxtiisliderId.value = Mary.pc_max_tii;
+                maxtiisliderId.value = VGrooveGausianDistroParameters.maxImageIntensity;
             }
 
             onEndFocus:
@@ -2128,7 +2121,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.pc_max_tii = maxtiisliderId.value;
+                VGrooveGausianDistroParameters.maxImageIntensity = maxtiisliderId.value;
             }
 
         }
@@ -2139,9 +2132,9 @@ Item {
             id: mintiisliderId
             x: 20
             y: maxtiisliderId.y + maxtiisliderId.height + 20
-            messagetext: "Min Image Intensity: " + Mary.pc_min_tii
+            messagetext: "Min Image Intensity: " + VGrooveGausianDistroParameters.minImageIntensity
             valuefrom: 0
-            valueto: Mary.pc_max_tii - 1
+            valueto: VGrooveGausianDistroParameters.maxImageIntensity - 1
             stepsize: 1
             majorstepsize: 50000
             controlstickautorepeat: true
@@ -2149,7 +2142,7 @@ Item {
 
             Component.onCompleted:
             {
-                mintiisliderId.value = Mary.pc_min_tii;
+                mintiisliderId.value = VGrooveGausianDistroParameters.minImageIntensity;
             }
 
             onEndFocus:
@@ -2161,7 +2154,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.pc_min_tii = mintiisliderId.value;
+                VGrooveGausianDistroParameters.minImageIntensity = mintiisliderId.value;
             }
 
         }
@@ -2172,8 +2165,8 @@ Item {
             id: maxclustersizesliderId
             x: 20
             y: mintiisliderId.y + mintiisliderId.height + 20
-            messagetext: "Max Pixel Cluster Size: " + Mary.pc_max_cluster_size
-            valuefrom: Mary.pc_min_cluster_size + 1
+            messagetext: "Max Pixel Cluster Size: " + VGrooveGausianDistroParameters.maxClusterSize
+            valuefrom: VGrooveGausianDistroParameters.minClusterSize + 1
             valueto: 200
             stepsize: 1
             majorstepsize: 10
@@ -2182,7 +2175,7 @@ Item {
 
             Component.onCompleted:
             {
-                maxclustersizesliderId.value = Mary.pc_max_cluster_size;
+                maxclustersizesliderId.value = VGrooveGausianDistroParameters.maxClusterSize;
             }
 
             onEndFocus:
@@ -2194,7 +2187,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.pc_max_cluster_size = maxclustersizesliderId.value;
+                VGrooveGausianDistroParameters.maxClusterSize = maxclustersizesliderId.value;
             }
 
         }
@@ -2205,9 +2198,9 @@ Item {
             id: minclustersizesliderId
             x: 20
             y: maxclustersizesliderId.y + maxclustersizesliderId.height + 20
-            messagetext: "Min Pixel Cluster Size: " + Mary.pc_min_cluster_size
+            messagetext: "Min Pixel Cluster Size: " + VGrooveGausianDistroParameters.minClusterSize
             valuefrom: 1
-            valueto: Mary.pc_max_cluster_size - 1
+            valueto: VGrooveGausianDistroParameters.maxClusterSize - 1
             stepsize: 1
             majorstepsize: 10
             controlstickautorepeat: true
@@ -2215,7 +2208,7 @@ Item {
 
             Component.onCompleted:
             {
-                minclustersizesliderId.value = Mary.pc_min_cluster_size;
+                minclustersizesliderId.value = VGrooveGausianDistroParameters.minClusterSize;
             }
 
             onEndFocus:
@@ -2227,7 +2220,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.pc_min_cluster_size = minclustersizesliderId.value;
+                VGrooveGausianDistroParameters.minClusterSize = minclustersizesliderId.value;
             }
 
         }
@@ -2238,7 +2231,7 @@ Item {
             id: maxclustersincolsliderId
             x: 20
             y: minclustersizesliderId.y + minclustersizesliderId.height + 20
-            messagetext: "Max Clusters in Column: " + Mary.pc_max_clusters_in_column
+            messagetext: "Max Clusters in Column: " + VGrooveGausianDistroParameters.maxClustersInColumn
             valuefrom: 1
             valueto: 10
             stepsize: 1
@@ -2248,7 +2241,7 @@ Item {
 
             Component.onCompleted:
             {
-                maxclustersincolsliderId.value = Mary.pc_max_clusters_in_column;
+                maxclustersincolsliderId.value = VGrooveGausianDistroParameters.maxClustersInColumn;
             }
 
             onEndFocus:
@@ -2260,7 +2253,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.pc_max_clusters_in_column = maxclustersincolsliderId.value;
+                VGrooveGausianDistroParameters.maxClustersInColumn = maxclustersincolsliderId.value;
             }
 
         }
@@ -2431,7 +2424,7 @@ Item {
             controlname: "MaxDiscontinuities"
             x:20
             y: 100
-            messagetext: "Maximum Discontinuities: " + Mary.sk_max_discontinuity;
+            messagetext: "Max Distrobuted Deviation: " + VGrooveGausianDistroParameters.declusterDistrobutionStandardDeviation;
             valuefrom: 0
             valueto: 700
             stepsize: 1
@@ -2442,7 +2435,7 @@ Item {
 
             Component.onCompleted:
             {
-                discontinuitysliderId.value = Mary.sk_max_discontinuity;
+                discontinuitysliderId.value = VGrooveGausianDistroParameters.declusterDistrobutionStandardDeviation;
             }
 
             onEndFocus:
@@ -2453,7 +2446,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.sk_max_discontinuity = discontinuitysliderId.value;
+                VGrooveGausianDistroParameters.declusterDistrobutionStandardDeviation = discontinuitysliderId.value;
             }
         }
 
@@ -3609,7 +3602,7 @@ Item {
             y: ransactextleftId.y+ransactextleftId.height+5
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "Ideal Angle: " + Mary.rn_left_tsl_ideal_angle;
+            messagetext: "Ideal Angle: " + VGrooveLeftTSLRansacParameters.idealAngle
             valuefrom: -90
             valueto: 90
             stepsize: 1
@@ -3618,9 +3611,10 @@ Item {
             fontsize: ransacsettingsrectId.slidertextsize
             highlightbordersize: ransacsettingsrectId.sliderborderwidth
 
+
             Component.onCompleted:
             {
-                ransaclefttslidealanglesliderId.value = Mary.rn_left_tsl_ideal_angle;
+                ransaclefttslidealanglesliderId.value = VGrooveLeftTSLRansacParameters.idealAngle;
             }
 
             onEndFocus:
@@ -3631,7 +3625,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_left_tsl_ideal_angle = ransaclefttslidealanglesliderId.value;
+                VGrooveLeftTSLRansacParameters.idealAngle = ransaclefttslidealanglesliderId.value;
             }
         }
 
@@ -3643,7 +3637,7 @@ Item {
             y: ransaclefttslidealanglesliderId.y + ransaclefttslidealanglesliderId.height + ransacsettingsrectId.slidersverticalspacing
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "Angle Variance: " + Mary.rn_left_tsl_allowed_angle_variance;
+            messagetext: "Angle Variance: " + VGrooveLeftTSLRansacParameters.allowedAngleVariance
             valuefrom: 0
             valueto: 30
             stepsize: 1
@@ -3655,7 +3649,7 @@ Item {
             Component.onCompleted:
             {
 
-                ransaclefttslallowedanglevariancesliderId.value = Mary.rn_left_tsl_allowed_angle_variance;
+                ransaclefttslallowedanglevariancesliderId.value = VGrooveLeftTSLRansacParameters.allowedAngleVariance;
             }
 
             onEndFocus:
@@ -3666,7 +3660,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_left_tsl_allowed_angle_variance = ransaclefttslallowedanglevariancesliderId.value;
+                VGrooveLeftTSLRansacParameters.allowedAngleVariance = ransaclefttslallowedanglevariancesliderId.value;
             }
         }
 
@@ -3679,7 +3673,7 @@ Item {
             y: ransacsettingsrectId.slidersverticalspacing + ransaclefttslallowedanglevariancesliderId.y + ransaclefttslallowedanglevariancesliderId.height
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "TSL Distance Threshold: " + Mary.rn_left_tsl_distance_threshold;
+            messagetext: "TSL Distance Threshold: " + VGrooveLeftTSLRansacParameters.distanceThreshold
             valuefrom: 1
             valueto: 10
             stepsize: 1
@@ -3690,7 +3684,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransaclefttsldistancethresholdsliderId.value = Mary.rn_left_tsl_distance_threshold;
+                ransaclefttsldistancethresholdsliderId.value = VGrooveLeftTSLRansacParameters.distanceThreshold;
             }
 
             onEndFocus:
@@ -3701,7 +3695,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_left_tsl_distance_threshold = ransaclefttsldistancethresholdsliderId.value;
+                VGrooveLeftTSLRansacParameters.distanceThreshold = ransaclefttsldistancethresholdsliderId.value;
             }
         }
 
@@ -3714,7 +3708,7 @@ Item {
             y: ransacsettingsrectId.slidersverticalspacing + ransaclefttsldistancethresholdsliderId.y + ransaclefttsldistancethresholdsliderId.height
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "TSL Iterations: " + Mary.rn_left_tsl_iterations;
+            messagetext: "TSL Iterations: " + VGrooveLeftTSLRansacParameters.iterations
             valuefrom: 20
             valueto: 1000
             stepsize: 1
@@ -3725,7 +3719,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransaclefttsliterationssliderId.value = Mary.rn_left_tsl_iterations;
+                ransaclefttsliterationssliderId.value = VGrooveLeftTSLRansacParameters.iterations;
             }
 
             onEndFocus:
@@ -3736,7 +3730,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_left_tsl_iterations = ransaclefttsliterationssliderId.value;
+                VGrooveLeftTSLRansacParameters.iterations = ransaclefttsliterationssliderId.value;
             }
         }
 
@@ -3749,7 +3743,7 @@ Item {
             y: ransacsettingsrectId.slidersverticalspacing + ransaclefttsliterationssliderId.y + ransaclefttsliterationssliderId.height
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "TSL Min Votes: " + Mary.rn_left_tsl_votes;
+            messagetext: "TSL Min Votes: " + VGrooveLeftTSLRansacParameters.minVotes
             valuefrom: 1
             valueto: 600
             stepsize: 1
@@ -3760,7 +3754,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransaclefttslminvotessliderId.value = Mary.rn_left_tsl_votes
+                ransaclefttslminvotessliderId.value = VGrooveLeftTSLRansacParameters.minVotes
             }
 
             onEndFocus:
@@ -3771,7 +3765,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_left_tsl_votes = ransaclefttslminvotessliderId.value;
+                VGrooveLeftTSLRansacParameters.minVotes = ransaclefttslminvotessliderId.value;
             }
         }
         //--------------------------------------------------
@@ -3787,7 +3781,7 @@ Item {
             y: 430
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "Ideal Angle: " + Mary.rn_left_bwl_ideal_angle;
+            messagetext: "Ideal Angle: " + VGrooveLeftBWLRansacParameters.idealAngle;
             valuefrom: -90
             valueto: 90
             stepsize: 1
@@ -3798,7 +3792,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacleftbwlidealanglesliderId.value = Mary.rn_left_bwl_ideal_angle;
+                ransacleftbwlidealanglesliderId.value = VGrooveLeftBWLRansacParameters.idealAngle
             }
 
             onEndFocus:
@@ -3809,7 +3803,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_left_bwl_ideal_angle = ransacleftbwlidealanglesliderId.value;
+                VGrooveLeftBWLRansacParameters.idealAngle = ransacleftbwlidealanglesliderId.value;
             }
         }
 
@@ -3821,7 +3815,7 @@ Item {
             y: ransacleftbwlidealanglesliderId.y + ransacleftbwlidealanglesliderId.height + ransacsettingsrectId.slidersverticalspacing
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "Angle Variance: " + Mary.rn_left_bwl_allowed_angle_variance;
+            messagetext: "Angle Variance: " + VGrooveLeftBWLRansacParameters.allowedAngleVariance;
             valuefrom: 0
             valueto: 30
             stepsize: 1
@@ -3832,7 +3826,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacleftbwlallowedanglevariancesliderId.value = Mary.rn_left_bwl_allowed_angle_variance;
+                ransacleftbwlallowedanglevariancesliderId.value = VGrooveLeftBWLRansacParameters.allowedAngleVariance;
             }
 
             onEndFocus:
@@ -3843,7 +3837,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_left_bwl_allowed_angle_variance = ransacleftbwlallowedanglevariancesliderId.value;
+                VGrooveLeftBWLRansacParameters.allowedAngleVariance = ransacleftbwlallowedanglevariancesliderId.value;
             }
         }
 
@@ -3856,7 +3850,7 @@ Item {
             y: ransacsettingsrectId.slidersverticalspacing + ransacleftbwlallowedanglevariancesliderId.y + ransacleftbwlallowedanglevariancesliderId.height
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "BWL Distance Threshold: " + Mary.rn_left_bwl_distance_threshold;
+            messagetext: "BWL Distance Threshold: " + VGrooveLeftBWLRansacParameters.distanceThreshold;
             valuefrom: 1
             valueto: 10
             stepsize: 1
@@ -3867,7 +3861,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacleftbwldistancethresholdsliderId.value = Mary.rn_left_bwl_distance_threshold;
+                ransacleftbwldistancethresholdsliderId.value = VGrooveLeftBWLRansacParameters.distanceThreshold;
             }
 
             onEndFocus:
@@ -3878,7 +3872,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_left_bwl_distance_threshold = ransacleftbwldistancethresholdsliderId.value;
+                VGrooveLeftBWLRansacParameters.distanceThreshold = ransacleftbwldistancethresholdsliderId.value;
             }
         }
 
@@ -3891,7 +3885,7 @@ Item {
             y: ransacsettingsrectId.slidersverticalspacing + ransacleftbwldistancethresholdsliderId.y + ransacleftbwldistancethresholdsliderId.height
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "BWL Iterations: " + Mary.rn_left_bwl_iterations;
+            messagetext: "BWL Iterations: " + VGrooveLeftBWLRansacParameters.iterations
             valuefrom: 20
             valueto: 1000
             stepsize: 1
@@ -3902,7 +3896,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacleftbwliterationssliderId.value = Mary.rn_left_bwl_iterations;
+                ransacleftbwliterationssliderId.value = VGrooveLeftBWLRansacParameters.iterations;
             }
 
             onEndFocus:
@@ -3913,7 +3907,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_left_bwl_iterations = ransacleftbwliterationssliderId.value;
+                VGrooveLeftBWLRansacParameters.iterations = ransacleftbwliterationssliderId.value;
             }
         }
 
@@ -3926,7 +3920,7 @@ Item {
             y: ransacsettingsrectId.slidersverticalspacing + ransacleftbwliterationssliderId.y + ransacleftbwliterationssliderId.height
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "BWL Min Votes: " + Mary.rn_left_bwl_votes;
+            messagetext: "BWL Min Votes: " + VGrooveLeftBWLRansacParameters.minVotes
             valuefrom: 1
             valueto: 600
             stepsize: 1
@@ -3937,7 +3931,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacleftbwlminvotessliderId.value = Mary.rn_left_bwl_votes;
+                ransacleftbwlminvotessliderId.value = VGrooveLeftBWLRansacParameters.minVotes;
             }
 
             onEndFocus:
@@ -3948,7 +3942,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_left_bwl_votes = ransacleftbwlminvotessliderId.value;
+                VGrooveLeftBWLRansacParameters.minVotes = ransacleftbwlminvotessliderId.value;
             }
         }
         //--------------------------------------------------
@@ -3963,7 +3957,7 @@ Item {
             y: ransactextrightId.y+ransactextrightId.height+5
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "Ideal Angle: " + Mary.rn_right_tsl_ideal_angle;
+            messagetext: "Ideal Angle: " + VGrooveRightTSLRansacParameters.idealAngle;
             valuefrom: -90
             valueto: 90
             stepsize: 1
@@ -3974,7 +3968,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacrighttslidealanglesliderId.value = Mary.rn_right_tsl_ideal_angle;
+                ransacrighttslidealanglesliderId.value = VGrooveRightTSLRansacParameters.idealAngle;
             }
 
             onEndFocus:
@@ -3985,7 +3979,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_right_tsl_ideal_angle = ransacrighttslidealanglesliderId.value;
+                VGrooveRightTSLRansacParameters.idealAngle = ransacrighttslidealanglesliderId.value;
             }
         }
 
@@ -3997,7 +3991,7 @@ Item {
             y: ransacrighttslidealanglesliderId.y + ransacrighttslidealanglesliderId.height + ransacsettingsrectId.slidersverticalspacing
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "Angle Variance: " + Mary.rn_right_tsl_allowed_angle_variance;
+            messagetext: "Angle Variance: " + VGrooveRightTSLRansacParameters.allowedAngleVariance;
             valuefrom: 0
             valueto: 30
             stepsize: 1
@@ -4008,7 +4002,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacrighttslallowedanglevariancesliderId.value = Mary.rn_right_tsl_allowed_angle_variance;
+                ransacrighttslallowedanglevariancesliderId.value = VGrooveRightTSLRansacParameters.allowedAngleVariance;
             }
 
             onEndFocus:
@@ -4019,7 +4013,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_right_tsl_allowed_angle_variance = ransacrighttslallowedanglevariancesliderId.value;
+                VGrooveRightTSLRansacParameters.allowedAngleVariance = ransacrighttslallowedanglevariancesliderId.value;
             }
         }
 
@@ -4032,7 +4026,7 @@ Item {
             y: ransacsettingsrectId.slidersverticalspacing + ransacrighttslallowedanglevariancesliderId.y + ransacrighttslallowedanglevariancesliderId.height
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "TSL Distance Threshold: " + Mary.rn_right_tsl_distance_threshold;
+            messagetext: "TSL Distance Threshold: " + VGrooveRightTSLRansacParameters.distanceThreshold;
             valuefrom: 1
             valueto: 10
             stepsize: 1
@@ -4043,7 +4037,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacrighttsldistancethresholdsliderId.value = Mary.rn_right_tsl_distance_threshold;
+                ransacrighttsldistancethresholdsliderId.value = VGrooveRightTSLRansacParameters.distanceThreshold;
             }
 
             onEndFocus:
@@ -4054,7 +4048,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_right_tsl_distance_threshold = ransacrighttsldistancethresholdsliderId.value;
+                VGrooveRightTSLRansacParameters.distanceThreshold = ransacrighttsldistancethresholdsliderId.value;
             }
         }
 
@@ -4067,7 +4061,7 @@ Item {
             y: ransacsettingsrectId.slidersverticalspacing + ransacrighttsldistancethresholdsliderId.y + ransacrighttsldistancethresholdsliderId.height
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "TSL Iterations: " + Mary.rn_right_tsl_iterations;
+            messagetext: "TSL Iterations: " + VGrooveRightTSLRansacParameters.iterations;
             valuefrom: 20
             valueto: 1000
             stepsize: 1
@@ -4078,7 +4072,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacrighttsliterationssliderId.value = Mary.rn_right_tsl_iterations;
+                ransacrighttsliterationssliderId.value = VGrooveRightTSLRansacParameters.iterations;
             }
 
             onEndFocus:
@@ -4089,7 +4083,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_right_tsl_iterations = ransacrighttsliterationssliderId.value;
+                VGrooveRightTSLRansacParameters.iterations = ransacrighttsliterationssliderId.value;
             }
         }
 
@@ -4102,7 +4096,7 @@ Item {
             y: ransacsettingsrectId.slidersverticalspacing + ransacrighttsliterationssliderId.y + ransacrighttsliterationssliderId.height
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "TSL Min Votes: " + Mary.rn_right_tsl_votes;
+            messagetext: "TSL Min Votes: " + VGrooveRightTSLRansacParameters.minVotes;
             valuefrom: 1
             valueto: 600
             stepsize: 1
@@ -4113,7 +4107,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacrighttslminvotessliderId.value = Mary.rn_right_tsl_votes;
+                ransacrighttslminvotessliderId.value = VGrooveRightTSLRansacParameters.minVotes;
             }
 
             onEndFocus:
@@ -4123,7 +4117,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_right_tsl_votes = ransacrighttslminvotessliderId.value;
+                VGrooveRightTSLRansacParameters.minVotes = ransacrighttslminvotessliderId.value;
             }
         }
         //--------------------------------------------------
@@ -4139,7 +4133,7 @@ Item {
             y: 430
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "BWL Ideal Angle: " + Mary.rn_right_bwl_ideal_angle;
+            messagetext: "BWL Ideal Angle: " + VGrooveRightBWLRansacParameters.idealAngle;
             valuefrom: -90
             valueto: 90
             stepsize: 1
@@ -4150,7 +4144,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacrightbwlidealanglesliderId.value = Mary.rn_right_bwl_ideal_angle;
+                ransacrightbwlidealanglesliderId.value = VGrooveRightBWLRansacParameters.idealAngle;
             }
 
             onEndFocus:
@@ -4161,7 +4155,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_right_bwl_ideal_angle = ransacrightbwlidealanglesliderId.value;
+                VGrooveRightBWLRansacParameters.idealAngle = ransacrightbwlidealanglesliderId.value;
             }
         }
 
@@ -4173,7 +4167,7 @@ Item {
             y: ransacrightbwlidealanglesliderId.y + ransacrightbwlidealanglesliderId.height + ransacsettingsrectId.slidersverticalspacing
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "Angle Variance: " + Mary.rn_right_bwl_allowed_angle_variance;
+            messagetext: "Angle Variance: " + VGrooveRightBWLRansacParameters.allowedAngleVariance
             valuefrom: 0
             valueto: 30
             stepsize: 1
@@ -4184,7 +4178,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacrightbwlallowedanglevariancesliderId.value = Mary.rn_right_bwl_allowed_angle_variance;
+                ransacrightbwlallowedanglevariancesliderId.value = VGrooveRightBWLRansacParameters.allowedAngleVariance;
             }
 
             onEndFocus:
@@ -4195,7 +4189,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_right_bwl_allowed_angle_variance = ransacrightbwlallowedanglevariancesliderId.value;
+                VGrooveRightBWLRansacParameters.allowedAngleVariance = ransacrightbwlallowedanglevariancesliderId.value;
             }
         }
 
@@ -4208,7 +4202,7 @@ Item {
             y: ransacsettingsrectId.slidersverticalspacing + ransacrightbwlallowedanglevariancesliderId.y + ransacrightbwlallowedanglevariancesliderId.height
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "BWL Distance Threshold: " + Mary.rn_right_bwl_distance_threshold;
+            messagetext: "BWL Distance Threshold: " + VGrooveRightBWLRansacParameters.distanceThreshold
             valuefrom: 1
             valueto: 10
             stepsize: 1
@@ -4219,7 +4213,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacrightbwldistancethresholdsliderId.value = Mary.rn_right_bwl_distance_threshold;
+                ransacrightbwldistancethresholdsliderId.value = VGrooveRightBWLRansacParameters.distanceThreshold;
             }
 
             onEndFocus:
@@ -4230,7 +4224,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_right_bwl_distance_threshold = ransacrightbwldistancethresholdsliderId.value;
+                VGrooveRightBWLRansacParameters.distanceThreshold = ransacrightbwldistancethresholdsliderId.value;
             }
         }
 
@@ -4243,7 +4237,7 @@ Item {
             y: ransacsettingsrectId.slidersverticalspacing + ransacrightbwldistancethresholdsliderId.y + ransacrightbwldistancethresholdsliderId.height
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "BWL Iterations: " + Mary.rn_right_bwl_iterations;
+            messagetext: "BWL Iterations: " + VGrooveRightBWLRansacParameters.iterations;
             valuefrom: 20
             valueto: 1000
             stepsize: 1
@@ -4254,7 +4248,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacrightbwliterationssliderId.value = Mary.rn_right_bwl_iterations;
+                ransacrightbwliterationssliderId.value = VGrooveRightBWLRansacParameters.iterations;
             }
 
             onEndFocus:
@@ -4265,7 +4259,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_right_bwl_iterations = ransacrightbwliterationssliderId.value;
+                VGrooveRightBWLRansacParameters.iterations = ransacrightbwliterationssliderId.value;
             }
         }
 
@@ -4278,7 +4272,7 @@ Item {
             y: ransacsettingsrectId.slidersverticalspacing + ransacrightbwliterationssliderId.y + ransacrightbwliterationssliderId.height
             width: ransacsettingsrectId.sliderwidth
             height: ransacsettingsrectId.sliderheight
-            messagetext: "BWL Min Votes: " + Mary.rn_right_bwl_votes;
+            messagetext: "BWL Min Votes: " + VGrooveRightBWLRansacParameters.minVotes
             valuefrom: 1
             valueto: 600
             stepsize: 1
@@ -4289,7 +4283,7 @@ Item {
 
             Component.onCompleted:
             {
-                ransacrightbwlminvotessliderId.value = Mary.rn_right_bwl_votes;
+                ransacrightbwlminvotessliderId.value = VGrooveRightBWLRansacParameters.minVotes;
             }
 
             onEndFocus:
@@ -4300,7 +4294,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.rn_right_bwl_votes = ransacrightbwlminvotessliderId.value;
+                VGrooveRightBWLRansacParameters.minVotes = ransacrightbwlminvotessliderId.value;
             }
         }
         //--------------------------------------------------
@@ -4440,18 +4434,18 @@ Item {
             font.family: fontId.name
             y: 10
             x:10
-            text: "Split Merge Settings"
+            text: "Geometric Contstructions"
             font.pixelSize: 25
             color: rootpageId.textcolor
         }
 
-        //Distance Threshold Slider
+        //Slider to be Removed
         SliderSettingsObject
         {
             id: geoconstructiondistancetsliderId
             x:20
             y: 60
-            messagetext: "Split Distance Threshold: " + Mary.sm_split_distance;
+            messagetext: "Geometric Constructions "
             valuefrom: 0
             valueto: 20
             stepsize: .5
@@ -4462,7 +4456,7 @@ Item {
 
             Component.onCompleted:
             {
-                // geoconstructiondistancetsliderId.value = Mary.sm_split_distance;
+
             }
 
             onEndFocus:
@@ -4473,7 +4467,7 @@ Item {
 
             onValueChanged:
             {
-                Mary.sm_split_distance = geoconstructiondistancetsliderId.value;
+
             }
         }
 
@@ -4563,10 +4557,10 @@ Item {
                     manualmotorcontrolbuttonId.grabFocus();
                     break;
                 case "MotorCalibration":
-                    Max.haveGaryStartMotorCalibration();
+                    //Max.haveGaryStartMotorCalibration();
                     break;
                 case "RecordTrackTo":
-                    Max.setMaryTrackToPoint();
+
                 break;
                 }
             }
@@ -4723,16 +4717,19 @@ Item {
 
                 onBlackButtonPressed:
                 {
+                    Gary.sendStopMovement();
                     operationsettingsrectId.grabFocus();
                 }
 
                 onGreenButtonPressed:
                 {
+                    Gary.sendStopMovement();
                     operationsettingsrectId.grabFocus();
                 }
 
                 onRedButtonPressed:
                 {
+                    Gary.sendStopMovement();
                     operationsettingsrectId.grabFocus();
                 }
 
@@ -5326,12 +5323,12 @@ Item {
                 id: cameraaoirectId
                 color: "transparent"
                 anchors.centerIn: parent
-                width: Mary.pylon_aoiwidth * scalex
-                height: Mary.pylon_aoiheight * scaley
+                width: PylonCameraParameters.aoiWidth * scalex
+                height: PylonCameraParameters.aoiHeight * scaley
                 border.color: Qt.rgba(.5,0,0,1);
                 border.width: 2
-                readonly property real scalex: mainviewdisplayId.width/Mary.pylon_maxwidth
-                readonly property real  scaley: mainviewdisplayId.height/Mary.pylon_maxheight
+                readonly property real scalex: mainviewdisplayId.width/PylonCameraParameters.maxWidth
+                readonly property real  scaley: mainviewdisplayId.height/PylonCameraParameters.maxHeight
             }
         }
     }

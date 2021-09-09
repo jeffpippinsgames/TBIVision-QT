@@ -10,7 +10,7 @@ Item
 
     readonly property string operationspage: "Operations"
     readonly property string mainmenupage: "MainMenu"
-    readonly property string pipelinesettingspage: "Pipeline"
+    readonly property string vgroovepipelinesettingspage: "VGroove Joint Pipeline"
 
     Rectangle
     {

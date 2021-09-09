@@ -13,18 +13,18 @@ SOURCES += \
         tbiclass_datadistributionset.cpp \
         tbiclass_dataset.cpp \
         tbiclass_line.cpp \
+        tbiclass_motorcalibrationcontroller.cpp \
         tbiclass_opencvmatcontainer.cpp \
         tbiclass_pointfloat.cpp \
         tbiclass_pointint.cpp \
         tbiclass_ransac.cpp \
-        tbiclass_threepointtrackingcontainer.cpp \
-        tbiclass_threepointtrackingmanager.cpp \
         tbicore_gary.cpp \
         tbicore_mary.cpp \
         tbicore_max.cpp \
         tbicore_toby.cpp \
         tbiparameterclass_gausiandecluster.cpp \
-        tbiparameterclass_imageintensity.cpp \
+        tbiparameterclass_motioncontrolparams.cpp \
+        tbiparameterclass_pyloncameraparams.cpp \
         tbiparameterclass_ranscaparms.cpp \
         tbiqml_display.cpp \
         tbiweld_base.cpp \
@@ -50,20 +50,20 @@ HEADERS += \
     tbiclass_datadistributionset.h \
     tbiclass_dataset.h \
     tbiclass_line.h \
+    tbiclass_motorcalibrationcontroller.h \
     tbiclass_opencvmatcontainer.h \
     tbiclass_pixelfundamental.h \
     tbiclass_pointfloat.h \
     tbiclass_pointint.h \
     tbiclass_ransac.h \
-    tbiclass_threepointtrackingcontainer.h \
-    tbiclass_threepointtrackingmanager.h \
     tbicore_constants.h \
     tbicore_gary.h \
     tbicore_mary.h \
     tbicore_max.h \
     tbicore_toby.h \
     tbiparameterclass_gausiandecluster.h \
-    tbiparameterclass_imageintensity.h \
+    tbiparameterclass_motioncontrolparams.h \
+    tbiparameterclass_pyloncameraparams.h \
     tbiparameterclass_ransacvotingstruct.h \
     tbiparameterclass_ranscaparms.h \
     tbiqml_display.h \

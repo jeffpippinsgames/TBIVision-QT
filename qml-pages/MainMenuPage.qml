@@ -57,7 +57,7 @@ Item {
             rotatemenuId.addMenuItem("qrc:/Icons/save.png", "Save Profile");
             rotatemenuId.addMenuItem("qrc:/Icons/gear.png", "System Settings");
             rotatemenuId.addMenuItem("qrc:/Icons/laser3.png", "Toggle Laser Power");
-            rotatemenuId.addMenuItem("qrc:/Icons/image.png", "Processing Pipeline Settings");
+            rotatemenuId.addMenuItem("qrc:/Icons/image.png", "VGroove Joint Pipeline Settings");
             rotatemenuId.addMenuItem("qrc:/Icons/quit.png", "Quit Application");
         }
 
@@ -69,9 +69,9 @@ Item {
                 rootpageId.cleanupForDestruction();
                 rootpageId.destroyPage(pagesId.operationspage);
                 break;
-            case "Processing Pipeline Settings":
+            case "VGroove Joint Pipeline Settings":
                 rootpageId.cleanupForDestruction();
-                rootpageId.destroyPage(pagesId.pipelinesettingspage)
+                rootpageId.destroyPage(pagesId.vgroovepipelinesettingspage)
                 break;
             case "Quit Application":
                 quitdialogId.visible = true;

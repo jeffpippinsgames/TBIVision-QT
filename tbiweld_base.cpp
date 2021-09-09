@@ -57,6 +57,16 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::extract
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
 }
 
+void TBIWeld_Base::saveGausianDeClusterParamsToFile(QDataStream &_filedatastream)
+{
+    m_gausiandecluster_params.saveToFile(_filedatastream);
+}
+
+void TBIWeld_Base::loadGausianDeClusterParamsFromFile(QDataStream &_filedatastream)
+{
+    m_gausiandecluster_params.loadFromFile(_filedatastream);
+}
+
 
 //The Mats Must Be Clear and Ready To Use.
 TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGausianClustering(TBIClass_OpenCVMatContainer &_mats)
@@ -79,12 +89,15 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGau
     m_filtered_gausian_decluster_ds->clear();
     m_filtered_gausian_decluster_ds->clear();
 
+    //Draw Raw Mat onto Operations Mat
+    cv::cvtColor(_mats.m_raw, _mats.m_operation, cv::COLOR_GRAY2BGR);
+
     //Do OpenCV Proccesses
-    cv::GaussianBlur(_mats.m_raw, _mats.m_blurr, cv::Size(m_gausiandecluster_settings.m_blur_value, m_gausiandecluster_settings.m_blur_value), 0);
-    cv::threshold(_mats.m_blurr, _mats.m_threshold, m_gausiandecluster_settings.m_threshold_min_value, m_gausiandecluster_settings.m_threshold_max_value, cv::THRESH_TOZERO);
+    cv::GaussianBlur(_mats.m_raw, _mats.m_blurr, cv::Size(m_gausiandecluster_params.getBlurValue(), m_gausiandecluster_params.getBlurValue()), 0);
+    cv::threshold(_mats.m_blurr, _mats.m_threshold, m_gausiandecluster_params.getMinThresholdValue(), m_gausiandecluster_params.getMaxThresholdValue(), cv::THRESH_TOZERO);
 
     //build DeCluster Data Set and Respond to failures.
-    TBIDataSetReturnType _retresult = m_gausian_decluster_ds->buildGausianClusterDataSet(_mats.m_threshold, m_gausiandecluster_settings);
+    TBIDataSetReturnType _retresult = m_gausian_decluster_ds->buildGausianClusterDataSet(_mats.m_threshold, m_gausiandecluster_params);
     switch(_retresult)
     {
         case TBIDataSetReturnType::FailedTotalImageIntensityTooHigh:
@@ -111,11 +124,15 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGau
     }
 
     //Make Sure Standard Deviation of Distrobution Set is ok.
-    if(m_gausian_decluster_distro->standardDeviation() > m_gausiandecluster_settings.m_max_decluster_distro_deviation)
+    if(m_gausian_decluster_distro->standardDeviation() > m_gausiandecluster_params.getDeclusterDeviation())
     {
         qDebug()<<"TBIWeld_Base::doDeGausianClustering() Gausian Decluster Distrobution Standard Deviation Exceeds Allowed Value.";
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_GAUSIANDISTROBUTIONDATASETEXCEEDSALLOWEDSTANDARDDEVIATION;
     }
+
+    //Draw The DeClusterSet Mat to the Inliers and Geo Construction
+    cv::cvtColor(_mats.m_gausiandecluster, _mats.m_inliers, cv::COLOR_GRAY2BGR);
+    cv::cvtColor(_mats.m_gausiandecluster, _mats.m_geometricconstruction, cv::COLOR_GRAY2BGR);
 
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
 }

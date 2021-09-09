@@ -3,6 +3,8 @@
 
 #include "tbicore_constants.h"
 #include <QObject>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <QImage>
 #include "opencv4/opencv2/core.hpp"
 #include "opencv4/opencv2/imgproc/imgproc.hpp"
@@ -18,10 +20,10 @@
 #include "tbiclass_dataset.h"
 #include "tbiclass_datadistributionset.h"
 #include "tbiparameterclass_gausiandecluster.h"
-#include "tbiparameterclass_imageintensity.h"
-#include "tbiclass_threepointtrackingmanager.h"
+#include "tbiparameterclass_motioncontrolparams.h"
 #include "tbicore_gary.h"
-#include "tbicore_mary.h"
+#include "tbiweld_vgroove.h"
+#include <QDataStream>
 
 
 using namespace cv;
@@ -74,176 +76,53 @@ class Max : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString timeinloop READ getTimeinLoop NOTIFY timeInLoopChanged)
-    Q_PROPERTY(quint64 total_image_intensity READ getTotalImageIntensity NOTIFY totalImageIntensityChanged)
     Q_PROPERTY(bool emitExtraMats READ getEmitExtraMats WRITE setEmitExtraMats NOTIFY emitExtraMatsChanged)
 
-
-private:
-    void processMotorCalibration(TBIThreePointTrackingContainer &_trackedpoint);
-    void processMotorCalibration(TBIPoint_Int &_trackedpoint);
-
-
-
-
-
-
 public:
+
+    //Constructor and Deconstructor
     explicit Max(QObject *parent = nullptr);
     ~Max();
-    QString getTimeinLoop(){return m_timeinloop;}
-    quint64 getTotalImageIntensity(){return m_total_image_intensity;}
 
+    //Get Methods
+    QString getTimeinLoop(){return m_timeinloop;}
     Q_INVOKABLE bool getEmitExtraMats(){return m_emitextramats;}
+
+    //Set Methods
     void setEmitExtraMats(bool _flag){m_emitextramats = _flag; emit emitExtraMatsChanged();}
     void setGary(Gary *_gy){m_gary = _gy;}
-    void setMary(Mary *_my){m_mary = _my;}
-    void resetMotorCalControlVariables(){m_motor_cal_got_pnt1=false; m_motor_cal_got_pnt2=false;}
-    Q_INVOKABLE void haveGaryStartMotorCalibration(){m_mary->setXAxisStepsPerPixel(10.0); m_mary->setZAxisStepsPerPixel(10.0); resetMotorCalControlVariables(); m_gary->setControlModeToMotorCalibration();}
-    Q_INVOKABLE void fullAutoControlModeVGroove();
-    Q_INVOKABLE void manualControlModeVGroove();
-    Q_INVOKABLE void setMaryTrackToPoint();
+    void setRootQMLContextProperties(QQmlApplicationEngine &_engine);
+
+    //Save File Methods
+    void setDefautValues();
+    void saveToFile(QDataStream &_filedatastream);
+    void loadFromFile(QDataStream &_filedatastream);
 
 private:
-    //The Maximum Frame Size For The Camera
+    void processVGrooveTracking(const cv::Mat _mat_frame);
+    void processButtJointTracking(const cv::Mat _mat_frame);
 
     Gary *m_gary;
-    Mary *m_mary;
     bool m_in_proccesing_loop;
+
+    TBIMotionControlParameters m_motion_control_params;
+    TBIWeld_VGroove m_vgroove;
 
     //Elements For GUI Display----------------------------------------
     QString m_timeinloop;
     QElapsedTimer m_timer;
     bool m_emitextramats;
 
-    //CV Processing Variables-----------------------------------------
-    int m_blur;
-    int m_thresholdmin;
-    int m_thresholdmax;
-
-    //Image Intensity Parameters
-    TBIImageIntensityParameters m_image_intensity_parameters;
-    //Pixel Column Phase Processing Variables----------------------------
-    TBIGausianDeclusteringParameters m_gausian_decluster_parameters;
-
-    //Geometric Construction Processing Variables----------------------
-
-    //Flattening Phase Data Variables-----------------------------------
-    //These are Used Throught The Class.
-    //You Must Call
-    int m_flattened_rows;
-    int m_flattened_cols;
-    int m_flattened_iohrv; //IndexOfHighestRowValue i.e index of the inlierdataset array with bottom pixel value
-    float m_flattened_hrv; //Highest Row Value
-
-    //Pixel Column Phase Processing Variables--------------------------
-    quint64 m_total_image_intensity;
-
-
-    //Data Sets and Distribution Sets-------------------------------------------------------------------------
-    TBIDataSet *m_gausian_decluster_ds;
-    TBIDataSet *m_filtered_gausian_decluster_ds;
-    TBIDataDistributionSet *m_gausian_decluster_distro;
-    TBIDataSet *m_left_ransac_tsg_ds;
-    TBIDataSet *m_left_inlier_tsg_ds;
-    TBIDataSet *m_right_ransac_tsg_ds;
-    TBIDataSet *m_right_inlier_tsg_ds;
-    TBIDataSet *m_left_ransac1_bwl_ds;
-    TBIDataSet *m_left_ransac2_bwl_ds;
-    TBIDataSet *m_left_inlier_bwl_ds;
-    TBIDataSet *m_right_ransac1_bwl_ds;
-    TBIDataSet *m_right_ransac2_bwl_ds;
-    TBIDataSet *m_right_inlier_bwl_ds;
-    TBIDataSet *m_joint_ds;
-
-    TBIDataSet *m_dummy_set1; //Used For Static Storage. So Other Functions Dont Have To Recreate Them in the Loops.
-    TBIDataSet *m_dummy_set2; //Used For Static Storage. So Other Functions Dont Have To Recreate Them in the Loops.
-
-    //inlierdataset Phase Data Variables-------------------------------------
-    int m_allowable_discontinuities;
-
-    //Ransac. Left and Right Top Surface Lines and Bevel Wall Lines(Voting Algorythms)-------
-    TBILine m_ransac_left_tsl;
-    TBIRansacParameter m_left_tsl_ransac;
-    TBILine m_ransac_right_tsl;
-    TBIRansacParameter m_right_tsl_ransac;
-    TBILine m_ransac_left_bwl;
-    TBIRansacParameter m_left_bwl_ransac;
-    TBILine m_ransac_right_bwl;
-    TBIRansacParameter m_right_bwl_ransac;
-    //Geometric Construction Phase Data Variables-----------------------
-    TBILine m_geo_left_tsl;
-    TBILine m_geo_right_tsl;
-    TBILine m_geo_left_bwl;
-    TBILine m_geo_right_bwl;
-
-    //Tracking Point Manager
-    TBIThreePointTrackingManager m_three_point_tracking_manager;
-    TBIThreePointTrackingContainer m_motor_cal_pnt1;
-    TBIThreePointTrackingContainer m_motor_cal_pnt2;
-    GaryMotorCalibrationCycleStatus::MotorCalibration_Cycle_t m_motor_cal_seq;
-    bool m_motor_cal_got_pnt1;
-    bool m_motor_cal_got_pnt2;
-    TBIThreePointTrackingContainer m_track_to_point;
-    //Butt Seams
-    TBIPoint_Int m_bs_tracked_point;
-    TBIPoint_Int m_bs_track_to_point;
-    TBIPoint_Int m_bs_motor_cal_pnt1;
-    TBIPoint_Int m_bs_motor_cal_pnt2;
-
-
-
     //Public Slots----------------------------------------------------------
 public slots:
-
     void recieveNewCVMat(const cv::Mat& _mat_frame);
-    void processVGrooveTracking(const cv::Mat _mat_frame);
-    void processButtJointTracking(const cv::Mat _mat_frame);
-
-    void onBlurChange(int _blur);
-    void onThresholdMinChange(int _min);
-    void onThresholdMaxChange(int _max);
-
-    void onMaxTIIChange(quint64 _tii);
-    void onMinTIIChange(quint64 _tii);
-    void onMaxClusterSizeChange(int _size);
-    void onMinClusterSizeChange(int _size);
-    void onMaxClustersInColChange(int _size);
-
-    void onMaxDiscontinuityChange(int _value);
-
-    void onLeftTSLIdealAngle(float _idealangle){m_left_tsl_ransac.setIdealAngle(_idealangle);}
-    void onLeftTSLAllowedAngleVariance(float _allowedanglevariance){m_left_tsl_ransac.setAllowedAngleVariance(_allowedanglevariance);}
-    void onLeftTSLMinVotes(int _minvotes){m_left_tsl_ransac.setMinVotes(_minvotes);}
-    void onLeftTSLDistanceThreshold(float _distthreshold){m_left_tsl_ransac.setDistanceThreshold(_distthreshold);}
-    void onLeftTSLIterations(int _iterations){m_left_tsl_ransac.setIterations(_iterations);}
-
-    void onRightTSLIdealAngle(float _idealangle){m_right_tsl_ransac.setIdealAngle(_idealangle);}
-    void onRightTSLAllowedAngleVariance(float _allowedanglevariance){m_right_tsl_ransac.setAllowedAngleVariance(_allowedanglevariance);}
-    void onRightTSLMinVotes(int _minvotes){m_right_tsl_ransac.setMinVotes(_minvotes);}
-    void onRightTSLDistanceThreshold(float _distthreshold){m_right_tsl_ransac.setDistanceThreshold(_distthreshold);}
-    void onRightTSLIterations(int _iterations){m_right_tsl_ransac.setIterations(_iterations);}
-
-    void onLeftBWLIdealAngle(float _idealangle){m_left_bwl_ransac.setIdealAngle(_idealangle);}
-    void onLeftBWLAllowedAngleVariance(float _allowedanglevariance){m_left_bwl_ransac.setAllowedAngleVariance(_allowedanglevariance);}
-    void onLeftBWLMinVotes(int _minvotes){m_left_bwl_ransac.setMinVotes(_minvotes);}
-    void onLeftBWLDistanceThreshold(float _distthreshold){m_left_bwl_ransac.setDistanceThreshold(_distthreshold);}
-    void onLeftBWLIterations(int _iterations){m_left_bwl_ransac.setIterations(_iterations);}
-
-    void onRightBWLIdealAngle(float _idealangle){m_right_bwl_ransac.setIdealAngle(_idealangle);}
-    void onRightBWLAllowedAngleVariance(float _allowedanglevariance){m_right_bwl_ransac.setAllowedAngleVariance(_allowedanglevariance);}
-    void onRightBWLMinVotes(int _minvotes){m_right_bwl_ransac.setMinVotes(_minvotes);}
-    void onRightBWLDistanceThreshold(float _distthreshold){m_right_bwl_ransac.setDistanceThreshold(_distthreshold);}
-    void onRightBWLIterations(int _iterations){m_right_bwl_ransac.setIterations(_iterations);}
-
 
     //Signals----------------------------------------------------------------
 signals:
     //QML Signals--------------------------------------------------------
     void timeInLoopChanged(QString _timinloop);
-    void viewportChanged();
     void aboutToDestroy();
-    void totalImageIntensityChanged(quint64 _tii);
-    //Mat Delivery Signals-----------------------------------------------
+    //Mat Signals-----------------------------------------------
     void newFrameProcessed(const QImage& _qimage);
     void newRawMatProcessed(const cv::Mat& _raw_frame);
     void newBlurMatProcessed(const cv::Mat& _blur_frame);
@@ -253,21 +132,9 @@ signals:
     void newRansacMatProcessed(const cv::Mat& _ransac_frame);
     void newGeoConstructionMatProcessed(const cv::Mat& _ransac_frame);
     void newOperationMatProcessed(const cv::Mat &_operation_frame);
-    //ProccessingComplete Signal-----------------------------------------
+    //Ulility Signals-----------------------------------------
     void processingComplete();
-    //Processing Failure Signals-----------------------------------------
-    void failedTIICheck(); //Total Image Intensity
-    void failedDiscontinuityCheck();
-    void failedRansacCheck(); //Voting Lines
-    void failedDataSetCheck();
-    void failedRansacVertexProcesssing();
-    void failedFlattenImageData();
-    void failedInlierDSMat();
     void emitExtraMatsChanged();
-    void onControlModeChanged(GaryControlMode::ControlMode_t _controlmode);
-
-
-
 };
 
 #endif // TBICORE_MAX_H

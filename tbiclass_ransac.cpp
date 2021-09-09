@@ -14,7 +14,7 @@ bool TBIRansac::doRansac(TBILine &_line, const TBIRansacParameter &_ransac, cons
     if(_datasetsize < _ransac.getMinVotes()) return false;
     if(_datasetsize < 10) return false;
 
-    const int _iterations = _ransac.getIteration();
+    const int _iterations = _ransac.getIterations();
     const float _distancethreshold = _ransac.getDistanceThreshold();
     const float _min_angle_from_horizon = _ransac.getIdealAngle() - _ransac.getAllowedAngleVariance();
     const float _max_angle_from_horizon = _ransac.getIdealAngle() + _ransac.getAllowedAngleVariance();
@@ -109,7 +109,7 @@ bool TBIRansac::doRansac(TBILine &_line, const TBIRansacParameter &_ransac, cons
     if(_datasetsize < _ransac.getMinVotes()) return false;
     if(_datasetsize < 10) return false;
 
-    const int _iterations = _ransac.getIteration();
+    const int _iterations = _ransac.getIterations();
     const float _distancethreshold = _ransac.getDistanceThreshold();
     const float _min_angle_from_horizon = _ransac.getIdealAngle() - _ransac.getAllowedAngleVariance();
     const float _max_angle_from_horizon = _ransac.getIdealAngle() + _ransac.getAllowedAngleVariance();
