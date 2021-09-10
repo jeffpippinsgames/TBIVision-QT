@@ -24,6 +24,9 @@
 #include "tbicore_gary.h"
 #include "tbiweld_vgroove.h"
 #include <QDataStream>
+#include "tbiweld_vgroovetrackingcontainer.h"
+#include "tbiweld_buttjointtrackingcontainer.h"
+#include "tbiweld_buttjoint.h"
 
 
 using namespace cv;
@@ -87,6 +90,9 @@ public:
     //Get Methods
     QString getTimeinLoop(){return m_timeinloop;}
     Q_INVOKABLE bool getEmitExtraMats(){return m_emitextramats;}
+    Q_INVOKABLE void attemptToToggleVGrooveControlState(){m_attempt_to_toggle_control_state = true;}
+
+
 
     //Set Methods
     void setEmitExtraMats(bool _flag){m_emitextramats = _flag; emit emitExtraMatsChanged();}
@@ -107,6 +113,12 @@ private:
 
     TBIMotionControlParameters m_motion_control_params;
     TBIWeld_VGroove m_vgroove;
+    TBIWeld_VGrooveTrackingContainer m_vgroove_tracking_container;
+
+    TBIWeld_ButtJoint m_buttjoint;
+    TBIWeld_ButtJointTrackingContainer m_buttjoint_tracking_container;
+
+    bool m_attempt_to_toggle_control_state;
 
     //Elements For GUI Display----------------------------------------
     QString m_timeinloop;

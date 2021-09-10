@@ -39,7 +39,63 @@ void Max::recieveNewCVMat(const Mat &_mat)
     _mats.initMats(_mat);
     //Do the VGroove Pipeline
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result;
-    _result = m_vgroove.processPipeline(_mats);
+    _result = m_vgroove.processPipeline(_mats, m_vgroove_tracking_container);
+
+    //---------------------------------------------------------------------------------
+    //Deal With a Change in Control State
+    if(m_attempt_to_toggle_control_state)
+    {
+        //Now Act According to the  Control State of Gary
+        switch(m_gary->getControlMode())
+        {
+        case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
+            if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
+            {
+                m_vgroove_tracking_container.setTrackToPoints();
+                m_gary->setControlModeToFullAuto();
+            }
+            break;
+        case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
+            m_gary->setControlModeToHeightOnly();
+            break;
+        case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
+            m_gary->setControlModeToFullAuto();
+            break;
+        default:
+            break;
+
+        }
+        m_attempt_to_toggle_control_state = false;
+    }
+    //No Change To Control State is Needed. Perform The Rest of The Tracking Sequence Here
+    else
+    {
+
+        //Now Act According to the  Control State of Gary
+        switch(m_gary->getControlMode())
+        {
+            case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
+                break;
+            case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
+                m_vgroove_tracking_container.drawTrackToPointstoMat(_mats);
+                if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
+                {
+
+                }
+                break;
+            case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
+                m_vgroove_tracking_container.drawTrackToPointstoMat(_mats);
+                if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
+                {
+
+                }
+                break;
+            default:
+                break;
+         }
+
+    }
+    //---------------------------------------------------------------------------------
 
     //Emit the Mats
     emit newOperationMatProcessed(_mats.m_operation);
@@ -65,11 +121,13 @@ void Max::recieveNewCVMat(const Mat &_mat)
 void Max::setRootQMLContextProperties(QQmlApplicationEngine &_engine)
 {
     m_vgroove.setRootQMLContextProperties(_engine);
+    m_buttjoint.setRootQMLContextProperties(_engine);
     _engine.rootContext()->setContextProperty("MotionControlParams", &m_motion_control_params);
 }
 
 void Max::setDefautValues()
 {
+    m_attempt_to_toggle_control_state = false;
     m_emitextramats = false;
     m_in_proccesing_loop = false;
     m_timeinloop = "Error:";
@@ -80,12 +138,15 @@ void Max::setDefautValues()
 void Max::saveToFile(QDataStream &_filedatastream)
 {
     m_vgroove.saveToFile(_filedatastream);
+    m_buttjoint.saveToFile(_filedatastream);
     m_motion_control_params.saveToFile(_filedatastream);
+
 }
 
 void Max::loadFromFile(QDataStream &_filedatastream)
 {
     m_vgroove.loadFromFile(_filedatastream);
+    m_buttjoint.loadFromFile(_filedatastream);
     m_motion_control_params.loadFromFile(_filedatastream);
 }
 

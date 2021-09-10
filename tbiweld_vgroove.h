@@ -7,6 +7,9 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QDataStream>
+#include "tbiweld_vgroovetrackingcontainer.h"
+#include "tbicore_gary.h"
+#include "tbiweld_enumerator.h"
 
 class TBIWeld_VGroove : public TBIWeld_Base
 {
@@ -15,14 +18,9 @@ public:
     TBIWeld_VGroove();
     ~TBIWeld_VGroove();
 
-    void setRansacLineParameters(TBIRansacParameter &_left_tsl_param, TBIRansacParameter &_left_bwl_param,
-                                 TBIRansacParameter &_right_tsl_param, TBIRansacParameter &_right_bwl_param);
-
-
     void setRootQMLContextProperties(QQmlApplicationEngine &engine);
 
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t processPipeline(TBIClass_OpenCVMatContainer &_mats);
-
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t processPipeline(TBIClass_OpenCVMatContainer &_mats, TBIWeld_VGrooveTrackingContainer &_vgroove_tracking_container, GaryControlMode::ControlMode_t _forcontrolmode = GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE);
     //Save File Methods
     void setDefautValues();
     void saveToFile(QDataStream &_filedatastream);
@@ -39,16 +37,14 @@ private:
     const cv::Scalar m_right_bwl_cv_color = CV_RGB(255,125,125);
 
     //Private Seam Tracking Methods
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructInlierRansacs(TBIClass_OpenCVMatContainer &_mats);
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doBuildInlierDataSets(TBIClass_OpenCVMatContainer &_mats);
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructGeometricEntities(TBIClass_OpenCVMatContainer &_mats);
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doFindValidTrackingPoints();
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructInlierRansacs(TBIClass_OpenCVMatContainer &_mats, GaryControlMode::ControlMode_t _forcontrolmode);
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doBuildInlierDataSets(TBIClass_OpenCVMatContainer &_mats, GaryControlMode::ControlMode_t _forcontrolmode);
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructGeometricEntities(TBIClass_OpenCVMatContainer &_mats, GaryControlMode::ControlMode_t _forcontrolmode);
 
     //Clearing Methods
     void clearDataSets();
     void clearRansacLines();
     void clearGeometricEntities();
-    void clearTrackingPoints();
 
     //VGroove Inlier Feature Datasets
     TBIDataSet *m_left_inlier_tsl_ds;
@@ -82,18 +78,6 @@ private:
     TBILine m_left_bwl_geo_line;
     TBILine m_right_tsl_geo_line;
     TBILine m_right_bwl_geo_line;
-
-    //Tracking Point
-    TBIPoint_Int m_left_tracking_point;
-    TBIPoint_Int m_right_tracking_point;
-    TBIPoint_Int m_root_tracking_point;
-    TBIPoint_Int m_joint_centroid;
-
-    //Tracking To Point
-    TBIPoint_Int m_left_track_to_point;
-    TBIPoint_Int m_right_track_to_point;
-    TBIPoint_Int m_root_track_to_point;
-    TBIPoint_Int m_joint_track_to_centroid;
 
     //internal control variables
     int m_break_index;

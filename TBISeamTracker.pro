@@ -29,6 +29,7 @@ SOURCES += \
         tbiqml_display.cpp \
         tbiweld_base.cpp \
         tbiweld_buttjoint.cpp \
+        tbiweld_buttjointtrackingcontainer.cpp \
         tbiweld_enumerator.cpp \
         tbiweld_pipelineprocessingreturntype.cpp \
         tbiweld_vgroove.cpp \
@@ -70,6 +71,7 @@ HEADERS += \
     tbiqml_display.h \
     tbiweld_base.h \
     tbiweld_buttjoint.h \
+    tbiweld_buttjointtrackingcontainer.h \
     tbiweld_enumerator.h \
     tbiweld_pipelineprocessingreturntype.h \
     tbiweld_vgroove.h \

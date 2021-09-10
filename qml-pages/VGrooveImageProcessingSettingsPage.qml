@@ -4723,54 +4723,165 @@ Item {
 
                 onGreenButtonPressed:
                 {
-                    Gary.sendStopMovement();
-                    operationsettingsrectId.grabFocus();
+                    Max.attemptToToggleVGrooveControlState();
                 }
 
                 onRedButtonPressed:
                 {
-                    Gary.sendStopMovement();
-                    operationsettingsrectId.grabFocus();
+                    switch(Gary.controlMode)
+                    {
+                    case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                        Gary.sendStopMovement();
+                        operationsettingsrectId.grabFocus();
+                        break;
+                    case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                        Gary.setControlModeToManual();
+                        break;
+                    case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                        Gary.setControlModeToManual();
+                        break;
+                    case GaryControlMode.TBI_CONTROL_MODE_MOTORCALIBRATION:
+                        break;
+                    }
                 }
 
                 onUpButtonPressed:
                 {
-                    Gary.sendJogUp();
+                    switch(Gary.controlMode)
+                    {
+                        case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                            Gary.sendJogUp();
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                            break;
+                        default:
+                            break;
+                    }
                 }
 
                 onDownButtonPressed:
                 {
-                    Gary.sendJogDown();
+                    switch(Gary.controlMode)
+                    {
+                        case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                            Gary.sendJogDown();
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                            break;
+                        default:
+                            break;
+                    }
+
                 }
 
                 onLeftButtonPressed:
                 {
-                    Gary.sendJogLeft();
+                    switch(Gary.controlMode)
+                    {
+                        case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                            Gary.sendJogLeft();
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                            Gary.sendJogLeft();
+                            break;
+                        default:
+                            break;
+                    }
+
                 }
 
                 onRightButtonPressed:
                 {
-                    Gary.sendJogRight();
+                    switch(Gary.controlMode)
+                    {
+                        case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                            Gary.sendJogRight();
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                            Gary.sendJogRight();
+                            break;
+                        default:
+                            break;
+                    }
+
                 }
 
                 onUpButtonReleased:
                 {
-                    Gary.sendStopMovement();
+                    switch(Gary.controlMode)
+                    {
+                        case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                            Gary.sendStopMovement();
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                            break;
+                        default:
+                            break;
+                    }
+
                 }
 
                 onDownButtonReleased:
                 {
-                    Gary.sendStopMovement();
+                    switch(Gary.controlMode)
+                    {
+                        case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                            Gary.sendStopMovement();
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                            break;
+                        default:
+                            break;
+                    }
+
                 }
 
                 onLeftButtonReleased:
                 {
-                    Gary.sendStopMovement();
+                    switch(Gary.controlMode)
+                    {
+                        case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                            Gary.sendStopMovement();
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                            Gary.sendStopMovement();
+                            break;
+                        default:
+                            break;
+                    }
+
                 }
 
                 onRightButtonReleased:
                 {
-                    Gary.sendStopMovement();
+                    switch(Gary.controlMode)
+                    {
+                        case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                            Gary.sendStopMovement();
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                            break;
+                        case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                            Gary.sendStopMovement();
+                            break;
+                        default:
+                            break;
+                    }
+
                 }
 
             }
@@ -4783,7 +4894,7 @@ Item {
                 font.pointSize: 20
                 height: manualmotorcontroltextId.implicitHeight
                 width: manualmotorcontroltextId.implicitWidth
-                text: "Control Motors"
+                text: "Operate"
                 color: rootpageId.textcolor
             }
         }

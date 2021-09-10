@@ -130,9 +130,10 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGau
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_GAUSIANDISTROBUTIONDATASETEXCEEDSALLOWEDSTANDARDDEVIATION;
     }
 
-    //Draw The DeClusterSet Mat to the Inliers and Geo Construction
+    //Draw The DeClusterSet Mat to the Inliers and Geo Construction and ransac
     cv::cvtColor(_mats.m_gausiandecluster, _mats.m_inliers, cv::COLOR_GRAY2BGR);
     cv::cvtColor(_mats.m_gausiandecluster, _mats.m_geometricconstruction, cv::COLOR_GRAY2BGR);
+    cv::cvtColor(_mats.m_gausiandecluster, _mats.m_ransac, cv::COLOR_GRAY2BGR);
 
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
 }

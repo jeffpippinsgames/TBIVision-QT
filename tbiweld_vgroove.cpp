@@ -41,13 +41,12 @@ void TBIWeld_VGroove::setRootQMLContextProperties(QQmlApplicationEngine &_engine
     _engine.rootContext()->setContextProperty("VGrooveGausianDistroParameters", this->getGausianDeclusterParametersPointer());
 }
 
-TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::processPipeline(TBIClass_OpenCVMatContainer &_mats)
+TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::processPipeline(TBIClass_OpenCVMatContainer &_mats, TBIWeld_VGrooveTrackingContainer &_vgroove_tracking_container, GaryControlMode::ControlMode_t _forcontrolmode)
 {
 
     this->clearDataSets();
     this->clearRansacLines();
     this->clearGeometricEntities();
-    this->clearTrackingPoints();
 
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result;
 
@@ -59,27 +58,39 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::proc
     }
 
     //Stage 2a Build Inlier Ransacs
-    _result = this->doConstructInlierRansacs(_mats);
+    _result = this->doConstructInlierRansacs(_mats, _forcontrolmode);
     if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
     {
         return _result;
     }
 
     //Stage 2b Build Inlier DataSets
-    _result = this->doBuildInlierDataSets(_mats);
+    _result = this->doBuildInlierDataSets(_mats, _forcontrolmode);
     if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
     {
         return _result;
     }
 
     //Stage3 Build Geometric Entities
-    _result = this->doConstructGeometricEntities(_mats);
+    _result = this->doConstructGeometricEntities(_mats, _forcontrolmode);
     if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
     {
         return _result;
     }
 
     //Stage4 Find Tracking Points.
+    if(_forcontrolmode != GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY)
+    {
+        _result = _vgroove_tracking_container.extractTrackingPointsFromGeometricEntities(m_left_tsl_geo_line, m_right_tsl_geo_line, m_left_bwl_geo_line, m_right_bwl_geo_line, _mats);
+    }
+    else
+    {
+        _result = _vgroove_tracking_container.extractTrackingPointsForHeightOnly(m_left_tsl_geo_line, _mats);
+    }
+    if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
+    {
+        return _result;
+    }
 
 
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
@@ -112,24 +123,41 @@ void TBIWeld_VGroove::loadFromFile(QDataStream &_filedatastream)
     m_right_bwl_ransac_params.loadFromFile(_filedatastream);
 }
 
-TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doConstructInlierRansacs(TBIClass_OpenCVMatContainer &_mats)
+TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doConstructInlierRansacs(TBIClass_OpenCVMatContainer &_mats, GaryControlMode::ControlMode_t _forcontrolmode = GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE)
 {
+
     //-----------------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------
-    //Copy The Gausian DeCluster Set to the Ransac Mat
-    cv::cvtColor(_mats.m_gausiandecluster, _mats.m_ransac, cv::COLOR_GRAY2BGR);
-    //-----------------------------------------------------------------------------------------------------
-    //-----------------------------------------------------------------------------------------------------
+
+    //Do Quick Height Only Ransac Left TSL Only
+    if(_forcontrolmode == GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY)
+    {
+        //Build The Left TSL Ransac Line.
+        if(!TBIRansac::doRansac(m_left_tsl_ransac_line, m_left_tsl_ransac_params, *this->getGausianDeclusterSetPointer()))
+        {
+            qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Left TSL Ransac Is Invalid.");
+            return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDUNABLETOFINDINLIERRANSACLINE;
+        }
+        //Draw The Left TSL Ransac
+        m_left_tsl_ransac_line.remakeLine(0, _mats.m_ransac.cols);
+        m_left_tsl_ransac_line.drawOnMat(_mats.m_ransac, m_left_tsl_cv_color);
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
+    }
+
+
     //Get The Break Index So the Distribution Set can be Split into two parts Left and right.
     //This helps to determine the Ransacs.
     m_break_index = this->getVGrooveBreakIndex();
+    if(_forcontrolmode == GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY)
+    {
+        m_break_index = this->getDeClusterSetMaxIndex();
+    }
     if(m_break_index == -1)
     {
         qDebug("TBIWeld_VGroove::doConstructInlierRansacs() A Valid Break Index Was Not Found.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_COULDNOTFINDVALIDBREAKINDEXFORVGROOVEDATASET;
     }
-    //Draw the Break Index to the Ransac Mat
-    this->drawVGrooveBreakPointIndex(_mats, m_break_index);
+
     //-----------------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------
     //Build The Left Side Gausian DeCluster Set
@@ -140,6 +168,9 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
         qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Could Not Build Left Gausian Decluster Data SubSet.");
         return _result;
     }
+
+
+
     //-----------------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------
     //Build The Right Side DeCluser SubSet
@@ -174,7 +205,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     //-----------------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------
     //Build Joint DataSet to Make Finding the BWL Ransacs Easier
-    _result = this->extractVGrooveJointDataSet(*m_joint_ds, m_left_tsl_ransac_line, m_right_tsl_ransac_line, 5.0);
+    _result = this->extractVGrooveJointDataSet(*m_joint_ds, m_left_tsl_ransac_line, m_right_tsl_ransac_line, 1.5);
     if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
     {
         qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Could Not Build VGroove Joint DataSet.");
@@ -216,9 +247,22 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
 }
 
-TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doBuildInlierDataSets(TBIClass_OpenCVMatContainer &_mats)
+TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doBuildInlierDataSets(TBIClass_OpenCVMatContainer &_mats, GaryControlMode::ControlMode_t _forcontrolmode)
 {
     TBIDataSetReturnType _datasetresult;
+
+    //Do Inlier For Height Only
+    if(_forcontrolmode == GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY)
+    {
+        _datasetresult = this->getGausianDeclusterSetPointer()->extractDataSetForInliers(*m_left_inlier_tsl_ds, m_left_tsl_ransac_line, 2.0);
+        if(_datasetresult != TBIDataSetReturnType::Ok)
+        {
+            qDebug("TBIWeld_VGroove::doBuildInlierDataSets() Failed To Extract Left TSL Inlier Data Set.");
+            return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTLEFTTSLINLIERDATASET;
+        }
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
+
+    }
 
     //-----------------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------
@@ -272,7 +316,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doBu
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
 }
 
-TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doConstructGeometricEntities(TBIClass_OpenCVMatContainer &_mats)
+TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doConstructGeometricEntities(TBIClass_OpenCVMatContainer &_mats, GaryControlMode::ControlMode_t _forcontrolmode)
 {
     TBIDataSetReturnType _datasetresult;
 
@@ -288,6 +332,10 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     //Draw Geometric Entity
     m_left_tsl_geo_line.drawOnMat(_mats.m_geometricconstruction, m_left_tsl_cv_color);
 
+    if(_forcontrolmode == GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY)
+    {
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
+    }
     //-----------------------------------------------------------------------------------------------------
     //-----------------------------------------------------------------------------------------------------
     //Build Right TSL Geometric Entity
@@ -359,10 +407,3 @@ void TBIWeld_VGroove::clearGeometricEntities()
     m_right_bwl_geo_line.clear();
 }
 
-void TBIWeld_VGroove::clearTrackingPoints()
-{
-    m_left_tracking_point.invalidatePoint();
-    m_right_tracking_point.invalidatePoint();
-    m_root_tracking_point.invalidatePoint();
-    m_joint_centroid.invalidatePoint();
-}
