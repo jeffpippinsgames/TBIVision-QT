@@ -11,6 +11,7 @@ Item
     readonly property string operationspage: "Operations"
     readonly property string mainmenupage: "MainMenu"
     readonly property string vgroovepipelinesettingspage: "VGroove Joint Pipeline"
+    readonly property string buttjointpipelinesettingspage: "Butt Joint Pipeline"
 
     Rectangle
     {

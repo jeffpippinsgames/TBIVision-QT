@@ -20,8 +20,9 @@ public:
 
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t extractTrackingPoint(TBILine &_tsl, TBIClass_OpenCVMatContainer &_mats);
     void setTrackToPoints();
-    void drawTrackToPointstoMat();
+    void drawTrackToPointstoMat(TBIClass_OpenCVMatContainer &_mats);
     int getZMovement(TBIMotionControlParameters &_motioncontrolparams);
+    int getZTrackingDifference();
 
 signals:
 

@@ -92,8 +92,6 @@ public:
     Q_INVOKABLE bool getEmitExtraMats(){return m_emitextramats;}
     Q_INVOKABLE void attemptToToggleVGrooveControlState(){m_attempt_to_toggle_control_state = true;}
 
-
-
     //Set Methods
     void setEmitExtraMats(bool _flag){m_emitextramats = _flag; emit emitExtraMatsChanged();}
     void setGary(Gary *_gy){m_gary = _gy;}
@@ -105,8 +103,8 @@ public:
     void loadFromFile(QDataStream &_filedatastream);
 
 private:
-    void processVGrooveTracking(const cv::Mat _mat_frame);
-    void processButtJointTracking(const cv::Mat _mat_frame);
+    void processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats);
+    void processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats);
 
     Gary *m_gary;
     bool m_in_proccesing_loop;

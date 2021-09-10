@@ -37,6 +37,66 @@ void Max::recieveNewCVMat(const Mat &_mat)
     //Instantiate and initialize cv::Mats
     TBIClass_OpenCVMatContainer _mats;
     _mats.initMats(_mat);
+
+    //Do Whichever PipeLine You Need
+    //processVGroovePipeline(_mats);
+    processButtJointPipeline(_mats);
+
+    //Emit the Mats
+    emit newOperationMatProcessed(_mats.m_operation);
+
+    if(m_emitextramats)
+    {
+        emit newRawMatProcessed(_mats.m_raw);
+        emit newBlurMatProcessed(_mats.m_blurr);
+        emit newThresholdMatProcessed(_mats.m_threshold);
+        emit newPixelColumnMatProcessed(_mats.m_gausiandecluster);
+        emit newRansacMatProcessed(_mats.m_ransac);
+        emit newInlierDataSetMatProcessed(_mats.m_inliers);
+        emit newGeoConstructionMatProcessed(_mats.m_geometricconstruction);
+    }
+    //--------------------------------
+    m_timeinloop = "Time in Loop: " + QString::number(m_timer.elapsed());
+    emit timeInLoopChanged(m_timeinloop);
+    m_in_proccesing_loop = false;
+    emit processingComplete(); //Must Be Last Signal Sent
+
+}
+
+void Max::setRootQMLContextProperties(QQmlApplicationEngine &_engine)
+{
+    m_vgroove.setRootQMLContextProperties(_engine);
+    m_buttjoint.setRootQMLContextProperties(_engine);
+    _engine.rootContext()->setContextProperty("MotionControlParams", &m_motion_control_params);
+}
+
+void Max::setDefautValues()
+{
+    m_attempt_to_toggle_control_state = false;
+    m_emitextramats = false;
+    m_in_proccesing_loop = false;
+    m_timeinloop = "Error:";
+    m_vgroove.setDefautValues();
+    m_motion_control_params.setDefautValues();
+}
+
+void Max::saveToFile(QDataStream &_filedatastream)
+{
+    m_vgroove.saveToFile(_filedatastream);
+    m_buttjoint.saveToFile(_filedatastream);
+    m_motion_control_params.saveToFile(_filedatastream);
+
+}
+
+void Max::loadFromFile(QDataStream &_filedatastream)
+{
+    m_vgroove.loadFromFile(_filedatastream);
+    m_buttjoint.loadFromFile(_filedatastream);
+    m_motion_control_params.loadFromFile(_filedatastream);
+}
+
+void Max::processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats)
+{
     //Do the VGroove Pipeline
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result;
     _result = m_vgroove.processPipeline(_mats, m_vgroove_tracking_container);
@@ -97,57 +157,64 @@ void Max::recieveNewCVMat(const Mat &_mat)
     }
     //---------------------------------------------------------------------------------
 
-    //Emit the Mats
-    emit newOperationMatProcessed(_mats.m_operation);
+}
 
-    if(m_emitextramats)
+void Max::processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats)
+{
+    //Do the Butt Joint Pipeline
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result;
+    _result = m_buttjoint.processPipeline(_mats, m_buttjoint_tracking_container);
+
+    //---------------------------------------------------------------------------------
+    //Deal With a Change in Control State
+    if(m_attempt_to_toggle_control_state)
     {
-        emit newRawMatProcessed(_mats.m_raw);
-        emit newBlurMatProcessed(_mats.m_blurr);
-        emit newThresholdMatProcessed(_mats.m_threshold);
-        emit newPixelColumnMatProcessed(_mats.m_gausiandecluster);
-        emit newRansacMatProcessed(_mats.m_ransac);
-        emit newInlierDataSetMatProcessed(_mats.m_inliers);
-        emit newGeoConstructionMatProcessed(_mats.m_geometricconstruction);
+        //Now Act According to the  Control State of Gary
+        switch(m_gary->getControlMode())
+        {
+        case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
+            if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
+            {
+                m_buttjoint_tracking_container.setTrackToPoints();
+                m_gary->setControlModeToHeightOnly();
+            }
+            break;
+        case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
+            break;
+        case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
+            break;
+        default:
+            break;
+        }
+         m_attempt_to_toggle_control_state = false;
     }
-    //--------------------------------
-    m_timeinloop = "Time in Loop: " + QString::number(m_timer.elapsed());
-    emit timeInLoopChanged(m_timeinloop);
-    m_in_proccesing_loop = false;
-    emit processingComplete(); //Must Be Last Signal Sent
+    //No Change To Control State is Needed. Perform The Rest of The Tracking Sequence Here
+    else
+    {
+        //Now Act According to the  Control State of Gary
+        switch(m_gary->getControlMode())
+        {
+            case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
+                break;
+            case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
+                break;
+            case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
+                m_buttjoint_tracking_container.drawTrackToPointstoMat(_mats);
+                if((_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK) && (m_gary->getZMotionStatus() == GaryMotionStatus::TBI_MOTION_STATUS_IDLE))
+                {
+                        int _zdiff = m_buttjoint_tracking_container.getZTrackingDifference();
+                        if(_zdiff != 0)
+                        {
+                            m_gary->autoMoveZAxis(_zdiff);
+                        }
+                }
+                break;
+            default:
+                break;
+         }
+    }
+    //---------------------------------------------------------------------------------
 
-}
-
-void Max::setRootQMLContextProperties(QQmlApplicationEngine &_engine)
-{
-    m_vgroove.setRootQMLContextProperties(_engine);
-    m_buttjoint.setRootQMLContextProperties(_engine);
-    _engine.rootContext()->setContextProperty("MotionControlParams", &m_motion_control_params);
-}
-
-void Max::setDefautValues()
-{
-    m_attempt_to_toggle_control_state = false;
-    m_emitextramats = false;
-    m_in_proccesing_loop = false;
-    m_timeinloop = "Error:";
-    m_vgroove.setDefautValues();
-    m_motion_control_params.setDefautValues();
-}
-
-void Max::saveToFile(QDataStream &_filedatastream)
-{
-    m_vgroove.saveToFile(_filedatastream);
-    m_buttjoint.saveToFile(_filedatastream);
-    m_motion_control_params.saveToFile(_filedatastream);
-
-}
-
-void Max::loadFromFile(QDataStream &_filedatastream)
-{
-    m_vgroove.loadFromFile(_filedatastream);
-    m_buttjoint.loadFromFile(_filedatastream);
-    m_motion_control_params.loadFromFile(_filedatastream);
 }
 
 

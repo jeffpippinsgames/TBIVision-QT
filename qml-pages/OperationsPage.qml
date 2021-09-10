@@ -93,12 +93,13 @@ Item
 
             switch(Gary.controlMode)
             {
-            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
-                Max.manualControlModeVGroove();
+            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:      
                 break;
             case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                 cleanupForDestruction();
                 destroyPage(pagesId.mainmenupage);
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
                 break;
             }
 
@@ -109,57 +110,150 @@ Item
 
             switch(Gary.controlMode)
             {
+            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                break;
             case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
-                Max.fullAutoControlModeVGroove();
+                Gary.setControlModeToHeightOnly();
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                break;
+            }
+        }
+
+        onRedButtonPressed:
+        {
+            switch(Gary.controlMode)
+            {
+            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                Gary.setControlModeToManual();
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                Gary.setControlModeToManual();
                 break;
             }
 
         }
 
-        onRedButtonPressed:
-        {
-            Max.manualControlModeVGroove();
-        }
-
         onUpButtonPressed:
         {
-            if(Gary.controlMode == GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE) Gary.sendJogUp();
+            switch(Gary.controlMode)
+            {
+            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                Gary.sendJogUp();
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                break;
+            }
         }
 
         onDownButtonPressed:
         {
-            if(Gary.controlMode == GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE) Gary.sendJogDown();
-
+            switch(Gary.controlMode)
+            {
+            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                Gary.sendJogDown();
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                break;
+            }
         }
 
         onLeftButtonPressed:
         {
-            Gary.sendJogLeft();
+            switch(Gary.controlMode)
+            {
+            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                Gary.sendJogLeft();
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                Gary.sendJogLeft();
+                break;
+            }
+
         }
 
         onRightButtonPressed:
         {
-            Gary.sendJogRight();
+            switch(Gary.controlMode)
+            {
+            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                Gary.sendJogRight();
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                Gary.sendJogRight();
+                break;
+            }
+
         }
 
         onUpButtonReleased:
         {
-            Gary.sendStopMovement();
+            switch(Gary.controlMode)
+            {
+            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                Gary.sendStopMovement();
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                break;
+            }
+
         }
 
         onDownButtonReleased:
         {
-            Gary.sendStopMovement();
+            switch(Gary.controlMode)
+            {
+            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                Gary.sendStopMovement();
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                break;
+            }
+
         }
 
         onLeftButtonReleased:
         {
-            Gary.sendStopMovement();
+            switch(Gary.controlMode)
+            {
+            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                Gary.sendStopMovement();
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                Gary.sendStopMovement();
+                break;
+            }
         }
 
         onRightButtonReleased:
         {
-            Gary.sendStopMovement();
+            switch(Gary.controlMode)
+            {
+            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                Gary.sendStopMovement();
+                break;
+            case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+                Gary.sendStopMovement();
+                break;
+            }
         }
     }
 

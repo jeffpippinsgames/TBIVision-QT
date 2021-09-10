@@ -58,6 +58,7 @@ Item {
             rotatemenuId.addMenuItem("qrc:/Icons/gear.png", "System Settings");
             rotatemenuId.addMenuItem("qrc:/Icons/laser3.png", "Toggle Laser Power");
             rotatemenuId.addMenuItem("qrc:/Icons/image.png", "VGroove Joint Pipeline Settings");
+            rotatemenuId.addMenuItem("qrc:/Icons/image.png", "Butt Joint Pipeline Settings");
             rotatemenuId.addMenuItem("qrc:/Icons/quit.png", "Quit Application");
         }
 
@@ -72,6 +73,10 @@ Item {
             case "VGroove Joint Pipeline Settings":
                 rootpageId.cleanupForDestruction();
                 rootpageId.destroyPage(pagesId.vgroovepipelinesettingspage)
+                break;
+            case "Butt Joint Pipeline Settings":
+                rootpageId.cleanupForDestruction();
+                rootpageId.destroyPage(pagesId.buttjointpipelinesettingspage)
                 break;
             case "Quit Application":
                 quitdialogId.visible = true;

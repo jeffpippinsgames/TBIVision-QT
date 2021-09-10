@@ -20,7 +20,7 @@ public:
 
     void setRootQMLContextProperties(QQmlApplicationEngine &engine);
 
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t processPipeline(TBIClass_OpenCVMatContainer &_mats, TBIWeld_VGrooveTrackingContainer &_vgroove_tracking_container, GaryControlMode::ControlMode_t _forcontrolmode = GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE);
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t processPipeline(TBIClass_OpenCVMatContainer &_mats, TBIWeld_VGrooveTrackingContainer &_vgroove_tracking_container);
     //Save File Methods
     void setDefautValues();
     void saveToFile(QDataStream &_filedatastream);
@@ -37,9 +37,9 @@ private:
     const cv::Scalar m_right_bwl_cv_color = CV_RGB(255,125,125);
 
     //Private Seam Tracking Methods
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructInlierRansacs(TBIClass_OpenCVMatContainer &_mats, GaryControlMode::ControlMode_t _forcontrolmode);
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doBuildInlierDataSets(TBIClass_OpenCVMatContainer &_mats, GaryControlMode::ControlMode_t _forcontrolmode);
-    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructGeometricEntities(TBIClass_OpenCVMatContainer &_mats, GaryControlMode::ControlMode_t _forcontrolmode);
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructInlierRansacs(TBIClass_OpenCVMatContainer &_mats);
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doBuildInlierDataSets(TBIClass_OpenCVMatContainer &_mats);
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t doConstructGeometricEntities(TBIClass_OpenCVMatContainer &_mats);
 
     //Clearing Methods
     void clearDataSets();

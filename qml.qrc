@@ -75,5 +75,6 @@
         <file>qml-components/PagesDescriptionObject.qml</file>
         <file>qml-components/empty_qml.qml</file>
         <file>qml-dialogs/StillImageFileOpenDialog.qml</file>
+        <file>qml-pages/ButtJointImageProcessingSettingsPage.qml</file>
     </qresource>
 </RCC>

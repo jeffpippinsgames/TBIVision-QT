@@ -49,7 +49,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_ButtJoint::pr
     }
 
 
-    //_result = _tracking_container.extractTrackingPoint(m_tsl_geo_line, _mats);
+    _result = _tracking_container.extractTrackingPoint(m_tsl_geo_line, _mats);
     if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
     {
         return _result;
@@ -140,13 +140,13 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_ButtJoint::do
 {
     TBIDataSetReturnType _datasetresult;
 
-    _datasetresult = this->getGausianDeclusterSetPointer()->extractDataSetForInliers(*m_tsl_inlier_ds, m_tsl_ransac_line, 2.0);
+    _datasetresult = this->getGausianDeclusterSetPointer()->extractDataSetForInliers(*m_tsl_inlier_ds, m_tsl_ransac_line, 10.0);
     if(_datasetresult != TBIDataSetReturnType::Ok)
     {
         qDebug("TBIWeld_ButtJoint::doBuildInlierDataSets() Failed To Extract Left TSL Inlier Data Set.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTLEFTTSLINLIERDATASET;
     }
-    m_tsl_inlier_ds->drawToMat(_mats.m_inliers);
+    m_tsl_inlier_ds->drawToMat(_mats.m_inliers, m_left_tsl_cv_color);
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
 }
 
