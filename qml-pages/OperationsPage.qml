@@ -113,7 +113,7 @@ Item
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
                 break;
             case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
-                Gary.setControlModeToHeightOnly();
+                Max.attemptToToggleVGrooveControlState();
                 break;
             case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
                 break;

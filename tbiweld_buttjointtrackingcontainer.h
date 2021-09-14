@@ -10,6 +10,7 @@
 #include "tbiparameterclass_motioncontrolparams.h"
 #include "tbicore_gary.h"
 #include "tbiclass_opencvmatcontainer.h"
+#include <QString>
 
 
 class TBIWeld_ButtJointTrackingContainer : public QObject
@@ -23,6 +24,7 @@ public:
     void drawTrackToPointstoMat(TBIClass_OpenCVMatContainer &_mats);
     int getZMovement(TBIMotionControlParameters &_motioncontrolparams);
     int getZTrackingDifference();
+    QString getTrackingPointString(){return QString::number(m_tracking_point.m_x) + "," + QString::number(m_tracking_point.m_y);}
 
 signals:
 
@@ -30,7 +32,7 @@ private:
     TBIPoint_Int m_tracking_point;
     TBIPoint_Int m_track_to_point;
 
-    int m_tracking_boundary = 10;
+    int m_tracking_boundary = 5;
 
     const cv::Scalar m_tracking_point_cv_color = CV_RGB(0,200,255);
     const cv::Scalar m_tracking_to_point_cv_color = CV_RGB(75,75,255);

@@ -12,7 +12,7 @@ import "qrc:/qml-components"
 Window {
     id: rootId
     visible: true
-    //visibility: Window.FullScreen
+    visibility: Window.FullScreen
     width: 1920
     height: 1080
     title: qsTr("TBI Laser Seam Tracker")

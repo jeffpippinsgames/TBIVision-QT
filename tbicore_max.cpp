@@ -202,10 +202,18 @@ void Max::processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats)
                 m_buttjoint_tracking_container.drawTrackToPointstoMat(_mats);
                 if((_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK) && (m_gary->getZMotionStatus() == GaryMotionStatus::TBI_MOTION_STATUS_IDLE))
                 {
+                    //Z Up Increases the Step Location
+                    //Which Means Z Must Add Positive Steps
+
+                    //A Positive _zdiff Means Move Down
+                    //So Send Negative Steps
+                        //m_motion_control_params.setZStepsPerPixel(1214.37037);
+
                         int _zdiff = m_buttjoint_tracking_container.getZTrackingDifference();
+                        _zdiff = _zdiff * 1214.37037;
                         if(_zdiff != 0)
                         {
-                            m_gary->autoMoveZAxis(_zdiff);
+                            m_gary->autoMoveZAxis(-_zdiff);
                         }
                 }
                 break;

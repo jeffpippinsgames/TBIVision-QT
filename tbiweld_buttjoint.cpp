@@ -54,7 +54,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_ButtJoint::pr
     {
         return _result;
     }
-
+    cv::putText(_mats.m_operation, _tracking_container.getTrackingPointString().toStdString(), cv::Point(20, 100), cv::FONT_HERSHEY_SIMPLEX, 1, m_left_tsl_cv_color, 1, cv::LINE_AA);
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
 }
 
