@@ -2488,24 +2488,6 @@ Item {
                 PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
                 PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
                 PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacrighttslidealanglesliderId; state: ransacrighttslidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttslallowedanglevariancesliderId; state: ransacrighttslallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacleftbwlidealanglesliderId; state: ransacleftbwlidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwlallowedanglevariancesliderId; state: ransacleftbwlallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacrightbwlidealanglesliderId; state: ransacrightbwlidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwlallowedanglevariancesliderId; state: ransacrightbwlallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
             },
             State
             {
@@ -2517,24 +2499,6 @@ Item {
                 PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
                 PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
                 PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacrighttslidealanglesliderId; state: ransacrighttslidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttslallowedanglevariancesliderId; state: ransacrighttslallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacleftbwlidealanglesliderId; state: ransacleftbwlidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwlallowedanglevariancesliderId; state: ransacleftbwlallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacrightbwlidealanglesliderId; state: ransacrightbwlidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwlallowedanglevariancesliderId; state: ransacrightbwlallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
             },
             State
             {
@@ -2546,25 +2510,6 @@ Item {
                 PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
                 PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
                 PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacrighttslidealanglesliderId; state: ransacrighttslidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttslallowedanglevariancesliderId; state: ransacrighttslallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacleftbwlidealanglesliderId; state: ransacleftbwlidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwlallowedanglevariancesliderId; state: ransacleftbwlallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacrightbwlidealanglesliderId; state: ransacrightbwlidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwlallowedanglevariancesliderId; state: ransacrightbwlallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
-
             },
             State
             {
@@ -2576,24 +2521,6 @@ Item {
                 PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.highlightedstate;}
                 PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
                 PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacrighttslidealanglesliderId; state: ransacrighttslidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttslallowedanglevariancesliderId; state: ransacrighttslallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacleftbwlidealanglesliderId; state: ransacleftbwlidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwlallowedanglevariancesliderId; state: ransacleftbwlallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacrightbwlidealanglesliderId; state: ransacrightbwlidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwlallowedanglevariancesliderId; state: ransacrightbwlallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
             },
             State
             {
@@ -2605,24 +2532,6 @@ Item {
                 PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
                 PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.highlightedstate;}
                 PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacrighttslidealanglesliderId; state: ransacrighttslidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttslallowedanglevariancesliderId; state: ransacrighttslallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacleftbwlidealanglesliderId; state: ransacleftbwlidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwlallowedanglevariancesliderId; state: ransacleftbwlallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacrightbwlidealanglesliderId; state: ransacrightbwlidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwlallowedanglevariancesliderId; state: ransacrightbwlallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
             },
             State
             {
@@ -2634,24 +2543,6 @@ Item {
                 PropertyChanges{target: ransaclefttslminvotessliderId; state: ransaclefttslminvotessliderId.nothighlightedstate;}
                 PropertyChanges{target: ransaclefttsldistancethresholdsliderId; state: ransaclefttsldistancethresholdsliderId.nothighlightedstate;}
                 PropertyChanges{target: ransaclefttsliterationssliderId; state: ransaclefttsliterationssliderId.highlightedstate;}
-
-                PropertyChanges{target: ransacrighttslidealanglesliderId; state: ransacrighttslidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttslallowedanglevariancesliderId; state: ransacrighttslallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttslminvotessliderId; state: ransacrighttslminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttsldistancethresholdsliderId; state: ransacrighttsldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrighttsliterationssliderId; state: ransacrighttsliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacleftbwlidealanglesliderId; state: ransacleftbwlidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwlallowedanglevariancesliderId; state: ransacleftbwlallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwlminvotessliderId; state: ransacleftbwlminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwldistancethresholdsliderId; state: ransacleftbwldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacleftbwliterationssliderId; state: ransacleftbwliterationssliderId.nothighlightedstate;}
-
-                PropertyChanges{target: ransacrightbwlidealanglesliderId; state: ransacrightbwlidealanglesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwlallowedanglevariancesliderId; state: ransacrightbwlallowedanglevariancesliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwlminvotessliderId; state: ransacrightbwlminvotessliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwldistancethresholdsliderId; state: ransacrightbwldistancethresholdsliderId.nothighlightedstate;}
-                PropertyChanges{target: ransacrightbwliterationssliderId; state: ransacrightbwliterationssliderId.nothighlightedstate;}
             }
 
         ]

@@ -18,6 +18,7 @@ import "tbi.vision.components" 1 0
 
 
 
+
 /**************************************************************
 GaryHomingStatus
 Description:
@@ -332,6 +333,28 @@ Description:
   microcontroller responsible for motion control of the TBI seam
   tracker.
  **************************************************************/
+/**************************************************************
+GaryControllerStatusPacket
+Description:
+  Gary Interacts with the motion Controller.
+
+
+  A class to encapsulate the requirments for keeping track
+  of the homing status codes of the Microcontroller.
+ **************************************************************/
+class GaryControllerStatusPacket: public QObject
+{
+    Q_OBJECT
+public:
+    GaryControllerStatusPacket() : QObject() {}
+
+    static void declareQML()
+    {
+        qmlRegisterType<GaryControllerStatusPacket>("tbi.vision.components", 1, 0, "GaryControllerStatusPacket");
+    }
+
+};
+
 class Gary : public QObject
 {
     //QT Properties and Macros-------------------------------------

@@ -843,6 +843,8 @@ void Gary::readSerial()
     //The Microcontroller Will send 23 Byte Packets.
     //It Will Not Send Another One Until the Packet Has Been Acknowledged.
 
+    //Add a bytesAvailable Hook.
+
     QByteArray _data = m_serial_port->readAll();
     m_recieved_serial.append(_data);
     //See the Aruino Sketch For the Status Buffer Structure
