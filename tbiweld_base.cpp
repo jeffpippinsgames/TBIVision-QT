@@ -38,7 +38,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::getGaus
     if(_result != TBIDataSetReturnType::Ok)
     {
         _dst.clear();
-        qDebug("TBIWeld_Base::getGausianDeClusterSubSet() Failed To Extract Gausian DeCluster Subset.");
+        if(m_showdebug) qDebug("TBIWeld_Base::getGausianDeClusterSubSet() Failed To Extract Gausian DeCluster Subset.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOGETGAUSIANDECLUSTERSUBSET;
     }
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
@@ -51,7 +51,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::extract
     if(_result != TBIDataSetReturnType::Ok)
     {
         _dst.clear();
-        qDebug("TBIWeld_Base::extractVGrooveJointDataSet() Failed To Extract V Groove Joint DataSet.");
+        if(m_showdebug) qDebug("TBIWeld_Base::extractVGrooveJointDataSet() Failed To Extract V Groove Joint DataSet.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTVGROOVEJOINTDATASET;
     }
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
@@ -75,12 +75,12 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGau
     //Make Sure Mats Are Ok.
     if(_mats.m_raw.channels() != 1)
     {
-        qDebug()<<"TBIWeld_Base::doDeGausianClustering() did not recieve a single Channel Mat";
+        if(m_showdebug) qDebug()<<"TBIWeld_Base::doDeGausianClustering() did not recieve a single Channel Mat";
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_RAWMATCHANNELNOTEQUALTOONE;
     }
     if(!_mats.m_raw.isContinuous())
     {
-        qDebug()<<"TBIWeld_Base::doDeGausianClustering() did not recieve a continuous Mat";
+        if(m_showdebug) qDebug()<<"TBIWeld_Base::doDeGausianClustering() did not recieve a continuous Mat";
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_RAWMATCHANNELNOTCONTINOUS;
     }
 
@@ -101,11 +101,11 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGau
     switch(_retresult)
     {
         case TBIDataSetReturnType::FailedTotalImageIntensityTooHigh:
-            qDebug()<<"TBIWeld_Base::doDeGausianClustering() Failed To Build Gausian Decluster Set. Total Image Intensity To High";
+            if(m_showdebug) qDebug()<<"TBIWeld_Base::doDeGausianClustering() Failed To Build Gausian Decluster Set. Total Image Intensity To High";
             return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_TOTALIMAGEINTENSITYTOHIGH;
             break;
         case TBIDataSetReturnType::FailedTotalImageIntensityTooLow:
-            qDebug()<<"TBIWeld_Base::doDeGausianClustering() Failed To Build Gausian Decluster Set. Total Image Intensity To Low";
+            if(m_showdebug) qDebug()<<"TBIWeld_Base::doDeGausianClustering() Failed To Build Gausian Decluster Set. Total Image Intensity To Low";
             return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_TOTALIMAGEINTENSITYTOLOW;
             break;
         default:
@@ -119,14 +119,14 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGau
     _retresult = m_gausian_decluster_ds->extractDistributionSet(*m_gausian_decluster_distro);
     if(_retresult != TBIDataSetReturnType::Ok)
     {
-        qDebug()<<"TBIWeld_Base::doDeGausianClustering() Failed To Build Gausian Decluster Distrobution Set.";
+        if(m_showdebug) qDebug()<<"TBIWeld_Base::doDeGausianClustering() Failed To Build Gausian Decluster Distrobution Set.";
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOBUILDDECLUSTERDISTROBUTIONSET;
     }
 
     //Make Sure Standard Deviation of Distrobution Set is ok.
     if(m_gausian_decluster_distro->standardDeviation() > m_gausiandecluster_params.getDeclusterDeviation())
     {
-        qDebug()<<"TBIWeld_Base::doDeGausianClustering() Gausian Decluster Distrobution Standard Deviation Exceeds Allowed Value.";
+        if(m_showdebug) qDebug()<<"TBIWeld_Base::doDeGausianClustering() Gausian Decluster Distrobution Standard Deviation Exceeds Allowed Value.";
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_GAUSIANDISTROBUTIONDATASETEXCEEDSALLOWEDSTANDARDDEVIATION;
     }
 

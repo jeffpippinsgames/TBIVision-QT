@@ -12,16 +12,21 @@ SOURCES += \
         main.cpp \
         tbiclass_datadistributionset.cpp \
         tbiclass_dataset.cpp \
+        tbiclass_garybasetypes.cpp \
         tbiclass_line.cpp \
+        tbiclass_microcontrollerstatuspacket.cpp \
         tbiclass_motorcalibrationcontroller.cpp \
         tbiclass_opencvmatcontainer.cpp \
         tbiclass_pointfloat.cpp \
         tbiclass_pointint.cpp \
         tbiclass_ransac.cpp \
+        tbiclass_serialportcontroller.cpp \
+        tbiclass_serialportcontrollerreturntype.cpp \
         tbicore_gary.cpp \
         tbicore_mary.cpp \
         tbicore_max.cpp \
         tbicore_toby.cpp \
+        tbijoystick.cpp \
         tbiparameterclass_gausiandecluster.cpp \
         tbiparameterclass_motioncontrolparams.cpp \
         tbiparameterclass_pyloncameraparams.cpp \
@@ -51,13 +56,18 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     tbiclass_datadistributionset.h \
     tbiclass_dataset.h \
+    tbiclass_garybasetypes.h \
+    tbiclass_joystick.h \
     tbiclass_line.h \
+    tbiclass_microcontrollerstatuspacket.h \
     tbiclass_motorcalibrationcontroller.h \
     tbiclass_opencvmatcontainer.h \
     tbiclass_pixelfundamental.h \
     tbiclass_pointfloat.h \
     tbiclass_pointint.h \
     tbiclass_ransac.h \
+    tbiclass_serialportcontroller.h \
+    tbiclass_serialportcontrollerreturntype.h \
     tbicore_constants.h \
     tbicore_gary.h \
     tbicore_mary.h \

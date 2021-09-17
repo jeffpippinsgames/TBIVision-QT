@@ -85,19 +85,18 @@ Item {
 
     function cleanupForDestruction()
     {
+
         //Stop The Camera and Still Image Processing For Transition
         Toby.stopCamera();
         Toby.closeStillImagetoProcess();
-
         //Save Mary and Update Singletons
         Mary.saveSettingsToDefaultFile();
-
         //disconnect all connected signals
         Max.processingComplete.disconnect(rootpageId.triggerTobyNextFrame);
         mainviewrectId.disconnectSignal();
         operationsettingsrectId.disconnectAllSignals();
-
         Max.emitExtraMats = false;
+
 
     }
 
@@ -3381,12 +3380,13 @@ Item {
 
         function disconnectAllSignals()
         {
-            Gary.xMotionStatusChanged.disconnect(xmotionstatustextId.updateMsg);
-            Gary.zMotionStatusChanged.disconnect(zmotionstatustextId.updateMsg);
-            Gary.xLimitSwitchChanged.disconnect(xlimitstatetextId.updateMsg);
-            Gary.zLimitSwitchChanged.disconnect(zlimitstatetextId.updateMsg);
-            Gary.controlModeChanged.disconnect(controlmodetextId.updateMsg);
-            Gary.motorCalibrationCycleChanged.disconnect(calibcyclestatustextId.updateMsg);
+           MicroControllerStatusPacket.xMotionStatusChanged.disconnect(xmotionstatustextId.updateMsg);
+           MicroControllerStatusPacket.zMotionStatusChanged.disconnect(zmotionstatustextId.updateMsg);
+           MicroControllerStatusPacket.xLimitSwitchChanged.disconnect(xlimitstatetextId.updateMsg);
+           MicroControllerStatusPacket.zLimitSwitchChanged.disconnect(zlimitstatetextId.updateMsg);
+           MicroControllerStatusPacket.controlModeChanged.disconnect(controlmodetextId.updateMsg);
+           MicroControllerStatusPacket.motorCalibrationCycleChanged.disconnect(calibcyclestatustextId.updateMsg);
+
         }
 
         states:
@@ -3617,7 +3617,7 @@ Item {
 
                 onRedButtonPressed:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                     case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                         Gary.sendStopMovement();
@@ -3636,7 +3636,7 @@ Item {
 
                 onUpButtonPressed:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendJogUp();
@@ -3652,7 +3652,7 @@ Item {
 
                 onDownButtonPressed:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendJogDown();
@@ -3669,7 +3669,7 @@ Item {
 
                 onLeftButtonPressed:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendJogLeft();
@@ -3687,7 +3687,7 @@ Item {
 
                 onRightButtonPressed:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendJogRight();
@@ -3705,7 +3705,7 @@ Item {
 
                 onUpButtonReleased:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendStopMovement();
@@ -3722,7 +3722,7 @@ Item {
 
                 onDownButtonReleased:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendStopMovement();
@@ -3739,7 +3739,7 @@ Item {
 
                 onLeftButtonReleased:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendStopMovement();
@@ -3757,7 +3757,7 @@ Item {
 
                 onRightButtonReleased:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendStopMovement();
@@ -3788,7 +3788,7 @@ Item {
             }
         }
 
-        //Controller Status
+        //Packet GUID
         Text
         {
             id: laststatusguidtextId
@@ -3798,7 +3798,7 @@ Item {
             font.pointSize: 15
             height: laststatusguidtextId.implicitHeight
             width: laststatusguidtextId.implicitWidth
-            text: "Last Controller Status GUID = " + Gary.currentControlStatusGUID;
+            text: "Last Controller Status GUID = " + MicroControllerStatusPacket.currentControlStatusGUID;
             color: rootpageId.textcolor
         }
 
@@ -3819,12 +3819,12 @@ Item {
 
             Component.onCompleted:
             {
-                Gary.xMotionStatusChanged.connect(xmotionstatustextId.updateMsg);
+                MicroControllerStatusPacket.xMotionStatusChanged.connect(xmotionstatustextId.updateMsg);
             }
 
             function updateMsg()
             {
-                switch(Gary.xMotionStatus)
+                switch(MicroControllerStatusPacket.xMotionStatus)
                 {
                 case GaryMotionStatus.TBI_MOTION_STATUS_IDLE:
                     _msg = "TBI_MOTION_STATUS_IDLE";
@@ -3865,12 +3865,12 @@ Item {
 
             Component.onCompleted:
             {
-                Gary.zMotionStatusChanged.connect(zmotionstatustextId.updateMsg);
+                MicroControllerStatusPacket.zMotionStatusChanged.connect(zmotionstatustextId.updateMsg);
             }
 
             function updateMsg()
             {
-                switch(Gary.zMotionStatus)
+                switch(MicroControllerStatusPacket.zMotionStatus)
                 {
                 case GaryMotionStatus.TBI_MOTION_STATUS_IDLE:
                     _msg = "TBI_MOTION_STATUS_IDLE";
@@ -3904,7 +3904,7 @@ Item {
             font.pointSize: 15
             height: xpositiontextId.implicitHeight
             width: xpositiontextId.implicitWidth
-            text: "X Position = " + Gary.xPosition;
+            text: "X Position = " + MicroControllerStatusPacket.xPosition
             color: rootpageId.textcolor
         }
 
@@ -3918,7 +3918,7 @@ Item {
             font.pointSize: 15
             height: zpositiontextId.implicitHeight
             width: zpositiontextId.implicitWidth
-            text: "Z Position = " + Gary.zPosition;
+            text: "Z Position = " + MicroControllerStatusPacket.zPosition
             color: rootpageId.textcolor
         }
 
@@ -3939,12 +3939,13 @@ Item {
 
             Component.onCompleted:
             {
-                Gary.xLimitSwitchChanged.connect(xlimitstatetextId.updateMsg);
+                MicroControllerStatusPacket.xLimitSwitchChanged.connect(xlimitstatetextId.updateMsg);
+
             }
 
             function updateMsg()
             {
-                switch(Gary.xLimitSwitch)
+                switch(MicroControllerStatusPacket.xLimitSwitch)
                 {
                 case GaryLimitSwitch.TBI_LIMIT_SWITCH_STATE_OK:
                     _msg = "Ok";
@@ -3956,6 +3957,7 @@ Item {
             }
 
         }
+
         //Z Limit Switch state:
         Text
         {
@@ -3973,12 +3975,12 @@ Item {
 
             Component.onCompleted:
             {
-                Gary.zLimitSwitchChanged.connect(zlimitstatetextId.updateMsg);
+                MicroControllerStatusPacket.zLimitSwitchChanged.connect(zlimitstatetextId.updateMsg);
             }
 
             function updateMsg()
             {
-                switch(Gary.zLimitSwitch)
+                switch(MicroControllerStatusPacket.zLimitSwitch)
                 {
                 case GaryLimitSwitch.TBI_LIMIT_SWITCH_STATE_OK:
                     _msg = "Ok";
@@ -3990,6 +3992,7 @@ Item {
             }
 
         }
+
         //Control mode
         Text
         {
@@ -4007,13 +4010,13 @@ Item {
 
             Component.onCompleted:
             {
-                Gary.controlModeChanged.connect(controlmodetextId.updateMsg);
+                MicroControllerStatusPacket.controlModeChanged.connect(controlmodetextId.updateMsg);
             }
 
 
             function updateMsg()
             {
-                switch(Gary.controlMode)
+                switch(MicroControllerStatusPacket.controlMode)
                 {
                 case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                     _msg = "TBI_CONTROL_MODE_MANUAL_MODE";
@@ -4076,12 +4079,14 @@ Item {
 
             Component.onCompleted:
             {
-                Gary.motorCalibrationCycleChanged.connect(calibcyclestatustextId.updateMsg);
+
+
+                MicroControllerStatusPacket.motorCalibrationCycleChanged.connect(calibcyclestatustextId.updateMsg);
             }
 
             function updateMsg()
             {
-                switch(Gary.motorCalibrationCycle)
+                switch(MicroControllerStatusPacket.motorCalibrationCycle)
                 {
                     case GaryMotorCalibrationCycleStatus.TBI_MOTORCAL_OFF:
                         _msg = "Calibration Not Running"
@@ -4112,7 +4117,7 @@ Item {
             font.pointSize: 15
             height: xstepsperpixeltextId.implicitHeight
             width: xstepsperpixeltextId.implicitWidth
-            text: "X Steps Per Pixel = " + Mary.x_axis_steps_per_pixel
+            text: "X Steps Per Pixel = " + MotionControlParams.xStepsPerPixel
             color: rootpageId.textcolor
         }
         Text
@@ -4124,7 +4129,7 @@ Item {
             font.pointSize: 15
             height: zstepsperpixeltextId.implicitHeight
             width: zstepsperpixeltextId.implicitWidth
-            text: "Z Steps Per Pixel = " + Mary.z_axis_steps_per_pixel
+            text: "Z Steps Per Pixel = " + MotionControlParams.zStepsPerPixel
             color: rootpageId.textcolor
         }
 

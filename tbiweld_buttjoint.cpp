@@ -108,7 +108,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_ButtJoint::do
     _datasetresult = m_tsl_inlier_ds->extractLeastSquareLine(m_tsl_geo_line);
     if(_datasetresult != TBIDataSetReturnType::Ok)
     {
-        qDebug("TBIWeld_ButtJoint::doConstructGeometricEntities() Failed To Build Left TSL Geometric Entity.");
+        if(m_showdebug) qDebug("TBIWeld_ButtJoint::doConstructGeometricEntities() Failed To Build Left TSL Geometric Entity.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOBUILDLEFTTSLGEOMETRICENTITY;
     }
     //Draw Geometric Entity
@@ -126,7 +126,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_ButtJoint::do
     //Build The Left TSL Ransac Line.
     if(!TBIRansac::doRansac(m_tsl_ransac_line, m_tsl_ransac_params, *this->getGausianDeclusterSetPointer()))
     {
-        qDebug("TBIWeld_ButtJoint::doConstructInlierRansacs TSL Ransac Is Invalid.");
+        if(m_showdebug) qDebug("TBIWeld_ButtJoint::doConstructInlierRansacs TSL Ransac Is Invalid.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDUNABLETOFINDINLIERRANSACLINE;
     }
     //Draw The Left TSL Ransac
@@ -143,7 +143,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_ButtJoint::do
     _datasetresult = this->getGausianDeclusterSetPointer()->extractDataSetForInliers(*m_tsl_inlier_ds, m_tsl_ransac_line, 10.0);
     if(_datasetresult != TBIDataSetReturnType::Ok)
     {
-        qDebug("TBIWeld_ButtJoint::doBuildInlierDataSets() Failed To Extract Left TSL Inlier Data Set.");
+        if(m_showdebug) qDebug("TBIWeld_ButtJoint::doBuildInlierDataSets() Failed To Extract Left TSL Inlier Data Set.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTLEFTTSLINLIERDATASET;
     }
     m_tsl_inlier_ds->drawToMat(_mats.m_inliers, m_left_tsl_cv_color);

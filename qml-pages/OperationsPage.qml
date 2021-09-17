@@ -40,7 +40,7 @@ Item
         //Disconnect All Signals
         Max.newOperationMatProcessed.disconnect(operationviewId.recieveCVMat);
         Max.processingComplete.disconnect(mainpageID.triggerTobyNextFrame);
-        Gary.controlModeChanged.disconnect(controlmodeselectedtextId.setControlModeText);
+        MicroControllerStatusPacket.controlModeChanged.disconnect(controlmodeselectedtextId.setControlModeText);
     }
 
     function triggerTobyNextFrame()
@@ -91,7 +91,7 @@ Item
         onBlackButtonPressed:
         {
 
-            switch(Gary.controlMode)
+            switch(MicroControllerStatusPacket.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:      
                 break;
@@ -108,7 +108,7 @@ Item
         onGreenButtonPressed:
         {
 
-            switch(Gary.controlMode)
+            switch(MicroControllerStatusPacket.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
                 break;
@@ -122,7 +122,7 @@ Item
 
         onRedButtonPressed:
         {
-            switch(Gary.controlMode)
+            switch(MicroControllerStatusPacket.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
                 Gary.setControlModeToManual();
@@ -138,7 +138,7 @@ Item
 
         onUpButtonPressed:
         {
-            switch(Gary.controlMode)
+            switch(MicroControllerStatusPacket.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
                 break;
@@ -152,7 +152,7 @@ Item
 
         onDownButtonPressed:
         {
-            switch(Gary.controlMode)
+            switch(MicroControllerStatusPacket.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
                 break;
@@ -166,7 +166,7 @@ Item
 
         onLeftButtonPressed:
         {
-            switch(Gary.controlMode)
+            switch(MicroControllerStatusPacket.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
                 break;
@@ -182,7 +182,7 @@ Item
 
         onRightButtonPressed:
         {
-            switch(Gary.controlMode)
+            switch(MicroControllerStatusPacket.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
                 break;
@@ -198,7 +198,7 @@ Item
 
         onUpButtonReleased:
         {
-            switch(Gary.controlMode)
+            switch(MicroControllerStatusPacket.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
                 break;
@@ -213,7 +213,7 @@ Item
 
         onDownButtonReleased:
         {
-            switch(Gary.controlMode)
+            switch(MicroControllerStatusPacket.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
                 break;
@@ -228,7 +228,7 @@ Item
 
         onLeftButtonReleased:
         {
-            switch(Gary.controlMode)
+            switch(MicroControllerStatusPacket.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
                 break;
@@ -243,7 +243,7 @@ Item
 
         onRightButtonReleased:
         {
-            switch(Gary.controlMode)
+            switch(MicroControllerStatusPacket.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
                 break;
@@ -358,7 +358,7 @@ Item
 
             function setControlModeText()
             {
-                switch(Gary.controlMode)
+                switch(MicroControllerStatusPacket.controlMode)
                 {
                 case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                     controlmodeselectedtextId.text = "Manual";
@@ -382,7 +382,7 @@ Item
             Component.onCompleted:
             {
                 controlmodeselectedtextId.setControlModeText();
-                Gary.controlModeChanged.connect(controlmodeselectedtextId.setControlModeText);
+                MicroControllerStatusPacket.controlModeChanged.connect(controlmodeselectedtextId.setControlModeText);
             }
         }
     }

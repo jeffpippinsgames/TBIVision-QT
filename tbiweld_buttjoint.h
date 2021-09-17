@@ -27,7 +27,7 @@ public:
 
 
 private:
-
+    static const bool m_showdebug = false;
     //Clearing Methods
     void clearDataSets();
     void clearRansacLines();

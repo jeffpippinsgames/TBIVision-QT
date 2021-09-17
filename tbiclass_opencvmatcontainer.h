@@ -18,6 +18,8 @@ public:
     cv::Mat m_ransac;
     cv::Mat m_geometricconstruction;
     cv::Mat m_operation;
+    cv::Mat m_testmatgrey;
+    cv::Mat m_testmatcolor;
 };
 
 #endif // TBICLASS_OPENCVMATCONTAINER_H

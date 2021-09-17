@@ -40,9 +40,13 @@ void Max::recieveNewCVMat(const Mat &_mat)
 
     //Do Whichever PipeLine You Need
     //processVGroovePipeline(_mats);
-    processButtJointPipeline(_mats);
+    processButtJointPipeline(_mats, *m_gary->getMicroControllerStatusPacketPointer());
 
     //Emit the Mats
+    //mats.m_testmatgrey = _mats.m_blurr.clone();
+    //cv::Sobel(_mats.m_blurr, _mats.m_testmatgrey, -1, 1,0,3,3,0,cv::BORDER_CONSTANT);
+    //cv::cvtColor(_mats.m_testmatgrey, _mats.m_operation, COLOR_GRAY2BGR);
+
     emit newOperationMatProcessed(_mats.m_operation);
 
     if(m_emitextramats)
@@ -95,8 +99,11 @@ void Max::loadFromFile(QDataStream &_filedatastream)
     m_motion_control_params.loadFromFile(_filedatastream);
 }
 
-void Max::processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats)
+void Max::processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet)
 {
+    MicroControllerStatusPacket _stat_packet;
+    _micro_status_packet.copyStatusPacketTo(_stat_packet);
+
     //Do the VGroove Pipeline
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result;
     _result = m_vgroove.processPipeline(_mats, m_vgroove_tracking_container);
@@ -106,7 +113,7 @@ void Max::processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats)
     if(m_attempt_to_toggle_control_state)
     {
         //Now Act According to the  Control State of Gary
-        switch(m_gary->getControlMode())
+        switch(_stat_packet.getControlMode())
         {
         case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
             if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
@@ -132,7 +139,7 @@ void Max::processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats)
     {
 
         //Now Act According to the  Control State of Gary
-        switch(m_gary->getControlMode())
+        switch(_stat_packet.getControlMode())
         {
             case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
                 break;
@@ -159,18 +166,22 @@ void Max::processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats)
 
 }
 
-void Max::processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats)
+void Max::processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet)
 {
+    MicroControllerStatusPacket _stat_packet;
+
+
     //Do the Butt Joint Pipeline
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result;
     _result = m_buttjoint.processPipeline(_mats, m_buttjoint_tracking_container);
 
+     _micro_status_packet.copyStatusPacketTo(_stat_packet);
     //---------------------------------------------------------------------------------
     //Deal With a Change in Control State
     if(m_attempt_to_toggle_control_state)
     {
         //Now Act According to the  Control State of Gary
-        switch(m_gary->getControlMode())
+        switch(_stat_packet.getControlMode())
         {
         case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
             if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
@@ -192,7 +203,7 @@ void Max::processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats)
     else
     {
         //Now Act According to the  Control State of Gary
-        switch(m_gary->getControlMode())
+        switch(_stat_packet.getControlMode())
         {
             case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
                 break;
@@ -200,20 +211,20 @@ void Max::processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats)
                 break;
             case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
                 m_buttjoint_tracking_container.drawTrackToPointstoMat(_mats);
-                if((_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK) && (m_gary->getZMotionStatus() == GaryMotionStatus::TBI_MOTION_STATUS_IDLE))
+                if((_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK) && _stat_packet.isZMotionStatusIdle())
                 {
                     //Z Up Increases the Step Location
                     //Which Means Z Must Add Positive Steps
-
                     //A Positive _zdiff Means Move Down
                     //So Send Negative Steps
-                        //m_motion_control_params.setZStepsPerPixel(1214.37037);
+                    //m_motion_control_params.setZStepsPerPixel(1214.37037);
 
-                        int _zdiff = m_buttjoint_tracking_container.getZTrackingDifference();
+                        int _zdiff = m_buttjoint_tracking_container.getZTrackingDifference();      
                         _zdiff = _zdiff * 1214.37037;
                         if(_zdiff != 0)
                         {
                             m_gary->autoMoveZAxis(-_zdiff);
+
                         }
                 }
                 break;

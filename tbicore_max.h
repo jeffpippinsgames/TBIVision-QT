@@ -27,6 +27,7 @@
 #include "tbiweld_vgroovetrackingcontainer.h"
 #include "tbiweld_buttjointtrackingcontainer.h"
 #include "tbiweld_buttjoint.h"
+#include "tbiclass_microcontrollerstatuspacket.h"
 
 
 using namespace cv;
@@ -103,8 +104,8 @@ public:
     void loadFromFile(QDataStream &_filedatastream);
 
 private:
-    void processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats);
-    void processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats);
+    void processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet);
+    void processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet);
 
     Gary *m_gary;
     bool m_in_proccesing_loop;

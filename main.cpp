@@ -10,6 +10,8 @@
 #include "opencv4/opencv2/core.hpp"
 #include "tbiweld_enumerator.h"
 #include "tbiweld_pipelineprocessingreturntype.h"
+#include "tbiclass_garybasetypes.h"
+#include "tbiclass_serialportcontrollerreturntype.h"
 //#include "tbilinearransac.h"
 
 using namespace Pylon;
@@ -46,13 +48,13 @@ int main(int argc, char *argv[])
     GaryMotionStatus::declareQML();
     GaryLaserStatus::declareQML();
     GaryMotorCalibrationCycleStatus::declareQML();
-    GaryControllerStatus::declareQML();
-    GaryControllerQMLSignals::declareQML();
     //Register The QmlTBIDisplay QML Type
     QmlTBIDisplay::declareQML();
     //Register TBI Weld Types
     TBIWeldType_Enumerator::declareQML();
     TBIWeld_ProcessingPipeLineReturnType::declareQML();
+    //General Class Types
+    SerialPortControllerReturnType::declareQML();
 
     //The QML Application engine----------------------------------
     QQmlApplicationEngine engine;
@@ -77,6 +79,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("Mary", &_mary);
     _max.setRootQMLContextProperties(engine);
     _toby.setRootQMLContextProperties(engine);
+    _gary.setRootQMLContextProperties(engine);
 
     //Set Mary's Default Values... The TBI Core Pointers Must Be Set Prior To Calling a Load File.
     //The QML Property Contexts Must Be Set First.

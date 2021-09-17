@@ -44,6 +44,7 @@ public:
     void loadGausianDeClusterParamsFromFile(QDataStream &_filedatastream);
 
 private:
+    static const bool m_showdebug = false;
         //Datasets
         TBIDataSet *m_gausian_decluster_ds;
         TBIDataSet *m_filtered_gausian_decluster_ds;

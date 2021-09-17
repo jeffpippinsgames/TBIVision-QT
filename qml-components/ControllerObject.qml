@@ -18,7 +18,7 @@ FocusScope {
     readonly property int rightbutton: Qt.Key_Right
     readonly property int nobutton: 0
 
-    readonly property bool showdebug: true
+    readonly property bool showdebug: false
 
     property int currentlyheldbutton: 0
 
@@ -108,167 +108,16 @@ FocusScope {
         return false;
     }
 
-
     onFocusChanged:
     {
         currentlyheldbutton = nobutton;
         if(rootcomponentId.focus)
         {
-          Gary.garyControllerFired.connect(rootcomponentId.processGaryControls);
+
         }
         else
         {
-            Gary.garyControllerFired.disconnect(rootcomponentId.processGaryControls);
-        }
-    }
 
-    function processGaryControls(controlsignal, autorepeat)
-    {
-        if(showdebug) console.log("ControllerObject.qml: controlsignal: " + controlsignal + " - autorepeat: " + autorepeat);
-        switch(controlsignal)
-        {
-        case GaryControllerQMLSignals.TBI_CONTROLLER_GREENBTN_PRESSED:
-            if(!useAutoRepeatonButtons)
-            {
-                if(autorepeat) return;
-            }
-            if((currentlyheldbutton===nobutton) || (currentlyheldbutton===greenbutton))
-            {
-                greenpressed = true;
-                currentlyheldbutton = greenbutton;
-                greenButtonPressed();
-                if(showdebug) console.log("ControllerObject.qml: Green Button Pressed");
-            }
-            break;
-        case GaryControllerQMLSignals.TBI_CONTROLLER_REDBTN_PRESSED:
-            if(isAnyOtherKeyPressed(redbutton)) return;
-            if(!useAutoRepeatonButtons)
-            {
-                if(autorepeat) return;
-            }
-            if((currentlyheldbutton===nobutton) || (currentlyheldbutton===redbutton))
-            {
-                redpressed = true;
-                currentlyheldbutton = redbutton;
-                redButtonPressed();
-                if(showdebug) console.log("ControllerObject.qml: Red Button Pressed");
-            }
-            break;
-        case GaryControllerQMLSignals.TBI_CONTROLLER_BLACKBTN_PRESSED:
-            if(isAnyOtherKeyPressed(greenbutton)) return;
-            if(!useAutoRepeatonButtons)
-            {
-                if(autorepeat) return;
-            }
-            if((currentlyheldbutton===nobutton) || (currentlyheldbutton===blackbutton))
-            {
-                blackpressed = true;
-                currentlyheldbutton = blackbutton;
-                blackButtonPressed();
-                if(showdebug) console.log("ControllerObject.qml: Black Button Pressed");
-            }
-            break;
-        case GaryControllerQMLSignals.TBI_CONTROLLER_JOYUP_PRESSED:
-            if(!useAutoRepeatonSticks)
-            {
-                if(autorepeat) return;
-            }
-            if((currentlyheldbutton===nobutton) || (currentlyheldbutton===upbutton))
-            {
-                uppressed = true;
-                currentlyheldbutton = upbutton;
-                upButtonPressed();
-                if(showdebug) console.log("ControllerObject.qml: Joystick Up Pressed");
-            }
-            break;
-        case GaryControllerQMLSignals.TBI_CONTROLLER_JOYDOWN_PRESSED:
-            if(!useAutoRepeatonSticks)
-            {
-                if(autorepeat) return;
-            }
-            if((currentlyheldbutton===nobutton) || (currentlyheldbutton===downbutton))
-            {
-                downpressed = true;
-                currentlyheldbutton = downbutton;
-                downButtonPressed();
-                if(showdebug) console.log("ControllerObject.qml: Joystick Down Pressed");
-            }
-            break;
-        case GaryControllerQMLSignals.TBI_CONTROLLER_JOYLEFT_PRESSED:
-            if(!useAutoRepeatonSticks)
-            {
-                if(autorepeat) return;
-            }
-            if((currentlyheldbutton===nobutton) || (currentlyheldbutton===leftbutton))
-            {
-                leftpressed = true;
-                currentlyheldbutton = leftbutton;
-                leftButtonPressed();
-                if(showdebug) console.log("ControllerObject.qml: Joystick Left Pressed");
-            }
-            break;
-        case GaryControllerQMLSignals.TBI_CONTROLLER_JOYRIGHT_PRESSED:
-            if(!useAutoRepeatonSticks)
-            {
-                if(autorepeat) return;
-            }
-            if((currentlyheldbutton===nobutton) || (currentlyheldbutton===rightbutton))
-            {
-                rightpressed = true;
-                currentlyheldbutton = rightbutton;
-                rightButtonPressed();
-                if(showdebug) console.log("ControllerObject.qml: Joystick Right Pressed");
-            }
-            break;
-        //--------------------------------------
-        case GaryControllerQMLSignals.TBI_CONTROLLER_GREENBTN_RELEASED:
-            if(currentlyheldbutton != greenbutton) return;
-            greenpressed = false;
-            currentlyheldbutton = nobutton;
-            greenButtonReleased();
-            if(showdebug) console.log("ControllerObject.qml: Green Button Released");
-            break;
-        case GaryControllerQMLSignals.TBI_CONTROLLER_REDBTN_RELEASED:
-            if(currentlyheldbutton != redbutton) return;
-            redpressed = false;
-            currentlyheldbutton = nobutton;
-            redButtonReleased();
-            if(showdebug) console.log("ControllerObject.qml: Red Button Released");
-            break;
-        case GaryControllerQMLSignals.TBI_CONTROLLER_BLACKBTN_RELEASED:
-            if(currentlyheldbutton != blackbutton) return;
-            blackpressed = false;
-            currentlyheldbutton = nobutton;
-            blackButtonReleased();
-            if(showdebug) console.log("ControllerObject.qml: Black Button Released");
-            break;
-        case GaryControllerQMLSignals.TBI_CONTROLLER_JOYUP_RELEASED:
-            if(currentlyheldbutton != upbutton) return;
-            uppressed = false;
-            currentlyheldbutton = nobutton;
-            upButtonReleased();
-            if(showdebug) console.log("ControllerObject.qml: Joystick Up Released");
-            break;
-        case GaryControllerQMLSignals.TBI_CONTROLLER_JOYDOWN_RELEASED:
-            if(currentlyheldbutton != downbutton) return;
-            downpressed = false;
-            downButtonReleased();
-            if(showdebug) console.log("ControllerObject.qml: Joystick Down Released");
-            break;
-        case GaryControllerQMLSignals.TBI_CONTROLLER_JOYLEFT_RELEASED:
-            if(currentlyheldbutton != leftbutton) return;
-            leftpressed = false;
-            currentlyheldbutton = nobutton;
-            leftButtonReleased();
-            if(showdebug) console.log("ControllerObject.qml: Joystick Left Released");
-            break;
-        case GaryControllerQMLSignals.TBI_CONTROLLER_JOYRIGHT_RELEASED:
-            if(currentlyheldbutton != rightbutton) return;
-            rightpressed = false;
-            currentlyheldbutton = nobutton;
-            rightButtonReleased();
-            if(showdebug) console.log("ControllerObject.qml: Joystick Right Released");
-            break;
         }
     }
 

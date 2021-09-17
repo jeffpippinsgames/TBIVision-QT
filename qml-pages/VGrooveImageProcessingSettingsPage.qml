@@ -13,6 +13,7 @@ Item {
     anchors.fill: parent
     visible: true
 
+    readonly property bool showdebug: false
     //Custom Properties----------------------------------------------
     readonly property string pagename: "Pipeline Settings Page"
 
@@ -4492,12 +4493,12 @@ Item {
 
         function disconnectAllSignals()
         {
-            Gary.xMotionStatusChanged.disconnect(xmotionstatustextId.updateMsg);
-            Gary.zMotionStatusChanged.disconnect(zmotionstatustextId.updateMsg);
-            Gary.xLimitSwitchChanged.disconnect(xlimitstatetextId.updateMsg);
-            Gary.zLimitSwitchChanged.disconnect(zlimitstatetextId.updateMsg);
-            Gary.controlModeChanged.disconnect(controlmodetextId.updateMsg);
-            Gary.motorCalibrationCycleChanged.disconnect(calibcyclestatustextId.updateMsg);
+            MicroControllerStatusPacket.xMotionStatusChanged.disconnect(xmotionstatustextId.updateMsg);
+            MicroControllerStatusPacket.zMotionStatusChanged.disconnect(zmotionstatustextId.updateMsg);
+            MicroControllerStatusPacket.xLimitSwitchChanged.disconnect(xlimitstatetextId.updateMsg);
+            MicroControllerStatusPacket.zLimitSwitchChanged.disconnect(zlimitstatetextId.updateMsg);
+            MicroControllerStatusPacket.controlModeChanged.disconnect(controlmodetextId.updateMsg);
+            MicroControllerStatusPacket.motorCalibrationCycleChanged.disconnect(calibcyclestatustextId.updateMsg);
         }
 
         states:
@@ -4557,7 +4558,7 @@ Item {
                     manualmotorcontrolbuttonId.grabFocus();
                     break;
                 case "MotorCalibration":
-                    //Max.haveGaryStartMotorCalibration();
+
                     break;
                 case "RecordTrackTo":
 
@@ -4728,7 +4729,7 @@ Item {
 
                 onRedButtonPressed:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                     case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                         Gary.sendStopMovement();
@@ -4747,7 +4748,7 @@ Item {
 
                 onUpButtonPressed:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendJogUp();
@@ -4763,7 +4764,7 @@ Item {
 
                 onDownButtonPressed:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendJogDown();
@@ -4780,7 +4781,7 @@ Item {
 
                 onLeftButtonPressed:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendJogLeft();
@@ -4798,7 +4799,7 @@ Item {
 
                 onRightButtonPressed:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendJogRight();
@@ -4816,7 +4817,7 @@ Item {
 
                 onUpButtonReleased:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendStopMovement();
@@ -4833,7 +4834,7 @@ Item {
 
                 onDownButtonReleased:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendStopMovement();
@@ -4850,7 +4851,7 @@ Item {
 
                 onLeftButtonReleased:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendStopMovement();
@@ -4868,7 +4869,7 @@ Item {
 
                 onRightButtonReleased:
                 {
-                    switch(Gary.controlMode)
+                    switch(MicroControllerStatusPacket.controlMode)
                     {
                         case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                             Gary.sendStopMovement();
@@ -4909,7 +4910,7 @@ Item {
             font.pointSize: 15
             height: laststatusguidtextId.implicitHeight
             width: laststatusguidtextId.implicitWidth
-            text: "Last Controller Status GUID = " + Gary.currentControlStatusGUID;
+            text: "Last Controller Status GUID = " + MicroControllerStatusPacket.currentControlStatusGUID
             color: rootpageId.textcolor
         }
 
@@ -4923,19 +4924,19 @@ Item {
             font.pointSize: 15
             height: xmotionstatustextId.implicitHeight
             width: xmotionstatustextId.implicitWidth
-            text: "X Axis Motion Status = " + _msg;
+            text: "X Axis Motion Status = " + _msg
             color: rootpageId.textcolor
 
             property string _msg: ""
 
             Component.onCompleted:
             {
-                Gary.xMotionStatusChanged.connect(xmotionstatustextId.updateMsg);
+                MicroControllerStatusPacket.xMotionStatusChanged.connect(xmotionstatustextId.updateMsg);
             }
 
             function updateMsg()
             {
-                switch(Gary.xMotionStatus)
+                switch(MicroControllerStatusPacket.xMotionStatus)
                 {
                 case GaryMotionStatus.TBI_MOTION_STATUS_IDLE:
                     _msg = "TBI_MOTION_STATUS_IDLE";
@@ -4976,12 +4977,12 @@ Item {
 
             Component.onCompleted:
             {
-                Gary.zMotionStatusChanged.connect(zmotionstatustextId.updateMsg);
+               MicroControllerStatusPacket.zMotionStatusChanged.connect(zmotionstatustextId.updateMsg);
             }
 
             function updateMsg()
             {
-                switch(Gary.zMotionStatus)
+                switch(MicroControllerStatusPacket.zMotionStatus)
                 {
                 case GaryMotionStatus.TBI_MOTION_STATUS_IDLE:
                     _msg = "TBI_MOTION_STATUS_IDLE";
@@ -5015,7 +5016,7 @@ Item {
             font.pointSize: 15
             height: xpositiontextId.implicitHeight
             width: xpositiontextId.implicitWidth
-            text: "X Position = " + Gary.xPosition;
+            text: "X Position = " + MicroControllerStatusPacket.xPosition
             color: rootpageId.textcolor
         }
 
@@ -5029,7 +5030,7 @@ Item {
             font.pointSize: 15
             height: zpositiontextId.implicitHeight
             width: zpositiontextId.implicitWidth
-            text: "Z Position = " + Gary.zPosition;
+            text: "Z Position = " + MicroControllerStatusPacket.zPosition;
             color: rootpageId.textcolor
         }
 
@@ -5050,12 +5051,12 @@ Item {
 
             Component.onCompleted:
             {
-                Gary.xLimitSwitchChanged.connect(xlimitstatetextId.updateMsg);
+                MicroControllerStatusPacket.xLimitSwitchChanged.connect(xlimitstatetextId.updateMsg);
             }
 
             function updateMsg()
             {
-                switch(Gary.xLimitSwitch)
+                switch(MicroControllerStatusPacket.xLimitSwitch)
                 {
                 case GaryLimitSwitch.TBI_LIMIT_SWITCH_STATE_OK:
                     _msg = "Ok";
@@ -5084,12 +5085,12 @@ Item {
 
             Component.onCompleted:
             {
-                Gary.zLimitSwitchChanged.connect(zlimitstatetextId.updateMsg);
+               MicroControllerStatusPacket.zLimitSwitchChanged.connect(zlimitstatetextId.updateMsg);
             }
 
             function updateMsg()
             {
-                switch(Gary.zLimitSwitch)
+                switch(MicroControllerStatusPacket.zLimitSwitch)
                 {
                 case GaryLimitSwitch.TBI_LIMIT_SWITCH_STATE_OK:
                     _msg = "Ok";
@@ -5118,13 +5119,13 @@ Item {
 
             Component.onCompleted:
             {
-                Gary.controlModeChanged.connect(controlmodetextId.updateMsg);
+                MicroControllerStatusPacket.controlModeChanged.connect(controlmodetextId.updateMsg);
             }
 
 
             function updateMsg()
             {
-                switch(Gary.controlMode)
+                switch(MicroControllerStatusPacket.controlMode)
                 {
                 case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                     _msg = "TBI_CONTROL_MODE_MANUAL_MODE";
@@ -5187,12 +5188,12 @@ Item {
 
             Component.onCompleted:
             {
-                Gary.motorCalibrationCycleChanged.connect(calibcyclestatustextId.updateMsg);
+                MicroControllerStatusPacket.motorCalibrationCycleChanged.connect(calibcyclestatustextId.updateMsg);
             }
 
             function updateMsg()
             {
-                switch(Gary.motorCalibrationCycle)
+                switch(MicroControllerStatusPacket.motorCalibrationCycle)
                 {
                     case GaryMotorCalibrationCycleStatus.TBI_MOTORCAL_OFF:
                         _msg = "Calibration Not Running"
@@ -5223,7 +5224,7 @@ Item {
             font.pointSize: 15
             height: xstepsperpixeltextId.implicitHeight
             width: xstepsperpixeltextId.implicitWidth
-            text: "X Steps Per Pixel = " + Mary.x_axis_steps_per_pixel
+            text: "X Steps Per Pixel = " + MotionControlParams.xStepsPerPixel
             color: rootpageId.textcolor
         }
         Text
@@ -5235,7 +5236,7 @@ Item {
             font.pointSize: 15
             height: zstepsperpixeltextId.implicitHeight
             width: zstepsperpixeltextId.implicitWidth
-            text: "Z Steps Per Pixel = " + Mary.z_axis_steps_per_pixel
+            text: "Z Steps Per Pixel = " + MotionControlParams.zStepsPerPixel
             color: rootpageId.textcolor
         }
 
@@ -5295,15 +5296,12 @@ Item {
                 {
                 case rootpageId.rawframe:
                     Max.newRawMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
-                    //console.log("Detaching Max.newRawMatProcessed");
                     break;
                 case rootpageId.blurframe:
                     Max.newBlurMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
-                    //console.log("Detaching Max.newBlurMatProcessed");
                     break;
                 case rootpageId.thresholdframe:
                     Max.newThresholdMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
-                    //console.log("Detaching Max.newThresholdMatProcessed");
                     break;
                 case rootpageId.pixelcolumnframe:
                     Max.newPixelColumnMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
@@ -5332,17 +5330,14 @@ Item {
                 case rootpageId.rawframe:
                     Max.newRawMatProcessed.connect(mainviewdisplayId.recieveCVMat);
                     mainviewrect_privateId.attached_frame = rootpageId.rawframe;
-                    //console.log("Connecting Max.newRawMatProcessed");
                     break;
                 case rootpageId.blurframe:
                     Max.newBlurMatProcessed.connect(mainviewdisplayId.recieveCVMat);
                     mainviewrect_privateId.attached_frame = rootpageId.blurframe;
-                    //console.log("Connecting Max.newBlurMatProcessed");
                     break;
                 case rootpageId.thresholdframe:
                     Max.newThresholdMatProcessed.connect(mainviewdisplayId.recieveCVMat);
                     mainviewrect_privateId.attached_frame = rootpageId.thresholdframe;
-                    //console.log("Connecting Max.newThresholdMatProcessed");
                     break;
                 case rootpageId.pixelcolumnframe:
                     Max.newPixelColumnMatProcessed.connect(mainviewdisplayId.recieveCVMat);
@@ -5359,7 +5354,6 @@ Item {
                 case rootpageId.geoconstructionframe:
                     Max.newGeoConstructionMatProcessed.connect(mainviewdisplayId.recieveCVMat);
                     mainviewrect_privateId.attached_frame = rootpageId.geoconstructionframe;
-                    console.log("Connecting Max.newgeoconstructionMatProcessed");
                     break;
                 case rootpageId.operationframe:
                     Max.newOperationMatProcessed.connect(mainviewdisplayId.recieveCVMat);
@@ -5376,12 +5370,8 @@ Item {
 
         onDisplayed_frameChanged:
         {
-            //console.log("");
-            //console.log("onDisplayed_frameChanged Starting. displayed_frame = " + displayed_frame + " - attached_frame = " + mainviewrect_privateId.attached_frame);
             mainviewrect_privateId.detachMaxSignal();
             mainviewrect_privateId.attachMaxSignal(mainviewrectId.displayed_frame);
-            //console.log("onDisplayed_frameChanged Finished. displayed_frame = " + displayed_frame + " - attached_frame = " + mainviewrect_privateId.attached_frame);
-            //console.log("");
         }
 
         Rectangle

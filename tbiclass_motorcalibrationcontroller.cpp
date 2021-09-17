@@ -8,6 +8,7 @@ TBIMotorCalibrationController::TBIMotorCalibrationController(QObject *parent) : 
 
 void TBIMotorCalibrationController::processMotorCalibration(TBIPoint_Int &_trackedpoint, TBIMotionControlParameters &_motionparams)
 {
+    /*
     switch(m_gary->getMotorCalibrationCycle())
     {
     case GaryMotorCalibrationCycleStatus::TBI_MOTORCAL_GETPNT1PAUSE:
@@ -33,4 +34,5 @@ void TBIMotorCalibrationController::processMotorCalibration(TBIPoint_Int &_track
      default:
         break;
     }
+    */
 }
