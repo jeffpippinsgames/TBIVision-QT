@@ -55,6 +55,8 @@ TBIJoystick::TBIJoystick(QObject *parent) : QObject(parent)
     m_black_state = false;
     m_last_black_state = false;
     m_serial_connection_state = false;
+
+    m_auto_repeat = true;
 }
 
 TBIJoystick::~TBIJoystick()
@@ -84,18 +86,20 @@ void TBIJoystick::processStates()
            1|1  - Hold Down Button Position - Timers Control This Do Nothing
       ----------------------------------------------------------------------*/
 
+
+
     //Up Button Handling---------------------------------------------
     if(!m_up_state && m_last_up_state) //Release Condition
     {
         //Fire Release Signal and Kill Hold Down Timer. Reset the Hold Down Timer Interval
         m_up_holddown_timer->stop();
-        emit TBIJoystick_Up_Released();
+        emit tBIJoystick_Up_Released();
         if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Joystick Up Released";
     }
     else if(m_up_state && !m_last_up_state) //Initial Press Condition
     {
         //Fire the Press Signal and Start Hold Down Timer
-        emit TBIJoystick_Up_Pressed(false);
+        emit tBIJoystick_Up_Pressed(false);
         m_up_holddown_timer->start(m_holddown_interval_timeout);
         if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Joystick Up Pressed";
     }
@@ -106,13 +110,13 @@ void TBIJoystick::processStates()
     {
         //Fire Release Signal and Kill Hold Down Timer. Reset the Hold Down Timer Interval
         m_down_holddown_timer->stop();
-        emit TBIJoystick_Down_Released();
+        emit tBIJoystick_Down_Released();
         if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Joystick Down Released";
     }
     else if(m_down_state && !m_last_down_state) //Initial Press Condition
     {
         //Fire the Press Signal and Start Hold Down Timer
-        emit TBIJoystick_Down_Pressed(false);
+        emit tBIJoystick_Down_Pressed(false);
         m_down_holddown_timer->start(m_holddown_interval_timeout);
         if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Joystick Down Pressed";
     }
@@ -123,13 +127,13 @@ void TBIJoystick::processStates()
     {
         //Fire Release Signal and Kill Hold Down Timer. Reset the Hold Down Timer Interval
         m_left_holddown_timer->stop();
-        emit TBIJoystick_Left_Released();
+        emit tBIJoystick_Left_Released();
         if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Joystick Left Released";
     }
     else if(m_left_state && !m_last_left_state) //Initial Press Condition
     {
         //Fire the Press Signal and Start Hold Down Timer
-        emit TBIJoystick_Left_Pressed(false);
+        emit tBIJoystick_Left_Pressed(false);
         m_left_holddown_timer->start(m_holddown_interval_timeout);
         if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Joystick Left Pressed";
     }
@@ -140,13 +144,13 @@ void TBIJoystick::processStates()
     {
         //Fire Release Signal and Kill Hold Down Timer. Reset the Hold Down Timer Interval
         m_right_holddown_timer->stop();
-        emit TBIJoystick_Right_Released();
+        emit tBIJoystick_Right_Released();
         if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Joystick Right Released";
     }
     else if(m_right_state && !m_last_right_state) //Initial Press Condition
     {
         //Fire the Press Signal and Start Hold Down Timer
-        emit TBIJoystick_Right_Pressed(false);
+        emit tBIJoystick_Right_Pressed(false);
         m_right_holddown_timer->start(m_holddown_interval_timeout);
         if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Joystick Right Pressed";
     }
@@ -157,13 +161,13 @@ void TBIJoystick::processStates()
     {
         //Fire Release Signal and Kill Hold Down Timer. Reset the Hold Down Timer Interval
         m_green_holddown_timer->stop();
-        emit TBIJoystick_Green_Released();
+        emit tBIJoystick_Green_Released();
         if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Green Button Released";
     }
     else if(m_green_state && !m_last_green_state) //Initial Press Condition
     {
         //Fire the Press Signal and Start Hold Down Timer
-        emit TBIJoystick_Green_Pressed(false);
+        emit tBIJoystick_Green_Pressed(false);
         m_green_holddown_timer->start(m_holddown_interval_timeout);
         if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Green Button Pressed";
     }
@@ -174,13 +178,13 @@ void TBIJoystick::processStates()
     {
         //Fire Release Signal and Kill Hold Down Timer. Reset the Hold Down Timer Interval
         m_red_holddown_timer->stop();
-        emit TBIJoystick_Red_Released();
+        emit tBIJoystick_Red_Released();
         if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Red Button Released";
     }
     else if(m_red_state && !m_last_red_state) //Initial Press Condition
     {
         //Fire the Press Signal and Start Hold Down Timer
-        emit TBIJoystick_Red_Pressed(false);
+        emit tBIJoystick_Red_Pressed(false);
         m_red_holddown_timer->start(m_holddown_interval_timeout);
         if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Red Button Pressed";
     }
@@ -191,13 +195,13 @@ void TBIJoystick::processStates()
     {
         //Fire Release Signal and Kill Hold Down Timer. Reset the Hold Down Timer Interval
         m_black_holddown_timer->stop();
-        emit TBIJoystick_Black_Released();
+        emit tBIJoystick_Black_Released();
         if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Black Button Released";
     }
     else if(m_black_state && !m_last_black_state) //Initial Press Condition
     {
         //Fire the Press Signal and Start Hold Down Timer
-        emit TBIJoystick_Black_Pressed(false);
+        emit tBIJoystick_Black_Pressed(false);
         m_black_holddown_timer->start(m_holddown_interval_timeout);
         if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Black Button Pressed";
     }
@@ -256,49 +260,50 @@ void TBIJoystick::onFailedConnectionTimer()
 
 void TBIJoystick::onUpHoldDownTimer()
 {
-    emit TBIJoystick_Up_Pressed(true);
+
+    if(m_auto_repeat) emit tBIJoystick_Up_Pressed(true);
     m_up_holddown_timer->start(m_autorepeat_timeout);
     if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Joystick Up Pressed";
 }
 
 void TBIJoystick::onDownHoldDownTimer()
 {
-    emit TBIJoystick_Down_Pressed(true);
+    if(m_auto_repeat) emit tBIJoystick_Down_Pressed(true);
     m_down_holddown_timer->start(m_autorepeat_timeout);
     if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Joystick Down Pressed";
 }
 
 void TBIJoystick::onLeftHoldDownTimer()
 {
-    emit TBIJoystick_Left_Pressed(true);
+    if(m_auto_repeat) emit tBIJoystick_Left_Pressed(true);
     m_left_holddown_timer->start(m_autorepeat_timeout);
     if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Joystick Left Pressed";
 }
 
 void TBIJoystick::onRightHoldDownTimer()
 {
-    emit TBIJoystick_Right_Pressed(true);
+    if(m_auto_repeat) emit tBIJoystick_Right_Pressed(true);
     m_right_holddown_timer->start(m_autorepeat_timeout);
     if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Joystick Right Pressed";
 }
 
 void TBIJoystick::onGreenHoldDownTimer()
 {
-    emit TBIJoystick_Green_Pressed(true);
+    if(m_auto_repeat) emit tBIJoystick_Green_Pressed(true);
     m_green_holddown_timer->start(m_autorepeat_timeout);
     if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Green Button Pressed";
 }
 
 void TBIJoystick::onRedHoldDownTimer()
 {
-    emit TBIJoystick_Red_Pressed(true);
+    if(m_auto_repeat) emit tBIJoystick_Red_Pressed(true);
     m_red_holddown_timer->start(m_autorepeat_timeout);
     if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Red Button Pressed";
 }
 
 void TBIJoystick::onBlackHoldDownTimer()
 {
-    emit TBIJoystick_Black_Pressed(true);
+    if(m_auto_repeat) emit tBIJoystick_Black_Pressed(true);
     m_black_holddown_timer->start(m_autorepeat_timeout);
     if(m_showdebug) qDebug() << "TBIJoystick::processStates(): Black Button Pressed";
 }

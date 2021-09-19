@@ -12,6 +12,8 @@
 #include "tbiweld_pipelineprocessingreturntype.h"
 #include "tbiclass_garybasetypes.h"
 #include "tbiclass_serialportcontrollerreturntype.h"
+#include "tbiclass_joystick.h"
+
 //#include "tbilinearransac.h"
 
 using namespace Pylon;
@@ -55,6 +57,7 @@ int main(int argc, char *argv[])
     TBIWeld_ProcessingPipeLineReturnType::declareQML();
     //General Class Types
     SerialPortControllerReturnType::declareQML();
+    //Joystick Event
 
     //The QML Application engine----------------------------------
     QQmlApplicationEngine engine;

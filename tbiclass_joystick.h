@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QVariant>
 #include "tbiclass_microcontrollerstatuspacket.h"
 
 class TBIJoystick : public QObject
@@ -17,6 +18,7 @@ class TBIJoystick : public QObject
     Q_PROPERTY(bool red_state READ getJoyRedState NOTIFY joystickRedStateChanged);
     Q_PROPERTY(bool black_state READ getJoyBlackState NOTIFY joystickBlackStateChanged);
     Q_PROPERTY(bool serial_connection_state READ getSerialConnectionState NOTIFY serialConnectionStateChanged)
+    Q_PROPERTY(bool enable_auto_repeat READ getEnableAutoRepeat WRITE setEnableAutoRepeat NOTIFY enableAutoRepeatChanged)
 
 public:
     explicit TBIJoystick(QObject *parent = nullptr);
@@ -30,6 +32,10 @@ public:
     bool getJoyRedState(){return m_red_state;}
     bool getJoyBlackState(){return m_black_state;}
     bool getSerialConnectionState(){return m_serial_connection_state;}
+    bool getEnableAutoRepeat(){return m_auto_repeat;}
+
+    void setEnableAutoRepeat(bool _state){m_auto_repeat = _state; emit getEnableAutoRepeat();}
+
 
 private:
     void extractFlagstoStates();
@@ -37,12 +43,13 @@ private:
     void updateLastStates();
 
 private:
-    static const bool m_showdebug = true;
+    static const bool m_showdebug = false;
 
     const int m_holddown_interval_timeout = 500;
     const int m_autorepeat_timeout = 50;
     const int m_connection_timeout = 500;
 
+    bool m_auto_repeat;
     bool m_updating_flags;
 
     quint8 m_controller_flags;
@@ -94,6 +101,7 @@ private slots:
     void onBlackHoldDownTimer();
 
 signals:
+    void enableAutoRepeatChanged();
     void serialConnectionStateChanged();
     void joystickUpStateChanged();
     void joystickDownStateChanged();
@@ -103,21 +111,21 @@ signals:
     void joystickRedStateChanged();
     void joystickBlackStateChanged();
 
-    void TBIJoystick_Up_Pressed(QVariant _autorepeat = false);
-    void TBIJoystick_Down_Pressed(QVariant _autorepeat = false);
-    void TBIJoystick_Left_Pressed(QVariant _autorepeat = false);
-    void TBIJoystick_Right_Pressed(QVariant _autorepeat = false);
-    void TBIJoystick_Green_Pressed(QVariant _autorepeat = false);
-    void TBIJoystick_Red_Pressed(QVariant _autorepeat = false);
-    void TBIJoystick_Black_Pressed(QVariant _autorepeat = false);
+    void tBIJoystick_Up_Pressed(bool _autorepeat = false);
+    void tBIJoystick_Down_Pressed(bool _autorepeat = false);
+    void tBIJoystick_Left_Pressed(bool _autorepeat = false);
+    void tBIJoystick_Right_Pressed(bool _autorepeat = false);
+    void tBIJoystick_Green_Pressed(bool _autorepeat = false);
+    void tBIJoystick_Red_Pressed(bool _autorepeat = false);
+    void tBIJoystick_Black_Pressed(bool _autorepeat = false);
 
-    void TBIJoystick_Up_Released();
-    void TBIJoystick_Down_Released();
-    void TBIJoystick_Left_Released();
-    void TBIJoystick_Right_Released();
-    void TBIJoystick_Green_Released();
-    void TBIJoystick_Red_Released();
-    void TBIJoystick_Black_Released();
+    void tBIJoystick_Up_Released();
+    void tBIJoystick_Down_Released();
+    void tBIJoystick_Left_Released();
+    void tBIJoystick_Right_Released();
+    void tBIJoystick_Green_Released();
+    void tBIJoystick_Red_Released();
+    void tBIJoystick_Black_Released();
 };
 
 #endif // TBIJOYSTICK_H
