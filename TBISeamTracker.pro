@@ -13,6 +13,7 @@ SOURCES += \
         tbiclass_datadistributionset.cpp \
         tbiclass_dataset.cpp \
         tbiclass_garybasetypes.cpp \
+        tbiclass_joystick.cpp \
         tbiclass_line.cpp \
         tbiclass_microcontrollerstatuspacket.cpp \
         tbiclass_motorcalibrationcontroller.cpp \
@@ -26,7 +27,6 @@ SOURCES += \
         tbicore_mary.cpp \
         tbicore_max.cpp \
         tbicore_toby.cpp \
-        tbijoystick.cpp \
         tbiparameterclass_gausiandecluster.cpp \
         tbiparameterclass_motioncontrolparams.cpp \
         tbiparameterclass_pyloncameraparams.cpp \

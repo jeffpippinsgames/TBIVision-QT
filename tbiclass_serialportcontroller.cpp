@@ -141,6 +141,7 @@ void SerialPortController::readSerial()
         QByteArray _data = m_serial_port->readAll();
         m_microcontroller_status_packet.fillDataFromSerialRead(_data);
         emit microControllerPacketReady(m_microcontroller_status_packet);
+        emit joystickFlagsReady(m_microcontroller_status_packet.getJoystickFlags());
         acknowledgeStatusPacket();
     }
 }

@@ -60,6 +60,7 @@ private:
 signals:
     void statusChanged();
     void microControllerPacketReady(MicroControllerStatusPacket &_packet);
+    void joystickFlagsReady(quint8 _flags);
 
 };
 

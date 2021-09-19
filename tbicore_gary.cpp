@@ -12,6 +12,7 @@ Description:
 Gary::Gary(QObject *parent) : QObject(parent)
 {
     QObject::connect(&m_serial_port_controller, SIGNAL(microControllerPacketReady(MicroControllerStatusPacket &)), this, SLOT(updateMicroControllerStatusPacket(MicroControllerStatusPacket &)));
+    QObject::connect(&m_serial_port_controller, SIGNAL(joystickFlagsReady(quint8)), &m_joystick, SLOT(updateTBIJoystickState(quint8)));
     emit completed();
     if(m_showdebug) qDebug() << "Gary::Gary() Object Created.";
 }
@@ -49,9 +50,9 @@ void Gary::declareQML()
 void Gary::setRootQMLContextProperties(QQmlApplicationEngine &_engine)
 {
     _engine.rootContext()->setContextProperty("MicroControllerStatusPacket", &m_micro_status_packet);
+    _engine.rootContext()->setContextProperty("TBIJoystick", &m_joystick);
     if(m_showdebug) qDebug() << "Gary::setRootQMLContextProperties(): Registered Gary QML Context Properties.";
 }
-
 
 /**************************************************************
 sendJogStop()
@@ -287,7 +288,7 @@ void Gary::toggleLaserPower()
 void Gary::updateMicroControllerStatusPacket(MicroControllerStatusPacket &_packet)
 {
     _packet.copyStatusPacketTo(m_micro_status_packet);
-    if(true)
+    if(m_showdebug)
     {
         qDebug() << "Gary::updateMicroControllerStatusPacket()";
         qDebug() << "Joystick Flags : " << m_micro_status_packet.getJoystickFlags();

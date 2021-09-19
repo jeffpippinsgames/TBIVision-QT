@@ -15,6 +15,7 @@ import "tbi.vision.components" 1 0
 #include "tbiclass_garybasetypes.h"
 #include "tbiclass_microcontrollerstatuspacket.h"
 #include "tbiclass_serialportcontroller.h"
+#include "tbiclass_joystick.h"
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
@@ -70,6 +71,7 @@ private:
     //Microcontroller Status Packet Manager
     MicroControllerStatusPacket m_micro_status_packet;
     SerialPortController m_serial_port_controller;
+    TBIJoystick m_joystick;
     //-------------------------------------------------------------
 
     //Private Methods----------------------------------------------
