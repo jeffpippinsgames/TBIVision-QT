@@ -16,13 +16,13 @@ Max::Max(QObject *parent) : QObject(parent)
 {
 
     this->setDefautValues();
-    qDebug()<<"Max::Max() Max Object Created.";
+    if(m_showdebug) qDebug()<<"Max::Max() Max Object Created.";
 }
 
 Max::~Max()
 {
     emit this->aboutToDestroy();
-    qDebug()<<"Max::~Max() Max Object Destroyed";
+    if(m_showdebug) qDebug()<<"Max::~Max() Max Object Destroyed";
 }
 
 //The Recieve New CV::Mat Method

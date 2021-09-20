@@ -26,7 +26,7 @@ Toby::Toby(QObject *parent) : QObject(parent)
     QObject::connect(&m_camera_params, SIGNAL(gainChanged()), this, SLOT(onChangeCameraGain()));
     this->setDefautValues();
     initializeCamera();
-    qDebug() << "Toby::Toby() Toby Object Created.";
+    if(m_showdebug) qDebug() << "Toby::Toby() Toby Object Created.";
 }
 
 /**************************************************************
@@ -47,7 +47,7 @@ Toby::~Toby()
         }
         m_camera->DestroyDevice();
     }
-    qDebug() << "Toby::~Toby() Toby Object Destroyed.";
+    if(m_showdebug) qDebug() << "Toby::~Toby() Toby Object Destroyed.";
 }
 
 //Pylon Overloaded onImageGrabbed Method
@@ -81,7 +81,7 @@ QString Toby::getCameraInfo()
 {
     if(!isCameraInitialized())
     {
-        qDebug() << "Toby::getCameraInfo() called without camera being initialized.";
+        if(m_showdebug) qDebug() << "Toby::getCameraInfo() called without camera being initialized.";
         return QString("No Camera Initialized.");
     }
     CDeviceInfo _deviceinfo = m_camera->GetDeviceInfo();
@@ -105,7 +105,7 @@ bool Toby::SetCameraSettingsacA800()
 
     if(!isCameraInitialized())
     {
-        qDebug() << "Toby::SetCameraSettings() called without a camera being initialized.";
+        if(m_showdebug) qDebug() << "Toby::SetCameraSettings() called without a camera being initialized.";
         return false;
     }
 
@@ -169,11 +169,11 @@ bool Toby::SetCameraSettingsacA800()
     catch(const GenericException &e)
     {
         QString _error = e.GetDescription();
-        qDebug() << "Toby:: Error in SetCameraSettingsacA800(): " + _error;
+        if(m_showdebug) qDebug() << "Toby:: Error in SetCameraSettingsacA800(): " + _error;
         return false;
     }
 
-    qDebug() << "Toby:: SetCameraSettingsacA800() finished. Camera Settings Have Been Set.";
+    if(m_showdebug) qDebug() << "Toby:: SetCameraSettingsacA800() finished. Camera Settings Have Been Set.";
     return true;
 }
 
@@ -184,7 +184,7 @@ bool Toby::SetCameraSettingsacA720()
 
     if(!isCameraInitialized())
     {
-        qDebug() << "Toby::SetCameraSettings() called without a camera being initialized.";
+        if(m_showdebug) qDebug() << "Toby::SetCameraSettings() called without a camera being initialized.";
         return false;
     }
 
@@ -248,11 +248,11 @@ bool Toby::SetCameraSettingsacA720()
     catch(const GenericException &e)
     {
         QString _error = e.GetDescription();
-        qDebug() << "Toby:: Error in SetCameraSettingsacA720(): " + _error;
+        if(m_showdebug) qDebug() << "Toby:: Error in SetCameraSettingsacA720(): " + _error;
         return false;
     }
 
-    qDebug() << "Toby:: SetCameraSettingsacA720() finished. Camera Settings Have Been Set.";
+    if(m_showdebug) qDebug() << "Toby:: SetCameraSettingsacA720() finished. Camera Settings Have Been Set.";
     return true;
 }
 
@@ -297,7 +297,7 @@ void Toby::onChangeCameraExposure()
 
     if(!isCameraInitialized())
     {
-        qDebug() << "Toby::onChangeCameraExposure() called without camera being initialized.";
+        if(m_showdebug) qDebug() << "Toby::onChangeCameraExposure() called without camera being initialized.";
         return;
     }
 
@@ -310,7 +310,7 @@ void Toby::onChangeCameraExposure()
     catch(const GenericException &e)
     {
         QString _error = e.GetDescription();
-        qDebug() << "Toby:: Error in onChangeCameraExposure: " + _error;
+        if(m_showdebug) qDebug() << "Toby:: Error in onChangeCameraExposure: " + _error;
     }
 
 }
@@ -327,7 +327,7 @@ void Toby::onChangeCameraGain()
 
     if(!isCameraInitialized())
     {
-        qDebug() << "Toby::onChangeCameraGain() called without camera being initialized.";
+        if(m_showdebug) qDebug() << "Toby::onChangeCameraGain() called without camera being initialized.";
         return;
     }
 
@@ -341,7 +341,7 @@ void Toby::onChangeCameraGain()
     catch(const GenericException &e)
     {
         //QString _error = e.GetDescription();
-        //qDebug() << "Toby:: Error in onChangeCameraGain: " + _error;
+        //if(m_showdebug) qDebug() << "Toby:: Error in onChangeCameraGain: " + _error;
     }
 */
 }
@@ -399,14 +399,14 @@ void Toby::openStillImagetoProcess(QString _filename)
         emit emitProcessingStillImageChanged();
         break;
     default:
-        qDebug() << "Toby: openStillImagetoProcess() cannot process the image file " << _filename;
+        if(m_showdebug) qDebug() << "Toby: openStillImagetoProcess() cannot process the image file " << _filename;
         return;
         break;
 
     }
 
 
-    qDebug() << "Toby: openStillImagetoProcess() Called. m_processing_debug_image = true. Now Processsing " << _filename;
+   if(m_showdebug) qDebug() << "Toby: openStillImagetoProcess() Called. m_processing_debug_image = true. Now Processsing " << _filename;
 
 }
 
@@ -416,7 +416,7 @@ void Toby::closeStillImagetoProcess()
     {
         m_processsing_debug_image = false;
         emit emitProcessingStillImageChanged();
-        qDebug() << "Toby: closeStillImagetoProcess() Called. m_processing_debug_image = false";
+        if(m_showdebug) qDebug() << "Toby: closeStillImagetoProcess() Called. m_processing_debug_image = false";
     }
 }
 
@@ -426,7 +426,7 @@ void Toby::updateStillImageFileList()
     QDir _dir(qApp->applicationDirPath() + "/stills");
     if(!_dir.exists())
     {
-        qDebug() << "Toby: Error in updateDtillImageFileList(). the /stills directory does not exsist.";
+        if(m_showdebug) qDebug() << "Toby: Error in updateDtillImageFileList(). the /stills directory does not exsist.";
         return;
     }
     QStringList _filenamefilters;
@@ -460,34 +460,34 @@ bool Toby::initializeCamera()
             m_camera->Open();
             CDeviceInfo _deviceinfo = m_camera->GetDeviceInfo();
             m_camera_params.setCameraName(QString(_deviceinfo.GetFriendlyName().c_str()));
-            qDebug() << m_camera_params.getCameraName() << " has been opened.";
+            if(m_showdebug) qDebug() << m_camera_params.getCameraName() << " has been opened.";
             if(m_camera_params.getCameraName().contains("acA800", Qt::CaseInsensitive))
             {
                 SetCameraSettingsacA800();
-                qDebug() << "Settings Have Been Applied to the Basler acA800-200gm GigE Camera.";
+                if(m_showdebug) qDebug() << "Settings Have Been Applied to the Basler acA800-200gm GigE Camera.";
             }
             if(m_camera_params.getCameraName().contains("acA720", Qt::CaseInsensitive))
             {
                 SetCameraSettingsacA720();
-                qDebug() << "Settings Have Been Applied to the Basler acA720-280gm GigE Camera.";
+                if(m_showdebug) qDebug() << "Settings Have Been Applied to the Basler acA720-280gm GigE Camera.";
             }
             m_camera->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
             //m_camera->RegisterConfiguration(new Pylon::CAcquireContinuousConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
             //m_camera->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
-            qDebug()<<"Toby::initializeCamera(): Camera Opened and Configured: ";
+            if(m_showdebug) qDebug()<<"Toby::initializeCamera(): Camera Opened and Configured: ";
         }
         catch(const Pylon::GenericException e)
         {
-            qDebug()<<"Toby::initializeCamera() Pylon Error: " << e.GetDescription();
+            if(m_showdebug) qDebug()<<"Toby::initializeCamera() Pylon Error: " << e.GetDescription();
             return false;
         }
         emit cameraInitialized();
-        qDebug()<<"Toby::initializeCamera(): Camera Initialization Complete: ";
+        if(m_showdebug) qDebug()<<"Toby::initializeCamera(): Camera Initialization Complete: ";
         return true;
     }
     else
     {
-        qDebug() << "Toby::initializeCamera() called without camera being initialized.";
+        if(m_showdebug) qDebug() << "Toby::initializeCamera() called without camera being initialized.";
         return false;
     }
     return true;
@@ -501,17 +501,17 @@ Description:
  **************************************************************/
 void Toby::startCamera()
 {
-    qDebug() << "startCamera() Called";
+    if(m_showdebug) qDebug() << "startCamera() Called";
     if(!isCameraInitialized())
     {
-        qDebug() << "Toby::startCamera() called without camera being initialized";
+        if(m_showdebug) qDebug() << "Toby::startCamera() called without camera being initialized";
         return;
     }
 
 
     if(m_camera->IsGrabbing())
     {
-        qDebug() << "Toby::startCamera() called with camera already grabbing";
+        if(m_showdebug) qDebug() << "Toby::startCamera() called with camera already grabbing";
         return;
     }
     try
@@ -521,11 +521,11 @@ void Toby::startCamera()
     }
     catch(const Pylon::GenericException e)
     {
-        qDebug() << "Toby::startCamera(): Pylon Error: FFFF" << e.GetDescription();
+        if(m_showdebug) qDebug() << "Toby::startCamera(): Pylon Error: FFFF" << e.GetDescription();
         m_camera = nullptr;
         return;
     }
-    qDebug() << "Toby::startCamera(): Camera has been turned on.";
+    if(m_showdebug) qDebug() << "Toby::startCamera(): Camera has been turned on.";
     emit cameraTurnedOn();
     emit emitProcessingCameraChanged();
 
@@ -542,13 +542,13 @@ void Toby::stopCamera()
 
     if(!isCameraInitialized())
     {
-        qDebug() << "Toby: turnOffCamera() called without the camera being initialized.";
+        if(m_showdebug) qDebug() << "Toby: turnOffCamera() called without the camera being initialized.";
         return;
     }
 
     if(!isCameraOn())
     {
-        qDebug() << "Toby: turnOffCamera() called. Camera is already off.";
+        if(m_showdebug) qDebug() << "Toby: turnOffCamera() called. Camera is already off.";
         return;
     }
 
@@ -557,7 +557,7 @@ void Toby::stopCamera()
     {
         m_camera->StopGrabbing();
     }
-    qDebug() << "Toby: turnOffCamera(). Camera has been turned off.";
+    if(m_showdebug) qDebug() << "Toby: turnOffCamera(). Camera has been turned off.";
     emit cameraTurnedOff();
     emit emitProcessingCameraChanged();
 }
@@ -616,19 +616,19 @@ void Toby::triggerNextFrame()
 
         if(!m_camera->IsOpen())
         {
-            qDebug() << "Toby: triggerCamera() called without camera being opened.";
+            if(m_showdebug) qDebug() << "Toby: triggerCamera() called without camera being opened.";
             return;
         }
         if(!m_camera->IsGrabbing())
         {
-            qDebug() << "Toby: triggerCamera() called while camera was not grabbing.";
+            if(m_showdebug) qDebug() << "Toby: triggerCamera() called while camera was not grabbing.";
             return;
         }
         if (m_camera->WaitForFrameTriggerReady( 1000, TimeoutHandling_ThrowException ))
         {
 
            m_camera->ExecuteSoftwareTrigger();
-            //qDebug() << "Camera Software Trigger Tripped";
+           if(m_showdebug) qDebug() << "Camera Software Trigger Tripped";
         }
     }
 }

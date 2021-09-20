@@ -317,6 +317,29 @@ Item
 
     }
 
+    //X Axis Motor Status
+    MotorStatusObject
+    {
+        id: xaxisstatusId
+        axisname: "X Axis"
+        position: MicroControllerStatusPacket.xPosition
+        microcontrollermotionstatus: MicroControllerStatusPacket.xMotionStatus
+        x: viewbackgroundrectId.width+5
+        y: 10
+    }
+
+    //Z Axis Motor Status
+    MotorStatusObject
+    {
+        id: zaxisstatusId
+        axisname: "Z Axis"
+        position: MicroControllerStatusPacket.zPosition
+        microcontrollermotionstatus: MicroControllerStatusPacket.zMotionStatus
+        x: xaxisstatusId.x + xaxisstatusId.width + 5
+        y: 10
+    }
+
+    //Control Mode Rect
     Rectangle
     {
         id: controlmoderectId
@@ -325,7 +348,7 @@ Item
         border.width: 3
         border.color: Qt.rgba(.8, .8, .0, .7)
         x:viewbackgroundrectId.width+5
-        y:10
+        y:xaxisstatusId.y + xaxisstatusId.height + 20
         width: 450
         height: 100
 

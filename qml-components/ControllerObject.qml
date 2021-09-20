@@ -18,7 +18,7 @@ FocusScope {
     readonly property int rightbutton: Qt.Key_Right
     readonly property int nobutton: 0
 
-    readonly property bool showdebug: true
+    readonly property bool showdebug: false
 
     property int currentlyheldbutton: 0
 
@@ -113,60 +113,60 @@ FocusScope {
     {
         target: TBIJoystick
 
-        onTBIJoystick_Up_Pressed:
+        function onTBIJoystick_Up_Pressed(_autorepeat)
         {
             if(rootcomponentId.focus) rootcomponentId.onTBIJoystickUp_Pressed(_autorepeat);
         }
-        onTBIJoystick_Down_Pressed:
+        function onTBIJoystick_Down_Pressed(_autorepeat)
         {
             if(rootcomponentId.focus) rootcomponentId.onTBIJoystickDown_Pressed(_autorepeat);
         }
-        onTBIJoystick_Left_Pressed:
+        function onTBIJoystick_Left_Pressed(_autorepeat)
         {
             if(rootcomponentId.focus) rootcomponentId.onTBIJoystickLeft_Pressed(_autorepeat);
         }
-        onTBIJoystick_Right_Pressed:
+        function onTBIJoystick_Right_Pressed(_autorepeat)
         {
             if(rootcomponentId.focus) rootcomponentId.onTBIJoystickRight_Pressed(_autorepeat);
         }
-        onTBIJoystick_Green_Pressed:
+        function onTBIJoystick_Green_Pressed(_autorepeat)
         {
             if(rootcomponentId.focus) rootcomponentId.onTBIJoystickGreen_Pressed(_autorepeat);
         }
-        onTBIJoystick_Red_Pressed:
+        function onTBIJoystick_Red_Pressed(_autorepeat)
         {
             if(rootcomponentId.focus) rootcomponentId.onTBIJoystickRed_Pressed(_autorepeat);
         }
-        onTBIJoystick_Black_Pressed:
+        function onTBIJoystick_Black_Pressed(_autorepeat)
         {
             if(rootcomponentId.focus) rootcomponentId.onTBIJoystickBlack_Pressed(_autorepeat);
         }
 
-        onTBIJoystick_Up_Released:
+        function onTBIJoystick_Up_Released()
         {
             if(rootcomponentId.focus) rootcomponentId.onTBIJoystickUp_Released();
         }
-        onTBIJoystick_Down_Released:
+        function onTBIJoystick_Down_Released()
         {
             if(rootcomponentId.focus) rootcomponentId.onTBIJoystickDown_Released();
         }
-        onTBIJoystick_Left_Released:
+        function onTBIJoystick_Left_Released()
         {
             if(rootcomponentId.focus) rootcomponentId.onTBIJoystickLeft_Released();
         }
-        onTBIJoystick_Right_Released:
+        function onTBIJoystick_Right_Released()
         {
             if(rootcomponentId.focus) rootcomponentId.onTBIJoystickRight_Released();
         }
-        onTBIJoystick_Green_Released:
+        function onTBIJoystick_Green_Released()
         {
             if(rootcomponentId.focus) rootcomponentId.onTBIJoystickGreen_Released();
         }
-        onTBIJoystick_Red_Released:
+        function onTBIJoystick_Red_Released()
         {
             if(rootcomponentId.focus) rootcomponentId.onTBIJoystickRed_Released();
         }
-        onTBIJoystick_Black_Released:
+        function onTBIJoystick_Black_Released()
         {
             if(rootcomponentId.focus) rootcomponentId.onTBIJoystickBlack_Released();
         }

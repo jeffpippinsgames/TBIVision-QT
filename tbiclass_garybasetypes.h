@@ -143,11 +143,7 @@ public:
                          TBI_MOTION_STATUS_JOGGING = 0x02,
                          TBI_MOTION_STATUS_GENERAL_ERROR = 0x03,
                          TBI_MOTION_STATUS_LIMIT_TRIPPED = 0x04,
-                         TBI_MOTION_STATUS_HOMING = 0x05,
-                         TBI_MOTION_STATUS_AWAITING_IDLE = 0x50,
-                         TBI_MOTION_STATUS_AWAITING_MOVING =0x51,
-                         TBI_MOTION_STATUS_AWAITING_JOGGING = 0x52,
-                         TBI_MOTION_STATUS_AWAITING_NONE = 0x99};
+                         TBI_MOTION_STATUS_HOMING = 0x05};
 
     Q_ENUMS(MotionStatus_t)
     static void declareQML()

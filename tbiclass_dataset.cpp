@@ -80,8 +80,6 @@ void TBIDataSet::eraseFromMat(cv::Mat &_dst)
         int _matindexc1 = 0;
         int _matindexc2 = 0;
         int _matindexc3 = 0;
-
-        //value = pImgData[img.channels() * (img.cols * row + column) + channel];
         do
         {
             _matindexc1 = _matchannels * (_dst.cols * m_pnts[_pntindex].m_y + m_pnts[_pntindex].m_x) + 0;

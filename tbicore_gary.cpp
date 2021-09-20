@@ -51,6 +51,7 @@ void Gary::setRootQMLContextProperties(QQmlApplicationEngine &_engine)
 {
     _engine.rootContext()->setContextProperty("MicroControllerStatusPacket", &m_micro_status_packet);
     _engine.rootContext()->setContextProperty("TBIJoystick", &m_joystick);
+    _engine.rootContext()->setContextProperty("SerialPortController", &m_serial_port_controller);
     if(m_showdebug) qDebug() << "Gary::setRootQMLContextProperties(): Registered Gary QML Context Properties.";
 }
 
@@ -176,7 +177,6 @@ Description:
  **************************************************************/
 void Gary::autoMoveZAxis(qint32 _steps)
 {
-    qDebug() << "m_micro_status_packet = " << m_micro_status_packet.isZMotionStatusIdle();
     if(!m_micro_status_packet.isZMotionStatusIdle()) return;
 
     QByteArray _cmd;

@@ -19,6 +19,7 @@ Window {
     flags: Qt.FramelessWindowHint
 
     property var page: null
+    readonly property bool showdebug: false
 
     function openPage(_page)
     {
@@ -48,11 +49,11 @@ Window {
             {
                 page.grabFocus(); //Send Focus
                 page.destroyPage.connect(destroyPage); //Connect The Destruction
-                console.log(page.pagename + " is Being Created.");
+                if(rootId.showdebug) console.log(page.pagename + " is Being Created.");
             }
             else
             {
-                console.log("main.qml: failed to create page.");
+                if(rootId.showdebug) console.log("main.qml: failed to create page.");
             }
 
         }
@@ -60,7 +61,7 @@ Window {
 
     function destroyPage(_transition_page)
     {
-        console.log(page.pagename + " is Being Destroyed.")
+        if(rootId.showdebug) console.log(page.pagename + " is Being Destroyed.")
         page.destroy();
         page = null;
         openPage(_transition_page);

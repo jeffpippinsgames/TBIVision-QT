@@ -21,6 +21,7 @@ public:
     }
 
 private:
+    const bool m_show_debug = false;
     int m_data[TBIConstants::Max_Camera_Width];
     int m_size;
 };

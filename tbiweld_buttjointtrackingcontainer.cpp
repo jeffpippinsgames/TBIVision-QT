@@ -41,7 +41,7 @@ int TBIWeld_ButtJointTrackingContainer::getZTrackingDifference()
 {
 
     int _diff = m_tracking_point.m_y - m_track_to_point.m_y;
-    qDebug() << "TBIWeld_ButtJointTrackingContainer::getZTrackingDifference(): _diff = " << _diff;
+    if(m_showdebug) qDebug() << "TBIWeld_ButtJointTrackingContainer::getZTrackingDifference(): _diff = " << _diff;
     if(abs(_diff) < m_tracking_boundary) return 0;
     return _diff;
 }

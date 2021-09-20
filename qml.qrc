@@ -76,5 +76,13 @@
         <file>qml-components/empty_qml.qml</file>
         <file>qml-dialogs/StillImageFileOpenDialog.qml</file>
         <file>qml-pages/ButtJointImageProcessingSettingsPage.qml</file>
+        <file>Icons/Motor2.png</file>
+        <file>qml-components/MotorStatusObject.qml</file>
+        <file>Fonts/Calculator.ttf</file>
+        <file>qml-components/ControlModeStatusObject.qml</file>
+        <file>Icons/automaticmode.png</file>
+        <file>Icons/manualmode.png</file>
+        <file>Icons/heightonlymode.png</file>
+        <file>Icons/calibrationmode.png</file>
     </qresource>
 </RCC>

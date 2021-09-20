@@ -13,27 +13,7 @@ MicroControllerStatusPacket::MicroControllerStatusPacket(QObject *parent) : QObj
     m_status_packet_guid = 0;
     m_motor_calib_cycle = GaryMotorCalibrationCycleStatus::TBI_MOTORCAL_OFF;
     m_joystick_flags = 0;
-    m_awaiting_control_mode = GaryControlMode::TBI_CONTROL_MODE_AWAITING_NONE;
-    m_awaiting_x_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_NONE;
-    m_awaiting_z_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_NONE;
-}
 
-void MicroControllerStatusPacket::setAwaitingXMotionStatus(GaryMotionStatus::MotionStatus_t _status)
-{
-    if(_status < GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_IDLE) return;
-    m_awaiting_x_motion_status = _status;
-}
-
-void MicroControllerStatusPacket::setAwaitingZMotionStatus(GaryMotionStatus::MotionStatus_t _status)
-{
-    if(_status < GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_IDLE) return;
-    m_awaiting_z_motion_status = _status;
-}
-
-void MicroControllerStatusPacket::setAwatingControlMode(GaryControlMode::ControlMode_t _mode)
-{
-    if(_mode < GaryControlMode::TBI_CONTROL_MODE_AWAITING_MANUAL) return;
-    m_awaiting_control_mode = _mode;
 }
 
 void MicroControllerStatusPacket::fillDataFromSerialRead(QByteArray &_data)
@@ -101,108 +81,10 @@ void MicroControllerStatusPacket::fillDataFromSerialRead(QByteArray &_data)
         qDebug() << "Motor Calibration Cycle: " << m_motor_calib_cycle;
         qDebug() << "Joystick Flags: " << m_joystick_flags;
         qDebug() << "-------------------------------------------------------";
-        qDebug() << "Awaiting Control Mode: " << m_awaiting_control_mode;
-        qDebug() << "Awaiting X MotionStatus: " << m_awaiting_x_motion_status;
-        qDebug() << "Awaiting Z MotionStatus: " << m_awaiting_z_motion_status;
-        qDebug() << "-------------------------------------------------------";
         qDebug() << "QByteArray _data = " << _data.toHex(',');
         qDebug() << "-------------------------------------------------------";
     }
 
-    /*
-    if(_readxmotionstatus == GaryMotionStatus::TBI_MOTION_STATUS_IDLE)
-    {
-        m_x_motion_status = _readxmotionstatus;
-        m_awaiting_x_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_NONE;
-    }
-
-    if(_readzmotionstatus == GaryMotionStatus::TBI_MOTION_STATUS_IDLE)
-    {
-       m_z_motion_status = _readzmotionstatus;
-       m_awaiting_z_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_NONE;
-    }
-
-
-    switch(m_awaiting_control_mode)
-    {
-        case GaryControlMode::TBI_CONTROL_MODE_AWAITING_NONE:
-            m_control_mode = _readcontrolmode;
-        break;
-        case GaryControlMode::TBI_CONTROL_MODE_AWAITING_MANUAL:
-                if(_readcontrolmode == GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE)
-                {
-                    m_control_mode = GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE;
-                    m_awaiting_control_mode = GaryControlMode::TBI_CONTROL_MODE_AWAITING_NONE;
-                }
-        break;
-        case GaryControlMode::TBI_CONTROL_MODE_AWAITING_HEIGHTONLY:
-            if(_readcontrolmode == GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY)
-            {
-                m_control_mode = GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY;
-                m_awaiting_control_mode = GaryControlMode::TBI_CONTROL_MODE_AWAITING_NONE;
-            }
-            break;
-        case GaryControlMode::TBI_CONTROL_MODE_AWAITING_FULLAUTO:
-            if(_readcontrolmode == GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE)
-            {
-                m_control_mode = GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE;
-                m_awaiting_control_mode = GaryControlMode::TBI_CONTROL_MODE_AWAITING_NONE;
-            }
-            break;
-        default:
-            break;
-    }
-
-    switch(m_awaiting_x_motion_status)
-    {
-        case GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_JOGGING:
-            if(_readxmotionstatus == GaryMotionStatus::TBI_MOTION_STATUS_JOGGING)
-            {
-                m_x_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_JOGGING;
-                m_awaiting_x_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_NONE;
-            }
-        break;
-        case GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_MOVING:
-            if(_readxmotionstatus == GaryMotionStatus::TBI_MOTION_STATUS_MOVING)
-            {
-                m_x_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_MOVING;
-                m_awaiting_x_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_NONE;
-            }
-        break;
-        default:
-        break;
-    }
-
-    switch(m_awaiting_z_motion_status)
-    {
-        case GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_NONE:
-            m_z_motion_status = _readzmotionstatus;
-        break;
-        case GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_IDLE:
-            if(_readzmotionstatus == GaryMotionStatus::TBI_MOTION_STATUS_IDLE)
-            {
-                m_z_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_IDLE;
-                m_awaiting_z_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_NONE;
-            }
-        break;
-        case GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_JOGGING:
-            if(_readzmotionstatus == GaryMotionStatus::TBI_MOTION_STATUS_JOGGING)
-            {
-                m_z_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_JOGGING;
-                m_awaiting_z_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_NONE;
-            }
-        break;
-        case GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_MOVING:
-            if(_readzmotionstatus == GaryMotionStatus::TBI_MOTION_STATUS_MOVING)
-            {
-                m_z_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_MOVING;
-                m_awaiting_z_motion_status = GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_NONE;
-            }
-        break;
-        default:
-        break;
-    }
-*/
     emit xMotionStatusChanged();
     emit zMotionStatusChanged();
     emit xPositionChanged();

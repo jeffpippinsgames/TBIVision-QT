@@ -29,6 +29,7 @@ public:
 signals:
 
 private:
+    const bool m_showdebug = false;
     TBIPoint_Int m_tracking_point;
     TBIPoint_Int m_track_to_point;
 

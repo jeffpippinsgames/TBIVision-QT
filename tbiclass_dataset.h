@@ -108,6 +108,7 @@ public:
 
 
 private:
+    const bool m_showdebug = false;
     static const int Mat_Max_Width = TBIConstants::Max_Camera_Width;
     static const int Mat_Max_Height = TBIConstants::Max_Camera_Height;
     static const int Largest_DataSet_Size = Mat_Max_Width*Mat_Max_Height;

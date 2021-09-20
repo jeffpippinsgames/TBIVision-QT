@@ -59,6 +59,7 @@ signals:
 public slots:
 
 private:
+    const bool m_show_debug = false;
     Max *m_max;
     Toby *m_toby;
     Gary *m_gary;

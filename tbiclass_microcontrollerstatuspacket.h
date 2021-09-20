@@ -54,9 +54,6 @@ public:
     quint8 getJoystickFlags(){return m_joystick_flags;}
     qint32 getXPosition(){return m_x_position;}
     qint32 getZPosition(){return m_z_position;}
-    void setAwaitingXMotionStatus(GaryMotionStatus::MotionStatus_t _status);
-    void setAwaitingZMotionStatus(GaryMotionStatus::MotionStatus_t _status);
-    void setAwatingControlMode(GaryControlMode::ControlMode_t _mode);
     void fillDataFromSerialRead(QByteArray &_data);
     void copyStatusPacketTo(MicroControllerStatusPacket &_packet);
 
@@ -78,10 +75,6 @@ private:
     GaryMotorCalibrationCycleStatus::MotorCalibration_Cycle_t m_motor_calib_cycle;
     quint32 m_x_position;
     quint32 m_z_position;
-
-    GaryMotionStatus::MotionStatus_t m_awaiting_x_motion_status;
-    GaryMotionStatus::MotionStatus_t m_awaiting_z_motion_status;
-    GaryControlMode::ControlMode_t m_awaiting_control_mode;
 
     const bool m_show_debug = false;
 

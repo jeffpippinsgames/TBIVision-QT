@@ -77,6 +77,7 @@ public:
 
 private:
     //Still Image Data Member
+    const bool m_showdebug = false;
     cv::Mat m_still_debug_image;
     QStringList m_still_file_names;
     bool m_processsing_debug_image;

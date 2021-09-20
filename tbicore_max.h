@@ -107,6 +107,7 @@ private:
     void processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet);
     void processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet);
 
+    const bool m_showdebug = false;
     Gary *m_gary;
     bool m_in_proccesing_loop;
 

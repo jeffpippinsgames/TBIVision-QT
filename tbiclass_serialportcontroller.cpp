@@ -10,6 +10,7 @@ SerialPortController::SerialPortController (QObject *parent) : QObject(parent)
     m_port_reconnection_timer->setInterval(200);
     QObject::connect(m_port_reconnection_timer, SIGNAL(timeout()), this, SLOT(onReconnectTimer()));
 
+    m_isconnected = false;
     this->openMicroControllerPort();
 }
 
@@ -97,6 +98,8 @@ SerialPortControllerReturnType::SerialControllerReturnType_t SerialPortControlle
                     QObject::connect(m_serial_port, SIGNAL(errorOccurred(QSerialPort::SerialPortError)), this, SLOT(onSerialPortError(QSerialPort::SerialPortError)));
                     if(m_serial_port->open(QIODevice::ReadWrite))
                     {
+                        m_isconnected = true;
+                        emit connectionChanged();
                         m_microcontroller_heartbeat_timer->start();
                         acknowledgeStatusPacket();
                         if(m_showdebug) qDebug() << "SerialPortControllerReturnType::openMicroControllerPort() Serial Port Opened.";
@@ -176,8 +179,11 @@ void SerialPortController::onSerialPortError(QSerialPort::SerialPortError _error
                 if(m_serial_port->isOpen())
                 {
                     m_serial_port->close();
+
                 }
             }
+            m_isconnected = false;
+            emit connectionChanged();
             activateReConnectionTimerIfNeeded();
             setStatus("Serial Port Resource Error.");
         break;

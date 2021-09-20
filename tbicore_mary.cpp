@@ -10,7 +10,7 @@ Description:
 Mary::Mary(QObject *parent) : QObject(parent)
 {
 
-    qDebug() << "Mary::Mary() Mary Object Created.";
+    if(m_show_debug) qDebug() << "Mary::Mary() Mary Object Created.";
 
 }
 
@@ -22,7 +22,7 @@ Description:
 **************************************************************/
 Mary::~Mary()
 {
-    qDebug() << "Mary::~Mary Mary Object Destroyed.";
+    if(m_show_debug) qDebug() << "Mary::~Mary Mary Object Destroyed.";
 }
 
 /**************************************************************
@@ -54,7 +54,7 @@ void Mary::saveSettingsToDefaultFile()
 
     _ds.setVersion(QDataStream::Qt_5_12);
     _savefile.close();
-    qDebug() << "Mary::saveMaryToFile() Settings Saved To " << _filepath;
+    if(m_show_debug) qDebug() << "Mary::saveMaryToFile() Settings Saved To " << _filepath;
 }
 
 /**************************************************************
@@ -69,7 +69,7 @@ void Mary::loadSettingsFromDefaultFile()
     QFile _savefile(_filepath);
     if(!_savefile.exists())
     {
-        qDebug("Mary::loadMaryFromFile() marydefualt.tbi Does Not Exsist. Loading Default Values.");
+        if(m_show_debug) qDebug("Mary::loadMaryFromFile() marydefualt.tbi Does Not Exsist. Loading Default Values.");
         return;
     }
     _savefile.open(QIODevice::ReadOnly);
@@ -77,5 +77,5 @@ void Mary::loadSettingsFromDefaultFile()
     m_max->loadFromFile(_ds);
     m_toby->loadFromFile(_ds);
     _savefile.close();
-    qDebug("Mary::loadMaryFromFile() marydefualt.tbi Loaded.");
+    if(m_show_debug) qDebug("Mary::loadMaryFromFile() marydefualt.tbi Loaded.");
 }

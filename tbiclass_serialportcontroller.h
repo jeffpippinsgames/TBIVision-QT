@@ -15,6 +15,7 @@ class SerialPortController : public QObject
     Q_OBJECT
 
     Q_PROPERTY(QString status READ getStatus  NOTIFY statusChanged)
+    Q_PROPERTY(bool isconnected READ getIsConnected NOTIFY connectionChanged)
 
 public:
     explicit SerialPortController (QObject *parent = nullptr);
@@ -30,6 +31,7 @@ private:
     void activateReConnectionTimerIfNeeded();
     SerialPortControllerReturnType::SerialControllerReturnType_t openMicroControllerPort(quint16 _vendorid = m_arduino_uno_vendorID, quint16 _productid = m_arduino_uno_productID);
     SerialPortControllerReturnType::SerialControllerReturnType_t acknowledgeStatusPacket();
+    bool getIsConnected(){return m_isconnected;}
 
 private slots:
     void readSerial();
@@ -54,10 +56,12 @@ private:
     QTimer *m_microcontroller_heartbeat_timer;
 
     QString m_status;
+    bool m_isconnected;
 
     MicroControllerStatusPacket m_microcontroller_status_packet;
 
 signals:
+    void connectionChanged();
     void statusChanged();
     void microControllerPacketReady(MicroControllerStatusPacket &_packet);
     void joystickFlagsReady(quint8 _flags);
