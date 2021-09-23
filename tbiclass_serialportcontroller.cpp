@@ -3,7 +3,8 @@
 SerialPortController::SerialPortController (QObject *parent) : QObject(parent)
 {
     m_microcontroller_heartbeat_timer = new QTimer(this);
-    m_microcontroller_heartbeat_timer->setInterval(100);
+    m_microcontroller_heartbeat_timer->setInterval(200);
+    m_microcontroller_heartbeat_timer->setSingleShot(true);
     QObject::connect(m_microcontroller_heartbeat_timer, SIGNAL(timeout()), this, SLOT(onSendMicroControllerHeartbeat()));
 
     m_port_reconnection_timer = new QTimer(this);
@@ -154,24 +155,34 @@ void SerialPortController::onSerialPortError(QSerialPort::SerialPortError _error
     switch(_error)
     {
         case QSerialPort::NoError:
+            if(m_showserialerrors) qDebug() << "SerialPortController::onSerialPortError(): Serial Port No Error: " << _error;
         break;
         case QSerialPort::DeviceNotFoundError:
+            if(m_showserialerrors) qDebug() << "SerialPortController::onSerialPortError(): Serial Port Device Not Found Error: " << _error;
         break;
         case QSerialPort::PermissionError:
+            if(m_showserialerrors) qDebug() << "SerialPortController::onSerialPortError(): Serial Port Permission Error: " << _error;
         break;
         case QSerialPort::OpenError:
+            if(m_showserialerrors) qDebug() << "SerialPortController::onSerialPortError(): Serial Port Open Error: " << _error;
         break;
         case QSerialPort::NotOpenError:
+            if(m_showserialerrors) qDebug() << "SerialPortController::onSerialPortError(): Serial Port Not Open Error: " << _error;
         break;
         case QSerialPort::ParityError:
+            if(m_showserialerrors) qDebug() << "SerialPortController::onSerialPortError(): Serial Port Parity Error: " << _error;
         break;
         case QSerialPort::FramingError:
+            if(m_showserialerrors) qDebug() << "SerialPortController::onSerialPortError(): Serial Port Framing Error: " << _error;
         break;
         case QSerialPort::BreakConditionError:
+            if(m_showserialerrors) qDebug() << "SerialPortController::onSerialPortError(): Serial Port Break Condition Error: " << _error;
         break;
         case QSerialPort::WriteError:
+            if(m_showserialerrors) qDebug() << "SerialPortController::onSerialPortError(): Serial Port Write Error: " << _error;
         break;
         case QSerialPort::ReadError:
+            if(m_showserialerrors) qDebug() << "SerialPortController::onSerialPortError(): Serial Port Read Error: " << _error;
         break;
         case QSerialPort::ResourceError:
             if(m_serial_port)
@@ -185,17 +196,21 @@ void SerialPortController::onSerialPortError(QSerialPort::SerialPortError _error
             m_isconnected = false;
             emit connectionChanged();
             activateReConnectionTimerIfNeeded();
+            if(m_showserialerrors) qDebug() << "SerialPortController::onSerialPortError(): Serial Port Resource Error: " << _error;
             setStatus("Serial Port Resource Error.");
         break;
         case QSerialPort::UnsupportedOperationError:
+            if(m_showserialerrors) qDebug() << "SerialPortController::onSerialPortError(): Serial Port Unsupported Operation Error: " << _error;
         break;
         case QSerialPort::TimeoutError:
+            if(m_showserialerrors) qDebug() << "SerialPortController::onSerialPortError(): Serial Port Timeout Error: " << _error;
         break;
         case QSerialPort::UnknownError:
+            if(m_showserialerrors) qDebug() << "SerialPortController::onSerialPortError(): Serial Port Unknown Error: " << _error;
         break;
     }
 
-    qDebug() << "SerialPortController::onSerialPortError(): Serial Port Error: " << _error;
+
 }
 
 void SerialPortController::onReconnectTimer()
@@ -208,4 +223,5 @@ void SerialPortController::onSendMicroControllerHeartbeat()
     QByteArray _cmd;
     _cmd.append(char(GaryCommands::TBI_CMD_KEEP_ALIVE));
     sendSerialCommand(_cmd);
+    m_microcontroller_heartbeat_timer->start();
 }

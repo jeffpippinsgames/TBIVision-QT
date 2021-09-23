@@ -19,9 +19,11 @@ class TBIPylonCameraParamers : public QObject
     Q_PROPERTY(int aoiHeight READ getAOIHeight WRITE setAOIHeight NOTIFY aoiHeightChanged)
     Q_PROPERTY(double exposure READ getExposure WRITE setExposure NOTIFY exposureChanged)
     Q_PROPERTY(int gain READ getGain WRITE setGain NOTIFY gainChanged)
+    Q_PROPERTY(bool connected READ getConnected NOTIFY connectionChanged)
 
 public:
     explicit TBIPylonCameraParamers(QObject *parent = nullptr);
+
 
     //Get Methods
     int getMaxHeight(){return m_max_height;}
@@ -31,6 +33,7 @@ public:
     int getAOIHeight(){return m_aoi_height;}
     double getExposure(){return m_exposure;}
     int getGain(){return m_gain;}
+    bool getConnected(){return m_connected;}
 
     //Set Methods
     void setMaxHeight(int _height);
@@ -40,6 +43,7 @@ public:
     void setAOIHeight(int _height);
     void setExposure(double _exposure);
     void setGain(int _gain);
+    void setConnection(bool _connection);
 
     //Save File Methods
     void setDefautValues();
@@ -56,6 +60,7 @@ private:
     int m_aoi_height;
     double m_exposure;
     int m_gain;
+    bool m_connected;
 
 
 signals:
@@ -66,6 +71,7 @@ signals:
     void aoiHeightChanged();
     void exposureChanged();
     void gainChanged();
+    void connectionChanged();
 };
 
 #endif // TBIPARAMETERCLASS_PYLONCAMERAPARAMS_H

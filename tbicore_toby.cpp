@@ -19,6 +19,7 @@ Toby::Toby(QObject *parent) : QObject(parent)
     m_timer.start();
     m_camera_fps = "Error";
     m_processsing_debug_image = false;
+
     emit cameraFPSChanged(m_camera_fps);
     QObject::connect(&m_camera_params, SIGNAL(aoiWidthChanged()), this, SLOT(onChangeCameraAOI()));
     QObject::connect(&m_camera_params, SIGNAL(aoiHeightChanged()), this, SLOT(onChangeCameraAOI()));
@@ -474,10 +475,14 @@ bool Toby::initializeCamera()
             m_camera->RegisterImageEventHandler(this, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
             //m_camera->RegisterConfiguration(new Pylon::CAcquireContinuousConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
             //m_camera->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
+            m_camera_params.setConnection(true);
+
+
             if(m_showdebug) qDebug()<<"Toby::initializeCamera(): Camera Opened and Configured: ";
         }
         catch(const Pylon::GenericException e)
         {
+            m_camera_params.setConnection(false);
             if(m_showdebug) qDebug()<<"Toby::initializeCamera() Pylon Error: " << e.GetDescription();
             return false;
         }

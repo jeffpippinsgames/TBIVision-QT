@@ -29,7 +29,7 @@ public:
 public slots:
 
 private:
-
+    const bool m_showdebug = false;
     //Color Constants
     const cv::Scalar m_left_tsl_cv_color = CV_RGB(0,0,255);
     const cv::Scalar m_left_bwl_cv_color = CV_RGB(125,125,255);

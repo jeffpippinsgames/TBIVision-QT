@@ -104,8 +104,10 @@ public:
     void loadFromFile(QDataStream &_filedatastream);
 
 private:
-    void processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet);
-    void processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet);
+
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet);
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet);
+
 
     const bool m_showdebug = false;
     Gary *m_gary;
@@ -117,6 +119,8 @@ private:
 
     TBIWeld_ButtJoint m_buttjoint;
     TBIWeld_ButtJointTrackingContainer m_buttjoint_tracking_container;
+
+    TBIWeld_ProcessingPipeLineReturnType m_pipelineresult;
 
     bool m_attempt_to_toggle_control_state;
 

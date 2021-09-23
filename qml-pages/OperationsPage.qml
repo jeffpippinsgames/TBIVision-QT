@@ -40,7 +40,6 @@ Item
         //Disconnect All Signals
         Max.newOperationMatProcessed.disconnect(operationviewId.recieveCVMat);
         Max.processingComplete.disconnect(mainpageID.triggerTobyNextFrame);
-        MicroControllerStatusPacket.controlModeChanged.disconnect(controlmodeselectedtextId.setControlModeText);
     }
 
     function triggerTobyNextFrame()
@@ -111,11 +110,13 @@ Item
             switch(MicroControllerStatusPacket.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+
                 break;
             case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
-                Max.attemptToToggleVGrooveControlState();
+
                 break;
             case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+
                 break;
             }
         }
@@ -317,6 +318,38 @@ Item
 
     }
 
+    //Camera Status
+    PylonCameraStatusObject
+    {
+        id: camerastatusId
+        rect_x: viewbackgroundrectId.width+5
+        rect_y: 10
+    }
+
+    //Motion System Status
+    MotionSystemStatusObject
+    {
+        id:motionsystemstatusId
+        rect_x: viewbackgroundrectId.width+5
+        rect_y: camerastatusId.rect_height + camerastatusId.rect_y + 5
+    }
+
+    //Laser Power Status
+    LaserPowerStatusObject
+    {
+        id: laserpowerstatusId
+        rect_x: viewbackgroundrectId.width+5
+        rect_y: motionsystemstatusId.rect_height + motionsystemstatusId.rect_y + 5
+    }
+
+    //Control Mode
+    ControlModeStatusObject
+    {
+        id: controlmodestatusId
+        x: viewbackgroundrectId.width+5
+        y: laserpowerstatusId.rect_y + laserpowerstatusId.rect_height + 5
+    }
+
     //X Axis Motor Status
     MotorStatusObject
     {
@@ -325,7 +358,7 @@ Item
         position: MicroControllerStatusPacket.xPosition
         microcontrollermotionstatus: MicroControllerStatusPacket.xMotionStatus
         x: viewbackgroundrectId.width+5
-        y: 10
+        y: controlmodestatusId.height + controlmodestatusId.y + 200
     }
 
     //Z Axis Motor Status
@@ -336,78 +369,18 @@ Item
         position: MicroControllerStatusPacket.zPosition
         microcontrollermotionstatus: MicroControllerStatusPacket.zMotionStatus
         x: xaxisstatusId.x + xaxisstatusId.width + 5
-        y: 10
+        y: xaxisstatusId.y
     }
 
-    //Control Mode Rect
-    Rectangle
+    //PipeLine Status Text
+    PipeLineProcessingStatusObject
     {
-        id: controlmoderectId
-        color: Qt.rgba(0,0,0,.8)
-        radius: 10
-        border.width: 3
-        border.color: Qt.rgba(.8, .8, .0, .7)
-        x:viewbackgroundrectId.width+5
-        y:xaxisstatusId.y + xaxisstatusId.height + 20
-        width: 450
-        height: 100
-
-        Text
-        {
-            id: controlmodetextId
-            focus: false
-            font.family: font2Id.name
-            text: "Selected Control Mode"
-            font.pointSize: 20
-            width: controlmodetextId.implicitWidth
-            height: controlmodetextId.implicitHeight
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: 5
-            color: Qt.rgba(.7,.2,.2,1)
-        }
-
-        Text
-        {
-            id: controlmodeselectedtextId
-            focus: false
-            font.family: font2Id.name
-            text: "Manual"
-            font.pointSize: 30
-            width: controlmodeselectedtextId.implicitWidth
-            height: controlmodeselectedtextId.implicitHeight
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: controlmodetextId.y + controlmodetextId.height+5
-            color: Qt.rgba(.2,.8,.2,1)
-
-            function setControlModeText()
-            {
-                switch(MicroControllerStatusPacket.controlMode)
-                {
-                case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
-                    controlmodeselectedtextId.text = "Manual";
-                    controlmodeselectedtextId.color = Qt.rgba(.8,0,.0,1);
-                    break;
-                case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
-                    controlmodeselectedtextId.text = "Full";
-                    controlmodeselectedtextId.color = Qt.rgba(0,.8,0,1);
-                    break;
-                case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
-                    controlmodeselectedtextId.text = "Height";
-                    controlmodeselectedtextId.color = Qt.rgba(.8,.8,0,1);
-                    break;
-                case GaryControlMode.TBI_CONTROL_MODE_MOTORCALIBRATION:
-                    controlmodeselectedtextId.text = "Calibration";
-                    controlmodeselectedtextId.color = Qt.rgba(0,0,.8,1);
-                    break;
-                }
-            }
-
-            Component.onCompleted:
-            {
-                controlmodeselectedtextId.setControlModeText();
-                MicroControllerStatusPacket.controlModeChanged.connect(controlmodeselectedtextId.setControlModeText);
-            }
-        }
+        id:pipelinestatusId
+        status_x:viewbackgroundrectId.width+5
+        status_y: 975
+        statusstring_x: 10
+        statusstring_y: 10
+        showstatusstring: true
     }
 
     //Camera FPS Text
@@ -422,8 +395,9 @@ Item
         width: camerafpstextId.implicitWidth
         height: camerafpstextId.implicitHeight
         x: 10
-        y: 10
+        y: 65
         color: Qt.rgba(1,.1,.1,1)
+        opacity: .7
     }
 
     //Time in Loop Text
@@ -437,9 +411,10 @@ Item
         font.pointSize: 15
         width: timeinlooptextId.implicitWidth
         height: timeinlooptextId.implicitHeight
-        x: camerafpstextId.width+30
-        y: 10
+        x: 10
+        y: camerafpstextId.y + camerafpstextId.height + 5
         color: Qt.rgba(1,.1,.1,1)
+        opacity: .7
     }
 
     //Control Key Display

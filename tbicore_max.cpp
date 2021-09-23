@@ -40,15 +40,15 @@ void Max::recieveNewCVMat(const Mat &_mat)
 
     //Do Whichever PipeLine You Need
     //processVGroovePipeline(_mats);
-    processButtJointPipeline(_mats, *m_gary->getMicroControllerStatusPacketPointer());
-
+    //m_pipelineresult.setStatus(processButtJointPipeline(_mats, *m_gary->getMicroControllerStatusPacketPointer()));
+    m_pipelineresult.setStatus(processVGroovePipeline(_mats, *m_gary->getMicroControllerStatusPacketPointer()));
     //Emit the Mats
+
     //mats.m_testmatgrey = _mats.m_blurr.clone();
     //cv::Sobel(_mats.m_blurr, _mats.m_testmatgrey, -1, 1,0,3,3,0,cv::BORDER_CONSTANT);
     //cv::cvtColor(_mats.m_testmatgrey, _mats.m_operation, COLOR_GRAY2BGR);
 
     emit newOperationMatProcessed(_mats.m_operation);
-
     if(m_emitextramats)
     {
         emit newRawMatProcessed(_mats.m_raw);
@@ -72,6 +72,7 @@ void Max::setRootQMLContextProperties(QQmlApplicationEngine &_engine)
     m_vgroove.setRootQMLContextProperties(_engine);
     m_buttjoint.setRootQMLContextProperties(_engine);
     _engine.rootContext()->setContextProperty("MotionControlParams", &m_motion_control_params);
+    _engine.rootContext()->setContextProperty("ProcessingPipeLineStatus", &m_pipelineresult);
 }
 
 void Max::setDefautValues()
@@ -99,7 +100,7 @@ void Max::loadFromFile(QDataStream &_filedatastream)
     m_motion_control_params.loadFromFile(_filedatastream);
 }
 
-void Max::processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet)
+TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet)
 {
     MicroControllerStatusPacket _stat_packet;
     _micro_status_packet.copyStatusPacketTo(_stat_packet);
@@ -118,15 +119,15 @@ void Max::processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats, MicroContro
         case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
             if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
             {
-                m_vgroove_tracking_container.setTrackToPoints();
-                m_gary->setControlModeToFullAuto();
+                //m_vgroove_tracking_container.setTrackToPoints();
+               // m_gary->setControlModeToFullAuto();
             }
             break;
         case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
-            m_gary->setControlModeToHeightOnly();
+            //m_gary->setControlModeToHeightOnly();
             break;
         case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
-            m_gary->setControlModeToFullAuto();
+            //m_gary->setControlModeToFullAuto();
             break;
         default:
             break;
@@ -162,11 +163,12 @@ void Max::processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats, MicroContro
          }
 
     }
+    return _result;
     //---------------------------------------------------------------------------------
 
 }
 
-void Max::processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet)
+TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet)
 {
     MicroControllerStatusPacket _stat_packet;
 
@@ -233,7 +235,7 @@ void Max::processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats, MicroCont
          }
     }
     //---------------------------------------------------------------------------------
-
+    return _result;
 }
 
 

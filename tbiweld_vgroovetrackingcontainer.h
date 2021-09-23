@@ -27,6 +27,7 @@ public:
     void drawTrackToPointstoMat(TBIClass_OpenCVMatContainer &_mats, GaryControlMode::ControlMode_t _forcontrolmode = GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE);
 
 private:
+    const bool m_showdebug = false;
     TBIPoint_Int m_left_tracking_point;
     TBIPoint_Int m_right_tracking_point;
     TBIPoint_Int m_root_point;

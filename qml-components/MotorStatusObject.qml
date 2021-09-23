@@ -31,6 +31,12 @@ Rectangle {
     //property string fontsource: "qrc:/Fonts/PermanentMarker-Regular.ttf"
     //property string fontsource2: "qrc:/Fonts/Calculator.ttf"
 
+    readonly property color mode1color: Qt.rgba(.8, .8, .0, .7) //yellow
+    readonly property color mode2color: Qt.rgba(.8, .0, .0, .7) //red
+    readonly property color mode3color: Qt.rgba(.0, .0, .8, .7) //blue
+    readonly property color mode4color: Qt.rgba(.2, .8, .2, .7) //green - chartreuse
+    readonly property color mode5color: Qt.rgba(.3, .3, .8, .7) //cyan
+
 
     function setStatus()
     {
@@ -42,7 +48,7 @@ Rectangle {
                 axisnametextId.color = "yellow";
                 glowId.color = "yellow";
                 positiontextId.color = "yellow"
-                rootitemId.border.color = Qt.rgba(.8, .8, .0, .7);
+                rootitemId.border.color = rootitemId.mode1color;
                 break;
             case GaryMotionStatus.TBI_MOTION_STATUS_GENERAL_ERROR:
                 statustextId.text = "Error";
@@ -50,7 +56,7 @@ Rectangle {
                 axisnametextId.color = "red";
                 glowId.color = "red";
                 positiontextId.color = "red";
-                rootitemId.border.color = Qt.rgba(.8, .0, .0, .7);
+                rootitemId.border.color = rootitemId.mode2color;
                 break;
             case GaryMotionStatus.TBI_MOTION_STATUS_HOMING:
                 statustextId.text = "Homing";
@@ -58,7 +64,7 @@ Rectangle {
                 axisnametextId.color = "blue";
                 glowId.color = "blue";
                 positiontextId.color = "blue";
-                rootitemId.border.color = Qt.rgba(.0, .0, .8, .7);
+                rootitemId.border.color = rootitemId.mode3color;
                 break;
             case GaryMotionStatus.TBI_MOTION_STATUS_LIMIT_TRIPPED:
                 statustextId.text = "Limit Tripped";
@@ -66,7 +72,7 @@ Rectangle {
                 axisnametextId.color = "red";
                 glowId.color = "red";
                 positiontextId.color = "red";
-                rootitemId.border.color = Qt.rgba(.8, .0, .0, .7);
+                rootitemId.border.color = rootitemId.mode2color;
                 break;
             case GaryMotionStatus.TBI_MOTION_STATUS_JOGGING:
                 statustextId.text = "Jogging";
@@ -74,7 +80,7 @@ Rectangle {
                 axisnametextId.color = "chartreuse";
                 glowId.color = "chartreuse";
                 positiontextId.color = "chartreuse";
-                rootitemId.border.color = Qt.rgba(.2, .8, .2, .7);
+                rootitemId.border.color = rootitemId.mode4color;
                 break;
             case GaryMotionStatus.TBI_MOTION_STATUS_MOVING:
                 statustextId.text = "Moving";
@@ -82,8 +88,23 @@ Rectangle {
                 axisnametextId.color = "cyan";
                 glowId.color = "cyan";
                 positiontextId.color = "cyan";
-                rootitemId.border.color = Qt.rgba(.3, .3, .8, .7);
+                rootitemId.border.color = rootitemId.mode5color;
                 break;
+        }
+    }
+
+    Component.onCompleted:
+    {
+        rootitemId.setStatus();
+        if(!rootitemId.microcontrollerconnected)
+        {
+            positiontextId.visible = false;
+            statustextId.text = "Com Error";
+            statustextId.color = "red";
+            axisnametextId.color = "red";
+            glowId.color = "red";
+            positiontextId.color = "red";
+            rootitemId.border.color = rootitemId.mode2color;
         }
     }
 
@@ -92,13 +113,12 @@ Rectangle {
         if(!rootitemId.microcontrollerconnected)
         {
             positiontextId.visible = false;
-            //statustextId.font.pointSize = 15;
-            statustextId.text = "Conn Error";
+            statustextId.text = "Com Error";
             statustextId.color = "red";
             axisnametextId.color = "red";
             glowId.color = "red";
             positiontextId.color = "red";
-            rootitemId.border.color = Qt.rgba(.8, .0, .0, .7);
+            rootitemId.border.color = rootitemId.mode2color;
         }
         else
         {
@@ -111,6 +131,7 @@ Rectangle {
     onMicrocontrollermotionstatusChanged:
     {
         rootitemId.setStatus();
+
     }
 
     //Font for UI

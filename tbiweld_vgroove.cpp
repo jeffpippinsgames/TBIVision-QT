@@ -126,7 +126,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     m_break_index = this->getVGrooveBreakIndex();
     if(m_break_index == -1)
     {
-        qDebug("TBIWeld_VGroove::doConstructInlierRansacs() A Valid Break Index Was Not Found.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doConstructInlierRansacs() A Valid Break Index Was Not Found.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_COULDNOTFINDVALIDBREAKINDEXFORVGROOVEDATASET;
     }
     //-----------------------------------------------------------------------------------------------------
@@ -136,7 +136,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     _result = this->getGausianDeClusterSubSet(*m_gausiandecluster_leftside_ds, 0, m_break_index);
     if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
     {
-        qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Could Not Build Left Gausian Decluster Data SubSet.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Could Not Build Left Gausian Decluster Data SubSet.");
         return _result;
     }
     //-----------------------------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     _result = this->getGausianDeClusterSubSet(*m_gausiandecluster_rightside_ds, m_break_index, this->getGausianDeclusterDataSetMaxIndex());
     if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
     {
-        qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Could Not Build Right Gausian Decluster Data SubSet.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Could Not Build Right Gausian Decluster Data SubSet.");
         return _result;
     }
     //-----------------------------------------------------------------------------------------------------
@@ -153,7 +153,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     //Build The Left TSL Ransac Line.
     if(!TBIRansac::doRansac(m_left_tsl_ransac_line, m_left_tsl_ransac_params, *m_gausiandecluster_leftside_ds))
     {
-        qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Left TSL Ransac Is Invalid.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Left TSL Ransac Is Invalid.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDUNABLETOFINDINLIERRANSACLINE;
     }
     //Draw The Left TSL Ransac
@@ -164,7 +164,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     //Build The Right TSL Ransac Line
     if(!TBIRansac::doRansac(m_right_tsl_ransac_line, m_right_tsl_ransac_params, *m_gausiandecluster_rightside_ds))
     {
-        qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Right TSL Ransac Is Invalid.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Right TSL Ransac Is Invalid.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDUNABLETOFINDINLIERRANSACLINE;
     }
     //Draw The Right TSL Ransac
@@ -176,7 +176,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     _result = this->extractVGrooveJointDataSet(*m_joint_ds, m_left_tsl_ransac_line, m_right_tsl_ransac_line, 1.5);
     if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
     {
-        qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Could Not Build VGroove Joint DataSet.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Could Not Build VGroove Joint DataSet.");
         return _result;
     }
 
@@ -194,7 +194,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     //Find Left BWL Ransac Line
     if(!TBIRansac::doRansac(m_left_bwl_ransac_line, _adjusted_left_bwl_param, *m_joint_ds))
     {
-        qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Left BWL Ransac Is Invalid.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Left BWL Ransac Is Invalid.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDUNABLETOFINDINLIERRANSACLINE;
     }
     //Draw Ransac to Mat
@@ -205,7 +205,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     //Find Right BWL Ransac Line
     if(!TBIRansac::doRansac(m_right_bwl_ransac_line, _adjusted_right_bwl_param, *m_joint_ds))
     {
-        qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Right BWL Ransac Is Invalid.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doConstructInlierRansacs() Right BWL Ransac Is Invalid.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDUNABLETOFINDINLIERRANSACLINE;
     }
     //Draw Ransac to Mat
@@ -225,7 +225,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doBu
     _datasetresult = m_gausiandecluster_leftside_ds->extractDataSetForInliers(*m_left_inlier_tsl_ds, m_left_tsl_ransac_line, 2.0);
     if(_datasetresult != TBIDataSetReturnType::Ok)
     {
-        qDebug("TBIWeld_VGroove::doBuildInlierDataSets() Failed To Extract Left TSL Inlier Data Set.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doBuildInlierDataSets() Failed To Extract Left TSL Inlier Data Set.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTLEFTTSLINLIERDATASET;
     }
     //Draw Data Set into Inlier Mat
@@ -237,7 +237,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doBu
     _datasetresult = m_gausiandecluster_rightside_ds->extractDataSetForInliers(*m_right_inlier_tsl_ds, m_right_tsl_ransac_line, 2.0);
     if(_datasetresult != TBIDataSetReturnType::Ok)
     {
-        qDebug("TBIWeld_VGroove::doBuildInlierDataSets() Failed To Extract Right TSL Inlier Data Set.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doBuildInlierDataSets() Failed To Extract Right TSL Inlier Data Set.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTRIGHTTSLINLIERDATASET;
     }
     //Draw Data Set into Inlier Mat
@@ -249,7 +249,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doBu
     _datasetresult = m_joint_ds->extractDataSetForInliers(*m_left_inlier_bwl_ds, m_left_bwl_ransac_line, 2.0);
     if(_datasetresult != TBIDataSetReturnType::Ok)
     {
-        qDebug("TBIWeld_VGroove::doBuildInlierDataSets() Failed To Extract Left BWL Inlier Data Set.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doBuildInlierDataSets() Failed To Extract Left BWL Inlier Data Set.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTLEFTBWLINLIERDATASET;
     }
     //Draw Data Set into Inlier Mat
@@ -261,7 +261,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doBu
     _datasetresult = m_joint_ds->extractDataSetForInliers(*m_right_inlier_bwl_ds, m_right_bwl_ransac_line, 2.0);
     if(_datasetresult != TBIDataSetReturnType::Ok)
     {
-        qDebug("TBIWeld_VGroove::doBuildInlierDataSets() Failed To Extract Right BWL Inlier Data Set.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doBuildInlierDataSets() Failed To Extract Right BWL Inlier Data Set.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTRIGHTBWLINLIERDATASET;
     }
     //Draw Data Set into Inlier Mat
@@ -281,7 +281,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     _datasetresult = m_left_inlier_tsl_ds->extractLeastSquareLine(m_left_tsl_geo_line);
     if(_datasetresult != TBIDataSetReturnType::Ok)
     {
-        qDebug("TBIWeld_VGroove::doConstructGeometricEntities() Failed To Build Left TSL Geometric Entity.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doConstructGeometricEntities() Failed To Build Left TSL Geometric Entity.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOBUILDLEFTTSLGEOMETRICENTITY;
     }
     //Draw Geometric Entity
@@ -293,7 +293,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     _datasetresult = m_right_inlier_tsl_ds->extractLeastSquareLine(m_right_tsl_geo_line);
     if(_datasetresult != TBIDataSetReturnType::Ok)
     {
-        qDebug("TBIWeld_VGroove::doConstructGeometricEntities() Failed To Build Right TSL Geometric Entity.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doConstructGeometricEntities() Failed To Build Right TSL Geometric Entity.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOBUILDRIGHTTSLGEOMETRICENTITY;
     }
     //Draw Geometric Entity
@@ -305,7 +305,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     _datasetresult = m_left_inlier_bwl_ds->extractLeastSquareLine(m_left_bwl_geo_line);
     if(_datasetresult != TBIDataSetReturnType::Ok)
     {
-        qDebug("TBIWeld_VGroove::doConstructGeometricEntities() Failed To Build Left BWL Geometric Entity.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doConstructGeometricEntities() Failed To Build Left BWL Geometric Entity.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOBUILDLEFTBWLGEOMETRICENTITY;
     }
     //Draw Geometric Entity
@@ -317,7 +317,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
     _datasetresult = m_right_inlier_bwl_ds->extractLeastSquareLine(m_right_bwl_geo_line);
     if(_datasetresult != TBIDataSetReturnType::Ok)
     {
-        qDebug("TBIWeld_VGroove::doConstructGeometricEntities() Failed To Build Right BWL Geometric Entity.");
+        if(m_showdebug) qDebug("TBIWeld_VGroove::doConstructGeometricEntities() Failed To Build Right BWL Geometric Entity.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOBUILDRIGHTBWLGEOMETRICENTITY;
     }
     //Draw Geometric Entity

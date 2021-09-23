@@ -14,10 +14,6 @@
         <file>Icons/Black Button.png</file>
         <file>Icons/BlackButton2.png</file>
         <file>Icons/ButtonsVertical.png</file>
-        <file>Icons/camera.png</file>
-        <file>Icons/Camera2.png</file>
-        <file>Icons/camera3.png</file>
-        <file>Icons/camera4.png</file>
         <file>Icons/dark_steel_texture.jpg</file>
         <file>Icons/document.png</file>
         <file>Icons/files-and-folders.png</file>
@@ -68,12 +64,10 @@
         <file>qml-pages/MainMenuPage.qml</file>
         <file>qml-dialogs/TwoButtonOptionDialog.qml</file>
         <file>qml-pages/PageTemplate.qml</file>
-        <file>qml-components/IconInfoStatusObject.qml</file>
         <file>Icons/microcontroller(white).png</file>
         <file>qml-pages/VGrooveImageProcessingSettingsPage.qml</file>
         <file>qml-components/SliderSettingsObject.qml</file>
         <file>qml-components/PagesDescriptionObject.qml</file>
-        <file>qml-components/empty_qml.qml</file>
         <file>qml-dialogs/StillImageFileOpenDialog.qml</file>
         <file>qml-pages/ButtJointImageProcessingSettingsPage.qml</file>
         <file>Icons/Motor2.png</file>
@@ -84,5 +78,13 @@
         <file>Icons/manualmode.png</file>
         <file>Icons/heightonlymode.png</file>
         <file>Icons/calibrationmode.png</file>
+        <file>qml-components/PipeLineProcessingStatusObject.qml</file>
+        <file>Icons/cross.png</file>
+        <file>Icons/okcheck.png</file>
+        <file>qml-components/PylonCameraStatusObject.qml</file>
+        <file>Icons/Camera.png</file>
+        <file>qml-components/MotionSystemStatusObject.qml</file>
+        <file>qml-components/LaserPowerStatusObject.qml</file>
+        <file>Icons/power.png</file>
     </qresource>
 </RCC>

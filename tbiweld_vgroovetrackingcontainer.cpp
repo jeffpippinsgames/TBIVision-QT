@@ -15,7 +15,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGrooveTracki
     //Extract Left Tracking Point
     if(!_left_tsl.findPointofIntersection(_left_bwl, m_left_tracking_point))
     {
-        qDebug("TBIWeld_VGrooveTrackingContainer::extractTrackingPointsFromGeometricEntities() Could Not Build Left Tracking Point.");
+        if(m_showdebug) qDebug("TBIWeld_VGrooveTrackingContainer::extractTrackingPointsFromGeometricEntities() Could Not Build Left Tracking Point.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTTRACKINGPOINT;
     }
     //Draw To Mat
@@ -26,7 +26,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGrooveTracki
     //Extract Right Tracking Point
     if(!_right_tsl.findPointofIntersection(_right_bwl, m_right_tracking_point))
     {
-        qDebug("TBIWeld_VGrooveTrackingContainer::extractTrackingPointsFromGeometricEntities() Could Not Build Right Tracking Point.");
+        if(m_showdebug) qDebug("TBIWeld_VGrooveTrackingContainer::extractTrackingPointsFromGeometricEntities() Could Not Build Right Tracking Point.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTTRACKINGPOINT;
     }
     //Draw To Mat
@@ -37,7 +37,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGrooveTracki
     //Extract Root Tracking Point
     if(!_left_bwl.findPointofIntersection(_right_bwl, m_root_point))
     {
-        qDebug("TBIWeld_VGrooveTrackingContainer::extractTrackingPointsFromGeometricEntities() Could Not Build Root Tracking Point.");
+        if(m_showdebug) qDebug("TBIWeld_VGrooveTrackingContainer::extractTrackingPointsFromGeometricEntities() Could Not Build Root Tracking Point.");
         return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTTRACKINGPOINT;
     }
     //Draw To Mat

@@ -31,7 +31,7 @@ class MicroControllerStatusPacket: public QObject
     Q_PROPERTY(GaryLimitSwitch::LimitSwitchState_t xLimitSwitch READ getXLimitSwitch  NOTIFY xLimitSwitchChanged)
     Q_PROPERTY(GaryLimitSwitch::LimitSwitchState_t zLimitSwitch READ getZLimitSwitch  NOTIFY zLimitSwitchChanged)
     Q_PROPERTY(GaryOperationStatus::OperationStatus_t operationStatus READ getOperationStatus  NOTIFY operationStatusChanged)
-    Q_PROPERTY(GaryLaserStatus::LaserStatus_t laserStatus READ getLaserStatus  NOTIFY laserStatusChanged)
+    Q_PROPERTY(int laserStatus READ getLaserStatus  NOTIFY laserStatusChanged)
     Q_PROPERTY(GaryHomingStatus::HomingStatus_t xHomingStatus READ getXHomingStatus NOTIFY xHomingStatusChanged)
     Q_PROPERTY(GaryHomingStatus::HomingStatus_t zHomingStatus READ getZHomingStatus  NOTIFY zHomingStatusChanged)
     Q_PROPERTY(qint32 xPosition READ getXPosition NOTIFY xPositionChanged)
@@ -49,7 +49,7 @@ public:
     GaryLimitSwitch::LimitSwitchState_t getXLimitSwitch(){return m_x_axis_limit;}
     GaryLimitSwitch::LimitSwitchState_t getZLimitSwitch(){return m_z_axis_limit;}
     GaryOperationStatus::OperationStatus_t getOperationStatus(){return m_operation_status;}
-    GaryLaserStatus::LaserStatus_t getLaserStatus(){return m_laser_status;}
+    int getLaserStatus(){return (int)m_laser_status;}
     GaryMotorCalibrationCycleStatus::MotorCalibration_Cycle_t getMotorCalibrationCycle(){return m_motor_calib_cycle;}
     quint8 getJoystickFlags(){return m_joystick_flags;}
     qint32 getXPosition(){return m_x_position;}

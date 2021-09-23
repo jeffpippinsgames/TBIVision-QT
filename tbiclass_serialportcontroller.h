@@ -41,6 +41,7 @@ private slots:
 
 private:
     static const bool m_showdebug = false;
+    static const bool m_showserialerrors = false;
 
     static const quint16 m_teensy32_vendorID = 0x16C0;
     static const quint16 m_teensy32_productID = 0x0483;

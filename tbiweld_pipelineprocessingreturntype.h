@@ -3,10 +3,18 @@
 
 #include <QObject>
 #include <QQuickItem>
+#include <QString>
+#include "opencv4/opencv2/core.hpp"
+#include "opencv4/opencv2/imgproc.hpp"
+
 
 class TBIWeld_ProcessingPipeLineReturnType : public QObject
 {
     Q_OBJECT
+
+    Q_PROPERTY(int status READ getStatus NOTIFY statusChanged)
+    Q_PROPERTY(QString statusString READ getStatusString NOTIFY statusStringChanged)
+
 public:
     explicit TBIWeld_ProcessingPipeLineReturnType(QObject *parent = nullptr);
     enum PipelineReturnType_t {TBI_PIPELINE_OK = 0x01,
@@ -32,13 +40,30 @@ public:
                                TBI_PIPELINE_FAILEDTOBUILDRIGHTTSLGEOMETRICENTITY = 0x21,
                                TBI_PIPELINE_FAILEDTOBUILDLEFTBWLGEOMETRICENTITY = 0x22,
                                TBI_PIPELINE_FAILEDTOBUILDRIGHTBWLGEOMETRICENTITY = 0x23,
-                               TBI_PIPELINE_FAILEDTOEXTRACTTRACKINGPOINT = 0x24};
+                               TBI_PIPELINE_FAILEDTOEXTRACTTRACKINGPOINT = 0x24,
+                               TBI_PIPELINE_FAILEDLASERPOWEROFF = 0x25};
     Q_ENUMS(PipelineReturnType_t)
     static void declareQML()
     {
         qmlRegisterType<TBIWeld_ProcessingPipeLineReturnType>("tbi.vision.components", 1, 0, "TBIWeld_ProcessingPipeLineReturnType");
     }
+
+    int getStatus(){return (int)m_status;}
+    QString getStatusString(){return m_statusstring;}
+    void setStatus(TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _status){m_status = _status; this->setStatusString(); emit statusChanged(); emit statusStringChanged();}
+    void drawStatusStringToMat(cv::Mat &_dst);
+
 signals:
+    void statusChanged();
+    void statusStringChanged();
+
+private:
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t m_status;
+    QString m_statusstring;
+
+    void setStatusString();
+
+
 
 };
 

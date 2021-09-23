@@ -47,6 +47,12 @@ void TBIPylonCameraParamers::setGain(int _gain)
     emit gainChanged();
 }
 
+void TBIPylonCameraParamers::setConnection(bool _connection)
+{
+    m_connected = _connection;
+    emit connectionChanged();
+}
+
 void TBIPylonCameraParamers::setDefautValues()
 {
     this->setMaxHeight(TBIConstants::Max_Camera_Height);
@@ -56,6 +62,15 @@ void TBIPylonCameraParamers::setDefautValues()
     this->setAOIHeight(m_max_height);
     this->setExposure(2000);
     this->setGain(0);
+    this->m_connected = false;
+    emit connectionChanged();
+    emit maxHeightChanged();
+    emit maxWidthChanged();
+    emit cameraNameChanged();
+    emit aoiWidthChanged();
+    emit aoiHeightChanged();
+    emit exposureChanged();
+    emit gainChanged();
 }
 
 void TBIPylonCameraParamers::saveToFile(QDataStream &_filedatastream)

@@ -17,7 +17,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_ButtJointTrac
 void TBIWeld_ButtJointTrackingContainer::setTrackToPoints()
 {
     m_track_to_point = m_tracking_point;
-    m_track_to_point.m_y = m_track_to_point.m_y + m_tracking_boundary + 1; //FOR DEBUG USE.
+    //m_track_to_point.m_y = m_track_to_point.m_y + m_tracking_boundary + 1; //FOR DEBUG USE.
 }
 
 void TBIWeld_ButtJointTrackingContainer::drawTrackToPointstoMat(TBIClass_OpenCVMatContainer &_mats)
