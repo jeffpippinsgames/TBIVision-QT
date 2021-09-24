@@ -38,10 +38,13 @@ private slots:
     void onSerialPortError(QSerialPort::SerialPortError _error);
     void onReconnectTimer();
     void onSendMicroControllerHeartbeat();
+    void onPacketsPerSecondDisplayTime();
+
 
 private:
     static const bool m_showdebug = false;
-    static const bool m_showserialerrors = false;
+    static const bool m_showserialerrors = true;
+    static const bool m_showstatuspacketspersec = true;
 
     static const quint16 m_teensy32_vendorID = 0x16C0;
     static const quint16 m_teensy32_productID = 0x0483;
@@ -50,11 +53,19 @@ private:
     static const quint16 m_ftdi_FT232_UART_vendorID = 0x0403;
     static const quint16 m_ftdi_FT232_UART_productID = 0x6001;
 
+
+    QByteArray m_write_buffer;
+
     QSerialPortInfo *m_serial_info;
     QSerialPort *m_serial_port;
 
     QTimer *m_port_reconnection_timer;
     QTimer *m_microcontroller_heartbeat_timer;
+
+    QTimer *m_packets_per_second_display_timer;
+    quint32 m_current_guid;
+    quint32 m_last_guid;
+    quint32 m_guid_diff;
 
     QString m_status;
     bool m_isconnected;

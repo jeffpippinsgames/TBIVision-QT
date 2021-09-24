@@ -38,6 +38,11 @@ private:
     TBIPoint_Int m_root_track_to_point;
     TBIPoint_Int m_joint_track_to_centroid;
 
+    TBIPoint_Int m_left_joint_def;
+    TBIPoint_Int m_right_joint_def;
+    TBIPoint_Int m_root_joint_def;
+    TBIPoint_Int m_joint_centroid_def;
+
     int m_tracking_boundary;
 
     const cv::Scalar m_tracking_point_cv_color =CV_RGB(0,200,255);

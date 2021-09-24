@@ -219,7 +219,7 @@ Rectangle {
         visible: true
         focus: false
         font.family: font2Id.name
-        text: "Pos: " + rootitemId.position
+        text: "Pos:" + rootitemId.position
         font.pointSize: 20
         width: statustextId.implicitWidth
         height: statustextId.implicitHeight
@@ -228,8 +228,4 @@ Rectangle {
         color: rootitemId.textcolor
         opacity: .7
     }
-
-
-
-
 }

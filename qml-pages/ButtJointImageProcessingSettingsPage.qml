@@ -110,6 +110,7 @@ Item {
     Component.onCompleted:
     {
 
+        WeldJointType.setJointToButt();
         //Connect Signals
         Max.processingComplete.connect(rootpageId.triggerTobyNextFrame);
 

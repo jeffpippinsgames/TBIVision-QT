@@ -110,7 +110,7 @@ Item
             switch(MicroControllerStatusPacket.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
-
+                Max.a
                 break;
             case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
 
@@ -415,6 +415,23 @@ Item
         y: camerafpstextId.y + camerafpstextId.height + 5
         color: Qt.rgba(1,.1,.1,1)
         opacity: .7
+    }
+
+    //Joint Type Selected
+    Text
+    {
+        id: jointtextId
+        text: "Processing Joint Type: " + WeldJointType.jointtypestring
+        width: jointtextId.implicitWidth;
+        height: jointtextId.implicitHeight;
+        color: Qt.rgba(1,.1,.1,1)
+        font.family: fontId.name
+        font.pointSize: 30
+        opacity: .7
+        x: (viewbackgroundrectId.x + viewbackgroundrectId.width) - jointtextId.width - 20
+        y: (viewbackgroundrectId.y + viewbackgroundrectId.height) - jointtextId.height - 10
+
+
     }
 
     //Control Key Display

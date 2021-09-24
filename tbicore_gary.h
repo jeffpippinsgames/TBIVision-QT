@@ -72,6 +72,8 @@ private:
     MicroControllerStatusPacket m_micro_status_packet;
     SerialPortController m_serial_port_controller;
     TBIJoystick m_joystick;
+
+
     //-------------------------------------------------------------
 
     //Private Methods----------------------------------------------

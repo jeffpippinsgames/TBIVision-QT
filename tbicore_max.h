@@ -28,6 +28,7 @@
 #include "tbiweld_buttjointtrackingcontainer.h"
 #include "tbiweld_buttjoint.h"
 #include "tbiclass_microcontrollerstatuspacket.h"
+#include "tbiweld_enumerator.h"
 
 
 using namespace cv;
@@ -91,7 +92,7 @@ public:
     //Get Methods
     QString getTimeinLoop(){return m_timeinloop;}
     Q_INVOKABLE bool getEmitExtraMats(){return m_emitextramats;}
-    Q_INVOKABLE void attemptToToggleVGrooveControlState(){m_attempt_to_toggle_control_state = true;}
+    Q_INVOKABLE void attemptToToggleControlState(){m_attempt_to_toggle_control_state = true;}
 
     //Set Methods
     void setEmitExtraMats(bool _flag){m_emitextramats = _flag; emit emitExtraMatsChanged();}
@@ -121,6 +122,7 @@ private:
     TBIWeld_ButtJointTrackingContainer m_buttjoint_tracking_container;
 
     TBIWeld_ProcessingPipeLineReturnType m_pipelineresult;
+    TBIWeldType_Enumerator m_joint_type;
 
     bool m_attempt_to_toggle_control_state;
 

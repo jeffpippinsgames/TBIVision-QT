@@ -8,8 +8,14 @@ SerialPortController::SerialPortController (QObject *parent) : QObject(parent)
     QObject::connect(m_microcontroller_heartbeat_timer, SIGNAL(timeout()), this, SLOT(onSendMicroControllerHeartbeat()));
 
     m_port_reconnection_timer = new QTimer(this);
-    m_port_reconnection_timer->setInterval(200);
+    m_port_reconnection_timer->setInterval(500);
     QObject::connect(m_port_reconnection_timer, SIGNAL(timeout()), this, SLOT(onReconnectTimer()));
+
+    m_packets_per_second_display_timer = new QTimer(this);
+    m_packets_per_second_display_timer->setInterval(1000);
+    m_packets_per_second_display_timer->setSingleShot(false);
+    if(m_showstatuspacketspersec) QObject::connect(m_packets_per_second_display_timer, SIGNAL(timeout()), this, SLOT(onPacketsPerSecondDisplayTime()));
+    if(m_showstatuspacketspersec) m_packets_per_second_display_timer->start();
 
     m_isconnected = false;
     this->openMicroControllerPort();
@@ -50,6 +56,7 @@ SerialPortControllerReturnType::SerialControllerReturnType_t SerialPortControlle
             _data.append(uint(255));
         }
         m_serial_port->write(_data);
+        m_serial_port->waitForBytesWritten(2000);
         if(_data[0].operator!=(uint(GaryCommands::TBI_CMD_KEEP_ALIVE)))
         {
             if(m_showdebug) qDebug() << "TBIClass_SerialPortController::sendSerialCommand() Sending Command to Controller: " << _data.toHex(',');
@@ -91,6 +98,7 @@ SerialPortControllerReturnType::SerialControllerReturnType_t SerialPortControlle
                 {
                     m_serial_port = new QSerialPort(_serialinfo, this);
                     m_serial_port->setBaudRate(2000000);
+                    //m_serial_port->setBaudRate(QSerialPort::Baud115200);
                     m_serial_port->setStopBits(QSerialPort::OneStop);
                     m_serial_port->setParity(QSerialPort::EvenParity);
                     m_serial_port->setDataBits(QSerialPort::Data8);
@@ -130,7 +138,8 @@ SerialPortControllerReturnType::SerialControllerReturnType_t SerialPortControlle
     QByteArray _cmd;
     _cmd.append(uint(GaryCommands::TBI_CMD_ACKNOWLEDGE_STATUS_PACKET));
     if(m_showdebug) qDebug() << "TBIClass_SerialPortController::acknowledgeStatusPacket(): Sending MicroController Acknowledge Status Packet Command";
-    return sendSerialCommand(_cmd);
+    //return SerialPortControllerReturnType::TBI_SERIAL_OK;
+     return sendSerialCommand(_cmd);
 }
 
 void SerialPortController::readSerial()
@@ -224,4 +233,13 @@ void SerialPortController::onSendMicroControllerHeartbeat()
     _cmd.append(char(GaryCommands::TBI_CMD_KEEP_ALIVE));
     sendSerialCommand(_cmd);
     m_microcontroller_heartbeat_timer->start();
+}
+
+void SerialPortController::onPacketsPerSecondDisplayTime()
+{
+    m_last_guid = m_current_guid;
+    m_current_guid = m_microcontroller_status_packet.getcurrentControlStatusGUID();
+    m_guid_diff = m_current_guid - m_last_guid;
+    qDebug() << "Packets Per Second: " << m_guid_diff;
+   // this->acknowledgeStatusPacket();
 }

@@ -17,6 +17,7 @@ Max::Max(QObject *parent) : QObject(parent)
 
     this->setDefautValues();
     if(m_showdebug) qDebug()<<"Max::Max() Max Object Created.";
+    m_joint_type.setJointType(TBIWeldType_Enumerator::TBI_VGROOVE_WELD);
 }
 
 Max::~Max()
@@ -38,16 +39,21 @@ void Max::recieveNewCVMat(const Mat &_mat)
     TBIClass_OpenCVMatContainer _mats;
     _mats.initMats(_mat);
 
-    //Do Whichever PipeLine You Need
-    //processVGroovePipeline(_mats);
-    //m_pipelineresult.setStatus(processButtJointPipeline(_mats, *m_gary->getMicroControllerStatusPacketPointer()));
-    m_pipelineresult.setStatus(processVGroovePipeline(_mats, *m_gary->getMicroControllerStatusPacketPointer()));
+    //Do Whichever PipeLine You Need. Feed the Result  Into The PipelineResult Variable.
+    switch(m_joint_type.getJointType())
+    {
+    case TBIWeldType_Enumerator::TBI_VGROOVE_WELD:
+        m_pipelineresult.setStatus(processVGroovePipeline(_mats, *m_gary->getMicroControllerStatusPacketPointer()));
+        break;
+    case TBIWeldType_Enumerator::TBI_BUTTJOINT_WELD:
+        m_pipelineresult.setStatus(processButtJointPipeline(_mats, *m_gary->getMicroControllerStatusPacketPointer()));
+        break;
+    case TBIWeldType_Enumerator::TBI_FILLET_WELD:
+        m_pipelineresult.setStatus(TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_SELECTEDJOINTTYPENOTIMPLEMENTED);
+        break;
+    }
+
     //Emit the Mats
-
-    //mats.m_testmatgrey = _mats.m_blurr.clone();
-    //cv::Sobel(_mats.m_blurr, _mats.m_testmatgrey, -1, 1,0,3,3,0,cv::BORDER_CONSTANT);
-    //cv::cvtColor(_mats.m_testmatgrey, _mats.m_operation, COLOR_GRAY2BGR);
-
     emit newOperationMatProcessed(_mats.m_operation);
     if(m_emitextramats)
     {
@@ -73,6 +79,7 @@ void Max::setRootQMLContextProperties(QQmlApplicationEngine &_engine)
     m_buttjoint.setRootQMLContextProperties(_engine);
     _engine.rootContext()->setContextProperty("MotionControlParams", &m_motion_control_params);
     _engine.rootContext()->setContextProperty("ProcessingPipeLineStatus", &m_pipelineresult);
+    _engine.rootContext()->setContextProperty("WeldJointType", &m_joint_type);
 }
 
 void Max::setDefautValues()
@@ -102,66 +109,74 @@ void Max::loadFromFile(QDataStream &_filedatastream)
 
 TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet)
 {
+    //Copy The MicroController Status Packet.
     MicroControllerStatusPacket _stat_packet;
     _micro_status_packet.copyStatusPacketTo(_stat_packet);
+    GaryControlMode::ControlMode_t _control_mode = _stat_packet.getControlMode();
+
 
     //Do the VGroove Pipeline
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result;
+
     _result = m_vgroove.processPipeline(_mats, m_vgroove_tracking_container);
+    if(_stat_packet.getLaserStatus()==GaryLaserStatus::TBI_LASER_STATUS_OFF) _result = TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDLASERPOWEROFF;
 
+    //--------------------------------------------------------------------------------
+    // VGroove Specific Secondary Operations After PipeLine Has Run. Tracking Point Checks and Motor Movement
     //---------------------------------------------------------------------------------
-    //Deal With a Change in Control State
-    if(m_attempt_to_toggle_control_state)
+    if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
     {
-        //Now Act According to the  Control State of Gary
-        switch(_stat_packet.getControlMode())
+        //Change Control State Or Process Different Control Modes.
+        if(m_attempt_to_toggle_control_state) //Process Control Mode State Change
         {
-        case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
-            if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
+            //Now Act According to the  Control State of Gary
+            switch(_control_mode)
             {
-                //m_vgroove_tracking_container.setTrackToPoints();
-               // m_gary->setControlModeToFullAuto();
+            case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
+                m_vgroove_tracking_container.setTrackToPoints();
+                m_gary->setControlModeToFullAuto();
+                break;
+            case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
+                m_vgroove_tracking_container.setTrackToPoints();
+                m_gary->setControlModeToHeightOnly();
+                break;
+            case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
+                m_gary->setControlModeToManual();
+                break;
+            default:
+                break;
             }
-            break;
-        case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
-            //m_gary->setControlModeToHeightOnly();
-            break;
-        case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
-            //m_gary->setControlModeToFullAuto();
-            break;
-        default:
-            break;
-
+            m_attempt_to_toggle_control_state = false;
         }
-        m_attempt_to_toggle_control_state = false;
-    }
-    //No Change To Control State is Needed. Perform The Rest of The Tracking Sequence Here
-    else
-    {
-
-        //Now Act According to the  Control State of Gary
-        switch(_stat_packet.getControlMode())
+        else//No Change To Control State is Needed. Perform The Rest of The Tracking Sequence Here
         {
+            //Now Act According to the  Control State of Gary
+            switch(_control_mode)
+            {
             case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
                 break;
             case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
                 m_vgroove_tracking_container.drawTrackToPointstoMat(_mats);
-                if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
+                if(_stat_packet.isXMotionStatusIdle())
                 {
-
+                    //Put Motor Moving Code Here
+                }
+                if(_stat_packet.isZMotionStatusIdle())
+                {
+                    //Put Motor Moving Code Here
                 }
                 break;
             case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
                 m_vgroove_tracking_container.drawTrackToPointstoMat(_mats);
-                if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
+                if(_stat_packet.isZMotionStatusIdle())
                 {
-
+                    //Put Motor Moving Code Here
                 }
                 break;
             default:
                 break;
-         }
-
+            }
+        }
     }
     return _result;
     //---------------------------------------------------------------------------------
@@ -171,16 +186,17 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePi
 TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet)
 {
     MicroControllerStatusPacket _stat_packet;
-
+    _micro_status_packet.copyStatusPacketTo(_stat_packet);
 
     //Do the Butt Joint Pipeline
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result;
     _result = m_buttjoint.processPipeline(_mats, m_buttjoint_tracking_container);
+    if(_micro_status_packet.getLaserStatus()==GaryLaserStatus::TBI_LASER_STATUS_OFF) _result = TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDLASERPOWEROFF;
 
-     _micro_status_packet.copyStatusPacketTo(_stat_packet);
+    //--------------------------------------------------------------------------------
+    // Butt Joint Specific Secondary Operations After PipeLine Has Run. Tracking Point Checks and Motor Movement
     //---------------------------------------------------------------------------------
-    //Deal With a Change in Control State
-    if(m_attempt_to_toggle_control_state)
+    if(m_attempt_to_toggle_control_state) //Deal With a Change in Control State
     {
         //Now Act According to the  Control State of Gary
         switch(_stat_packet.getControlMode())
@@ -195,44 +211,44 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processButtJoint
         case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
             break;
         case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
+            m_gary->setControlModeToManual();
             break;
         default:
             break;
         }
-         m_attempt_to_toggle_control_state = false;
+        m_attempt_to_toggle_control_state = false;
     }
-    //No Change To Control State is Needed. Perform The Rest of The Tracking Sequence Here
-    else
+    else //No Change To Control State is Needed. Perform The Rest of The Tracking Sequence Here
     {
         //Now Act According to the  Control State of Gary
         switch(_stat_packet.getControlMode())
         {
-            case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
-                break;
-            case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
-                break;
-            case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
-                m_buttjoint_tracking_container.drawTrackToPointstoMat(_mats);
-                if((_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK) && _stat_packet.isZMotionStatusIdle())
+        case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
+            break;
+        case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
+            break;
+        case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
+            m_buttjoint_tracking_container.drawTrackToPointstoMat(_mats);
+            if((_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK) && _stat_packet.isZMotionStatusIdle())
+            {
+                //Z Up Increases the Step Location
+                //Which Means Z Must Add Positive Steps
+                //A Positive _zdiff Means Move Down
+                //So Send Negative Steps
+                //m_motion_control_params.setZStepsPerPixel(1214.37037);
+
+                int _zdiff = m_buttjoint_tracking_container.getZTrackingDifference();
+                _zdiff = _zdiff * 1214.37037;
+                if(_zdiff != 0)
                 {
-                    //Z Up Increases the Step Location
-                    //Which Means Z Must Add Positive Steps
-                    //A Positive _zdiff Means Move Down
-                    //So Send Negative Steps
-                    //m_motion_control_params.setZStepsPerPixel(1214.37037);
+                    m_gary->autoMoveZAxis(-_zdiff);
 
-                        int _zdiff = m_buttjoint_tracking_container.getZTrackingDifference();      
-                        _zdiff = _zdiff * 1214.37037;
-                        if(_zdiff != 0)
-                        {
-                            m_gary->autoMoveZAxis(-_zdiff);
-
-                        }
                 }
-                break;
-            default:
-                break;
-         }
+            }
+            break;
+        default:
+            break;
+        }
     }
     //---------------------------------------------------------------------------------
     return _result;

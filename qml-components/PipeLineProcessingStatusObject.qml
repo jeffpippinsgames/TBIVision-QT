@@ -169,7 +169,7 @@ Item {
         focus: false
         font.family: fontId.name
         text: "Pipeline Status: " + rootitemId.pipelinestatusstring
-        font.pointSize: 35
+        font.pointSize: 30
         x: rootitemId.statusstring_x
         y: rootitemId.statusstring_y
         width: statusstringtextId.implicitWidth

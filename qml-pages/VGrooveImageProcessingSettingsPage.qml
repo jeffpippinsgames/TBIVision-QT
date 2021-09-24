@@ -111,6 +111,7 @@ Item {
     //Slots---------------------------------------------------------
     Component.onCompleted:
     {
+        WeldJointType.setJointToVGroove();
 
         //Connect Signals
         Max.processingComplete.connect(rootpageId.triggerTobyNextFrame);
@@ -4724,7 +4725,7 @@ Item {
 
                 onGreenButtonPressed:
                 {
-                    Max.attemptToToggleVGrooveControlState();
+                    Max.attemptToToggleControlState();
                 }
 
                 onRedButtonPressed:

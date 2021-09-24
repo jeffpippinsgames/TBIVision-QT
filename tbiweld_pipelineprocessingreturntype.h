@@ -41,7 +41,8 @@ public:
                                TBI_PIPELINE_FAILEDTOBUILDLEFTBWLGEOMETRICENTITY = 0x22,
                                TBI_PIPELINE_FAILEDTOBUILDRIGHTBWLGEOMETRICENTITY = 0x23,
                                TBI_PIPELINE_FAILEDTOEXTRACTTRACKINGPOINT = 0x24,
-                               TBI_PIPELINE_FAILEDLASERPOWEROFF = 0x25};
+                               TBI_PIPELINE_FAILEDLASERPOWEROFF = 0x25,
+                               TBI_PIPELINE_SELECTEDJOINTTYPENOTIMPLEMENTED = 0x26};
     Q_ENUMS(PipelineReturnType_t)
     static void declareQML()
     {
