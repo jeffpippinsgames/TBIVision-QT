@@ -17,6 +17,11 @@ SerialPortController::SerialPortController (QObject *parent) : QObject(parent)
     if(m_showstatuspacketspersec) QObject::connect(m_packets_per_second_display_timer, SIGNAL(timeout()), this, SLOT(onPacketsPerSecondDisplayTime()));
     if(m_showstatuspacketspersec) m_packets_per_second_display_timer->start();
 
+    m_packet_ack_timeout_timer = new QTimer(this);
+    m_packet_ack_timeout_timer->setInterval(300);
+    m_packet_ack_timeout_timer->setSingleShot(true);
+    QObject::connect(m_packet_ack_timeout_timer, SIGNAL(timeout()), this, SLOT(onStatusPacketAckTimeout()));
+
     m_isconnected = false;
     this->openMicroControllerPort();
 }
@@ -97,8 +102,13 @@ SerialPortControllerReturnType::SerialControllerReturnType_t SerialPortControlle
                 if(_serialinfo.productIdentifier() == _productid)
                 {
                     m_serial_port = new QSerialPort(_serialinfo, this);
-                    m_serial_port->setBaudRate(2000000);
-                    //m_serial_port->setBaudRate(QSerialPort::Baud115200);
+                    //Best Practical Baud Rate with the Serial Lib. See https://arduino.stackexchange.com/questions/296/how-high-of-a-baud-rate-can-i-go-without-errors
+                    //m_serial_port->setBaudRate(2000000);
+                    //m_serial_port->setBaudRate(1000000);
+                    m_serial_port->setBaudRate(500000);
+                    //m_serial_port->setBaudRate(250000);
+                    //m_serial_port->setBaudRate(230400);
+                    //m_serial_port->setBaudRate(115200);
                     m_serial_port->setStopBits(QSerialPort::OneStop);
                     m_serial_port->setParity(QSerialPort::EvenParity);
                     m_serial_port->setDataBits(QSerialPort::Data8);
@@ -110,7 +120,6 @@ SerialPortControllerReturnType::SerialControllerReturnType_t SerialPortControlle
                         m_isconnected = true;
                         emit connectionChanged();
                         m_microcontroller_heartbeat_timer->start();
-                        acknowledgeStatusPacket();
                         if(m_showdebug) qDebug() << "SerialPortControllerReturnType::openMicroControllerPort() Serial Port Opened.";
                         setStatus("MicroController Serial Port Opened.");
                         return SerialPortControllerReturnType::TBI_SERIAL_OK;
@@ -138,8 +147,8 @@ SerialPortControllerReturnType::SerialControllerReturnType_t SerialPortControlle
     QByteArray _cmd;
     _cmd.append(uint(GaryCommands::TBI_CMD_ACKNOWLEDGE_STATUS_PACKET));
     if(m_showdebug) qDebug() << "TBIClass_SerialPortController::acknowledgeStatusPacket(): Sending MicroController Acknowledge Status Packet Command";
-    //return SerialPortControllerReturnType::TBI_SERIAL_OK;
-     return sendSerialCommand(_cmd);
+    m_packet_ack_timeout_timer->start();
+    return sendSerialCommand(_cmd);
 }
 
 void SerialPortController::readSerial()
@@ -241,5 +250,16 @@ void SerialPortController::onPacketsPerSecondDisplayTime()
     m_current_guid = m_microcontroller_status_packet.getcurrentControlStatusGUID();
     m_guid_diff = m_current_guid - m_last_guid;
     qDebug() << "Packets Per Second: " << m_guid_diff;
-   // this->acknowledgeStatusPacket();
+}
+
+void SerialPortController::onStatusPacketAckTimeout()
+{
+    if(m_isconnected)
+    {
+        qDebug() << "SerialPortController::onStatusPacketAckTimeout(): Lost Status Packets. Acknowledgement was lost. Last Good Packet GUID = " << m_microcontroller_status_packet.getcurrentControlStatusGUID();
+    }
+    else
+    {
+        qDebug() << "SerialPortController::onStatusPacketAckTimeout(): Lost Status Packets. Serial Connection Lost. Acknowledgement was lost. Last Good Packet GUID = " << m_microcontroller_status_packet.getcurrentControlStatusGUID();
+    }
 }

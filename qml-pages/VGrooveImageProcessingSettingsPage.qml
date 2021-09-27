@@ -4730,21 +4730,7 @@ Item {
 
                 onRedButtonPressed:
                 {
-                    switch(MicroControllerStatusPacket.controlMode)
-                    {
-                    case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
-                        Gary.sendStopMovement();
-                        operationsettingsrectId.grabFocus();
-                        break;
-                    case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
-                        Gary.setControlModeToManual();
-                        break;
-                    case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
-                        Gary.setControlModeToManual();
-                        break;
-                    case GaryControlMode.TBI_CONTROL_MODE_MOTORCALIBRATION:
-                        break;
-                    }
+                    Gary.setControlModeToManual();
                 }
 
                 onUpButtonPressed:

@@ -39,12 +39,13 @@ private slots:
     void onReconnectTimer();
     void onSendMicroControllerHeartbeat();
     void onPacketsPerSecondDisplayTime();
+     void onStatusPacketAckTimeout();
 
 
 private:
     static const bool m_showdebug = false;
     static const bool m_showserialerrors = true;
-    static const bool m_showstatuspacketspersec = true;
+    static const bool m_showstatuspacketspersec = false;
 
     static const quint16 m_teensy32_vendorID = 0x16C0;
     static const quint16 m_teensy32_productID = 0x0483;
@@ -67,6 +68,8 @@ private:
     quint32 m_last_guid;
     quint32 m_guid_diff;
 
+    QTimer *m_packet_ack_timeout_timer;
+
     QString m_status;
     bool m_isconnected;
 
@@ -77,6 +80,7 @@ signals:
     void statusChanged();
     void microControllerPacketReady(MicroControllerStatusPacket &_packet);
     void joystickFlagsReady(quint8 _flags);
+
 
 };
 
