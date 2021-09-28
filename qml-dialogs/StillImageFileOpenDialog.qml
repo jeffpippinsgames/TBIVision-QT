@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Window 2.12
 import QtGraphicalEffects 1.0
 import QtQuick.Controls 2.12
+import QtQml.Models 2.12
 import "qrc:/qml-components"
 import "qrc:/qml-pages"
 import tbi.vision.components 1.0
@@ -37,9 +38,25 @@ Rectangle
     onVisibleChanged:
     {
         Toby.updateStillImageFileList();
+        if(rootdialogId.visible)
+        {
+            filelistviewId.model = Toby.stillImageListViewModel;
+        }
+        else
+        {
+            filelistviewId.model = emptymodelId;
+        }
     }
 
     //OML Components------------------------------------------------
+
+
+
+
+    ListModel
+    {
+        id: emptymodelId;
+    }
 
    //Controller Object
     ControllerObject
@@ -162,9 +179,14 @@ Rectangle
        y: 20
        width: rootdialogId.width-filelistviewId.x-20
        height: rootdialogId.height - 2* filelistviewId.y
-       model: Toby.stillImageListViewModel
+       //model: Toby.stillImageListViewModel
        spacing: 10
        highlight: Rectangle{id: filehighlightrectId; color: "green"; radius: 5; opacity: .2}
+
+       Component.onDestruction:
+       {
+           filelistviewId.model = emptymodelId;
+       }
 
        delegate: Rectangle
        {
@@ -185,7 +207,7 @@ Rectangle
 
        onCurrentIndexChanged:
        {
-           previewimageId.source = "file:///" + Toby.currentApplicationPath + "/stills/" + Toby.stillImageListViewModel[filelistviewId.currentIndex];
+           if(rootdialogId.visible) previewimageId.source = "file:///" + Toby.currentApplicationPath + "/stills/" + Toby.stillImageListViewModel[filelistviewId.currentIndex];
        }
     }
 

@@ -21,6 +21,8 @@ Max::Max(QObject *parent) : QObject(parent)
 
     m_motion_control_params.setXStepsPerPixel(1214.37037);
     m_motion_control_params.setZStepsPerPixel(1214.37037);
+    m_tracking_point_valid = false;
+    m_track_to_point_valid = false;
 }
 
 Max::~Max()
@@ -115,6 +117,9 @@ void Max::loadFromFile(QDataStream &_filedatastream)
 
 TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet)
 {
+    m_tracking_point_valid = false;
+    m_track_to_point_valid = false;
+
     //Copy The MicroController Status Packet.
     MicroControllerStatusPacket _stat_packet;
     _micro_status_packet.copyStatusPacketTo(_stat_packet);
@@ -125,6 +130,12 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePi
 
     _result = m_vgroove.processPipeline(_mats, m_vgroove_tracking_container);
     if(_stat_packet.getLaserStatus()==GaryLaserStatus::TBI_LASER_STATUS_OFF) _result = TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDLASERPOWEROFF;
+    if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK) //Set Tracking Point Info
+    {
+            m_tracking_point_valid = true;
+            m_tracking_x = (int)round(m_vgroove_tracking_container.getTrackingPoint().m_x);
+            m_tracking_y = (int)round(m_vgroove_tracking_container.getTrackingPoint().m_y);
+    }
 
     //--------------------------------------------------------------------------------
     // VGroove Specific Secondary Operations After PipeLine Has Run. Tracking Point Checks and Motor Movement
@@ -167,6 +178,9 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePi
                 break;
             case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
                 m_vgroove_tracking_container.drawTrackToPointstoMat_FullAuto(_mats);
+                m_track_to_point_valid = true;
+                m_track_to_x = (int)round(m_vgroove_tracking_container.getTrackToPoint().m_x);
+                m_track_to_y = (int)round(m_vgroove_tracking_container.getTrackToPoint().m_y);
                 m_vgroove_tracking_container.CalcJointDefinitionBoundaryPoints();
                 _result = m_vgroove_tracking_container.CheckJointBoundry();
 
@@ -190,6 +204,9 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePi
                 break;
             case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
                 m_vgroove_tracking_container.drawTrackToPointstoMat_HeightOnly(_mats);
+                m_track_to_point_valid = true;
+                m_track_to_x = (int)round(m_vgroove_tracking_container.getTrackToPoint().m_x);
+                m_track_to_y = (int)round(m_vgroove_tracking_container.getTrackToPoint().m_y);
                 m_vgroove_tracking_container.CalcJointDefinitionBoundaryPoints();
                 _result = m_vgroove_tracking_container.CheckJointBoundry();
                 if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
@@ -208,6 +225,15 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePi
             }
         }
     }
+
+    emit trackingPointXChanged();
+    emit trackingPointYChanged();
+    emit validTrackingPointChanged();
+    emit trackToPointXChanged();
+    emit trackToPointYChanged();
+    emit validTrackToPointChanged();
+
+    //Update Tracking Info For
     return _result;
     //---------------------------------------------------------------------------------
 
@@ -215,6 +241,10 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePi
 
 TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processButtJointPipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet)
 {
+
+    m_tracking_point_valid = false;
+    m_track_to_point_valid = false;
+
     MicroControllerStatusPacket _stat_packet;
     _micro_status_packet.copyStatusPacketTo(_stat_packet);
 
@@ -222,6 +252,12 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processButtJoint
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result;
     _result = m_buttjoint.processPipeline(_mats, m_buttjoint_tracking_container);
     if(_micro_status_packet.getLaserStatus()==GaryLaserStatus::TBI_LASER_STATUS_OFF) _result = TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDLASERPOWEROFF;
+    if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK) //Set Tracking Point Info
+    {
+            m_tracking_point_valid = true;
+            m_track_to_x = (int)round(m_vgroove_tracking_container.getTrackingPoint().m_x);
+            m_track_to_y = (int)round(m_vgroove_tracking_container.getTrackingPoint().m_y);
+    }
 
     //--------------------------------------------------------------------------------
     // Butt Joint Specific Secondary Operations After PipeLine Has Run. Tracking Point Checks and Motor Movement
@@ -259,6 +295,9 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processButtJoint
             break;
         case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
             m_buttjoint_tracking_container.drawTrackToPointstoMat(_mats);
+            m_track_to_point_valid = true;
+            m_track_to_x = (int)round(m_vgroove_tracking_container.getTrackToPoint().m_x);
+            m_track_to_y = (int)round(m_vgroove_tracking_container.getTrackToPoint().m_y);
             if((_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK) && _stat_packet.isZMotionStatusIdle())
             {
                 //Z Up Increases the Step Location
@@ -280,6 +319,14 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processButtJoint
             break;
         }
     }
+
+    emit trackingPointXChanged();
+    emit trackingPointYChanged();
+    emit validTrackingPointChanged();
+    emit trackToPointXChanged();
+    emit trackToPointYChanged();
+    emit validTrackToPointChanged();
+
     //---------------------------------------------------------------------------------
     return _result;
 }

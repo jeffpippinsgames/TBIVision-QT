@@ -82,6 +82,13 @@ class Max : public QObject
     Q_OBJECT
     Q_PROPERTY(QString timeinloop READ getTimeinLoop NOTIFY timeInLoopChanged)
     Q_PROPERTY(bool emitExtraMats READ getEmitExtraMats WRITE setEmitExtraMats NOTIFY emitExtraMatsChanged)
+    Q_PROPERTY(bool validtrackingpoint READ getValidTrackingPoint NOTIFY validTrackingPointChanged)
+    Q_PROPERTY(bool validtracktopoint READ getValidTrackToPoint NOTIFY validTrackToPointChanged)
+    Q_PROPERTY(int trackingpoint_x READ getTrackingPointX NOTIFY trackingPointXChanged)
+    Q_PROPERTY(int trackingpoint_y READ getTrackingPointY NOTIFY trackingPointYChanged)
+    Q_PROPERTY(int tracktopoint_x READ getTrackToPointX NOTIFY trackToPointXChanged)
+    Q_PROPERTY(int tracktopoint_y READ getTrackToPointY NOTIFY trackToPointYChanged)
+
 
 public:
 
@@ -93,6 +100,12 @@ public:
     QString getTimeinLoop(){return m_timeinloop;}
     Q_INVOKABLE bool getEmitExtraMats(){return m_emitextramats;}
     Q_INVOKABLE void attemptToToggleControlState(){m_attempt_to_toggle_control_state = true;}
+    bool getValidTrackingPoint(){return m_tracking_point_valid;}
+    bool getValidTrackToPoint(){return m_track_to_point_valid;}
+    int getTrackingPointX(){return m_tracking_x;}
+    int getTrackingPointY(){return m_tracking_y;}
+    int getTrackToPointX(){return m_track_to_x;}
+    int getTrackToPointY(){return m_track_to_y;}
 
     //Set Methods
     void setEmitExtraMats(bool _flag){m_emitextramats = _flag; emit emitExtraMatsChanged();}
@@ -117,6 +130,13 @@ private:
     TBIMotionControlParameters m_motion_control_params;
     TBIWeld_VGroove m_vgroove;
     TBIWeld_VGrooveTrackingContainer m_vgroove_tracking_container;
+
+    bool m_tracking_point_valid;
+    bool m_track_to_point_valid;
+    int  m_tracking_x;
+    int m_tracking_y;
+    int m_track_to_x;
+    int m_track_to_y;
 
     TBIWeld_ButtJoint m_buttjoint;
     TBIWeld_ButtJointTrackingContainer m_buttjoint_tracking_container;
@@ -153,6 +173,12 @@ signals:
     //Ulility Signals-----------------------------------------
     void processingComplete();
     void emitExtraMatsChanged();
+    void validTrackingPointChanged();
+    void validTrackToPointChanged();
+    void trackingPointXChanged();
+    void trackingPointYChanged();
+    void trackToPointXChanged();
+    void trackToPointYChanged();
 };
 
 #endif // TBICORE_MAX_H

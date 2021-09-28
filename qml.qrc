@@ -30,7 +30,6 @@
         <file>Icons/laser2.png</file>
         <file>Icons/laser3.png</file>
         <file>Icons/laser4.png</file>
-        <file>Icons/Lens.png</file>
         <file>Icons/open.png</file>
         <file>Icons/photography.png</file>
         <file>Icons/position.png</file>
@@ -86,5 +85,8 @@
         <file>qml-components/MotionSystemStatusObject.qml</file>
         <file>qml-components/LaserPowerStatusObject.qml</file>
         <file>Icons/power.png</file>
+        <file>qml-components/TrackingStatusObject.qml</file>
+        <file>Icons/crosshairs.png</file>
+        <file>Icons/processingpipeline.png</file>
     </qresource>
 </RCC>

@@ -53,6 +53,8 @@ public:
     void drawJointDefinitionBoundaryToMat(TBIClass_OpenCVMatContainer &_mats);
     void setJointDefinitionBoundaryOffset(int _offset){m_joint_def_boundary = _offset;}
     void setMotionRequirementBoundary(int _offset){m_movement_boundary = _offset;}
+    TBIPoint_Float getTrackingPoint(){return m_tracking_line_center_point;}
+    TBIPoint_Float getTrackToPoint(){return m_track_to_line_center_point;}
 
 private:
     float areaofThreeVertexTriangle(TBIPoint_Float _vertex1, TBIPoint_Float _vertex2, TBIPoint_Float _vertex3);

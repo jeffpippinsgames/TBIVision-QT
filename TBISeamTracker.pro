@@ -104,3 +104,5 @@ DEPENDPATH += $$PWD/../../../../../usr/local/include
 INCLUDEPATH += $$PWD/../../../../../usr/include/opencv4
 DEPENDPATH += $$PWD/../../../../../usr/include/opencv4
 
+DISTFILES +=
+

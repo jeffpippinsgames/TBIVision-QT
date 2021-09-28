@@ -57,9 +57,12 @@ Item {
             rotatemenuId.addMenuItem("qrc:/Icons/save.png", "Save Profile");
             rotatemenuId.addMenuItem("qrc:/Icons/gear.png", "System Settings");
             rotatemenuId.addMenuItem("qrc:/Icons/laser3.png", "Toggle Laser Power");
-            rotatemenuId.addMenuItem("qrc:/Icons/image.png", "VGroove Joint Pipeline Settings");
-            rotatemenuId.addMenuItem("qrc:/Icons/image.png", "Butt Joint Pipeline Settings");
+            rotatemenuId.addMenuItem("qrc:/Icons/processingpipeline.png", "VGroove Joint Pipeline Settings");
+            rotatemenuId.addMenuItem("qrc:/Icons/processingpipeline.png", "Butt Joint Pipeline Settings");
             rotatemenuId.addMenuItem("qrc:/Icons/quit.png", "Quit Application");
+            rotatemenuId.addMenuItem("qrc:/Icons/image.png", "Process Still Image");
+            rotatemenuId.addMenuItem("qrc:/Icons/Camera.png", "Process Camera");
+
         }
 
         onSelectionMade:
@@ -84,6 +87,16 @@ Item {
                 break;
             case "Toggle Laser Power":
                 Gary.toggleLaserPower();
+                rootpageId.cleanupForDestruction();
+                rootpageId.destroyPage(pagesId.operationspage);
+                break;
+            case "Process Still Image":
+                Toby.updateStillImageFileList();
+                Toby.stopCamera();
+                stillimagefiledialogId.visible = true;
+                break;
+            case "Process Camera":
+                Toby.closeStillImagetoProcess();
                 rootpageId.cleanupForDestruction();
                 rootpageId.destroyPage(pagesId.operationspage);
                 break;
@@ -113,6 +126,27 @@ Item {
                 rootpageId.grabFocus();
                 break;
             }
+        }
+    }
+
+    //Still Image File Open Dialog
+    StillImageFileOpenDialog
+    {
+        id: stillimagefiledialogId
+        visible: false
+
+        onVisibleChanged:
+        {
+            if(stillimagefiledialogId.visible == true)
+            {
+                stillimagefiledialogId.grabFocus();
+            }
+            else
+            {
+                rootpageId.cleanupForDestruction();
+                rootpageId.destroyPage(pagesId.operationspage);
+            }
+
         }
     }
 

@@ -22,7 +22,16 @@ SerialPortController::SerialPortController (QObject *parent) : QObject(parent)
     m_packet_ack_timeout_timer->setSingleShot(true);
     QObject::connect(m_packet_ack_timeout_timer, SIGNAL(timeout()), this, SLOT(onStatusPacketAckTimeout()));
 
+    m_write_buffer.clear();
+    m_bytes_written = 0;
+    m_serial_write_timer = new QTimer(this);
+    m_serial_write_timer->setInterval(5);
+    m_serial_write_timer->setSingleShot(true);
+
+
     m_isconnected = false;
+
+
     this->openMicroControllerPort();
 }
 
@@ -60,6 +69,42 @@ SerialPortControllerReturnType::SerialControllerReturnType_t SerialPortControlle
         {
             _data.append(uint(255));
         }
+        m_write_buffer.push_back(_data);
+        if(!m_serial_write_timer->isActive()) m_serial_write_timer->start();
+    }
+    else
+    {
+        activateReConnectionTimerIfNeeded();
+        if(m_showdebug) qDebug() << "TBIClass_SerialPortController::sendSerialCommand() Error in sendSerialCommand: m_serial_port is not open";
+        return SerialPortControllerReturnType::TBI_SERIAL_SERIAL_PORT_IS_NOT_OPENED;
+    }
+    return SerialPortControllerReturnType::TBI_SERIAL_OK;
+}
+
+/*
+SerialPortControllerReturnType::SerialControllerReturnType_t SerialPortController::sendSerialCommand(QByteArray &_data)
+{
+    if(m_serial_port == nullptr)
+    {
+        if(m_showdebug) qDebug() << "TBIClass_SerialPortController::sendSerialCommand() Error in sendSerialCommand: m_serial_port is null";
+        activateReConnectionTimerIfNeeded();
+        return SerialPortControllerReturnType::TBI_SERIAL_SERIAL_PORT_IS_NULL_POINTER;
+    }
+    if(_data.size() > TBIConstants::TBI_COMMAND_BUFFER_SIZE)
+    {
+        if(m_showdebug) qDebug() << "TBIClass_SerialPortController::sendSerialCommand() Error. _data is larger than allowed size.";
+        return SerialPortControllerReturnType::TBI_SERIAL_FAILED_SEND_BYTEARRAY_TO_LARGE;
+    }
+    if(m_serial_port->isOpen())
+    {
+        //Make Sure the Data Array is TBI_COMMAND_BUFFER_SIZE in size.
+        //The Microcontroller an incomming packet to be this size.
+        while(_data.size() < TBIConstants::TBI_COMMAND_BUFFER_SIZE)
+        {
+            _data.append(uint(255));
+        }
+        if(_data[0].operator==(uint(GaryCommands::TBI_CMD_TOGGLE_LASER_POWER))) qDebug() << "Serial Send Command Entered.";
+
         m_serial_port->write(_data);
         m_serial_port->waitForBytesWritten(2000);
         if(_data[0].operator!=(uint(GaryCommands::TBI_CMD_KEEP_ALIVE)))
@@ -76,6 +121,9 @@ SerialPortControllerReturnType::SerialControllerReturnType_t SerialPortControlle
     }
     return SerialPortControllerReturnType::TBI_SERIAL_OK;
 }
+*/
+
+
 
 void SerialPortController::setStatus(QString _msg)
 {
@@ -115,10 +163,13 @@ SerialPortControllerReturnType::SerialControllerReturnType_t SerialPortControlle
                     m_serial_port->setFlowControl(QSerialPort::NoFlowControl);
                     QObject::connect(m_serial_port, SIGNAL(readyRead()), this, SLOT(readSerial()));
                     QObject::connect(m_serial_port, SIGNAL(errorOccurred(QSerialPort::SerialPortError)), this, SLOT(onSerialPortError(QSerialPort::SerialPortError)));
+                    QObject::connect(m_serial_port, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
+                    QObject::connect(m_serial_write_timer, SIGNAL(timeout()), this, SLOT(onWriteSerialTimeout()));
                     if(m_serial_port->open(QIODevice::ReadWrite))
                     {
                         m_isconnected = true;
                         emit connectionChanged();
+                        m_serial_write_timer->start();
                         m_microcontroller_heartbeat_timer->start();
                         if(m_showdebug) qDebug() << "SerialPortControllerReturnType::openMicroControllerPort() Serial Port Opened.";
                         setStatus("MicroController Serial Port Opened.");
@@ -149,6 +200,31 @@ SerialPortControllerReturnType::SerialControllerReturnType_t SerialPortControlle
     if(m_showdebug) qDebug() << "TBIClass_SerialPortController::acknowledgeStatusPacket(): Sending MicroController Acknowledge Status Packet Command";
     m_packet_ack_timeout_timer->start();
     return sendSerialCommand(_cmd);
+}
+
+SerialPortControllerReturnType::SerialControllerReturnType_t SerialPortController::transmitNextSerialCommand(QByteArray &_data)
+{
+    if(_data.size() == 0) return SerialPortControllerReturnType::TBI_SERIAL_OK;
+    if(m_serial_port->isOpen())
+    {
+        if(m_can_write_to_buffer)
+        {
+            m_can_write_to_buffer = false;
+            m_serial_port->write(_data, TBIConstants::TBI_COMMAND_BUFFER_SIZE);
+            _data.remove(0, TBIConstants::TBI_COMMAND_BUFFER_SIZE);
+            if(!m_serial_write_timer->isActive() && _data.size() != 0) m_serial_write_timer->start();
+        }
+        else
+        {
+            if(!m_serial_write_timer->isActive() && _data.size() != 0) m_serial_write_timer->start();
+        }
+    }
+    else
+    {
+        return SerialPortControllerReturnType::TBI_SERIAL_SERIAL_PORT_IS_NOT_OPENED;
+    }
+
+    return SerialPortControllerReturnType::TBI_SERIAL_OK;
 }
 
 void SerialPortController::readSerial()
@@ -262,4 +338,23 @@ void SerialPortController::onStatusPacketAckTimeout()
     {
         qDebug() << "SerialPortController::onStatusPacketAckTimeout(): Lost Status Packets. Serial Connection Lost. Acknowledgement was lost. Last Good Packet GUID = " << m_microcontroller_status_packet.getcurrentControlStatusGUID();
     }
+}
+
+void SerialPortController::bytesWritten(qint64 _bytes)
+{
+    if(m_serial_port->isOpen())
+    {
+        m_bytes_written += _bytes;
+        if(m_bytes_written == TBIConstants::TBI_COMMAND_BUFFER_SIZE)
+        {
+            m_bytes_written = 0;
+            m_can_write_to_buffer = true;
+            qDebug() << "m_write_buffer.size() = " << m_write_buffer.size();
+        }
+    }
+}
+
+void SerialPortController::onWriteSerialTimeout()
+{
+    if(m_can_write_to_buffer) this->transmitNextSerialCommand(m_write_buffer);
 }

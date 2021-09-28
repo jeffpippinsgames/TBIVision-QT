@@ -18,6 +18,7 @@ Item
     y:0
 
     readonly property string pagename: "Operations Page"
+    property int control_mode: MicroControllerStatusPacket.controlMode
 
     //property string fontsource2: "qrc:/Fonts/Blueprint BoldItalic.ttf"
     //property string fontsource2: "qrc:/Fonts/EurostileBold.ttf"
@@ -40,11 +41,50 @@ Item
         //Disconnect All Signals
         Max.newOperationMatProcessed.disconnect(operationviewId.recieveCVMat);
         Max.processingComplete.disconnect(mainpageID.triggerTobyNextFrame);
+        lasertimeouttimerId.stop();
     }
 
     function triggerTobyNextFrame()
     {
         imagegrabtimerId.restart();
+    }
+
+    onControl_modeChanged:
+    {
+        switch(control_mode)
+        {
+        case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+            if(MicroControllerStatusPacket.laserStatus)
+            {
+                if(!lasertimeouttimerId.running) lasertimeouttimerId.restart();
+
+            }
+            break;
+        case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
+            lasertimeouttimerId.stop();
+            break;
+        case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
+            lasertimeouttimerId.stop();
+            break;
+        }
+    }
+
+    Timer
+    {
+        id: lasertimeouttimerId
+        interval: 300000
+        running: false
+        repeat: false
+        triggeredOnStart: false
+
+        onTriggered:
+        {
+            if(MicroControllerStatusPacket.laserStatus)
+            {
+                lasertimeouttimerId.stop();
+                Gary.toggleLaserPower();
+            }
+        }
     }
 
     //Slots
@@ -53,6 +93,7 @@ Item
         Max.processingComplete.connect(mainpageID.triggerTobyNextFrame);
         Toby.startCamera();
         Max.emitExtraMats = false;
+        lasertimeouttimerId.stop();
     }
 
     //Signals
@@ -92,7 +133,7 @@ Item
 
             switch(MicroControllerStatusPacket.controlMode)
             {
-            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:      
+            case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
                 break;
             case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
                 cleanupForDestruction();
@@ -110,13 +151,23 @@ Item
             switch(MicroControllerStatusPacket.controlMode)
             {
             case GaryControlMode.TBI_CONTROL_MODE_FULLAUTO_MODE:
-                Max.a
+                Max.attemptToToggleControlState();
                 break;
             case GaryControlMode.TBI_CONTROL_MODE_MANUAL_MODE:
+                if(!MicroControllerStatusPacket.laserStatus)
+                {
+                    Gary.toggleLaserPower();
+                    if(!lasertimeouttimerId.running) lasertimeouttimerId.restart();
+
+                }
+                else
+                {
+                    Max.attemptToToggleControlState();
+                }
 
                 break;
             case GaryControlMode.TBI_CONTROL_MODE_HEIGHTONLY:
-
+                Max.attemptToToggleControlState();
                 break;
             }
         }
@@ -350,6 +401,25 @@ Item
         y: laserpowerstatusId.rect_y + laserpowerstatusId.rect_height + 5
     }
 
+    TrackingStatusObject
+    {
+        id: trackingstatusId
+        trackingtext: "TP " + Max.trackingpoint_x + "," + Max.trackingpoint_y
+        showcontrol: Max.validtrackingpoint
+        rect_x: viewbackgroundrectId.width+5
+        rect_y: controlmodestatusId.y + controlmodestatusId.height + 30
+
+    }
+
+    TrackingStatusObject
+    {
+        id: tracktostatusId
+        trackingtext: "TTP: " + Max.tracktopoint_x + "," + Max.tracktopoint_y
+        showcontrol: Max.validtracktopoint
+        rect_x: viewbackgroundrectId.width+5
+        rect_y: trackingstatusId.rect_y + trackingstatusId.rect_height + 5
+    }
+
     //X Axis Motor Status
     MotorStatusObject
     {
@@ -358,7 +428,7 @@ Item
         position: MicroControllerStatusPacket.xPosition
         microcontrollermotionstatus: MicroControllerStatusPacket.xMotionStatus
         x: viewbackgroundrectId.width+5
-        y: controlmodestatusId.height + controlmodestatusId.y + 200
+        y: controlmodestatusId.height + controlmodestatusId.y + 300
     }
 
     //Z Axis Motor Status

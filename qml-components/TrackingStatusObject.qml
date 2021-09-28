@@ -12,8 +12,9 @@ Item
     anchors.fill: parent
 
     property bool microcontrollerconnected: SerialPortController.isconnected
-    property int laserstatus: MicroControllerStatusPacket.laserStatus
-    property int controlmode: MicroControllerStatusPacket.controlMode
+    property string trackingtext: "No Binding Set"
+    property string iconsourceimage: "qrc:/Icons/crosshairs.png"
+    property bool showcontrol: false
 
     property int rect_x: 0
     property int rect_y: 0
@@ -33,8 +34,6 @@ Item
     readonly property color mode4color: Qt.rgba(.2, .8, .2, .7) //green - chartreuse
     readonly property color mode5color: Qt.rgba(.3, .3, .8, .7) //cyan
 
-
-
     //Font for UI
     FontLoader
     {
@@ -51,42 +50,23 @@ Item
 
     function setStatus()
     {
-
-       switch(rootitemId.laserstatus)
+       if(!microcontrollerconnected)
        {
-         case 0:
-             glowId.color = rootitemId.mode2color;
-             statustextId.text = "Laser Power";
-             statustextId.color = "red";
-             rootrectId.border.color = "red";
-             break;
-         case 1:
-             glowId.color = rootitemId.mode4color;
-             statustextId.text = "Laser Power";
-             statustextId.color = "chartreuse";
-             rootrectId.border.color =rootitemId.mode4color;
-             break;
+           statustextId.color = "red";
+           rootrectId.border.color = rootitemId.mode2color;
+           glowId.color = "red";
        }
-    }
-
-    onLaserstatusChanged:
-    {
-        setStatus();
+       else
+       {
+           statustextId.color = "chartreuse";
+           rootrectId.border.color = rootitemId.mode4color;
+           glowId.color = "chartreuse";
+       }
     }
 
     onMicrocontrollerconnectedChanged:
     {
-        if(!rootitemId.microcontrollerconnected)
-        {
-            glowId.color = rootitemId.mode2color;
-            statustextId.text = "Com Error";
-            statustextId.color = "red";
-            rootrectId.border.color = "red";
-        }
-        else
-        {
-            rootitemId.setStatus();
-        }
+        rootitemId.setStatus();
     }
 
     Component.onCompleted:
@@ -103,8 +83,10 @@ Item
         color: "transparent"
         radius: 10
         border.width: 3
+        border.color: Qt.rgba(.8, .8, .0, .7)
         x: rootitemId.rect_x
         y: rootitemId.rect_y
+        visible: rootitemId.showcontrol
 
         Image
         {
@@ -114,7 +96,7 @@ Item
             x: 5
             y: (rootrectId.height - imageId.height)/2
             visible: true
-            source: "qrc:/Icons/power.png"
+            source: rootitemId.iconsourceimage
             opacity: .1
         }
 
@@ -124,23 +106,25 @@ Item
             anchors.fill: imageId
             radius: 8
             samples: 25
+            color: "yellow"
             source: imageId
             opacity: .5
         }
 
-        //Camera Name Text
+        //Text Tracking
         Text
         {
             id: statustextId
             visible: true
             focus: false
             font.family: font2Id.name
-            text: "Laser Power"
+            text: rootitemId.trackingtext
             font.pointSize: 20
             width: statustextId.implicitWidth
             height: statustextId.implicitHeight
             x: imageId.x+imageId.width+10
             y: (rootrectId.height - statustextId.height)/2
+            color: rootitemId.textcolor
             opacity: .7
         }
 

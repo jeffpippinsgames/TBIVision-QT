@@ -129,11 +129,13 @@ void TBIWeld_VGrooveTrackingContainer::setTrackToPoints()
     m_track_to_joint_line = m_tracking_joint_line;
     m_track_to_line_center_point = m_tracking_line_center_point;
 
+    m_track_to_line_center_point.m_x += m_movement_boundary + 5;
+    m_track_to_line_center_point.m_y += m_movement_boundary + 5;
+
     m_left_joint_def = m_left_tracking_point;
     m_right_joint_def = m_right_tracking_point;
     m_root_joint_def = m_root_point;
     m_joint_centroid_def = m_joint_centroid;
-
 }
 
 void TBIWeld_VGrooveTrackingContainer::drawTrackToPointstoMat_FullAuto(TBIClass_OpenCVMatContainer &_mats)

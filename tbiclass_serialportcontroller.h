@@ -31,6 +31,7 @@ private:
     void activateReConnectionTimerIfNeeded();
     SerialPortControllerReturnType::SerialControllerReturnType_t openMicroControllerPort(quint16 _vendorid = m_arduino_uno_vendorID, quint16 _productid = m_arduino_uno_productID);
     SerialPortControllerReturnType::SerialControllerReturnType_t acknowledgeStatusPacket();
+    SerialPortControllerReturnType::SerialControllerReturnType_t transmitNextSerialCommand(QByteArray &_data);
     bool getIsConnected(){return m_isconnected;}
 
 private slots:
@@ -39,7 +40,10 @@ private slots:
     void onReconnectTimer();
     void onSendMicroControllerHeartbeat();
     void onPacketsPerSecondDisplayTime();
-     void onStatusPacketAckTimeout();
+    void onStatusPacketAckTimeout();
+    void bytesWritten(qint64 _bytes);
+    void onWriteSerialTimeout();
+
 
 
 private:
@@ -55,6 +59,9 @@ private:
     static const quint16 m_ftdi_FT232_UART_productID = 0x6001;
 
 
+    bool m_can_write_to_buffer;
+    qint64 m_bytes_written;
+    QTimer *m_serial_write_timer;
     QByteArray m_write_buffer;
 
     QSerialPortInfo *m_serial_info;

@@ -88,7 +88,7 @@ Item {
     {
         //Stop The Camera and Still Image Processing For Transition
         Toby.stopCamera();
-        Toby.closeStillImagetoProcess();
+        //Toby.closeStillImagetoProcess();
 
         //Save Mary and Update Singletons
         Mary.saveSettingsToDefaultFile();
