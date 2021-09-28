@@ -96,8 +96,6 @@ private:
     TBIPoint_Float m_root_inside_joint_def;
     TBIPoint_Float m_joint_inside_centroid_def;
 
-
-
     int m_joint_def_boundary;
     int m_movement_boundary;
     int m_excessive_change_boundry;

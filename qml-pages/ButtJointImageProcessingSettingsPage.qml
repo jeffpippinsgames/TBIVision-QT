@@ -3613,7 +3613,7 @@ Item {
 
                 onGreenButtonPressed:
                 {
-                    Max.attemptToToggleVGrooveControlState();
+                    Max.attemptToToggleControlState();
                 }
 
                 onRedButtonPressed:
