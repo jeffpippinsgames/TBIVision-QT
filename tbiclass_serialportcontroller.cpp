@@ -69,6 +69,7 @@ SerialPortControllerReturnType::SerialControllerReturnType_t SerialPortControlle
         {
             _data.append(uint(255));
         }
+        qDebug() << "Writing Command " << (int)_data[0] << " To Write Buffer";
         m_write_buffer.push_back(_data);
         if(!m_serial_write_timer->isActive()) m_serial_write_timer->start();
     }
