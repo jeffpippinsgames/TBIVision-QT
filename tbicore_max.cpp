@@ -18,6 +18,9 @@ Max::Max(QObject *parent) : QObject(parent)
     this->setDefautValues();
     if(m_showdebug) qDebug()<<"Max::Max() Max Object Created.";
     m_joint_type.setJointType(TBIWeldType_Enumerator::TBI_VGROOVE_WELD);
+
+    m_motion_control_params.setXStepsPerPixel(1214.37037);
+    m_motion_control_params.setZStepsPerPixel(1214.37037);
 }
 
 Max::~Max()
@@ -90,6 +93,7 @@ void Max::setDefautValues()
     m_timeinloop = "Error:";
     m_vgroove.setDefautValues();
     m_motion_control_params.setDefautValues();
+
 }
 
 void Max::saveToFile(QDataStream &_filedatastream)
@@ -105,6 +109,8 @@ void Max::loadFromFile(QDataStream &_filedatastream)
     m_vgroove.loadFromFile(_filedatastream);
     m_buttjoint.loadFromFile(_filedatastream);
     m_motion_control_params.loadFromFile(_filedatastream);
+    m_motion_control_params.setXStepsPerPixel(1214.37037);
+    m_motion_control_params.setZStepsPerPixel(1214.37037);
 }
 
 TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePipeline(TBIClass_OpenCVMatContainer &_mats, MicroControllerStatusPacket &_micro_status_packet)
@@ -113,7 +119,6 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePi
     MicroControllerStatusPacket _stat_packet;
     _micro_status_packet.copyStatusPacketTo(_stat_packet);
     GaryControlMode::ControlMode_t _control_mode = _stat_packet.getControlMode();
-
 
     //Do the VGroove Pipeline
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result;
@@ -129,48 +134,73 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePi
         //Change Control State Or Process Different Control Modes.
         if(m_attempt_to_toggle_control_state) //Process Control Mode State Change
         {
-            //Now Act According to the  Control State of Gary
-            switch(_control_mode)
+            if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
             {
-            case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
-                m_vgroove_tracking_container.setTrackToPoints();
-                m_gary->setControlModeToFullAuto();
-                break;
-            case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
-                m_vgroove_tracking_container.setTrackToPoints();
-                m_gary->setControlModeToHeightOnly();
-                break;
-            case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
-                m_gary->setControlModeToManual();
-                break;
-            default:
-                break;
+                //Now Act According to the  Control State of Gary
+                switch(_control_mode)
+                {
+                case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
+                    m_vgroove_tracking_container.setTrackToPoints();
+                    m_gary->setControlModeToFullAuto();
+                    break;
+                case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
+                    m_vgroove_tracking_container.setTrackToPoints();
+                    m_gary->setControlModeToHeightOnly();
+                    break;
+                case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
+                    m_gary->setControlModeToManual();
+                    break;
+                default:
+                    break;
+                }
             }
             m_attempt_to_toggle_control_state = false;
         }
         else//No Change To Control State is Needed. Perform The Rest of The Tracking Sequence Here
         {
+
             //Now Act According to the  Control State of Gary
             switch(_control_mode)
             {
             case GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE:
+                m_vgroove_tracking_container.drawTrackingPointstoMat(_mats);
                 break;
             case GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE:
-                m_vgroove_tracking_container.drawTrackToPointstoMat(_mats);
-                if(_stat_packet.isXMotionStatusIdle())
+                m_vgroove_tracking_container.drawTrackToPointstoMat_FullAuto(_mats);
+                m_vgroove_tracking_container.CalcJointDefinitionBoundaryPoints();
+                _result = m_vgroove_tracking_container.CheckJointBoundry();
+
+                if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
                 {
-                    //Put Motor Moving Code Here
+                    m_vgroove_tracking_container.drawJointDefinitionBoundaryToMat(_mats);
+                    m_vgroove_tracking_container.drawTrackingPointstoMat(_mats);
+                    if(_stat_packet.isXMotionStatusIdle())
+                    {
+                        int _xsteps = m_vgroove_tracking_container.getXMovement(m_motion_control_params);
+                        if(_xsteps != 0) m_gary->autoMoveXAxis(_xsteps);
+                    }
+                    if(_stat_packet.isZMotionStatusIdle())
+                    {
+                        int _zsteps = m_vgroove_tracking_container.getZMovement(m_motion_control_params);
+                        if(_zsteps != 0) m_gary->autoMoveXAxis(_zsteps);
+
+                    }
                 }
-                if(_stat_packet.isZMotionStatusIdle())
-                {
-                    //Put Motor Moving Code Here
-                }
+
                 break;
             case GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY:
-                m_vgroove_tracking_container.drawTrackToPointstoMat(_mats);
-                if(_stat_packet.isZMotionStatusIdle())
+                m_vgroove_tracking_container.drawTrackToPointstoMat_HeightOnly(_mats);
+                m_vgroove_tracking_container.CalcJointDefinitionBoundaryPoints();
+                _result = m_vgroove_tracking_container.CheckJointBoundry();
+                if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
                 {
-                    //Put Motor Moving Code Here
+                    m_vgroove_tracking_container.drawJointDefinitionBoundaryToMat(_mats);
+                    m_vgroove_tracking_container.drawTrackingPointstoMat(_mats);
+                    if(_stat_packet.isZMotionStatusIdle())
+                    {
+                        int _zsteps = m_vgroove_tracking_container.getZMovement(m_motion_control_params);
+                        if(_zsteps != 0) m_gary->autoMoveXAxis(_zsteps);
+                    }
                 }
                 break;
             default:

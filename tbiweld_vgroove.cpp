@@ -79,11 +79,12 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::proc
     }
 
     //Stage4 Find Tracking Points.
-    _result = _vgroove_tracking_container.extractTrackingPointsFromGeometricEntities(m_left_tsl_geo_line, m_right_tsl_geo_line, m_left_bwl_geo_line, m_right_bwl_geo_line, _mats);
+    _result = _vgroove_tracking_container.extractTrackingPointsFromGeometricEntities(m_left_tsl_geo_line, m_right_tsl_geo_line, m_left_bwl_geo_line, m_right_bwl_geo_line);
     if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
     {
         return _result;
     }
+
 
 
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;

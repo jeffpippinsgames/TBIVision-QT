@@ -4674,6 +4674,11 @@ Item {
             color: rootpageId.textcolor
         }
 
+
+
+
+
+
         //------------------------------------------------------------------------
         //Manual Motor Control Button
         Rectangle
@@ -5265,6 +5270,7 @@ Item {
         y: rootpageId.settingsrecty
         color: "transparent"
 
+
         function disconnectSignal()
         {
             mainviewrect_privateId.detachMaxSignal();
@@ -5419,6 +5425,18 @@ Item {
                 readonly property real  scaley: mainviewdisplayId.height/PylonCameraParameters.maxHeight
             }
         }
+    }
+
+    //Settings Text
+    Text
+    {
+        id: pipelinestatustextId
+        font.family: fontId.name
+        y: 300
+        x:40
+        text: "Pipeline Status:" + ProcessingPipeLineStatus.statusString
+        color: "red"
+        font.pixelSize: 25
     }
 
     //Graphical Key-------------------------------------------------

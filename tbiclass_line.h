@@ -32,7 +32,8 @@ public:
     TBIPoint_Float getPoint2() const;
     TBIPoint_Float getVector() const;
     int getThickness(){return m_thickness;}
-    TBIPoint_Int getMidPointofLine();
+    TBIPoint_Int getIntMidPointofLine();
+    TBIPoint_Float getFloatMidPointofLine();
 
     //Set Functions------------------------------------------------------------
     void setPoint1(TBIPoint_Float _pnt);

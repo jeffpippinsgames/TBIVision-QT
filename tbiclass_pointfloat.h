@@ -17,13 +17,32 @@ public:
     TBIPoint_Float(const TBIPoint_Float &_pnt){m_x = _pnt.m_x; m_y = _pnt.m_y;}
 
     float distance(const TBIPoint_Float &_pnt);
+    float vectorMagnitude();
+    TBIPoint_Float getUnitVecor();
+    TBIPoint_Float getVectorBetweenPoint(const TBIPoint_Float &_pnt);
     cv::Point toCVPoint();
 
 
 
 
 
+    TBIPoint_Float operator /(const float _scalar)
+    {
+        TBIPoint_Float _pnt(this->m_x/_scalar, this->m_y/_scalar);
+        return _pnt;
+    }
 
+    TBIPoint_Float operator *(const int _scalar)
+    {
+        TBIPoint_Float _pnt((m_x*(float)_scalar), (m_y*(float)_scalar));
+        return _pnt;
+    }
+
+    TBIPoint_Float operator *(const float _scalar)
+    {
+        TBIPoint_Float _pnt((m_x*_scalar), (m_y*_scalar));
+        return _pnt;
+    }
 
     TBIPoint_Float operator + (const TBIPoint_Float &_pnt)
     {

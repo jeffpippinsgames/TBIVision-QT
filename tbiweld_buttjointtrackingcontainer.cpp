@@ -7,7 +7,7 @@ TBIWeld_ButtJointTrackingContainer::TBIWeld_ButtJointTrackingContainer(QObject *
 
 TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_ButtJointTrackingContainer::extractTrackingPoint(TBILine &_tsl, TBIClass_OpenCVMatContainer &_mats)
 {
-    m_tracking_point = _tsl.getMidPointofLine();
+    m_tracking_point = _tsl.getIntMidPointofLine();
     cv::drawMarker(_mats.m_operation, m_tracking_point.toCVPoint(), m_tracking_point_cv_color,cv::MARKER_CROSS, 15, 1, cv::LINE_AA);
 
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
