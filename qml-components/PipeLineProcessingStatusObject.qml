@@ -28,7 +28,7 @@ Item {
     property int pipelinestatus: ProcessingPipeLineStatus.status
     property string pipelinestatusstring: ProcessingPipeLineStatus.statusString
 
-    property bool microcontrollerconnected: SerialPortController.isconnected
+    property bool microcontrollerconnected: MicroControllerStatusPacket.serialportconnected
 
     readonly property string okiconresource: "qrc:/Icons/okcheck.png"
     readonly property string notokiconresource: "qrc:/Icons/cross.png"

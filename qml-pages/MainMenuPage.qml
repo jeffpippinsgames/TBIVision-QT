@@ -54,8 +54,6 @@ Item {
 
         Component.onCompleted:
         {
-            rotatemenuId.addMenuItem("qrc:/Icons/save.png", "Save Profile");
-            rotatemenuId.addMenuItem("qrc:/Icons/gear.png", "System Settings");
             rotatemenuId.addMenuItem("qrc:/Icons/laser3.png", "Toggle Laser Power");
             rotatemenuId.addMenuItem("qrc:/Icons/processingpipeline.png", "VGroove Joint Pipeline Settings");
             rotatemenuId.addMenuItem("qrc:/Icons/processingpipeline.png", "Butt Joint Pipeline Settings");
@@ -119,6 +117,7 @@ Item {
             {
             case "Yes":
                 console.log("Exiting Program.")
+                Gary.shutdownSerialThread();
                 Qt.quit();
                 break;
             case "No":

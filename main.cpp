@@ -13,6 +13,7 @@
 #include "tbiclass_garybasetypes.h"
 #include "tbiclass_serialportcontrollerreturntype.h"
 #include "tbiclass_joystick.h"
+#include "tbiclass_microcontrollerstatuspacket.h"
 
 //#include "tbilinearransac.h"
 
@@ -20,6 +21,7 @@ using namespace Pylon;
 using namespace cv;
 
 Q_DECLARE_METATYPE(cv::Mat) //So Mat Can Be Passed Thru Signals
+
 
 int main(int argc, char *argv[])
 {

@@ -22,7 +22,7 @@ Rectangle {
     property int position: 0
     property int microcontrollermotionstatus: 0
     property color textcolor: "yellow"
-    property bool microcontrollerconnected: SerialPortController.isconnected
+    property bool microcontrollerconnected: MicroControllerStatusPacket.serialportconnected
 
     //property string fontsource2: "qrc:/Fonts/Blueprint BoldItalic.ttf"
     //property string fontsource2: "qrc:/Fonts/EurostileBold.ttf"

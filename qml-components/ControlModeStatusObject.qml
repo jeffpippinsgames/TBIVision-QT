@@ -25,7 +25,7 @@ Rectangle
 
     property int microcontrollermode: MicroControllerStatusPacket.controlMode
     property color textcolor: "green"
-    property bool microcontrollerconnected: SerialPortController.isconnected
+    property bool microcontrollerconnected: MicroControllerStatusPacket.serialportconnected
 
     readonly property string manualiconresource: "qrc:/Icons/manualmode.png"
     readonly property string autoiconresource: "qrc:/Icons/automaticmode.png"

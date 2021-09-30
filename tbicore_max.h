@@ -89,7 +89,6 @@ class Max : public QObject
     Q_PROPERTY(int tracktopoint_x READ getTrackToPointX NOTIFY trackToPointXChanged)
     Q_PROPERTY(int tracktopoint_y READ getTrackToPointY NOTIFY trackToPointYChanged)
 
-
 public:
 
     //Constructor and Deconstructor
@@ -99,7 +98,7 @@ public:
     //Get Methods
     QString getTimeinLoop(){return m_timeinloop;}
     Q_INVOKABLE bool getEmitExtraMats(){return m_emitextramats;}
-    Q_INVOKABLE void attemptToToggleControlState(){m_attempt_to_toggle_control_state = true;}
+    Q_INVOKABLE void attemptToToggleControlState(){if(m_gary->isLaserOn()) m_attempt_to_toggle_control_state = true;}
     bool getValidTrackingPoint(){return m_tracking_point_valid;}
     bool getValidTrackToPoint(){return m_track_to_point_valid;}
     int getTrackingPointX(){return m_tracking_x;}
@@ -179,6 +178,7 @@ signals:
     void trackingPointYChanged();
     void trackToPointXChanged();
     void trackToPointYChanged();
+
 };
 
 #endif // TBICORE_MAX_H

@@ -20,7 +20,6 @@ Toby::Toby(QObject *parent) : QObject(parent)
     m_camera_fps = "Error";
     m_processsing_debug_image = false;
 
-    emit cameraFPSChanged(m_camera_fps);
     QObject::connect(&m_camera_params, SIGNAL(aoiWidthChanged()), this, SLOT(onChangeCameraAOI()));
     QObject::connect(&m_camera_params, SIGNAL(aoiHeightChanged()), this, SLOT(onChangeCameraAOI()));
     QObject::connect(&m_camera_params, SIGNAL(exposureChanged()), this, SLOT(onChangeCameraExposure()));
@@ -364,7 +363,7 @@ void Toby::openStillImagetoProcess(QString _filename)
     int _height  = _mat.rows;
 
     //Resize the Image if its too Big
-    if((_width > 720) || (_height > 540))
+    if((_width > TBIConstants::Max_Camera_Width) || (_height > TBIConstants::Max_Camera_Height))
     {
         float  _wscale = (float)720/_width;
         float _hscale = (float)540/_height;
@@ -400,14 +399,14 @@ void Toby::openStillImagetoProcess(QString _filename)
         emit emitProcessingStillImageChanged();
         break;
     default:
-        if(m_showdebug) qDebug() << "Toby: openStillImagetoProcess() cannot process the image file " << _filename;
+        if(true) qDebug() << "Toby: openStillImagetoProcess() cannot process the image file " << _filename;
         return;
         break;
 
     }
 
 
-   if(m_showdebug) qDebug() << "Toby: openStillImagetoProcess() Called. m_processing_debug_image = true. Now Processsing " << _filename;
+   if(true) qDebug() << "Toby: openStillImagetoProcess() Called. m_processing_debug_image = true. Now Processsing " << _filename;
 
 }
 

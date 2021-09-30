@@ -18,6 +18,7 @@ import "tbi.vision.components" 1 0
 #include "tbiclass_joystick.h"
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QThread>
 
 /**************************************************************
 Gary
@@ -41,8 +42,8 @@ public:
     ~Gary();
     static void declareQML();
     void setRootQMLContextProperties(QQmlApplicationEngine &engine);
-    MicroControllerStatusPacket* getMicroControllerStatusPacketPointer(){return &m_micro_status_packet;}
-    SerialPortController* getSerialPortControllerPointer(){return &m_serial_port_controller;}
+    MicroControllerStatusPacket * getMicroControllerStatusPacketPointer(){return &m_micro_status_packet;}
+    bool isLaserOn(){if(m_micro_status_packet.getLaserStatus()==GaryLaserStatus::TBI_LASER_STATUS_ON) return true; return false;}
 
     //Public Methods to Control the MicroController
     Q_INVOKABLE void sendStopMovement();
@@ -62,6 +63,7 @@ public:
     Q_INVOKABLE void setControlMode(GaryControlMode::ControlMode_t _mode);
     Q_INVOKABLE void sendProceedNextMotorPhase();
     Q_INVOKABLE void startMotorCalibration(qint32 _steps);
+    Q_INVOKABLE void shutdownSerialThread(){emit quitSerialThread();}
 
     //------------------------------------------------------------
 
@@ -70,10 +72,9 @@ private:
 
     //Microcontroller Status Packet Manager
     MicroControllerStatusPacket m_micro_status_packet;
-    SerialPortController m_serial_port_controller;
+    SerialPortController m_serial_port_controller; //A Thread Class
+    QThread m_serial_port_thread;
     TBIJoystick m_joystick;
-
-
     //-------------------------------------------------------------
 
     //Private Methods----------------------------------------------
@@ -85,10 +86,12 @@ signals:
     void aboutToDestroy();
     void completed();
     void garyControllerFired(QVariant controlsignal, QVariant autorepeat);
+    void quitSerialThread();
+    void sendSerialCommand(QByteArray _cmd);
     //--------------------------------------------------------------
 
 public slots:
-    void updateMicroControllerStatusPacket(MicroControllerStatusPacket &_packet);
+    //void updateMicroControllerStatusPacket(MicroControllerStatusPacket &_packet);
 
 
 

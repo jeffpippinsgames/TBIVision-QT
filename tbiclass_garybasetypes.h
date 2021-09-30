@@ -212,7 +212,7 @@ public:
     enum LaserStatus_t{ TBI_LASER_STATUS_OFF = 0x00,
                         TBI_LASER_STATUS_ON = 0x01};
 
-    Q_ENUMS(SerialCommand_t)
+    Q_ENUMS(LaserStatus_t)
 
     static void declareQML()
     {

@@ -11,9 +11,19 @@ Description:
  **************************************************************/
 Gary::Gary(QObject *parent) : QObject(parent)
 {
-    QObject::connect(&m_serial_port_controller, SIGNAL(microControllerPacketReady(MicroControllerStatusPacket &)), this, SLOT(updateMicroControllerStatusPacket(MicroControllerStatusPacket &)));
-    QObject::connect(&m_serial_port_controller, SIGNAL(joystickFlagsReady(quint8)), &m_joystick, SLOT(updateTBIJoystickState(quint8)));
-    emit completed();
+    //Setup The Serial Port Thread
+    m_serial_port_controller.moveToThread(&m_serial_port_thread);
+    //Make Serial Port Connections
+    QObject::connect(&m_serial_port_thread, &QThread::started, &m_serial_port_controller, &SerialPortController::startThread); //Connect Thread Start
+    QObject::connect(this, &Gary::quitSerialThread, &m_serial_port_controller, &SerialPortController::quitThread); // Connect The End Thread Loop
+    QObject::connect(this, &Gary::sendSerialCommand, &m_serial_port_controller, &SerialPortController::sendSerialCommand);
+    QObject::connect(&m_serial_port_controller, &SerialPortController::microControllerPacketReady, &m_micro_status_packet, &MicroControllerStatusPacket::fillDataFromSerialRead); //Micro Status Packet
+    QObject::connect(&m_serial_port_controller, &SerialPortController::joystickFlagsReady, &m_joystick, &TBIJoystick::updateTBIJoystickState);
+    QObject::connect(&m_serial_port_controller, &SerialPortController::serialPortConnected, &m_micro_status_packet, &MicroControllerStatusPacket::onSerialPortConnected);
+    QObject::connect(&m_serial_port_controller, &SerialPortController::serialPortDisconnected, &m_micro_status_packet, &MicroControllerStatusPacket::onSerialPortDisconnected);
+    m_serial_port_thread.start();
+
+
     if(m_showdebug) qDebug() << "Gary::Gary() Object Created.";
 }
 //--------------------------------------------------------------
@@ -27,6 +37,10 @@ Description:
  **************************************************************/
 Gary::~Gary()
 {
+    emit quitSerialThread();
+    while(m_serial_port_thread.isRunning())
+    {
+    }
     emit aboutToDestroy();
     if(m_showdebug) qDebug() << "Gary::~Gary() Object Destroyed.";
 }
@@ -51,7 +65,6 @@ void Gary::setRootQMLContextProperties(QQmlApplicationEngine &_engine)
 {
     _engine.rootContext()->setContextProperty("MicroControllerStatusPacket", &m_micro_status_packet);
     _engine.rootContext()->setContextProperty("TBIJoystick", &m_joystick);
-    _engine.rootContext()->setContextProperty("SerialPortController", &m_serial_port_controller);
     if(m_showdebug) qDebug() << "Gary::setRootQMLContextProperties(): Registered Gary QML Context Properties.";
 }
 
@@ -90,7 +103,7 @@ Q_INVOKABLE void Gary::sendJogUp()
     _cmd.append(char(GaryCommands::TBI_CMD_JOG_UP));
     //m_micro_status_packet.setAwaitingZMotionStatus(GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_JOGGING);
     if(m_showdebug) qDebug() << "Gary::sendJogUp(): Sending MicroController JogUp Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 //--------------------------------------------------------------
 
@@ -109,7 +122,7 @@ Q_INVOKABLE void Gary::sendJogDown()
     _cmd.append(char(GaryCommands::TBI_CMD_JOG_DOWN));
     //m_micro_status_packet.setAwaitingZMotionStatus(GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_JOGGING);
     if(m_showdebug) qDebug() << "Gary::sendJogDown(): Sending MicroController Jog Down Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 //--------------------------------------------------------------
 
@@ -128,7 +141,7 @@ Q_INVOKABLE void Gary::sendJogLeft()
     _cmd.append(char(GaryCommands::TBI_CMD_JOG_LEFT));
     //m_micro_status_packet.setAwaitingXMotionStatus(GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_JOGGING);
     if(m_showdebug) qDebug() << "Gary::sendJogLeft(): Sending MicroController Jog Left Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 //--------------------------------------------------------------
 
@@ -147,7 +160,7 @@ Q_INVOKABLE void Gary::sendJogRight()
     _cmd.append(char(GaryCommands::TBI_CMD_JOG_RIGHT));
     //m_micro_status_packet.setAwaitingXMotionStatus(GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_JOGGING);
     if(m_showdebug) qDebug() << "Gary::sendJogRight(): Sending MicroController Jog Right Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 
 
@@ -165,7 +178,7 @@ void Gary::autoMoveXAxis(qint32 _steps)
     _cmd.append((char*)&_steps, sizeof (_steps));
     //m_micro_status_packet.setAwaitingXMotionStatus(GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_MOVING);
     if(m_showdebug) qDebug() << "Gary::autoMoveXAxis(): Sending MicroController Auto Move X Axis Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 
 }
 
@@ -184,7 +197,7 @@ void Gary::autoMoveZAxis(qint32 _steps)
     _cmd.append((char*)&_steps, sizeof (_steps));
     //m_micro_status_packet.setAwaitingZMotionStatus(GaryMotionStatus::TBI_MOTION_STATUS_AWAITING_MOVING);
     if(m_showdebug) qDebug() << "Gary::autoMoveZAxis(): Sending MicroController Auto Move Z Axis Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 
 void Gary::setControllerToCalibrationSpeed()
@@ -192,7 +205,7 @@ void Gary::setControllerToCalibrationSpeed()
     QByteArray _cmd;
     _cmd.append((char)GaryCommands::TBI_CMD_SET_CALIBRATION_SPEED);
     if(m_showdebug) qDebug() << "Gary::setControllerToCalibrationSpeed(): Sending MicroController Set Calibration Speed Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 
 void Gary::setControllerToOperationSpeed()
@@ -200,7 +213,7 @@ void Gary::setControllerToOperationSpeed()
     QByteArray _cmd;
     _cmd.append((char)GaryCommands::TBI_CMD_SET_OPERATION_SPEED);
     if(m_showdebug) qDebug() << "Gary::setControllerToOperationSpeed(): Sending MicroController Operation Speed Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 
 void Gary::setControlModeToFullAuto()
@@ -210,7 +223,7 @@ void Gary::setControlModeToFullAuto()
     _cmd.append((char)GaryControlMode::TBI_CONTROL_MODE_FULLAUTO_MODE);
     //m_micro_status_packet.setAwatingControlMode(GaryControlMode::TBI_CONTROL_MODE_AWAITING_FULLAUTO);
     if(m_showdebug) qDebug() << "Gary::setControlModeToFullAuto(): Sending MicroController Set Full Auto Mode Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 
 void Gary::setControlModeToHeightOnly()
@@ -219,7 +232,7 @@ void Gary::setControlModeToHeightOnly()
     _cmd.append((char)GaryCommands::TBI_CMD_SETCONTROLMODE);
     _cmd.append((char)GaryControlMode::TBI_CONTROL_MODE_HEIGHTONLY);
     if(m_showdebug) qDebug() << "Gary::setControlModeToHeightOnly(): Sending MicroController Set Height Only Mode Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 
 void Gary::setControlModeToManual()
@@ -228,7 +241,7 @@ void Gary::setControlModeToManual()
     _cmd.append((char)GaryCommands::TBI_CMD_SETCONTROLMODE);
     _cmd.append((char)GaryControlMode::TBI_CONTROL_MODE_MANUAL_MODE);
     if(m_showdebug) qDebug() << "Gary::setControlModeToManual(): Sending MicroController Manual Mode Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 
 void Gary::setControlModeToMotorCalibration()
@@ -237,7 +250,7 @@ void Gary::setControlModeToMotorCalibration()
     _cmd.append((char)GaryCommands::TBI_CMD_SETCONTROLMODE);
     _cmd.append((char)GaryControlMode::TBI_CONTROL_MODE_MOTORCALIBRATION);
     if(m_showdebug) qDebug() << "Gary::setControlModeToMotorCalibration(): Sending MicroController Motor Calibration Mode Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 
 void Gary::setControlMode(GaryControlMode::ControlMode_t _mode)
@@ -246,7 +259,7 @@ void Gary::setControlMode(GaryControlMode::ControlMode_t _mode)
     _cmd.append((char)GaryCommands::TBI_CMD_SETCONTROLMODE);
     _cmd.append((char)_mode);
     if(m_showdebug) qDebug() << "Gary::setControlMode(): Sending MicroController Set Control Mode Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 
 void Gary::sendProceedNextMotorPhase()
@@ -254,7 +267,7 @@ void Gary::sendProceedNextMotorPhase()
     QByteArray _cmd;
     _cmd.append((char)GaryCommands::TBI_CMD_CONTINUE_MOTOR_CALIBRATION);
     if(m_showdebug) qDebug() << "Gary::sendProceedNextMotorPhase(): Sending MicroController Proceed Next Motor Phase Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 
 void Gary::startMotorCalibration(qint32 _steps)
@@ -266,7 +279,7 @@ void Gary::startMotorCalibration(qint32 _steps)
     _cmd.append((char)((quint8)((_steps & 0x0000FF00) >> 8)));
     _cmd.append((char)((quint8)(_steps & 0x000000FF)));
     if(m_showdebug) qDebug() << "Gary::startMotorCalibration(): Sending MicroController Continue Motor Calibration Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 
 /**************************************************************
@@ -281,19 +294,10 @@ void Gary::toggleLaserPower()
     QByteArray _cmd;
     _cmd.append(char(GaryCommands::TBI_CMD_TOGGLE_LASER_POWER));
     if(m_showdebug) qDebug() << "Gary::toggleLaserPower): Sending MicroController Toggle Laser Power Command.";
-    m_serial_port_controller.sendSerialCommand(_cmd);
+    emit sendSerialCommand(_cmd);
 }
 //--------------------------------------------------------------
 
-void Gary::updateMicroControllerStatusPacket(MicroControllerStatusPacket &_packet)
-{
-    _packet.copyStatusPacketTo(m_micro_status_packet);
-    if(m_showdebug)
-    {
-        qDebug() << "Gary::updateMicroControllerStatusPacket()";
-        qDebug() << "Joystick Flags : " << m_micro_status_packet.getJoystickFlags();
-    }
-}
 
 
 

@@ -11,10 +11,11 @@ Item
     id: rootitemId
     anchors.fill: parent
 
-    property bool microcontrollerconnected: SerialPortController.isconnected
+    property bool microcontrollerconnected: MicroControllerStatusPacket.serialportconnected
     property string trackingtext: "No Binding Set"
     property string iconsourceimage: "qrc:/Icons/crosshairs.png"
     property bool showcontrol: false
+    property color rect_color: rootitemId.mode1color
 
     property int rect_x: 0
     property int rect_y: 0
@@ -52,15 +53,15 @@ Item
     {
        if(!microcontrollerconnected)
        {
-           statustextId.color = "red";
+           statustextId.color = rootitemId.mode2color;
            rootrectId.border.color = rootitemId.mode2color;
-           glowId.color = "red";
+           glowId.color = rootitemId.mode2color;
        }
        else
        {
-           statustextId.color = "chartreuse";
-           rootrectId.border.color = rootitemId.mode4color;
-           glowId.color = "chartreuse";
+           statustextId.color = rootitemId.rect_color
+           rootrectId.border.color = rootitemId.rect_color;
+           glowId.color = rootitemId.rect_color;
        }
     }
 

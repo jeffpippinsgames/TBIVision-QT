@@ -91,6 +91,11 @@ Item
     Component.onCompleted:
     {
         Max.processingComplete.connect(mainpageID.triggerTobyNextFrame);
+        if(Toby.processingStillImage)
+        {
+            triggerTobyNextFrame();
+        }
+
         Toby.startCamera();
         Max.emitExtraMats = false;
         lasertimeouttimerId.stop();
@@ -398,7 +403,7 @@ Item
     {
         id: controlmodestatusId
         x: viewbackgroundrectId.width+5
-        y: laserpowerstatusId.rect_y + laserpowerstatusId.rect_height + 5
+        y: laserpowerstatusId.rect_y + laserpowerstatusId.rect_height + 125
     }
 
     TrackingStatusObject
@@ -407,7 +412,8 @@ Item
         trackingtext: "TP " + Max.trackingpoint_x + "," + Max.trackingpoint_y
         showcontrol: Max.validtrackingpoint
         rect_x: viewbackgroundrectId.width+5
-        rect_y: controlmodestatusId.y + controlmodestatusId.height + 30
+        rect_y: controlmodestatusId.y + controlmodestatusId.height + 4
+        rect_color: trackingstatusId.mode1color
 
     }
 
@@ -418,6 +424,7 @@ Item
         showcontrol: Max.validtracktopoint
         rect_x: viewbackgroundrectId.width+5
         rect_y: trackingstatusId.rect_y + trackingstatusId.rect_height + 5
+        rect_color: tracktostatusId.mode2color
     }
 
     //X Axis Motor Status
@@ -428,7 +435,7 @@ Item
         position: MicroControllerStatusPacket.xPosition
         microcontrollermotionstatus: MicroControllerStatusPacket.xMotionStatus
         x: viewbackgroundrectId.width+5
-        y: controlmodestatusId.height + controlmodestatusId.y + 300
+        y: tracktostatusId.rect_height + tracktostatusId.rect_y + 5
     }
 
     //Z Axis Motor Status

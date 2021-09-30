@@ -9,42 +9,35 @@
 #include "tbiclass_garybasetypes.h"
 #include "tbiclass_serialportcontrollerreturntype.h"
 #include "tbiclass_microcontrollerstatuspacket.h"
+#include <QThread>
 
 class SerialPortController : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(QString status READ getStatus  NOTIFY statusChanged)
-    Q_PROPERTY(bool isconnected READ getIsConnected NOTIFY connectionChanged)
-
 public:
+
     explicit SerialPortController (QObject *parent = nullptr);
     ~SerialPortController();
 
-    QString getStatus(){return m_status;}
-
-    SerialPortControllerReturnType::SerialControllerReturnType_t sendSerialCommand(QByteArray &_data);
-    bool isSerialPortOK();
-
 private:
-    void setStatus(QString _msg);
+    void initialize();
     void activateReConnectionTimerIfNeeded();
     SerialPortControllerReturnType::SerialControllerReturnType_t openMicroControllerPort(quint16 _vendorid = m_arduino_uno_vendorID, quint16 _productid = m_arduino_uno_productID);
     SerialPortControllerReturnType::SerialControllerReturnType_t acknowledgeStatusPacket();
-    SerialPortControllerReturnType::SerialControllerReturnType_t transmitNextSerialCommand(QByteArray &_data);
-    bool getIsConnected(){return m_isconnected;}
+
+public slots:
+    void startThread();
+    void quitThread();
+    void sendSerialCommand(QByteArray _data);
 
 private slots:
     void readSerial();
     void onSerialPortError(QSerialPort::SerialPortError _error);
     void onReconnectTimer();
     void onSendMicroControllerHeartbeat();
-    void onPacketsPerSecondDisplayTime();
-    void onStatusPacketAckTimeout();
-    void bytesWritten(qint64 _bytes);
-    void onWriteSerialTimeout();
-
-
+    void closeAndDestroySerialPort();
+    void onWriteSerialTimer();
 
 private:
     static const bool m_showdebug = false;
@@ -58,34 +51,22 @@ private:
     static const quint16 m_ftdi_FT232_UART_vendorID = 0x0403;
     static const quint16 m_ftdi_FT232_UART_productID = 0x6001;
 
-
-    bool m_can_write_to_buffer;
-    qint64 m_bytes_written;
-    QTimer *m_serial_write_timer;
-    QByteArray m_write_buffer;
-
     QSerialPortInfo *m_serial_info;
     QSerialPort *m_serial_port;
 
     QTimer *m_port_reconnection_timer;
     QTimer *m_microcontroller_heartbeat_timer;
 
-    QTimer *m_packets_per_second_display_timer;
-    quint32 m_current_guid;
-    quint32 m_last_guid;
-    quint32 m_guid_diff;
+    QTimer *m_write_timer;
+    QByteArray *m_write_buffer;
 
-    QTimer *m_packet_ack_timeout_timer;
-
-    QString m_status;
     bool m_isconnected;
 
-    MicroControllerStatusPacket m_microcontroller_status_packet;
-
 signals:
-    void connectionChanged();
+    void serialPortDisconnected();
+    void serialPortConnected();
     void statusChanged();
-    void microControllerPacketReady(MicroControllerStatusPacket &_packet);
+    void microControllerPacketReady(QByteArray _packet);
     void joystickFlagsReady(quint8 _flags);
 
 

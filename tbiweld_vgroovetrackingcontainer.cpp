@@ -14,8 +14,6 @@ TBIWeld_VGrooveTrackingContainer::TBIWeld_VGrooveTrackingContainer(QObject *pare
 
 }
 
-
-
 TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGrooveTrackingContainer::extractTrackingPointsFromGeometricEntities(TBILine &_left_tsl, TBILine &_right_tsl,
                                                                                                                                         TBILine &_left_bwl, TBILine &_right_bwl)
 {
@@ -119,7 +117,6 @@ void TBIWeld_VGrooveTrackingContainer::drawTrackingPointstoMat(TBIClass_OpenCVMa
     cv::drawMarker(_mats.m_operation, m_tracking_line_center_point.toCVPoint(), m_tracking_point_cv_color,cv::MARKER_CROSS, 15, 1, cv::LINE_AA);
 }
 
-
 void TBIWeld_VGrooveTrackingContainer::setTrackToPoints()
 {
     m_left_track_to_point = m_left_tracking_point;
@@ -129,8 +126,8 @@ void TBIWeld_VGrooveTrackingContainer::setTrackToPoints()
     m_track_to_joint_line = m_tracking_joint_line;
     m_track_to_line_center_point = m_tracking_line_center_point;
 
-    m_track_to_line_center_point.m_x += m_movement_boundary + 5;
-    m_track_to_line_center_point.m_y += m_movement_boundary + 5;
+    //m_track_to_line_center_point.m_x += m_movement_boundary + 5;
+    //m_track_to_line_center_point.m_y += m_movement_boundary + 5;
 
     m_left_joint_def = m_left_tracking_point;
     m_right_joint_def = m_right_tracking_point;

@@ -11,7 +11,7 @@ Item
     id: rootitemId
     anchors.fill: parent
 
-    property bool microcontrollerconnected: SerialPortController.isconnected
+    property bool microcontrollerconnected: MicroControllerStatusPacket.serialportconnected
     property int laserstatus: MicroControllerStatusPacket.laserStatus
     property int controlmode: MicroControllerStatusPacket.controlMode
 

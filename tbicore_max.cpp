@@ -196,7 +196,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePi
                     if(_stat_packet.isZMotionStatusIdle())
                     {
                         int _zsteps = m_vgroove_tracking_container.getZMovement(m_motion_control_params);
-                        if(_zsteps != 0) m_gary->autoMoveXAxis(_zsteps);
+                        if(_zsteps != 0) m_gary->autoMoveZAxis(_zsteps);
 
                     }
                 }
@@ -216,7 +216,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePi
                     if(_stat_packet.isZMotionStatusIdle())
                     {
                         int _zsteps = m_vgroove_tracking_container.getZMovement(m_motion_control_params);
-                        if(_zsteps != 0) m_gary->autoMoveXAxis(_zsteps);
+                        if(_zsteps != 0) m_gary->autoMoveZAxis(_zsteps);
                     }
                 }
                 break;
@@ -224,6 +224,10 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePi
                 break;
             }
         }
+    }
+    else
+    {
+        m_attempt_to_toggle_control_state = false;
     }
 
     emit trackingPointXChanged();
@@ -262,6 +266,8 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processButtJoint
     //--------------------------------------------------------------------------------
     // Butt Joint Specific Secondary Operations After PipeLine Has Run. Tracking Point Checks and Motor Movement
     //---------------------------------------------------------------------------------
+    if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
+    {
     if(m_attempt_to_toggle_control_state) //Deal With a Change in Control State
     {
         //Now Act According to the  Control State of Gary
@@ -319,7 +325,11 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processButtJoint
             break;
         }
     }
-
+    }
+    else
+    {
+        m_attempt_to_toggle_control_state = false;
+    }
     emit trackingPointXChanged();
     emit trackingPointYChanged();
     emit validTrackingPointChanged();

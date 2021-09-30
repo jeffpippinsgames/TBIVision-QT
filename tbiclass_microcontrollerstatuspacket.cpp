@@ -16,7 +16,19 @@ MicroControllerStatusPacket::MicroControllerStatusPacket(QObject *parent) : QObj
 
 }
 
-void MicroControllerStatusPacket::fillDataFromSerialRead(QByteArray &_data)
+bool MicroControllerStatusPacket::isXMotionStatusIdle()
+{
+    if(m_x_motion_status == GaryMotionStatus::TBI_MOTION_STATUS_IDLE) return true;
+    return false;
+}
+
+bool MicroControllerStatusPacket::isZMotionStatusIdle()
+{
+    if(m_z_motion_status == GaryMotionStatus::TBI_MOTION_STATUS_IDLE) return true;
+    return false;
+}
+
+void MicroControllerStatusPacket::fillDataFromSerialRead(QByteArray _data)
 {
 
     if(_data.size() != TBIConstants::TBI_CONTROL_STATUS_BUFFER_SIZE) return;
@@ -134,16 +146,4 @@ void MicroControllerStatusPacket::copyStatusPacketTo(MicroControllerStatusPacket
     emit _packet.zHomingStatusChanged();
 
     emit joystickFlagsUpdated(m_joystick_flags);
-}
-
-bool MicroControllerStatusPacket::isXMotionStatusIdle()
-{
-    if(m_x_motion_status == GaryMotionStatus::TBI_MOTION_STATUS_IDLE) return true;
-    return false;
-}
-
-bool MicroControllerStatusPacket::isZMotionStatusIdle()
-{
-    if(m_z_motion_status == GaryMotionStatus::TBI_MOTION_STATUS_IDLE) return true;
-    return false;
-}
+ }
