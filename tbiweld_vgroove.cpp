@@ -1,8 +1,11 @@
 #include "tbiweld_vgroove.h"
-#include "tbiclass_ransac.h"
+
+
+using namespace std;
 
 TBIWeld_VGroove::TBIWeld_VGroove()
 {
+    m_master_inlier_tsl_ds = new TBIDataSet();
     m_left_inlier_tsl_ds = new TBIDataSet();
     m_left_inlier_bwl_ds = new TBIDataSet();
     m_right_inlier_tsl_ds = new TBIDataSet();
@@ -19,6 +22,7 @@ TBIWeld_VGroove::TBIWeld_VGroove()
 
 TBIWeld_VGroove::~TBIWeld_VGroove()
 {
+    delete m_master_inlier_tsl_ds;
     delete m_left_inlier_tsl_ds;
     delete  m_left_inlier_bwl_ds;
     delete m_right_inlier_tsl_ds;
@@ -34,6 +38,7 @@ TBIWeld_VGroove::~TBIWeld_VGroove()
 
 void TBIWeld_VGroove::setRootQMLContextProperties(QQmlApplicationEngine &_engine)
 {
+     _engine.rootContext()->setContextProperty("MasterTSLRansacParameters", &m_master_tsl_ransac_params);
     _engine.rootContext()->setContextProperty("VGrooveLeftTSLRansacParameters", &m_left_tsl_ransac_params);
     _engine.rootContext()->setContextProperty("VGrooveRightTSLRansacParameters", &m_right_tsl_ransac_params);
     _engine.rootContext()->setContextProperty("VGrooveLeftBWLRansacParameters", &m_left_bwl_ransac_params);
@@ -49,6 +54,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::proc
     this->clearGeometricEntities();
 
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result;
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result2;
 
     //Stage 1 Build Gausian DeCluster DataSet.
     _result = this->doDeGausianClustering(_mats);
@@ -57,6 +63,43 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::proc
         return _result;
     }
 
+    //Build Master TSL Line
+    _result = this->buildRansacLine(this->getGausianDeclusterSetPointer(), m_master_tsl_ransac_line, m_master_tsl_ransac_params);
+    if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
+    {
+        return _result;
+    }
+    //Draw Master Ransac Line
+    m_master_tsl_ransac_line.drawOnMat(_mats.m_ransac, m_left_tsl_cv_color);
+    //Build Master Inlier DataSet
+    _result = this->extractInlierDataSet(this->getGausianDeclusterSetPointer(), m_master_inlier_tsl_ds, m_master_tsl_ransac_line, m_master_tsl_ransac_params.getDistanceThreshold());
+    if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
+    {
+        return _result;
+    }
+    //Draw Master Inlier Dataset to Mat
+    m_master_inlier_tsl_ds->drawToMat(_mats.m_inliers, m_master_tsl_cv_color);
+
+    //Now Anaylize the Break
+
+    return _result;
+    //Old Pipeline
+    /*
+    cv::Mat _bingaus;
+    cv::threshold(_mats.m_gausiandecluster, _bingaus, 200, 255, cv::THRESH_BINARY);
+    vector<cv::Vec4i> _lines;
+    cv::HoughLinesP(_bingaus, _lines, 1, CV_PI/180, 2, 0, 30);
+
+
+    for(size_t i = 0; i < _lines.size(); ++i)
+    {
+        cv::Vec4i _vecs = _lines[i];
+        cv::line(_mats.m_ransac, cv::Point(_vecs[0], _vecs[1]), cv::Point(_vecs[2], _vecs[3]),
+                  cv::Scalar(0,0,255), 1, cv::LINE_AA);
+    }
+    */
+
+    /*
     //Stage 2a Build Inlier Ransacs
     _result = this->doConstructInlierRansacs(_mats);
     if(_result != TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK)
@@ -84,10 +127,8 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::proc
     {
         return _result;
     }
-
-
-
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
+    */
 }
 
 void TBIWeld_VGroove::setDefautValues()
@@ -102,19 +143,38 @@ void TBIWeld_VGroove::setDefautValues()
 void TBIWeld_VGroove::saveToFile(QDataStream &_filedatastream)
 {
     this->saveGausianDeClusterParamsToFile(_filedatastream);
+    m_master_tsl_ransac_params.saveToFile(_filedatastream);
     m_left_tsl_ransac_params.saveToFile(_filedatastream);
-    m_left_bwl_ransac_params.saveToFile(_filedatastream);
     m_right_tsl_ransac_params.saveToFile(_filedatastream);
-    m_right_bwl_ransac_params.saveToFile(_filedatastream);
 }
 
 void TBIWeld_VGroove::loadFromFile(QDataStream &_filedatastream)
 {
     this->loadGausianDeClusterParamsFromFile(_filedatastream);
+    m_master_tsl_ransac_params.loadFromFile(_filedatastream);
     m_left_tsl_ransac_params.loadFromFile(_filedatastream);
-    m_left_bwl_ransac_params.loadFromFile(_filedatastream);
     m_right_tsl_ransac_params.loadFromFile(_filedatastream);
-    m_right_bwl_ransac_params.loadFromFile(_filedatastream);
+}
+
+TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::buildRansacLine(TBIDataSet *_ds, TBILine &_line, TBIRansacParameter &_params)
+{
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result = TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
+    if(!TBIRansac::doRansac(_line, _params, *_ds)) _result = TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDUNABLETOFINDINLIERRANSACLINE;
+    _line.remakeLine(0, TBIConstants::Max_Camera_Width);
+    return _result;
+}
+
+TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::extractInlierDataSet(TBIDataSet *_src, TBIDataSet *_dst, TBILine &_ransac, float _distthreshold)
+{
+    if(_src->size() < 10) return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILED_TO_EXTRACTINLIERDATASET;
+    if(!_ransac.isValid()) return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILED_TO_EXTRACTINLIERDATASET;
+    if(_distthreshold < 0) return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILED_TO_EXTRACTINLIERDATASET;
+    if(_dst->size() != 0 ) return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILED_TO_EXTRACTINLIERDATASET;
+
+    if(_src->extractDataSetForInliers(*_dst, _ransac, _distthreshold) != TBIDataSetReturnType::Ok) return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILED_TO_EXTRACTINLIERDATASET;
+
+    return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
+
 }
 
 TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doConstructInlierRansacs(TBIClass_OpenCVMatContainer &_mats)
@@ -330,6 +390,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::doCo
 
 void TBIWeld_VGroove::clearDataSets()
 {
+    m_master_inlier_tsl_ds->clear();
     m_left_inlier_tsl_ds->clear();
     m_left_inlier_bwl_ds->clear();
     m_right_inlier_tsl_ds->clear();
@@ -345,6 +406,7 @@ void TBIWeld_VGroove::clearDataSets()
 
 void TBIWeld_VGroove::clearRansacLines()
 {
+    m_master_tsl_ransac_line.clear();
     m_left_bwl_ransac_line.clear();
     m_left_tsl_ransac_line.clear();
     m_right_tsl_ransac_line.clear();

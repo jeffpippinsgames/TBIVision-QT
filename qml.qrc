@@ -88,5 +88,7 @@
         <file>qml-components/TrackingStatusObject.qml</file>
         <file>Icons/crosshairs.png</file>
         <file>Icons/processingpipeline.png</file>
+        <file>qml-pages/VGrooveImageProcessingSettingsPage_Testing.qml</file>
+        <file>qml-components/RansacControlParameterObject.qml</file>
     </qresource>
 </RCC>

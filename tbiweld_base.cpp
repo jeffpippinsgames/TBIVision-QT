@@ -94,6 +94,12 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGau
 
     //Do OpenCV Proccesses
     cv::GaussianBlur(_mats.m_raw, _mats.m_blurr, cv::Size(m_gausiandecluster_params.getBlurValue(), m_gausiandecluster_params.getBlurValue()), 0);
+    cv::erode(_mats.m_raw, _mats.m_blurr, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+    cv::erode(_mats.m_blurr, _mats.m_blurr, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+    cv::erode(_mats.m_blurr, _mats.m_blurr, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+    cv::erode(_mats.m_blurr, _mats.m_blurr, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+    cv::Canny(_mats.m_blurr, _mats.m_blurr, 50, 100);
+    cv::GaussianBlur(_mats.m_blurr, _mats.m_blurr, cv::Size(m_gausiandecluster_params.getBlurValue(), m_gausiandecluster_params.getBlurValue()), 0);
     cv::threshold(_mats.m_blurr, _mats.m_threshold, m_gausiandecluster_params.getMinThresholdValue(), m_gausiandecluster_params.getMaxThresholdValue(), cv::THRESH_TOZERO);
 
     //build DeCluster Data Set and Respond to failures.

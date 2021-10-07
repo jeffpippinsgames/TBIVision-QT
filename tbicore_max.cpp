@@ -73,6 +73,8 @@ void Max::recieveNewCVMat(const Mat &_mat)
     //--------------------------------
     m_timeinloop = "Time in Loop: " + QString::number(m_timer.elapsed());
     emit timeInLoopChanged(m_timeinloop);
+    \
+    //Sample The
     m_in_proccesing_loop = false;
     emit processingComplete(); //Must Be Last Signal Sent
 

@@ -35,6 +35,9 @@ Window {
         case pagesId.vgroovepipelinesettingspage:
             component = Qt.createComponent("/qml-pages/VGrooveImageProcessingSettingsPage.qml");
             break;
+        case pagesId.vgroovepipelinesettingstestpage:
+            component = Qt.createComponent("/qml-pages/VGrooveImageProcessingSettingsPage_Testing.qml");
+            break;
         case pagesId.buttjointpipelinesettingspage:
             component = Qt.createComponent("/qml-pages/ButtJointImageProcessingSettingsPage.qml");
             break;

@@ -83,6 +83,8 @@ private:
    int m_threshold_min_value;
    int m_threshold_max_value;
    float m_max_decluster_distro_deviation;
+   int m_num_of_erodes;
+
 
    quint64 m_max_image_intensity;
    quint64 m_min_image_intensity;

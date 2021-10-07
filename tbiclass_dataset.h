@@ -48,9 +48,13 @@ public:
     int getIndexofHighestX();
     int getHighestX();
     int getLowestX();
+    void remove(int _index);
+    void removeBlock(int _startindex, int _endindex);
     TBIPoint_Int getPoint(int _index){ return m_pnts[_index];}
 
-    //Build Methods
+
+    //Specific Build Methods
+
     //Build Methods Create New Dataset types from the Source Dataset.
     //For Gausian Clustering
     TBIDataSetReturnType buildGausianClusterDataSet(cv::Mat &_thresholdmat, TBIGausianDeclusteringParameters &_declusterparameter);
@@ -64,6 +68,7 @@ public:
     TBIDataSetReturnType buildRightBWLInlierDataSet(const TBIDataSet &_gausiansrcds, const TBILine &_rightbwlransacline);
     TBIDataSetReturnType buildLeftTSLInlierDataSet(const TBIDataSet &_gausiansrcds, const TBILine &_lefttslransacline);
     TBIDataSetReturnType buildRightTSLInlierDataSet(const TBIDataSet &_gausiansrcds, const TBILine &_righttslransacline);
+
 
     //Extract Methods
     //Extract Methods Create New Entities By Extracting From This DataSet
@@ -80,6 +85,7 @@ public:
     TBIDataSetReturnType extractLeastSquareLine(TBILine &_line);
     TBIDataSetReturnType extractFilteredGausianSet(TBIDataSet &_dst, int _breakindex);
     TBIDataSetReturnType extractDataSubSet(TBIDataSet &_dst, int _startindex, int _endindex);
+    //TBIDataSetReturnType analyzeDiscontinuities(int *_startofbreakindex, int *_endofbreakindex, float _allowablegap);
 
     //Filter Functions
 

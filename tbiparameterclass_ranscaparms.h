@@ -35,6 +35,10 @@ public:
     explicit TBIRansacParameter(QObject *parent = nullptr);
 
     //Processing Functions
+    static void declareQML()
+    {
+        qmlRegisterType<TBIRansacParameter>("tbi.vision.components", 1, 0, "TBIRansacParameter");
+    }
 
     //Get Functions
     float getIdealAngle() const {return m_ideal_angle;}

@@ -14,6 +14,7 @@
 #include "tbiclass_serialportcontrollerreturntype.h"
 #include "tbiclass_joystick.h"
 #include "tbiclass_microcontrollerstatuspacket.h"
+#include "tbiparameterclass_ranscaparms.h"
 
 //#include "tbilinearransac.h"
 
@@ -59,7 +60,8 @@ int main(int argc, char *argv[])
     TBIWeld_ProcessingPipeLineReturnType::declareQML();
     //General Class Types
     SerialPortControllerReturnType::declareQML();
-    //Joystick Event
+    //Ransac Params
+    TBIRansacParameter::declareQML();
 
     //The QML Application engine----------------------------------
     QQmlApplicationEngine engine;

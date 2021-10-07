@@ -56,6 +56,7 @@ Item {
         {
             rotatemenuId.addMenuItem("qrc:/Icons/laser3.png", "Toggle Laser Power");
             rotatemenuId.addMenuItem("qrc:/Icons/processingpipeline.png", "VGroove Joint Pipeline Settings");
+            rotatemenuId.addMenuItem("qrc:/Icons/processingpipeline.png", "VGroove Joint Pipeline - Testing")
             rotatemenuId.addMenuItem("qrc:/Icons/processingpipeline.png", "Butt Joint Pipeline Settings");
             rotatemenuId.addMenuItem("qrc:/Icons/quit.png", "Quit Application");
             rotatemenuId.addMenuItem("qrc:/Icons/image.png", "Process Still Image");
@@ -74,6 +75,10 @@ Item {
             case "VGroove Joint Pipeline Settings":
                 rootpageId.cleanupForDestruction();
                 rootpageId.destroyPage(pagesId.vgroovepipelinesettingspage)
+                break;
+            case "VGroove Joint Pipeline - Testing":
+                rootpageId.cleanupForDestruction();
+                rootpageId.destroyPage(pagesId.vgroovepipelinesettingstestpage);
                 break;
             case "Butt Joint Pipeline Settings":
                 rootpageId.cleanupForDestruction();

@@ -1,5 +1,7 @@
 #include "tbiclass_dataset.h"
 #include "tbiclass_pixelfundamental.h"
+#include <iostream>
+using namespace std;
 
 //Utility Functions
 void TBIDataSet::drawToMat(cv::Mat &_dst)
@@ -220,6 +222,55 @@ int TBIDataSet::getLowestX()
     return _lowestxvalue;
 }
 
+void TBIDataSet::remove(int _index)
+{
+    if(m_dataset_size == 0) return;
+    if(_index >= Largest_DataSet_Size) return;
+    if(_index >= m_dataset_size) return;
+    if(_index < 0 ) return;
+    int __index = _index;
+
+    if(_index == (m_dataset_size - 1))
+    {
+        --m_dataset_size;
+        return;
+    }
+
+    do
+    {
+        m_pnts[__index].m_x = m_pnts[__index+1].m_x;
+        m_pnts[__index].m_y = m_pnts[__index+1].m_y;
+        ++__index;
+    }while(__index < m_dataset_size);
+    --m_dataset_size;
+}
+
+void TBIDataSet::removeBlock(int _startindex, int _endindex)
+{
+    if(m_dataset_size == 0) return;
+    if(_startindex >= _endindex) return;
+    if(_endindex >= Largest_DataSet_Size) return;
+    if(_endindex >= m_dataset_size) return;
+    if(_startindex < 0) return;
+
+    if(_endindex == (m_dataset_size - 1))
+    {
+        m_dataset_size -= (_endindex - _startindex + 1);
+        return;
+    }
+
+    int _indexoffset = _endindex - _startindex + 1;
+    int _index = _startindex;
+
+    do
+    {
+        m_pnts[_index].m_x = m_pnts[_index+_indexoffset].m_x;
+        m_pnts[_index].m_y = m_pnts[_index+_indexoffset].m_y;
+        ++_index;
+    }while((_index + _indexoffset) < m_dataset_size);
+    m_dataset_size -= (_indexoffset);
+}
+
 TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdmat, TBIGausianDeclusteringParameters &_declusterparameter)
 {
 
@@ -245,6 +296,7 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
     int _pixelarrayindex = -1; //start out of bounds. Initialization of Pixel Index must be -1
     bool _inintensifingphase = true;
     bool _clustercomplete = false;
+    int _clustersincolumn = 0;
 
     //Note:
     // The Gausian Distribution Phase Exsists In Two Phases
@@ -317,7 +369,7 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
             {
                 //Find The Centroid By Weighted Average
                 //And Record In The DataSet
-                if((_pixelarraysize >= _declusterparameter.getMinClusterSize()) && (_pixelarraysize <= _declusterparameter.getMaxClusterSize()))
+                if((_pixelarraysize >= _declusterparameter.getMinClusterSize()) && (_pixelarraysize <= _declusterparameter.getMaxClusterSize()) && (_clustersincolumn < _declusterparameter.getMaxClustersInColumn()))
                 {
                     float _weight_sum = 0.0;
                     float _weight_data_product_sum = 0.0;
@@ -330,7 +382,9 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
                     }while(_element < _pixelarraysize);
                     TBIPoint_Int __pnt(_x, (int)(_weight_data_product_sum/_weight_sum));
                     this->insert(__pnt);
+                    ++_clustersincolumn;
                 }
+                /*
                 else //Add The Whole List
                 {
                     int _element = 0;
@@ -341,7 +395,7 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
                         ++_element;
                     }while(_element < _pixelarraysize);
                 }
-
+                */
                 if(_clustercomplete) //Handle If Cluster Was Complete
                 {
                     _clustercomplete = false;
@@ -376,7 +430,7 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
             {
                 //Find The Centroid By Weighted Average
                 //And Record In The DataSet
-                if((_pixelarraysize >= _declusterparameter.getMinClusterSize()) && (_pixelarraysize <= _declusterparameter.getMaxClusterSize()))
+                if((_pixelarraysize >= _declusterparameter.getMinClusterSize()) && (_pixelarraysize <= _declusterparameter.getMaxClusterSize()) && (_clustersincolumn < _declusterparameter.getMaxClustersInColumn()))
                 {
                     float _weight_sum = 0.0;
                     float _weight_data_product_sum = 0.0;
@@ -390,6 +444,7 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
                     TBIPoint_Int __pnt(_x, (int)(_weight_data_product_sum/_weight_sum));
                     this->insert(__pnt);
                 }
+                /*
                 else //Add The Whole List
                 {
                     int _element = 0;
@@ -400,17 +455,16 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
                         ++_element;
                     }while(_element < _pixelarraysize);
                 }
-
+                */
 
                 _clustercomplete = false;
                 _inintensifingphase = true;
                 _pixelarraysize = 0;
                 _pixelarrayindex = -1;
             }
-
-
             _y=0;
             ++_x;
+            _clustersincolumn = 0;
         }
     }while(_x < _max_x);
 
@@ -418,9 +472,9 @@ TBIDataSetReturnType TBIDataSet::buildGausianClusterDataSet(cv::Mat &_thresholdm
     if(_declusterparameter.totalImageIntensityToHigh()) return TBIDataSetReturnType::FailedTotalImageIntensityTooHigh;
 
     if(_declusterparameter.totalImageInstenisyToLow()) return TBIDataSetReturnType::FailedTotalImageIntensityTooLow;
+
     this->m_dataset_type = TBIDataSetType::GausianDeclusterType;
     return TBIDataSetReturnType::Ok;
-
 }
 
 TBIDataSetReturnType TBIDataSet::buildLeftTSLRansacDataSet(const TBIDataSet &_gausiansrcds, const int _endingsrcindex)

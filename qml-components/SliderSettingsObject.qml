@@ -42,7 +42,6 @@ Rectangle
     property real stepsize: 1
     property real majorstepsize: 10
 
-
     property bool controlstickautorepeat: false
     property bool controlbuttonautorepeat: false
 
@@ -108,16 +107,19 @@ Rectangle
 
         onBlackButtonPressed:
         {
+            rootobjectId.state = highlightedstate;
             rootobjectId.endFocus();
         }
 
         onGreenButtonPressed:
         {
+            rootobjectId.state = highlightedstate;
             rootobjectId.endFocus();
         }
 
         onRedButtonPressed:
         {
+            rootobjectId.state = highlightedstate;
             rootobjectId.endFocus();
         }
 
