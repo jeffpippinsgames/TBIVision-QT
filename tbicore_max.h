@@ -162,7 +162,10 @@ signals:
     //Mat Signals-----------------------------------------------
     void newFrameProcessed(const QImage& _qimage);
     void newRawMatProcessed(const cv::Mat& _raw_frame);
-    void newBlurMatProcessed(const cv::Mat& _blur_frame);
+    void newPreBlurMatProcessed(const cv::Mat& _blur_frame);
+    void newErodeMatProcessed(const cv::Mat& _erode_frame);
+    void newEdgeMatProcessed(const cv::Mat& _edge_frame);
+    void newPostBlurMatProcessed(const cv::Mat& _blur_frame);
     void newThresholdMatProcessed(const cv::Mat& _threshold_frame);
     void newPixelColumnMatProcessed(const cv::Mat& _pixel_column_frame);
     void newInlierDataSetMatProcessed(const cv::Mat& _inlierds_frame);

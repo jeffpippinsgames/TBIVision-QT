@@ -90,5 +90,6 @@
         <file>Icons/processingpipeline.png</file>
         <file>qml-pages/VGrooveImageProcessingSettingsPage_Testing.qml</file>
         <file>qml-components/RansacControlParameterObject.qml</file>
+        <file>qml-components/EmptyFIleForPasting.qml</file>
     </qresource>
 </RCC>

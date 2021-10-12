@@ -91,18 +91,27 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGau
 
     //Draw Raw Mat onto Operations Mat
     cv::cvtColor(_mats.m_raw, _mats.m_operation, cv::COLOR_GRAY2BGR);
+    //Do OpenCV Proccesses-------------------------------------------------------
+    //1. Blurr The Raw Frame.
+    //2. Erode The Raw Frame.
+    //3. Edge Detect The Erroded Frame
+    //4. Blur The Edge Detect
+    //5. Threshold The Post Blurr
+    //6. Do the Declustering of the Threshohld
+    cv::GaussianBlur(_mats.m_raw, _mats.m_pre_blurr, cv::Size(m_gausiandecluster_params.getPreBlurValue(), m_gausiandecluster_params.getPreBlurValue()), 0);
+    cv::erode(_mats.m_pre_blurr, _mats.m_erode, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+    int _erodeiteration = 1;
+    while(_erodeiteration < this->getGausianDeclusterParametersPointer()->getErodeIterations())
+    {
+        cv::erode(_mats.m_erode, _mats.m_erode, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+        ++_erodeiteration;
+    }
+    cv::Canny(_mats.m_erode, _mats.m_edge, this->getGausianDeclusterParametersPointer()->getEdgeMin(), this->getGausianDeclusterParametersPointer()->getEdgeMax());
+    cv::GaussianBlur(_mats.m_edge, _mats.m_post_blurr, cv::Size(m_gausiandecluster_params.getPostBlurValue(), m_gausiandecluster_params.getPostBlurValue()), 0);
+    cv::threshold(_mats.m_post_blurr, _mats.m_threshold, m_gausiandecluster_params.getMinThresholdValue(), m_gausiandecluster_params.getMaxThresholdValue(), cv::THRESH_TOZERO);
+    //End of Image Processing.--------------------------------------------------
 
-    //Do OpenCV Proccesses
-    cv::GaussianBlur(_mats.m_raw, _mats.m_blurr, cv::Size(m_gausiandecluster_params.getBlurValue(), m_gausiandecluster_params.getBlurValue()), 0);
-    cv::erode(_mats.m_raw, _mats.m_blurr, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-    cv::erode(_mats.m_blurr, _mats.m_blurr, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-    cv::erode(_mats.m_blurr, _mats.m_blurr, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-    cv::erode(_mats.m_blurr, _mats.m_blurr, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-    cv::Canny(_mats.m_blurr, _mats.m_blurr, 50, 100);
-    cv::GaussianBlur(_mats.m_blurr, _mats.m_blurr, cv::Size(m_gausiandecluster_params.getBlurValue(), m_gausiandecluster_params.getBlurValue()), 0);
-    cv::threshold(_mats.m_blurr, _mats.m_threshold, m_gausiandecluster_params.getMinThresholdValue(), m_gausiandecluster_params.getMaxThresholdValue(), cv::THRESH_TOZERO);
-
-    //build DeCluster Data Set and Respond to failures.
+    //Build DeCluster Data Set and Respond to failures.
     TBIDataSetReturnType _retresult = m_gausian_decluster_ds->buildGausianClusterDataSet(_mats.m_threshold, m_gausiandecluster_params);
     switch(_retresult)
     {

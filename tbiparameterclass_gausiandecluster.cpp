@@ -26,10 +26,16 @@ void TBIGausianDeclusteringParameters::setMaxClustersInColumn(int _value)
     emit maxClustersInColumnChanged();
 }
 
-void TBIGausianDeclusteringParameters::setBlurValue(int _value)
+void TBIGausianDeclusteringParameters::setPreBlurValue(int _value)
 {
-    m_blur_value = _value;
-    emit blurValueChanged();
+    m_pre_blur_value = _value;
+    emit preBlurValueChanged();
+}
+
+void TBIGausianDeclusteringParameters::setPostBlurValue(int _value)
+{
+    m_post_blur_value = _value;
+    emit postBlurValueChanged();
 }
 
 void TBIGausianDeclusteringParameters::setMinThresholdValue(int _value)
@@ -68,6 +74,12 @@ void TBIGausianDeclusteringParameters::setTotalImageIntensity(quint64 _value)
     emit totalImageIntensityChanged();
 }
 
+void TBIGausianDeclusteringParameters::setErodeIterations(int _value)
+{
+    m_erode_iterations = _value;
+    emit erodeIterationsChanged();
+}
+
 bool TBIGausianDeclusteringParameters::totalImageIntensityToHigh()
 {
     if(m_total_image_intensity > m_max_image_intensity) return true;
@@ -95,13 +107,15 @@ void TBIGausianDeclusteringParameters::setDefautValues()
     this->setMaxClustersInColumn(2);
     this->setMinClusterSize(1);
     this->setMaxClusterSize(75);
-    this->setBlurValue(3);
+    this->setPreBlurValue(3);
+    this->setPostBlurValue(3);
     this->setMinThresholdValue(100);
     this->setMaxThresholdValue(255);
     this->setMinImageIntensity(1);
     this->setMaxImageIntensity(2000000);
     this->setTotalImageIntensity(0);
     this->setDeclusterDeviation(15.0);
+    this->setErodeIterations(4);
 }
 
 void TBIGausianDeclusteringParameters::saveToFile(QDataStream &_filedatastream)
@@ -110,7 +124,9 @@ void TBIGausianDeclusteringParameters::saveToFile(QDataStream &_filedatastream)
     _filedatastream << m_min_cluster_size;
     _filedatastream << m_max_cluster_size;
     _filedatastream << m_max_clusters_in_col;
-    _filedatastream << m_blur_value;
+    _filedatastream << m_pre_blur_value;
+    _filedatastream << m_post_blur_value;
+    _filedatastream << m_erode_iterations;
     _filedatastream << m_threshold_min_value;
     _filedatastream << m_threshold_max_value;
     _filedatastream << m_max_decluster_distro_deviation;
@@ -124,16 +140,21 @@ void TBIGausianDeclusteringParameters::loadFromFile(QDataStream &_filedatastream
     _filedatastream >> m_min_cluster_size;
     _filedatastream >> m_max_cluster_size;
     _filedatastream >> m_max_clusters_in_col;
-    _filedatastream >> m_blur_value;
+    _filedatastream >> m_pre_blur_value;
+    _filedatastream >> m_post_blur_value;
+    _filedatastream >> m_erode_iterations;
     _filedatastream >> m_threshold_min_value;
     _filedatastream >> m_threshold_max_value;
     _filedatastream >> m_max_decluster_distro_deviation;
     _filedatastream >> m_max_image_intensity;
     _filedatastream >> m_min_image_intensity;
+
     emit minClusterSizeChanged();
     emit maxClusterSizeChanged();
     emit maxClustersInColumnChanged();
-    emit blurValueChanged();
+    emit preBlurValueChanged();
+    emit postBlurValueChanged();
+    emit erodeIterationsChanged();
     emit minThresholdValueChanged();
     emit maxThresholdValueChanged();
     emit deClusterDeviationChanged();

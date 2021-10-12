@@ -30,8 +30,14 @@ Item {
     //State Constants
     readonly property string camerastateframeactive: "CameraStateFrameActive"
     readonly property string camerastateframenotactive: "CameraStateFrameNotActive"
-    readonly property string blurstateframeactive: "BlurStateFrameActive"
-    readonly property string blurstateframenotactive: "BlurStateFrameNotActive"
+    readonly property string preblurstateframeactive: "PreBlurStateFrameActive"
+    readonly property string preblurstateframenotactive: "PreBlurStateFrameNotActive"
+    readonly property string postblurstateframeactive: "PostBlurStateFrameActive"
+    readonly property string postblurstateframenotactive: "PostBlurStateFrameNotActive"
+    readonly property string erodestateframeactive: "ErodeStateFrameActive"
+    readonly property string erodestateframenotactive: "ErodeStateFrameNotActive"
+    readonly property string edgedetectframeactive: "EdgeStateFrameActive"
+    readonly property string edgedetectframenotactive: "EdgeStateFrameNotActive"
     readonly property string thresholdstateframeactive: "ThresholdStateFrameActive"
     readonly property string thresholdstateframenotactive: "ThresholdStateFrameNotActive"
     readonly property string pixelcolumnstateframenotactive: "PixelColumnStateFrameNotActive"
@@ -48,13 +54,16 @@ Item {
     //Frame Constants. For Display Switching and Signal Connections to Max
     readonly property string emptyframe: "NoFrame"
     readonly property string rawframe: "1-Camera"
-    readonly property string blurframe: "2-Blur"
-    readonly property string thresholdframe: "3-Threshold"
-    readonly property string pixelcolumnframe: "4-Gausian Declustering"
-    readonly property string ransacframe: "5-Inlier Ransacs"
-    readonly property string inlierdatasetframe: "6-Inlier DataSets"
-    readonly property string geoconstructionframe: "7-Geo Constructions"
-    readonly property string operationframe: "8-Operations"
+    readonly property string preblurframe: "2- Pre Edge Blur"
+    readonly property string erodeframe: "3- Erode"
+    readonly property string edgeframe: "4- Edge Detect"
+    readonly property string postblurframe: "4- Post Edge Blur"
+    readonly property string thresholdframe: "5-Threshold"
+    readonly property string pixelcolumnframe: "6-Gausian Declustering"
+    readonly property string ransacframe: "7-Inlier Ransacs"
+    readonly property string inlierdatasetframe: "8-Inlier DataSets"
+    readonly property string geoconstructionframe: "9-Geo Constructions"
+    readonly property string operationframe: "10-Operations"
 
     //For Rectangle Placements
     //The MainView Rect Derives From FrameSelect and Settings
@@ -133,7 +142,7 @@ Item {
             name: rootpageId.camerastateframeactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: true;}
-            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: preblursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
@@ -144,7 +153,7 @@ Item {
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.nonfocuscolor}
             //SetController focus To FrameSele
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
@@ -164,7 +173,7 @@ Item {
             name: rootpageId.camerastateframenotactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: true;}
-            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: preblursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
@@ -175,7 +184,7 @@ Item {
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.nonfocuscolor}
             PropertyChanges{ target: camerasettingsborderrectId; border.color: rootpageId.focuscolor}
             //SetController focus To FrameSelect
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
@@ -191,10 +200,10 @@ Item {
         },
         State //Blur Selected Frame Focused
         {
-            name: rootpageId.blurstateframeactive
+            name: rootpageId.preblurstateframeactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
-            PropertyChanges{ target: blursettingsrectId; visible: true;}
+            PropertyChanges{ target: preblursettingsrectId; visible: true;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
@@ -205,7 +214,7 @@ Item {
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: blursettingsborderrectId; border.color: rootpageId.nonfocuscolor}
             //SetController focus To FrameSele
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
@@ -215,14 +224,14 @@ Item {
             PropertyChanges{target: operationcontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: true}
             //SetMainViewRect Display
-            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.preblurframe}
         },
         State //Blur Selected and Focused
         {
             name: rootpageId.blurstateframenotactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
-            PropertyChanges{ target: blursettingsrectId; visible: true;}
+            PropertyChanges{ target: preblursettingsrectId; visible: true;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
@@ -241,18 +250,18 @@ Item {
             PropertyChanges{target: ransaccontrollerId; focus: false}
             PropertyChanges{target: geoconstructioncontrollerId; focus: false}
             PropertyChanges{target: operationcontrollerId; focus: false}
-            PropertyChanges{target: blursettingscontrollerId; focus: true}
+            PropertyChanges{target: preblursettingscontrollerId; focus: true}
             //SetMainViewRect Display
-            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.blurframe}
+            PropertyChanges{target: mainviewrectId; displayed_frame: rootpageId.preblurframe}
             //Set The Interior Control State
-            PropertyChanges {target: blursettingsrectId; state: "BlurState";}
+            PropertyChanges {target: preblursettingsrectId; state: "BlurState";}
         },
         State //Threshold Selected Frame Focused
         {
             name: rootpageId.thresholdstateframeactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
-            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: preblursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: true;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
@@ -263,7 +272,7 @@ Item {
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.nonfocuscolor}
             //SetController focus To FrameSele
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
@@ -280,7 +289,7 @@ Item {
             name: rootpageId.thresholdstateframenotactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
-            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: preblursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: true;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
@@ -292,7 +301,7 @@ Item {
             PropertyChanges{ target: thresholdsettingsborderrectId; border.color: rootpageId.focuscolor}
             //SetController focus To FrameSele
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
             PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
@@ -310,7 +319,7 @@ Item {
             name: rootpageId.pixelcolumnstateframeactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
-            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: preblursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: true;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
@@ -321,7 +330,7 @@ Item {
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: pixelcolumnborderrectId; border.color: rootpageId.nonfocuscolor}
             //SetController focus To FrameSele
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
@@ -338,7 +347,7 @@ Item {
             name: rootpageId.pixelcolumnstateframenotactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
-            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: preblursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: true;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
@@ -350,7 +359,7 @@ Item {
             PropertyChanges{ target: pixelcolumnborderrectId; border.color: rootpageId.focuscolor}
             //SetController focus To FrameSele
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: inlierdatasetcontrollerId; focus: false}
@@ -368,7 +377,7 @@ Item {
             name: rootpageId.inlierdatasetstateframeactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
-            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: preblursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: true;}
@@ -380,7 +389,7 @@ Item {
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: inlierdatasetborderrectId; border.color: rootpageId.nonfocuscolor}
             //SetController focus To FrameSele
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
@@ -397,7 +406,7 @@ Item {
             name: rootpageId.inlierdatasetstateframenotactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
-            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: preblursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: true;}
@@ -409,7 +418,7 @@ Item {
             PropertyChanges{ target: inlierdatasetborderrectId; border.color: rootpageId.focuscolor}
             //SetController focus To FrameSele
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
@@ -427,7 +436,7 @@ Item {
             name: rootpageId.ransacstateframeactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
-            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: preblursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
@@ -439,7 +448,7 @@ Item {
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: ransacborderrectId; border.color: rootpageId.nonfocuscolor}
             //SetController focus To FrameSele
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
@@ -456,7 +465,7 @@ Item {
             name: rootpageId.ransacstateframenotactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
-            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: preblursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
@@ -468,7 +477,7 @@ Item {
             PropertyChanges{ target: ransacborderrectId; border.color: rootpageId.focuscolor}
             //SetController focus To FrameSele
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
@@ -486,7 +495,7 @@ Item {
             name: rootpageId.geoconstructionstateframeactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
-            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: preblursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
@@ -497,7 +506,7 @@ Item {
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: geoconstructionborderrectId; border.color: rootpageId.nonfocuscolor}
             //SetController focus To FrameSele
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
@@ -514,7 +523,7 @@ Item {
             name: rootpageId.geoconstructionstateframenotactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
-            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: preblursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
@@ -526,7 +535,7 @@ Item {
             PropertyChanges{ target: ransacborderrectId; border.color: rootpageId.focuscolor}
             //SetController focus To FrameSele
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
@@ -544,7 +553,7 @@ Item {
             name: rootpageId.operationstateframeactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
-            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: preblursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
@@ -555,7 +564,7 @@ Item {
             PropertyChanges{ target: frameselectborderrectId; border.color: rootpageId.focuscolor}
             PropertyChanges{ target: operationborderrectId; border.color: rootpageId.nonfocuscolor}
             //SetController focus To FrameSele
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
@@ -573,7 +582,7 @@ Item {
             name: rootpageId.operationstateframenotactive
             //Set Displayed Setting Rect
             PropertyChanges{ target: camerasettingsrectId; visible: false;}
-            PropertyChanges{ target: blursettingsrectId; visible: false;}
+            PropertyChanges{ target: preblursettingsrectId; visible: false;}
             PropertyChanges{ target: thresholdsettingsrectId; visible: false;}
             PropertyChanges{ target: pixelcolumnsettingsrectId; visible: false;}
             PropertyChanges{ target: inlierdatasetsettingsrectId; visible: false;}
@@ -586,7 +595,7 @@ Item {
             PropertyChanges{ target: operationborderrectId; border.color: rootpageId.focuscolor}
             //SetController focus To FrameSele
             PropertyChanges{target: camerasettingscontrollerId; focus: false}
-            PropertyChanges{target: blursettingscontrollerId; focus: false}
+            PropertyChanges{target: preblursettingscontrollerId; focus: false}
             PropertyChanges{target: frameselectcontrollerId; focus: false}
             PropertyChanges{target: thresholdsettingscontrollerId; focus: false}
             PropertyChanges{target: pixelcolumncontrollerId; focus: false}
@@ -756,7 +765,7 @@ Item {
                 case rootpageId.rawframe:
                     rootpageId.state = rootpageId.camerastateframenotactive;
                     break;
-                case rootpageId.blurframe:
+                case rootpageId.preblurframe:
                     rootpageId.state = rootpageId.blurstateframenotactive;
                     break;
                 case rootpageId.thresholdframe:
@@ -864,8 +873,17 @@ Item {
                         case rootpageId.rawframe:
                             Max.newRawMatProcessed.connect(delegateframeId.recieveCVMat);
                             break;
-                        case rootpageId.blurframe:
+                        case rootpageId.preblurframe:
                             Max.newBlurMatProcessed.connect(delegateframeId.recieveCVMat);
+                            break;
+                        case rootpageId.erodeframe:
+                            Max.newErodeMatProcessed.connect(delegateframeId.recieveCVMat);
+                            break;
+                        case rootpageId.edgeframe:
+                            Max.newEdgeMatProcessed.connect(delegateframeId.recieveCVMat);
+                            break;
+                        case rootpageId.postblurframe:
+                            Max.newPostBlurMatProcessed.connect(delegateframeId.recieveCVMat);
                             break;
                         case rootpageId.thresholdframe:
                             Max.newThresholdMatProcessed.connect(delegateframeId.recieveCVMat);
@@ -920,7 +938,10 @@ Item {
                 //Add Items to model
                 //This Way Will Help with using properties in the frame setting for Listmodel.
                 modelId.append({"frame": rootpageId.rawframe});
-                modelId.append({"frame": rootpageId.blurframe});
+                modelId.append({"frame": rootpageId.preblurframe});
+                modelId.append({"frame": rootpageId.erodeframe});
+                modelId.append({"frame": rootpageId.edgeframe});
+                modelId.append({"frame": rootpageId.postblurframe});
                 modelId.append({"frame": rootpageId.thresholdframe});
                 modelId.append({"frame": rootpageId.pixelcolumnframe});
                 modelId.append({"frame": rootpageId.ransacframe});
@@ -938,7 +959,7 @@ Item {
                     rootpageId.state = rootpageId.camerastateframeactive;
                     break;
                 case rootpageId.blurframe:
-                    rootpageId.state = rootpageId.blurstateframeactive;
+                    rootpageId.state = rootpageId.preblurstateframeactive;
                     break;
                 case rootpageId.thresholdframe:
                     rootpageId.state = rootpageId.thresholdstateframeactive;
@@ -1413,10 +1434,10 @@ Item {
         }
     }
 
-    //Blur Settings Rectangle---------------------------------------
+    //Pre Blur Settings Rectangle---------------------------------------
     Rectangle
     {
-        id: blursettingsrectId
+        id: preblursettingsrectId
         visible: false
         width: rootpageId.settingsrectwidth
         height: rootpageId.settingsrectheight
@@ -1426,7 +1447,7 @@ Item {
 
         function grabFocus()
         {
-            blursettingscontrollerId.focus = true;
+            preblursettingscontrollerId.focus = true;
 
         }
 
@@ -1435,22 +1456,22 @@ Item {
             State
             {
                 name: "NonFocused"
-                PropertyChanges{target: blursettingsrectId; border.color:rootpageId.nonfocuscolor;}
-                PropertyChanges{target: blursliderId; state: blursliderId.nothighlightedstate;}
+                PropertyChanges{target: preblursettingsrectId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: preblursliderId; state: preblursliderId.nothighlightedstate;}
 
             },
             State
             {
                 name: "BlurState"
-                PropertyChanges{target: blursettingsrectId; border.color:rootpageId.focuscolor;}
-                PropertyChanges{target: blursliderId; state: blursliderId.highlightedstate;}
+                PropertyChanges{target: preblursettingsrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: preblursliderId; state: preblursliderId.highlightedstate;}
             }
         ]
 
         ControllerObject
         {
 
-            id:blursettingscontrollerId
+            id:preblursettingscontrollerId
             focus: false
 
             onFocusChanged:
@@ -1468,10 +1489,10 @@ Item {
 
             onGreenButtonPressed:
             {
-                switch(blursettingsrectId.state)
+                switch(preblursettingsrectId.state)
                 {
                 case "BlurState":
-                    blursliderId.grabFocus();
+                    preblursliderId.grabFocus();
                     break;
                 }
             }
@@ -1483,8 +1504,8 @@ Item {
 
             onUpButtonPressed:
             {
-                blursettingscontrollerId.state = "NonFocused"
-                rootpageId.state = rootpageId.blurstateframeactive;
+                preblursettingscontrollerId.state = "NonFocused"
+                rootpageId.state = rootpageId.preblurstateframeactive;
             }
 
             onDownButtonPressed:
@@ -1525,7 +1546,7 @@ Item {
 
         Rectangle
         {
-            anchors.fill: blursettingsrectId
+            anchors.fill: preblursettingsrectId
             color: "black"
             opacity: .8
             radius: 10
@@ -1533,7 +1554,7 @@ Item {
 
         Rectangle
         {
-            anchors.fill: blursettingsrectId
+            anchors.fill: preblursettingsrectId
             color: "darkred"
             opacity: .05
             radius: 10
@@ -1542,7 +1563,7 @@ Item {
         Rectangle
         {
             id: blursettingsborderrectId
-            anchors.fill: blursettingsrectId
+            anchors.fill: preblursettingsrectId
             color: "transparent"
             border.color: rootpageId.nonfocuscolor
             border.width: rootpageId.rectborderwidths
@@ -1552,7 +1573,7 @@ Item {
         //Settings Text
         Text
         {
-            id: blurtextId
+            id: preblurtextId
             font.family: fontId.name
             y: 10
             x:10
@@ -1563,11 +1584,11 @@ Item {
 
         SliderSettingsObject
         {
-            id: blursliderId
+            id: preblursliderId
             controlname: "BlurSliderControl"
             x:20
             y:60
-            messagetext: "Blur: " + VGrooveGausianDistroParameters.blurValue;
+            messagetext: "Blur: " + VGrooveGausianDistroParameters.preBlurValue;
             valuefrom: 1
             valueto: 49
             stepsize: 2
@@ -1576,18 +1597,623 @@ Item {
 
             Component.onCompleted:
             {
-                blursliderId.value = VGrooveGausianDistroParameters.blurValue;
+                preblursliderId.value = VGrooveGausianDistroParameters.preBlurValue;
             }
 
             onEndFocus:
             {
-                blursettingsrectId.grabFocus();
-                blursliderId.state = blursliderId.highlightedstate;
+                preblursettingsrectId.grabFocus();
+                preblursliderId.state = preblursliderId.highlightedstate;
             }
 
             onValueChanged:
             {
-                VGrooveGausianDistroParameters.blurValue = blursliderId.value;
+                VGrooveGausianDistroParameters.preBlurValue = preblursliderId.value;
+            }
+
+
+        }
+
+    }
+
+    //Erode Settings Rectangle---------------------------------------
+    Rectangle
+    {
+        id: erodesettingsrectId
+        visible: false
+        width: rootpageId.settingsrectwidth
+        height: rootpageId.settingsrectheight
+        x: rootpageId.settingsrectx
+        y: rootpageId.settingsrecty
+        color: "transparent"
+
+        function grabFocus()
+        {
+            erodesettingscontrollerId.focus = true;
+
+        }
+
+        states:
+            [
+            State
+            {
+                name: "NonFocused"
+                PropertyChanges{target: erodesettingsrectId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: erodesliderId; state: erodesliderId.nothighlightedstate;}
+
+            },
+            State
+            {
+                name: "ErodeState"
+                PropertyChanges{target: erodesettingsrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: erodesliderId; state: erodesliderId.highlightedstate;}
+            }
+        ]
+
+        ControllerObject
+        {
+
+            id:erodesettingscontrollerId
+            focus: false
+
+            onFocusChanged:
+            {
+                if(focus)
+                {
+                    controlkeyId.enableblackbutton = false;
+                }
+            }
+
+            onBlackButtonPressed:
+            {
+
+            }
+
+            onGreenButtonPressed:
+            {
+                switch(erodesettingsrectId.state)
+                {
+                case "ErodeState":
+                    erodesliderId.grabFocus();
+                    break;
+                }
+            }
+
+            onRedButtonPressed:
+            {
+
+            }
+
+            onUpButtonPressed:
+            {
+                erodesettingscontrollerId.state = "NonFocused"
+                rootpageId.state = rootpageId.preErodeStateframeactive;
+            }
+
+            onDownButtonPressed:
+            {
+
+            }
+
+            onLeftButtonPressed:
+            {
+
+            }
+
+            onRightButtonPressed:
+            {
+
+            }
+
+            onUpButtonReleased:
+            {
+
+            }
+
+            onDownButtonReleased:
+            {
+
+            }
+
+            onLeftButtonReleased:
+            {
+
+            }
+
+            onRightButtonReleased:
+            {
+
+            }
+        }
+
+        Rectangle
+        {
+            anchors.fill: erodesettingsrectId
+            color: "black"
+            opacity: .8
+            radius: 10
+        }
+
+        Rectangle
+        {
+            anchors.fill: erodesettingsrectId
+            color: "darkred"
+            opacity: .05
+            radius: 10
+        }
+
+        Rectangle
+        {
+            id: erodesettingsborderrectId
+            anchors.fill: erodesettingsrectId
+            color: "transparent"
+            border.color: rootpageId.nonfocuscolor
+            border.width: rootpageId.rectborderwidths
+            radius: 10
+        }
+
+        //Settings Text
+        Text
+        {
+            id: erodetextId
+            font.family: fontId.name
+            y: 10
+            x:10
+            text: "Erode Settings"
+            font.pixelSize: 25
+            color: rootpageId.textcolor
+        }
+
+        SliderSettingsObject
+        {
+            id: erodesliderId
+            controlname: "ErodeSliderControl"
+            x:20
+            y:60
+            messagetext: "Erode Iterations: " + VGrooveGausianDistroParameters.erodeIterations;
+            valuefrom: 1
+            valueto: 15
+            stepsize: 1
+            majorstepsize: 1
+            controlstickautorepeat: true
+
+            Component.onCompleted:
+            {
+                erodesliderId.value = VGrooveGausianDistroParameters.erodeIterations;
+            }
+
+            onEndFocus:
+            {
+                erodesettingsrectId.grabFocus();
+                erodesliderId.state = erodesliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                VGrooveGausianDistroParameters.erodeIterations = erodesliderId.value;
+            }
+        }
+    }
+
+    //Edge Settings Rectangle---------------------------------------
+    Rectangle
+    {
+        id: edgesettingsrectId
+        visible: false
+        width: rootpageId.settingsrectwidth
+        height: rootpageId.settingsrectheight
+        x: rootpageId.settingsrectx
+        y: rootpageId.settingsrecty
+        color: "transparent"
+
+        function grabFocus()
+        {
+            edgesettingscontrollerId.focus = true;
+
+        }
+
+        states:
+            [
+            State
+            {
+                name: "NonFocused"
+                PropertyChanges{target: edgesettingsrectId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: edgeminsliderId; state: edgeminsliderId.nothighlightedstate;}
+                PropertyChanges{target: edgemaxsliderId; state: edgemaxsliderId.nothighlightedstate;}
+
+            },
+            State
+            {
+                name: "EdgeMinState"
+                PropertyChanges{target: edgesettingsrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: edgeminsliderId; state: edgeminsliderId.highlightedstate;}
+                PropertyChanges{target: edgemaxsliderId; state: edgemaxsliderId.nothighlightedstate;}
+            },
+            State
+            {
+                name: "EdgeMaxState"
+                PropertyChanges{target: edgesettingsrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: edgeminsliderId; state: edgeminsliderId.nothighlightedstate;}
+                PropertyChanges{target: edgemaxsliderId; state: edgemaxsliderId.highlightedstate;}
+            }
+        ]
+
+        ControllerObject
+        {
+
+            id:edgesettingscontrollerId
+            focus: false
+
+            onFocusChanged:
+            {
+                if(focus)
+                {
+                    controlkeyId.enableblackbutton = false;
+                }
+            }
+
+            onBlackButtonPressed:
+            {
+
+            }
+
+            onGreenButtonPressed:
+            {
+                switch(edgesettingsrectId.state)
+                {
+                case "EdgeMinState":
+                    edgeminsliderId.grabFocus();
+                    break;
+                case "EdgeMaxState":
+                    edgemaxsliderId.grabFocus();
+                    break;
+                }
+            }
+
+            onRedButtonPressed:
+            {
+
+            }
+
+            onUpButtonPressed:
+            {
+                switch(edgesettingsrectId.state)
+                {
+                case "EdgeMinState":
+                    edgesettingscontrollerId.state = "NonFocused"
+                    rootpageId.state = rootpageId.edgeStateframeactive;
+                    break;
+                case "EdgeMaxState":
+                    edgesettingsrectId.state = "EdgeMinState";
+                    break;
+                }
+
+
+            }
+
+            onDownButtonPressed:
+            {
+                switch(edgesettingsrectId.state)
+                {
+                case "EdgeMinState":
+                    edgesettingscontrollerId.state = "EdgeMaxState"
+                    break;
+                case "EdgeMaxState":
+                    break;
+                }
+            }
+
+            onLeftButtonPressed:
+            {
+
+            }
+
+            onRightButtonPressed:
+            {
+
+            }
+
+            onUpButtonReleased:
+            {
+
+            }
+
+            onDownButtonReleased:
+            {
+
+            }
+
+            onLeftButtonReleased:
+            {
+
+            }
+
+            onRightButtonReleased:
+            {
+
+            }
+        }
+
+        Rectangle
+        {
+            anchors.fill: edgesettingsrectId
+            color: "black"
+            opacity: .8
+            radius: 10
+        }
+
+        Rectangle
+        {
+            anchors.fill: edgesettingsrectId
+            color: "darkred"
+            opacity: .05
+            radius: 10
+        }
+
+        Rectangle
+        {
+            id: edgesettingsborderrectId
+            anchors.fill: edgesettingsrectId
+            color: "transparent"
+            border.color: rootpageId.nonfocuscolor
+            border.width: rootpageId.rectborderwidths
+            radius: 10
+        }
+
+        //Settings Text
+        Text
+        {
+            id: edgetextId
+            font.family: fontId.name
+            y: 10
+            x:10
+            text: "Edge Filter Settings"
+            font.pixelSize: 25
+            color: rootpageId.textcolor
+        }
+
+        SliderSettingsObject
+        {
+            id: edgeminsliderId
+            controlname: "EdgeMinSliderControl"
+            x:20
+            y:60
+            messagetext: "Edge Filter Min Threshold: " + VGrooveGausianDistroParameters.edgeMin;
+            valuefrom: 1
+            valueto: edgemaxsliderId.value
+            stepsize: 1
+            majorstepsize: 5
+            controlstickautorepeat: true
+
+            Component.onCompleted:
+            {
+                edgeminsliderId.value = VGrooveGausianDistroParameters.edgeMin;
+            }
+
+            onEndFocus:
+            {
+                edgesettingsrectId.grabFocus();
+                edgeminsliderId.state = edgeminsliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                VGrooveGausianDistroParameters.edgeMin = edgeminsliderId.value;
+            }
+
+
+        }
+
+        SliderSettingsObject
+        {
+            id: edgemaxsliderId
+            controlname: "EdgeMaxSliderControl"
+            x:20
+            y: edgeminsliderId.y + edgeminsliderId.height + 20
+            messagetext: "Edge Filter Max Threshold: " + VGrooveGausianDistroParameters.edgeMax;
+            valuefrom: edgeminsliderId.value
+            valueto: 255
+            stepsize: 1
+            majorstepsize: 5
+            controlstickautorepeat: true
+
+            Component.onCompleted:
+            {
+                edgemaxsliderId.value = VGrooveGausianDistroParameters.edgeMax;
+            }
+
+            onEndFocus:
+            {
+                edgesettingsrectId.grabFocus();
+                edgemaxsliderId.state = edgemaxsliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                VGrooveGausianDistroParameters.edgeMax = edgemaxsliderId.value;
+            }
+
+
+        }
+
+
+    }
+
+    //Post Blur Settings Rectangle---------------------------------------
+    Rectangle
+    {
+        id: postblursettingsrectId
+        visible: false
+        width: rootpageId.settingsrectwidth
+        height: rootpageId.settingsrectheight
+        x: rootpageId.settingsrectx
+        y: rootpageId.settingsrecty
+        color: "transparent"
+
+        function grabFocus()
+        {
+            postblursettingscontrollerId.focus = true;
+
+        }
+
+        states:
+            [
+            State
+            {
+                name: "NonFocused"
+                PropertyChanges{target: postblursettingsrectId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: postblursliderId; state: postblursliderId.nothighlightedstate;}
+
+            },
+            State
+            {
+                name: "BlurState"
+                PropertyChanges{target: postblursettingsrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: postblursliderId; state: postblursliderId.highlightedstate;}
+            }
+        ]
+
+        ControllerObject
+        {
+
+            id:postblursettingscontrollerId
+            focus: false
+
+            onFocusChanged:
+            {
+                if(focus)
+                {
+                    controlkeyId.enableblackbutton = false;
+                }
+            }
+
+            onBlackButtonPressed:
+            {
+
+            }
+
+            onGreenButtonPressed:
+            {
+                switch(postblursettingsrectId.state)
+                {
+                case "BlurState":
+                    postblursliderId.grabFocus();
+                    break;
+                }
+            }
+
+            onRedButtonPressed:
+            {
+
+            }
+
+            onUpButtonPressed:
+            {
+                postblursettingscontrollerId.state = "NonFocused"
+                rootpageId.state = rootpageId.postblurstateframeactive;
+            }
+
+            onDownButtonPressed:
+            {
+
+            }
+
+            onLeftButtonPressed:
+            {
+
+            }
+
+            onRightButtonPressed:
+            {
+
+            }
+
+            onUpButtonReleased:
+            {
+
+            }
+
+            onDownButtonReleased:
+            {
+
+            }
+
+            onLeftButtonReleased:
+            {
+
+            }
+
+            onRightButtonReleased:
+            {
+
+            }
+        }
+
+        Rectangle
+        {
+            anchors.fill: postblursettingsrectId
+            color: "black"
+            opacity: .8
+            radius: 10
+        }
+
+        Rectangle
+        {
+            anchors.fill: postblursettingsrectId
+            color: "darkred"
+            opacity: .05
+            radius: 10
+        }
+
+        Rectangle
+        {
+            id: postblursettingsborderrectId
+            anchors.fill: postblursettingsrectId
+            color: "transparent"
+            border.color: rootpageId.nonfocuscolor
+            border.width: rootpageId.rectborderwidths
+            radius: 10
+        }
+
+        //Settings Text
+        Text
+        {
+            id: postblurtextId
+            font.family: fontId.name
+            y: 10
+            x:10
+            text: "Post Edge Blur Frame Settings"
+            font.pixelSize: 25
+            color: rootpageId.textcolor
+        }
+
+        SliderSettingsObject
+        {
+            id: postblursliderId
+            controlname: "PostBlurSliderControl"
+            x:20
+            y:60
+            messagetext: "Blur: " + VGrooveGausianDistroParameters.postBlurValue;
+            valuefrom: 1
+            valueto: 49
+            stepsize: 2
+            majorstepsize: 4
+            controlstickautorepeat: true
+
+            Component.onCompleted:
+            {
+                postblursliderId.value = VGrooveGausianDistroParameters.postBlurValue;
+            }
+
+            onEndFocus:
+            {
+                postblursettingsrectId.grabFocus();
+                postblursliderId.state = postblursliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                VGrooveGausianDistroParameters.postBlurValue = postblursliderId.value;
             }
 
 
@@ -3717,8 +4343,17 @@ Item {
                 case rootpageId.rawframe:
                     Max.newRawMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
                     break;
-                case rootpageId.blurframe:
+                case rootpageId.preblurframe:
                     Max.newBlurMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
+                    break;
+                case rootpageId.erodeframe:
+                    Max.newErodeMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
+                    break;
+                case rootpageId.edgeframe:
+                    Max.newEdgeMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
+                    break;
+                case rootpageId.postblurframe:
+                    Max.newPostBlurMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
                     break;
                 case rootpageId.thresholdframe:
                     Max.newThresholdMatProcessed.disconnect(mainviewdisplayId.recieveCVMat);
@@ -3751,9 +4386,21 @@ Item {
                     Max.newRawMatProcessed.connect(mainviewdisplayId.recieveCVMat);
                     mainviewrect_privateId.attached_frame = rootpageId.rawframe;
                     break;
-                case rootpageId.blurframe:
+                case rootpageId.preblurframe:
                     Max.newBlurMatProcessed.connect(mainviewdisplayId.recieveCVMat);
-                    mainviewrect_privateId.attached_frame = rootpageId.blurframe;
+                    mainviewrect_privateId.attached_frame = rootpageId.preblurframe;
+                    break;
+                case rootpageId.erodeframe:
+                    Max.newErodeMatProcessed.connect(mainviewdisplayId.recieveCVMat);
+                    mainviewrect_privateId.attached_frame = rootpageId.erodeframe;
+                    break;
+                case rootpageId.edgeframe:
+                    Max.newEdgeMatProcessed.connect(mainviewdisplayId.recieveCVMat);
+                    mainviewrect_privateId.attached_frame = rootpageId.edgeframe;
+                    break;
+                case rootpageId.postblurframe:
+                    Max.newPostBlurMatProcessed.connect(mainviewdisplayId.recieveCVMat);
+                    mainviewrect_privateId.attached_frame = rootpageId.postblurframe;
                     break;
                 case rootpageId.thresholdframe:
                     Max.newThresholdMatProcessed.connect(mainviewdisplayId.recieveCVMat);

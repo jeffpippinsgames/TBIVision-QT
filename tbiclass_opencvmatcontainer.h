@@ -11,7 +11,10 @@ public:
     void initMats(const cv::Mat &_srcmat);
 
     cv::Mat m_raw;
-    cv::Mat m_blurr;
+    cv::Mat m_pre_blurr;
+    cv::Mat m_erode;
+    cv::Mat m_edge;
+    cv::Mat m_post_blurr;
     cv::Mat m_threshold;
     cv::Mat m_gausiandecluster;
     cv::Mat m_inliers;

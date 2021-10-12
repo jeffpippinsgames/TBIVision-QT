@@ -63,7 +63,10 @@ void Max::recieveNewCVMat(const Mat &_mat)
     if(m_emitextramats)
     {
         emit newRawMatProcessed(_mats.m_raw);
-        emit newBlurMatProcessed(_mats.m_blurr);
+        emit newPreBlurMatProcessed(_mats.m_pre_blurr);
+        emit newPostBlurMatProcessed(_mats.m_post_blurr);
+        emit newEdgeMatProcessed(_mats.m_edge);
+        emit newErodeMatProcessed(_mats.m_erode);
         emit newThresholdMatProcessed(_mats.m_threshold);
         emit newPixelColumnMatProcessed(_mats.m_gausiandecluster);
         emit newRansacMatProcessed(_mats.m_ransac);
