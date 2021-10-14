@@ -79,6 +79,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_VGroove::proc
     }
     //Draw Master Inlier Dataset to Mat
     m_master_inlier_tsl_ds->drawToMat(_mats.m_inliers, m_master_tsl_cv_color);
+    m_master_inlier_tsl_ds->drawToMat(_mats.m_operation, m_left_tsl_cv_color);
 
     //Now Anaylize the Break
 

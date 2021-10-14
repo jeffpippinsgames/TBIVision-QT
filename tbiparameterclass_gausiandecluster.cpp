@@ -32,6 +32,18 @@ void TBIGausianDeclusteringParameters::setPreBlurValue(int _value)
     emit preBlurValueChanged();
 }
 
+void TBIGausianDeclusteringParameters::setPreMinThresholdValue(int _value)
+{
+    m_pre_threshold_min_value = _value;
+    emit minPreThresholdValueChanged();
+}
+
+void TBIGausianDeclusteringParameters::setPreMaxThresholdValue(int _value)
+{
+    m_pre_threshold_max_value = _value;
+    emit maxPreThresholdValueChanged();
+}
+
 void TBIGausianDeclusteringParameters::setPostBlurValue(int _value)
 {
     m_post_blur_value = _value;
@@ -80,6 +92,30 @@ void TBIGausianDeclusteringParameters::setErodeIterations(int _value)
     emit erodeIterationsChanged();
 }
 
+void TBIGausianDeclusteringParameters::setEdgeMin(int _value)
+{
+    m_edge_min = _value;
+    emit edgeMinChanged();
+}
+
+void TBIGausianDeclusteringParameters::setEdgeMax(int _value)
+{
+    m_edge_max = _value;
+    emit edgeMaxChanged();
+}
+
+void TBIGausianDeclusteringParameters::setMinLaserBoundry(int _value)
+{
+    m_min_laser_boundry = _value;
+    emit minLaserBoundryChanged();
+}
+
+void TBIGausianDeclusteringParameters::setMaxLaserBoundry(int _value)
+{
+    m_max_laser_boundry = _value;
+    emit maxLaserBoundryChanged();
+}
+
 bool TBIGausianDeclusteringParameters::totalImageIntensityToHigh()
 {
     if(m_total_image_intensity > m_max_image_intensity) return true;
@@ -116,6 +152,10 @@ void TBIGausianDeclusteringParameters::setDefautValues()
     this->setTotalImageIntensity(0);
     this->setDeclusterDeviation(15.0);
     this->setErodeIterations(4);
+    this->setEdgeMin(20);
+    this->setEdgeMax(255);
+    this->setMinLaserBoundry(3);
+    this->setMaxLaserBoundry(10);
 }
 
 void TBIGausianDeclusteringParameters::saveToFile(QDataStream &_filedatastream)
@@ -127,6 +167,12 @@ void TBIGausianDeclusteringParameters::saveToFile(QDataStream &_filedatastream)
     _filedatastream << m_pre_blur_value;
     _filedatastream << m_post_blur_value;
     _filedatastream << m_erode_iterations;
+    _filedatastream << m_min_laser_boundry;
+    _filedatastream << m_max_laser_boundry;
+    _filedatastream << m_pre_threshold_min_value;
+    _filedatastream << m_pre_threshold_max_value;
+    _filedatastream << m_edge_min;
+    _filedatastream << m_edge_max;
     _filedatastream << m_threshold_min_value;
     _filedatastream << m_threshold_max_value;
     _filedatastream << m_max_decluster_distro_deviation;
@@ -143,6 +189,12 @@ void TBIGausianDeclusteringParameters::loadFromFile(QDataStream &_filedatastream
     _filedatastream >> m_pre_blur_value;
     _filedatastream >> m_post_blur_value;
     _filedatastream >> m_erode_iterations;
+    _filedatastream >> m_min_laser_boundry;
+    _filedatastream >> m_max_laser_boundry;
+    _filedatastream >> m_pre_threshold_min_value;
+    _filedatastream >> m_pre_threshold_max_value;
+    _filedatastream >> m_edge_min;
+    _filedatastream >> m_edge_max;
     _filedatastream >> m_threshold_min_value;
     _filedatastream >> m_threshold_max_value;
     _filedatastream >> m_max_decluster_distro_deviation;
@@ -160,6 +212,10 @@ void TBIGausianDeclusteringParameters::loadFromFile(QDataStream &_filedatastream
     emit deClusterDeviationChanged();
     emit maxImageIntensityChanged();
     emit minImageIntensityChanged();
+    emit minPreThresholdValueChanged();
+    emit maxPreThresholdValueChanged();
+    emit minLaserBoundryChanged();
+    emit maxLaserBoundryChanged();
 }
 
 

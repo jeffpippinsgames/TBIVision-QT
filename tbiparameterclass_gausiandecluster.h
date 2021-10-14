@@ -16,6 +16,10 @@ class TBIGausianDeclusteringParameters: public QObject
     Q_PROPERTY(int minClusterSize WRITE setMinClusterSize READ getMinClusterSize NOTIFY minClusterSizeChanged)
     Q_PROPERTY(int maxClustersInColumn WRITE setMaxClustersInColumn READ getMaxClustersInColumn NOTIFY maxClustersInColumnChanged)
     Q_PROPERTY(int preBlurValue WRITE setPreBlurValue READ getPreBlurValue NOTIFY preBlurValueChanged)
+    Q_PROPERTY(int minPreThresholdValue WRITE setPreMinThresholdValue READ getPreMinThresholdValue NOTIFY minPreThresholdValueChanged)
+    Q_PROPERTY(int maxPreThresholdValue WRITE setPreMaxThresholdValue READ getPreMaxThresholdValue NOTIFY maxPreThresholdValueChanged)
+    Q_PROPERTY(int minLaserBoundry WRITE setMinLaserBoundry READ getMinLaserBoundry NOTIFY minLaserBoundryChanged)
+    Q_PROPERTY(int maxLaserBoundry WRITE setMaxLaserBoundry READ getMaxLaserBoundry NOTIFY maxLaserBoundryChanged)
     Q_PROPERTY(int postBlurValue WRITE setPostBlurValue READ getPostBlurValue NOTIFY postBlurValueChanged)
     Q_PROPERTY(int erodeIterations WRITE setErodeIterations READ getErodeIterations NOTIFY erodeIterationsChanged)
     Q_PROPERTY(int edgeMin WRITE setEdgeMin READ getEdgeMin NOTIFY edgeMinChanged)
@@ -36,6 +40,8 @@ public:
     void setMinClusterSize(int _size);
     void setMaxClustersInColumn(int _value);
     void setPreBlurValue(int _value);
+    void setPreMinThresholdValue(int _value);
+    void setPreMaxThresholdValue(int _value);
     void setPostBlurValue(int _value);
     void setMinThresholdValue(int _value);
     void setMaxThresholdValue(int _value);
@@ -46,12 +52,16 @@ public:
     void setErodeIterations(int _value);
     void setEdgeMin(int _value);
     void setEdgeMax(int _value);
+    void setMinLaserBoundry(int _value);
+    void setMaxLaserBoundry(int _value);
 
     //Get Methods
     int getMaxClusterSize(){return m_max_cluster_size;}
     int getMinClusterSize(){return m_min_cluster_size;}
     int getMaxClustersInColumn(){return m_max_clusters_in_col;}
     int getPreBlurValue(){return m_pre_blur_value;}
+    int getPreMinThresholdValue(){return m_threshold_min_value;}
+    int getPreMaxThresholdValue(){return m_threshold_max_value;}
     int getPostBlurValue(){return m_post_blur_value;}
     int getMinThresholdValue(){return m_threshold_min_value;}
     int getMaxThresholdValue(){return m_threshold_max_value;}
@@ -62,6 +72,8 @@ public:
     int getErodeIterations(){return m_erode_iterations;}
     int getEdgeMin(){return m_edge_min;}
     int getEdgeMax(){return m_edge_max;}
+    int getMinLaserBoundry(){return m_min_laser_boundry;}
+    int getMaxLaserBoundry(){return m_max_laser_boundry;}
 
 
     //Utility Methods
@@ -81,6 +93,8 @@ signals:
    void maxClustersInColumnChanged();
    void preBlurValueChanged();
    void postBlurValueChanged();
+   void minPreThresholdValueChanged();
+   void maxPreThresholdValueChanged();
    void minThresholdValueChanged();
    void maxThresholdValueChanged();
    void deClusterDeviationChanged();
@@ -90,6 +104,8 @@ signals:
    void erodeIterationsChanged();
    void edgeMinChanged();
    void edgeMaxChanged();
+   void minLaserBoundryChanged();
+   void maxLaserBoundryChanged();
 
 private:
 
@@ -97,6 +113,8 @@ private:
    int m_min_cluster_size;
    int m_max_clusters_in_col;
    int m_pre_blur_value;
+   int m_pre_threshold_min_value;
+   int m_pre_threshold_max_value;
    int m_threshold_min_value;
    int m_threshold_max_value;
    float m_max_decluster_distro_deviation;
@@ -105,6 +123,8 @@ private:
    int m_erode_iterations;
    int m_edge_min;
    int m_edge_max;
+   int m_min_laser_boundry;
+   int m_max_laser_boundry;
 
 
    quint64 m_max_image_intensity;

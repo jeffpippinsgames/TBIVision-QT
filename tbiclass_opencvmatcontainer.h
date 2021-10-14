@@ -3,6 +3,7 @@
 
 #include "opencv4/opencv2/core.hpp"
 #include "opencv4/opencv2/imgproc/imgproc.hpp"
+#include "tbiparameterclass_gausiandecluster.h"
 
 class TBIClass_OpenCVMatContainer
 {

@@ -42,6 +42,7 @@ public:
     void setGausianDeClusterParamDefaultValues(){m_gausiandecluster_params.setDefautValues();}
     void saveGausianDeClusterParamsToFile(QDataStream &_filedatastream);
     void loadGausianDeClusterParamsFromFile(QDataStream &_filedatastream);
+    TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t buildBoundedLaserImage(TBIClass_OpenCVMatContainer &_mats, TBIGausianDeclusteringParameters &_params);
 
 private:
     static const bool m_showdebug = false;

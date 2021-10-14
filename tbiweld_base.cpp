@@ -67,6 +67,105 @@ void TBIWeld_Base::loadGausianDeClusterParamsFromFile(QDataStream &_filedatastre
     m_gausiandecluster_params.loadFromFile(_filedatastream);
 }
 
+TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::buildBoundedLaserImage(TBIClass_OpenCVMatContainer &_mats, TBIGausianDeclusteringParameters &_params)
+{
+    //Make Sure Mats Are Ok.
+    if(_mats.m_raw.channels() != 1)
+    {
+        if(m_showdebug) qDebug()<<"TBIWeld_Base::buildBoundedLaserImage() did not recieve a single Channel Mat";
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_RAWMATCHANNELNOTEQUALTOONE;
+    }
+    if(!_mats.m_raw.isContinuous())
+    {
+        if(m_showdebug) qDebug()<<"TBIWeld_Base::buildBoundedLaserImage() did not recieve a continuous Mat";
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_RAWMATCHANNELNOTCONTINOUS;
+    }
+    if(_mats.m_edge.channels() != 1)
+    {
+        if(m_showdebug) qDebug()<<"TBIWeld_Base::buildBoundedLaserImage() did not recieve a single Channel Mat";
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_RAWMATCHANNELNOTEQUALTOONE;
+    }
+    if(!_mats.m_edge.isContinuous())
+    {
+        if(m_showdebug) qDebug()<<"TBIWeld_Base::buildBoundedLaserImage() did not recieve a continuous Mat";
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_RAWMATCHANNELNOTCONTINOUS;
+    }
+    if(_mats.m_post_blurr .channels() != 1)
+    {
+        if(m_showdebug) qDebug()<<"TBIWeld_Base::buildBoundedLaserImage() did not recieve a single Channel Mat";
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_RAWMATCHANNELNOTEQUALTOONE;
+    }
+    if(!_mats.m_post_blurr.isContinuous())
+    {
+        if(m_showdebug) qDebug()<<"TBIWeld_Base::buildBoundedLaserImage() did not recieve a continuous Mat";
+        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_RAWMATCHANNELNOTCONTINOUS;
+    }
+
+    //Go Thru The Entire Edge Map And Look For Bounding values
+    uint8_t *_data = (uint8_t *) _mats.m_edge.data;
+    uint8_t *_data2 = (uint8_t *) _mats.m_post_blurr.data;
+    uint8_t *_data3 = (uint8_t *) _mats.m_raw.data;
+    int _dataindex;
+    const int _max_x = _mats.m_edge.cols;
+    const int _max_y = _mats.m_edge.rows;
+    int _x = 0;
+    int _y = 0;
+    int _intensity;
+    int _length = 0;
+    bool _iscounting = false;
+    int _dataindex2;
+    int _y2;
+
+    //The Edge Mat is a Binary Edge Either 255 or 0
+    //Run Thru THe Edge Map And Copy The Mat From The Raw Mat to the Post Blur Mat
+    do
+    {
+        _dataindex = (_y * _max_x) + _x;
+        // _y = (_dataindex - _x)/_max_x
+        _intensity = _data[_dataindex];
+
+        if(_intensity > 0) //Hit a Wall
+        {
+            _iscounting = true;
+            if(_length >= _params.getMinLaserBoundry() && _length <= _params.getMaxLaserBoundry())
+            {
+                _y2 = _y - _length;
+                do
+                {
+                    _dataindex2 = (_y2 * _max_x) + _x;
+                    _data2[_dataindex2] = _data3[_dataindex2];
+                    //qDebug() << "Copied Boundry, Length = " << _length;
+                    ++_y2;
+                }while(_y2 <= _y);
+
+            }
+            _length = 0;
+        }
+        else
+        {
+            _data2[_dataindex] = 0;
+        }
+
+
+        if(_iscounting) ++_length;
+
+        ++_y;
+        if(_y == _max_y)
+        {
+            ++_x;
+            _y = 0;
+            _length = 0;
+            _iscounting = false;
+        }
+    }while(_x < _max_x);
+
+
+
+
+}
+
+
+
 
 //The Mats Must Be Clear and Ready To Use.
 TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGausianClustering(TBIClass_OpenCVMatContainer &_mats)
@@ -95,19 +194,23 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGau
     //1. Blurr The Raw Frame.
     //2. Erode The Raw Frame.
     //3. Edge Detect The Erroded Frame
-    //4. Blur The Edge Detect
+    //4. Reconstruct The Laser Portion From The Edge Map and Blur.
     //5. Threshold The Post Blurr
     //6. Do the Declustering of the Threshohld
     cv::GaussianBlur(_mats.m_raw, _mats.m_pre_blurr, cv::Size(m_gausiandecluster_params.getPreBlurValue(), m_gausiandecluster_params.getPreBlurValue()), 0);
-    cv::erode(_mats.m_pre_blurr, _mats.m_erode, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+    cv::threshold(_mats.m_pre_blurr, _mats.m_pre_blurr, 0, 255, cv::THRESH_TOZERO);
+
     int _erodeiteration = 1;
-    while(_erodeiteration < this->getGausianDeclusterParametersPointer()->getErodeIterations())
+    while(_erodeiteration <= this->getGausianDeclusterParametersPointer()->getErodeIterations())
     {
-        cv::erode(_mats.m_erode, _mats.m_erode, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+        if(_erodeiteration == 1) cv::erode(_mats.m_pre_blurr, _mats.m_erode, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+        else cv::erode(_mats.m_erode, _mats.m_erode, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
         ++_erodeiteration;
     }
+    if(this->getGausianDeclusterParametersPointer()->getErodeIterations() == 0) _mats.m_erode = _mats.m_pre_blurr.clone();
     cv::Canny(_mats.m_erode, _mats.m_edge, this->getGausianDeclusterParametersPointer()->getEdgeMin(), this->getGausianDeclusterParametersPointer()->getEdgeMax());
-    cv::GaussianBlur(_mats.m_edge, _mats.m_post_blurr, cv::Size(m_gausiandecluster_params.getPostBlurValue(), m_gausiandecluster_params.getPostBlurValue()), 0);
+    this->buildBoundedLaserImage(_mats, m_gausiandecluster_params);
+    cv::GaussianBlur(_mats.m_post_blurr, _mats.m_post_blurr, cv::Size(m_gausiandecluster_params.getPostBlurValue(), m_gausiandecluster_params.getPostBlurValue()), 0);
     cv::threshold(_mats.m_post_blurr, _mats.m_threshold, m_gausiandecluster_params.getMinThresholdValue(), m_gausiandecluster_params.getMaxThresholdValue(), cv::THRESH_TOZERO);
     //End of Image Processing.--------------------------------------------------
 

@@ -12,6 +12,7 @@ SOURCES += \
         main.cpp \
         tbiclass_datadistributionset.cpp \
         tbiclass_dataset.cpp \
+        tbiclass_edgeboundry.cpp \
         tbiclass_garybasetypes.cpp \
         tbiclass_joystick.cpp \
         tbiclass_line.cpp \
@@ -56,6 +57,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     tbiclass_datadistributionset.h \
     tbiclass_dataset.h \
+    tbiclass_edgeboundry.h \
     tbiclass_garybasetypes.h \
     tbiclass_joystick.h \
     tbiclass_line.h \

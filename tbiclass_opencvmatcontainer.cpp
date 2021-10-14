@@ -22,3 +22,5 @@ void TBIClass_OpenCVMatContainer::initMats(const cv::Mat &_srcmat)
     m_operation = cv::Mat::zeros(m_raw.rows, m_raw.cols, CV_8UC3);
     m_testmatcolor = cv::Mat::zeros(m_raw.rows, m_raw.cols, CV_8UC3);
 }
+
+
