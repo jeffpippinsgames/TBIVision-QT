@@ -48,7 +48,9 @@ TBI_PIPELINE_FAILEDTOEXTRACTTRACKINGPOINT = 0x24,
 TBI_PIPELINE_FAILEDLASERPOWEROFF = 0x25,
 TBI_PIPELINE_SELECTEDJOINTTYPENOTIMPLEMENTED = 0x26,
 TBI_PIPELINE_SCANNEDVGROOVEJOINTFAILEDBOUNDRYCHECK = 0x27,
-TBI_PIPELINE_FAILED_TO_EXTRACTINLIERDATASET = 0x29}
+TBI_PIPELINE_FAILED_TO_EXTRACTINLIERDATASET = 0x29,
+TBI_PIPELINE_FAILED_TO_EXTRACTOUTLIERDATASET = 0x30,
+TBI_PIPELINE_FAILED_TO_EXTRACTVGROOVEBREAKINDEX = 0x31}
 
     case TBIWeld_ProcessingPipeLineReturnType::
         m_statusstring = "";
@@ -143,6 +145,12 @@ TBI_PIPELINE_FAILED_TO_EXTRACTINLIERDATASET = 0x29}
         break;
     case TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILED_TO_EXTRACTINLIERDATASET:
         m_statusstring = "Failed To Extract Inlier DataSet.";
+        break;
+    case TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILED_TO_EXTRACTOUTLIERDATASET:
+        m_statusstring = "Failed to Extract Outlier DataSet.";
+        break;
+    case TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILED_TO_EXTRACTVGROOVEBREAKINDEX:
+        m_statusstring = "Failed to Extract V Groove Break Index.";
         break;
     default:
         m_statusstring = "Unknown Return.";

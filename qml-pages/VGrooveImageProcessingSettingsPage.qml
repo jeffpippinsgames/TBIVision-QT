@@ -1796,6 +1796,10 @@ Item {
                 name: "NonFocused"
                 PropertyChanges{target: preblursettingsrectId; border.color:rootpageId.nonfocuscolor;}
                 PropertyChanges{target: preblursliderId; state: preblursliderId.nothighlightedstate;}
+                PropertyChanges{target: prethresholdminsliderId; state: prethresholdminsliderId.nothighlightedstate;}
+                PropertyChanges{target: prethresholdmaxsliderId; state: prethresholdmaxsliderId.nothighlightedstate;}
+
+
 
             },
             State
@@ -1803,6 +1807,24 @@ Item {
                 name: "BlurState"
                 PropertyChanges{target: preblursettingsrectId; border.color:rootpageId.focuscolor;}
                 PropertyChanges{target: preblursliderId; state: preblursliderId.highlightedstate;}
+                PropertyChanges{target: prethresholdminsliderId; state: prethresholdminsliderId.nothighlightedstate;}
+                PropertyChanges{target: prethresholdmaxsliderId; state: prethresholdmaxsliderId.nothighlightedstate;}
+            },
+            State
+            {
+                name: "MinThresholdState"
+                PropertyChanges{target: preblursettingsrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: preblursliderId; state: preblursliderId.nothighlightedstate;}
+                PropertyChanges{target: prethresholdminsliderId; state: prethresholdminsliderId.highlightedstate;}
+                PropertyChanges{target: prethresholdmaxsliderId; state: prethresholdmaxsliderId.nothighlightedstate;}
+            },
+            State
+            {
+                name: "MaxThresholdState"
+                PropertyChanges{target: preblursettingsrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: preblursliderId; state: preblursliderId.nothighlightedstate;}
+                PropertyChanges{target: prethresholdminsliderId; state: prethresholdminsliderId.nothighlightedstate;}
+                PropertyChanges{target: prethresholdmaxsliderId; state: prethresholdmaxsliderId.highlightedstate;}
             }
         ]
 
@@ -1832,6 +1854,12 @@ Item {
                 case "BlurState":
                     preblursliderId.grabFocus();
                     break;
+                case "MinThresholdState":
+                    prethresholdminsliderId.grabFocus();
+                    break;
+                case "MaxThresholdState":
+                    prethresholdmaxsliderId.grabFocus();
+                    break;
                 }
             }
 
@@ -1842,13 +1870,36 @@ Item {
 
             onUpButtonPressed:
             {
-                preblursettingscontrollerId.state = "NonFocused"
-                rootpageId.state = rootpageId.preblurstateframeactive;
+
+
+                switch(preblursettingsrectId.state)
+                {
+                case "BlurState":
+                    preblursettingsrectId.state = "NonFocused";
+                    rootpageId.state = rootpageId.preblurstateframeactive;
+                    break;
+                case "MinThresholdState":
+                    preblursettingsrectId.state = "BlurState";
+                    break;
+                case "MaxThresholdState":
+                    preblursettingsrectId.state = "MinThresholdState";
+                    break;
+                }
             }
 
             onDownButtonPressed:
             {
-
+                switch(preblursettingsrectId.state)
+                {
+                case "BlurState":
+                    preblursettingsrectId.state = "MinThresholdState";
+                    break;
+                case "MinThresholdState":
+                    preblursettingsrectId.state = "MaxThresholdState";
+                    break;
+                case "MaxThresholdState":
+                    break;
+                }
             }
 
             onLeftButtonPressed:
@@ -1950,6 +2001,66 @@ Item {
             }
 
 
+        }
+
+        SliderSettingsObject
+        {
+            id: prethresholdminsliderId
+            controlname: "PreThresholdMinSliderControl"
+            x:20
+            y:preblursliderId.y+preblursliderId.height+20
+            messagetext: "Threshold Min: " + VGrooveGausianDistroParameters.minPreThresholdValue;
+            valuefrom: 0
+            valueto: prethresholdmaxsliderId.value - 1
+            stepsize: 1
+            majorstepsize: 5
+            controlstickautorepeat: true
+
+            Component.onCompleted:
+            {
+                prethresholdminsliderId.value = VGrooveGausianDistroParameters.minPreThresholdValue;
+            }
+
+            onEndFocus:
+            {
+                preblursettingsrectId.grabFocus();
+                prethresholdminsliderId.state = prethresholdminsliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                VGrooveGausianDistroParameters.minPreThresholdValue = prethresholdminsliderId.value;
+            }
+        }
+
+        SliderSettingsObject
+        {
+            id: prethresholdmaxsliderId
+            controlname: "PreThresholdMaxSliderControl"
+            x:20
+            y:prethresholdminsliderId.y+prethresholdminsliderId.height+20
+            messagetext: "Threshold Max: " + VGrooveGausianDistroParameters.maxPreThresholdValue;
+            valuefrom: prethresholdminsliderId.value + 1
+            valueto: 255
+            stepsize: 1
+            majorstepsize: 5
+            controlstickautorepeat: true
+
+            Component.onCompleted:
+            {
+                prethresholdmaxsliderId.value = VGrooveGausianDistroParameters.maxPreThresholdValue;
+            }
+
+            onEndFocus:
+            {
+                preblursettingsrectId.grabFocus();
+                prethresholdmaxsliderId.state = prethresholdmaxsliderId.highlightedstate;
+            }
+
+            onValueChanged:
+            {
+                VGrooveGausianDistroParameters.maxPreThresholdValue = prethresholdmaxsliderId.value;
+            }
         }
 
     }
@@ -3570,6 +3681,7 @@ Item {
                 PropertyChanges{target: masterransacparamId; border.color:rootpageId.nonfocuscolor;}
                 PropertyChanges{target: leftransacparamId; border.color:rootpageId.nonfocuscolor;}
                 PropertyChanges{target: rightransacparamId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: breakindexransacparamId; border.color:rootpageId.nonfocuscolor;}
             },
             State
             {
@@ -3578,6 +3690,7 @@ Item {
                 PropertyChanges{target: masterransacparamId; border.color:rootpageId.focuscolor;}
                 PropertyChanges{target: leftransacparamId; border.color:rootpageId.nonfocuscolor;}
                 PropertyChanges{target: rightransacparamId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: breakindexransacparamId; border.color:rootpageId.nonfocuscolor;}
             },
             State
             {
@@ -3586,6 +3699,7 @@ Item {
                 PropertyChanges{target: masterransacparamId; border.color:rootpageId.nonfocuscolor;}
                 PropertyChanges{target: leftransacparamId; border.color:rootpageId.focuscolor;}
                 PropertyChanges{target: rightransacparamId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: breakindexransacparamId; border.color:rootpageId.nonfocuscolor;}
             },
             State
             {
@@ -3594,6 +3708,16 @@ Item {
                 PropertyChanges{target: masterransacparamId; border.color:rootpageId.nonfocuscolor;}
                 PropertyChanges{target: leftransacparamId; border.color:rootpageId.nonfocuscolor;}
                 PropertyChanges{target: rightransacparamId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: breakindexransacparamId; border.color:rootpageId.nonfocuscolor;}
+            },
+            State
+            {
+                name: "BreakRansac"
+                PropertyChanges{target: ransacborderrectId; border.color:rootpageId.focuscolor;}
+                PropertyChanges{target: masterransacparamId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: leftransacparamId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: rightransacparamId; border.color:rootpageId.nonfocuscolor;}
+                PropertyChanges{target: breakindexransacparamId; border.color:rootpageId.focuscolor;}
             }
          ]
 
@@ -3664,6 +3788,9 @@ Item {
                 case "RightRansac":
                     rightransacparamId.grabFocus();
                     break;
+                case "BreakRansac":
+                    breakindexransacparamId.grabFocus();
+                    break;
                 }
             }
 
@@ -3686,6 +3813,10 @@ Item {
                 case "RightRansac":
                     ransacsettingsrectId.state = "LeftRansac";
                     break;
+                case "BreakRansac":
+                    rootpageId.state = ransacstateframeactive;
+                    ransacsettingsrectId.state = "NonFocused";
+                    break;
                 }
             }
 
@@ -3700,6 +3831,10 @@ Item {
                     break;
                 case "RightRansac":
                     break;
+                case "BreakRansac":
+                    ransacsettingsrectId.state = "RightRansac";
+                    break;
+
                 }
             }
 
@@ -3714,6 +3849,9 @@ Item {
                 case "RightRansac":
                     ransacsettingsrectId.state = "LeftRansac";
                     break;
+                case "BreakRansac":
+                    ransacsettingsrectId.state = "MasterRansac";
+                    break;
                 }
             }
 
@@ -3722,11 +3860,14 @@ Item {
                 switch(ransacsettingsrectId.state)
                 {
                 case "MasterRansac":
+                    ransacsettingsrectId.state = "BreakRansac";
                     break;
                 case "LeftRansac":
                     ransacsettingsrectId.state = "RightRansac";
                     break;
                 case "RightRansac":
+                    break;
+                case "BreakRansac":
                     break;
                 }
             }
@@ -3778,6 +3919,21 @@ Item {
             {
                 ransacsettingsrectId.grabFocus();
                 masterransacparamId.state = "NonFocused";
+            }
+        }
+
+        RansacControlParameterObject
+        {
+            id: breakindexransacparamId
+            x: 425
+            y: 60
+            ransacparameter: BreakIndexRansacParameters
+            titletext: "Break Index Ransac Parameters"
+
+            onEndFocus:
+            {
+                ransacsettingsrectId.grabFocus();
+                breakindexransacparamId.state = "NonFocused";
             }
         }
 

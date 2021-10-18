@@ -38,6 +38,7 @@ public:
         }
     }
     void clear(){m_dataset_size = 0; m_dataset_type = TBIDataSetType::NoType;}
+    int getIndexofFirstXValue(int _xval);
     TBIDataSetType getDataSetType(){return m_dataset_type;}
     void drawToMat(cv::Mat &_dst);
     void drawToMat(cv::Mat &_dst, cv::Scalar _color);
@@ -76,16 +77,17 @@ public:
     TBIDataSetReturnType extractDataSetForRightTSL(TBIDataSet &_dst, unsigned int _uniquexvalues);
     TBIDataSetReturnType extractDataSetForRansacLeftTSL(TBIDataSet &_dst, int _breakindex);
     TBIDataSetReturnType extractDataSetForRansacRightTSL(TBIDataSet &_dst, int _startindex);
-    TBIDataSetReturnType extractDataSetForJoint(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold);
-    TBIDataSetReturnType extractVGrooveJointDataSet(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold);
     TBIDataSetReturnType extractDataSetForInliers(TBIDataSet &_dst, const TBILine &_line, const float _distancethreshold);
     TBIDataSetReturnType extractDataSetForInliers(TBIDataSet &_dst, const TBILine &_ransacline, const float _distancethreshold, const int _start_index, const int _end_index);
     TBIDataSetReturnType extractInlierDataSet(TBIDataSet &_dst, const TBIDataDistributionSet &_srcdistro);
+    TBIDataSetReturnType extractOutlierDataSet(TBIDataSet &_inlierds, TBIDataSet &_outlierds);
     TBIDataSetReturnType extractDistributionSet(TBIDataDistributionSet &_distroset);
     TBIDataSetReturnType extractLeastSquareLine(TBILine &_line);
     TBIDataSetReturnType extractFilteredGausianSet(TBIDataSet &_dst, int _breakindex);
     TBIDataSetReturnType extractDataSubSet(TBIDataSet &_dst, int _startindex, int _endindex);
-    //TBIDataSetReturnType analyzeDiscontinuities(int *_startofbreakindex, int *_endofbreakindex, float _allowablegap);
+    bool containsPoint(TBIPoint_Int _pnt);
+
+    int extractVGrooveBreakXValue(int _mindistancethreshold);
 
     //Filter Functions
 

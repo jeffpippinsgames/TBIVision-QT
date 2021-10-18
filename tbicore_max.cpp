@@ -133,7 +133,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t Max::processVGroovePi
     //Do the VGroove Pipeline
     TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t _result;
 
-    _result = m_vgroove.processPipeline(_mats, m_vgroove_tracking_container);
+    _result = m_vgroove.processPipeline(_mats);
     if(_stat_packet.getLaserStatus()==GaryLaserStatus::TBI_LASER_STATUS_OFF) _result = TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDLASERPOWEROFF;
     if(_result == TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK) //Set Tracking Point Info
     {

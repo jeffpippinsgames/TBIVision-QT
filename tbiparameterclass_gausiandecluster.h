@@ -60,8 +60,8 @@ public:
     int getMinClusterSize(){return m_min_cluster_size;}
     int getMaxClustersInColumn(){return m_max_clusters_in_col;}
     int getPreBlurValue(){return m_pre_blur_value;}
-    int getPreMinThresholdValue(){return m_threshold_min_value;}
-    int getPreMaxThresholdValue(){return m_threshold_max_value;}
+    int getPreMinThresholdValue(){return m_pre_threshold_min_value;}
+    int getPreMaxThresholdValue(){return m_pre_threshold_max_value;}
     int getPostBlurValue(){return m_post_blur_value;}
     int getMinThresholdValue(){return m_threshold_min_value;}
     int getMaxThresholdValue(){return m_threshold_max_value;}

@@ -15,6 +15,7 @@ SOURCES += \
         tbiclass_edgeboundry.cpp \
         tbiclass_garybasetypes.cpp \
         tbiclass_joystick.cpp \
+        tbiclass_lasercolumndataset.cpp \
         tbiclass_line.cpp \
         tbiclass_microcontrollerstatuspacket.cpp \
         tbiclass_motorcalibrationcontroller.cpp \
@@ -60,6 +61,7 @@ HEADERS += \
     tbiclass_edgeboundry.h \
     tbiclass_garybasetypes.h \
     tbiclass_joystick.h \
+    tbiclass_lasercolumndataset.h \
     tbiclass_line.h \
     tbiclass_microcontrollerstatuspacket.h \
     tbiclass_motorcalibrationcontroller.h \

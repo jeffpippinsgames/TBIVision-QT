@@ -45,7 +45,10 @@ public:
                                TBI_PIPELINE_SELECTEDJOINTTYPENOTIMPLEMENTED = 0x26,
                                TBI_PIPELINE_SCANNEDVGROOVEJOINTFAILEDBOUNDRYCHECK = 0x27,
                                TBI_PIPELINE_TRACKINGPOINTINSTABILITYERROR = 0x28,
-                               TBI_PIPELINE_FAILED_TO_EXTRACTINLIERDATASET = 0x29};
+                               TBI_PIPELINE_FAILED_TO_EXTRACTINLIERDATASET = 0x29,
+                               TBI_PIPELINE_FAILED_TO_EXTRACTOUTLIERDATASET = 0x30,
+                               TBI_PIPELINE_FAILED_TO_EXTRACTVGROOVEBREAKINDEX = 0x31};
+
     Q_ENUMS(PipelineReturnType_t)
     static void declareQML()
     {

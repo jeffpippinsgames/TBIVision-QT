@@ -44,18 +44,6 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::getGaus
     return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
 }
 
-TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::extractVGrooveJointDataSet(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold)
-{
-    TBIDataSetReturnType _result;
-    _result = m_gausian_decluster_ds->extractVGrooveJointDataSet(_dst, _lefttsl, _righttsl, _inlierdistancethreshold);
-    if(_result != TBIDataSetReturnType::Ok)
-    {
-        _dst.clear();
-        if(m_showdebug) qDebug("TBIWeld_Base::extractVGrooveJointDataSet() Failed To Extract V Groove Joint DataSet.");
-        return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_FAILEDTOEXTRACTVGROOVEJOINTDATASET;
-    }
-    return TBIWeld_ProcessingPipeLineReturnType::TBI_PIPELINE_OK;
-}
 
 void TBIWeld_Base::saveGausianDeClusterParamsToFile(QDataStream &_filedatastream)
 {
@@ -165,8 +153,6 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::buildBo
 }
 
 
-
-
 //The Mats Must Be Clear and Ready To Use.
 TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGausianClustering(TBIClass_OpenCVMatContainer &_mats)
 {
@@ -198,7 +184,7 @@ TBIWeld_ProcessingPipeLineReturnType::PipelineReturnType_t TBIWeld_Base::doDeGau
     //5. Threshold The Post Blurr
     //6. Do the Declustering of the Threshohld
     cv::GaussianBlur(_mats.m_raw, _mats.m_pre_blurr, cv::Size(m_gausiandecluster_params.getPreBlurValue(), m_gausiandecluster_params.getPreBlurValue()), 0);
-    cv::threshold(_mats.m_pre_blurr, _mats.m_pre_blurr, 0, 255, cv::THRESH_TOZERO);
+    cv::threshold(_mats.m_pre_blurr, _mats.m_pre_blurr, m_gausiandecluster_params.getPreMinThresholdValue(), m_gausiandecluster_params.getPreMaxThresholdValue(), cv::THRESH_TOZERO);
 
     int _erodeiteration = 1;
     while(_erodeiteration <= this->getGausianDeclusterParametersPointer()->getErodeIterations())

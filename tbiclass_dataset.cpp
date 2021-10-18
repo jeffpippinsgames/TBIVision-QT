@@ -4,6 +4,26 @@
 using namespace std;
 
 //Utility Functions
+int TBIDataSet::getIndexofFirstXValue(int _xval)
+{
+    if(this->size() == 0) return -1;
+    if(_xval < 0) return -1;
+
+    int _index = 0;
+
+    do
+    {
+        if(this->m_pnts[_index].m_x == _xval)
+        {
+            return _index;
+        }
+        ++_index;
+
+    }while(_index < this->size());
+
+    return -1;
+}
+
 void TBIDataSet::drawToMat(cv::Mat &_dst)
 {
     if(_dst.type() != CV_8UC1) return;
@@ -592,56 +612,6 @@ TBIDataSetReturnType TBIDataSet::extractDataSetForRansacRightTSL(TBIDataSet &_ds
     return TBIDataSetReturnType::Ok;
 }
 
-TBIDataSetReturnType TBIDataSet::extractDataSetForJoint(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold)
-{
-    _dst.clear();
-    if(m_dataset_size == 0) return TBIDataSetReturnType::FailedPassedInDataSetWrongSize;
-    if(!_lefttsl.isValid()) return TBIDataSetReturnType::FailedPassedInParameterMakesNoSense;
-    if(!_righttsl.isValid()) return TBIDataSetReturnType::FailedPassedInParameterMakesNoSense;
-
-    int _index = 0;
-    float _distanceleft;
-    float _distanceright;
-
-    do
-    {
-        _distanceleft = _lefttsl.distanceAbs(m_pnts[_index]);
-        _distanceright = _righttsl.distanceAbs(m_pnts[_index]);
-        if((_distanceleft > _inlierdistancethreshold) && (_distanceright > _inlierdistancethreshold))
-        {
-            _dst.insert(m_pnts[_index]);
-        }
-        ++_index;
-    }while(_index < m_dataset_size);
-
-    return TBIDataSetReturnType::Ok;
-}
-
-TBIDataSetReturnType TBIDataSet::extractVGrooveJointDataSet(TBIDataSet &_dst, const TBILine &_lefttsl, const TBILine &_righttsl, const float _inlierdistancethreshold)
-{
-    _dst.clear();
-    if(m_dataset_size == 0) return TBIDataSetReturnType::FailedPassedInDataSetWrongSize;
-    if(!_lefttsl.isValid()) return TBIDataSetReturnType::FailedPassedInParameterMakesNoSense;
-    if(!_righttsl.isValid()) return TBIDataSetReturnType::FailedPassedInParameterMakesNoSense;
-
-    int _index = 0;
-    float _distanceleft;
-    float _distanceright;
-
-    do
-    {
-        _distanceleft = _lefttsl.distanceAbs(m_pnts[_index]);
-        _distanceright = _righttsl.distanceAbs(m_pnts[_index]);
-        if((_distanceleft > _inlierdistancethreshold) && (_distanceright > _inlierdistancethreshold))
-        {
-            _dst.insert(m_pnts[_index]);
-        }
-        ++_index;
-    }while(_index < m_dataset_size);
-
-    return TBIDataSetReturnType::Ok;
-}
-
 TBIDataSetReturnType TBIDataSet::extractDataSetForInliers(TBIDataSet &_dst, const TBILine &_line, const float _distancethreshold)
 {
     _dst.clear();
@@ -700,6 +670,29 @@ TBIDataSetReturnType TBIDataSet::extractInlierDataSet(TBIDataSet &_dst, const TB
         }
         ++_srcindex;
     }while(_srcindex < m_dataset_size);
+
+    return TBIDataSetReturnType::Ok;
+}
+
+TBIDataSetReturnType TBIDataSet::extractOutlierDataSet(TBIDataSet &_inlierds, TBIDataSet &_outlierds)
+{
+    if(this->size() == 0) return TBIDataSetReturnType::FailedPassedInDataSetWrongSize;
+    if(_inlierds.size() == 0) return TBIDataSetReturnType::FailedPassedInDataSetWrongSize;
+    if(_inlierds.size() > this->size()) return TBIDataSetReturnType::FailedPassedInDataSetWrongSize;
+
+    _outlierds.clear();
+
+    int _index = 0;
+    do
+    {
+        if(!_inlierds.containsPoint(this->getPoint(_index)))
+        {
+            TBIPoint_Int _pnt = this->getPoint(_index);
+            _outlierds.insert(_pnt);
+        }
+        ++_index;
+
+    }while(_index < this->size());
 
     return TBIDataSetReturnType::Ok;
 }
@@ -807,6 +800,82 @@ TBIDataSetReturnType TBIDataSet::extractDataSubSet(TBIDataSet &_dst, int _starti
         ++_index;
     }while(_index <= _endindex);
     return TBIDataSetReturnType::Ok;
+}
+
+bool TBIDataSet::containsPoint(TBIPoint_Int _pnt)
+{
+    if(this->size() == 0) return false;
+    int _index = 0;
+    do
+    {
+        if(this->m_pnts[_index] == _pnt) return true;
+        ++_index;
+    }while(_index < this->size());
+
+    return false;
+
+}
+
+
+//This is Function Is Only Useful For Break Index DataSets.
+int TBIDataSet::extractVGrooveBreakXValue(int _mindistancethreshold)
+{
+    if(this->size() < 10) return -1;
+    if(this->size() > 2000) return -1;
+    if(_mindistancethreshold < 0) return -1;
+
+    int _index = 0;
+    int _calcdist = 0;
+    int _largestdist = 0;
+    int _totalhits = 0;
+    int _largestindex=0;
+
+    do
+    {
+        _calcdist = (int)this->m_pnts[_index].distance(this->m_pnts[_index+1]);
+        if(_calcdist > _largestdist)
+        {
+            _largestdist = _calcdist;
+            _largestindex = _index;
+        }
+        if(_calcdist >= _mindistancethreshold) ++_totalhits;
+        ++_index;
+    }while(_index < (this->size() - 2));
+
+
+    if(_totalhits > 1) return -1; //More than 1 Bounded Break Bad Data
+
+    if(_totalhits == 0) //Might Not Be Bounded. Determine Left or Right Side
+    {
+        //Left Side Has More Distance to the Frame Edge. This is a Right Side Line
+        //So Break at 0 index;
+        if(this->m_pnts[0].m_x > (TBIConstants::Max_Camera_Width - this->m_pnts[this->size()-1].m_x))
+        {
+            return this->m_pnts[0].m_x;
+        }
+        return this->m_pnts[this->size()-1].m_x;
+    }
+
+    //All that is left now is the bounded find
+    //We need to know how many points lie on the left side of _largestindex and how many on the right side of largest index
+
+    int _pntsleft = _largestindex+1;
+    int _pntsright = this->size()-(_largestindex+1);
+    if(_pntsleft > _pntsright) //More Points on the Left. Left Side Line.
+    {
+        return this->m_pnts[_largestindex].m_x;
+    }
+    if(_pntsright > _pntsleft) //More Points on the Right. Right Side Line.
+    {
+        return this->m_pnts[_largestindex+1].m_x;
+    }
+    if(_pntsleft == _pntsright) //Equal Number of Points. Cant's Determine.
+    {
+        return -1;
+    }
+
+
+    return -1;
 }
 
 
